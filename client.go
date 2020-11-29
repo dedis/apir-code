@@ -14,13 +14,13 @@ type clientState struct {
 	alpha *big.Int
 }
 
-func (c Client) Query(i int) ([]*big.Int, []*big.Int, clientState) {
+func (c Client) Query(i int) ([][]*big.Int, clientState) {
 	if i < 0 || i > DBLength {
 		panic("query index out of bound")
 	}
 
 	// sample random alpha
-	alpha, err := rand.Int(rand.Reader, MODULO)
+	alpha, err := rand.Int(rand.Reader, Modulo)
 	if err != nil {
 		panic(err)
 	}
@@ -28,42 +28,51 @@ func (c Client) Query(i int) ([]*big.Int, []*big.Int, clientState) {
 	// set client state
 	st := clientState{i: i, alpha: alpha}
 
-	// sample two random vectors q0 and q1 such that q0 + q1 = eiy
+	// sample k (variable Servers) random vectors q0,..., q_{k-1} such
+	// that they sum to alpha * e_i
 	eialpha := make([]*big.Int, DBLength)
-	q0 := make([]*big.Int, DBLength)
-	q1 := make([]*big.Int, DBLength)
-
-	for k := range q0 {
-		// create basic vector
-		eialpha[k] = bigZero
-
-		if k == i {
-			eialpha[k] = alpha
-		}
-
-		// create random vector
-		randInt, err := rand.Int(rand.Reader, MODULO)
-		if err != nil {
-			panic(err)
-		}
-		q0[k] = randInt
-
-		q1[k] = new(big.Int)
-		q1[k].Sub(eialpha[k], q0[k])
+	vectors := make([][]*big.Int, Servers)
+	for k := 0; k < Servers; k++ {
+		vectors[k] = make([]*big.Int, DBLength)
 	}
 
-	return q0, q1, st
+	for n := 0; n < DBLength; n++ {
+		// create basic vector
+		eialpha[n] = big.NewInt(0)
+
+		// set alpha at the index we want to retrieve
+		if n == i {
+			eialpha[n] = alpha
+		}
+
+		// create k - 1 random vectors
+		sum := big.NewInt(0)
+		for k := 0; k < Servers-1; k++ {
+			randInt, err := rand.Int(rand.Reader, Modulo)
+			if err != nil {
+				panic(err)
+			}
+			vectors[k][n] = randInt
+			sum.Add(sum, randInt)
+		}
+		vectors[Servers-1][n] = new(big.Int)
+		vectors[Servers-1][n].Sub(eialpha[n], sum)
+	}
+
+	return vectors, st
 }
 
-func (c Client) Reconstruct(a0, a1 *big.Int, st clientState) (*big.Int, error) {
-	a := new(big.Int)
-	a.Add(a0, a1)
+func (c Client) Reconstruct(answers []*big.Int, st clientState) (*big.Int, error) {
+	sum := big.NewInt(0)
+	for _, a := range answers {
+		sum.Add(sum, a)
+	}
 
-	if a.Cmp(st.alpha) != 0 && a.Cmp(bigZero) != 0 {
+	if sum.Cmp(st.alpha) != 0 && sum.Cmp(bigZero) != 0 {
 		return nil, errors.New("REJECT!")
 	}
 
-	if a.Cmp(st.alpha) == 0 {
+	if sum.Cmp(st.alpha) == 0 {
 		return bigOne, nil
 	}
 
