@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package proto;
+
+service VPIR {
+	rpc Query(QueryRequest) returns (Answer) {}
+}
+
+message QueryRequest {
+	string query = 1;
+}
+
+message Answer {
+	string answer = 1;
+}
