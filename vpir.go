@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	start := time.Now()
+	//start := time.Now()
+	totalTimer := newMonitor()
 	db := CreateAsciiDatabase()
 	result := ""
 	c := Client{}
@@ -55,8 +56,9 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(string(b))
-	elapsed := time.Since(start)
-	fmt.Printf("Took %s", elapsed)
+	//elapsed := time.Since(start)
+	elapsed := totalTimer.record()
+	fmt.Printf("Took %.1fms", elapsed)
 }
 
 func bitStringToBytes(s string) ([]byte, error) {
