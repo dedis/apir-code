@@ -5,9 +5,15 @@ import (
 	"net"
 	"os"
 
+	pb "github.com/si-co/vpir-code/proto"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
+
+// server is used to implement helloworld.GreeterServer.
+type server struct {
+	pb.UnimplementedVPIRServer
+}
 
 func main() {
 	app := &cli.App{
@@ -29,6 +35,9 @@ func runServer(c *cli.Context) error {
 		return err
 	}
 	s := grpc.NewServer()
-
+	pb.RegisterVPIRServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 	return nil
 }
