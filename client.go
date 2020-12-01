@@ -4,9 +4,12 @@ import (
 	"crypto/rand"
 	"errors"
 	"math/big"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 type Client struct {
+	xof blake2b.XOF
 }
 
 type clientState struct {
@@ -48,7 +51,7 @@ func (c Client) Query(i int) ([][]*big.Int, clientState) {
 		// create k - 1 random vectors
 		sum := big.NewInt(0)
 		for k := 0; k < Servers-1; k++ {
-			randInt, err := rand.Int(rand.Reader, Modulo)
+			randInt, err := rand.Int(c.xof, Modulo)
 			if err != nil {
 				panic(err)
 			}

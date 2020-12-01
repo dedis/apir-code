@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math/big"
 	"time"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 func main() {
@@ -12,7 +14,11 @@ func main() {
 	totalTimer := newMonitor()
 	db := CreateAsciiDatabase()
 	result := ""
-	c := Client{}
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	if err != nil {
+		panic(err)
+	}
+	c := Client{xof: xof}
 	s0 := Server{}
 	s1 := Server{}
 	s2 := Server{}
