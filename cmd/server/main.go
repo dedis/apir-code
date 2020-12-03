@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"log"
 	"math/big"
 	"net"
@@ -10,47 +12,33 @@ import (
 	db "github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
 	srv "github.com/si-co/vpir-code/lib/server"
-	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	app := &cli.App{
-		Name:   "VPIR server",
-		Usage:  "WIP",
-		Action: runServer,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "config",
-				Aliases: []string{"c"},
-				Usage:   "Load configuration from `FILE`",
-			},
-		},
-	}
+	log.SetOutput(os.Stdout)
 
-	err := app.Run(os.Args)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+	index := flag.Int("index", -1, "Server index")
+	addr := flag.String("addr", "", "Server address")
+	flag.Parse()
 
-func runServer(c *cli.Context) error {
-	lis, err := net.Listen("tcp", ":50051")
+	log.SetPrefix(fmt.Sprintf("[Server %v] ", *index))
+
+	lis, err := net.Listen("tcp", *addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
-		return err
 	}
 	rpcServer := grpc.NewServer()
 	vpirServer := &server{
 		server: srv.CreateServer(db.CreateAsciiDatabase()),
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
+	log.Printf("Server %d is listening at %s", *index, *addr)
 
 	if err := rpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
+		fmt.Println("here")
 	}
-
-	return nil
 }
 
 type Server interface {
