@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
+	"log"
+	"math/big"
+	"net"
+	"os"
+
 	db "github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
 	srv "github.com/si-co/vpir-code/lib/server"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
-	"log"
-	"math/big"
-	"net"
-	"os"
 )
 
 func main() {
@@ -18,6 +19,13 @@ func main() {
 		Name:   "VPIR server",
 		Usage:  "WIP",
 		Action: runServer,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "config",
+				Aliases: []string{"c"},
+				Usage:   "Load configuration from `FILE`",
+			},
+		},
 	}
 
 	err := app.Run(os.Args)
@@ -41,6 +49,7 @@ func runServer(c *cli.Context) error {
 	if err := rpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+
 	return nil
 }
 
