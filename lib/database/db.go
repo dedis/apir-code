@@ -1,6 +1,7 @@
-package main
+package database
 
 import (
+	cst "github.com/si-co/vpir-code/lib/constants"
 	"math/big"
 	"strconv"
 )
@@ -10,11 +11,11 @@ type Database struct {
 }
 
 func CreateDatabase() *Database {
-	entries := make([]*big.Int, DBLength)
-	for i := 0; i < DBLength; i++ {
-		entries[i] = bigOne
+	entries := make([]*big.Int, cst.DBLength)
+	for i := 0; i < cst.DBLength; i++ {
+		entries[i] = cst.BigOne
 	}
-	entries[9] = bigZero
+	entries[9] = cst.BigZero
 
 	return &Database{Entries: entries}
 }

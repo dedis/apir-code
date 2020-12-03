@@ -1,45 +1,50 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"math/big"
+	"testing"
 	"time"
 
 	"golang.org/x/crypto/blake2b"
+
+	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/timer"
 )
 
-func main() {
+func TestAlgorithm(t *testing.T) {
 	//start := time.Now()
-	totalTimer := newMonitor()
-	db := CreateAsciiDatabase()
+	totalTimer := timer.NewMonitor()
+	db := database.CreateAsciiDatabase()
 	result := ""
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
 		panic(err)
 	}
-	c := Client{xof: xof}
-	s0 := Server{}
-	s1 := Server{}
-	s2 := Server{}
+	c := client.NewClient(xof)
+	s0 := server.CreateServer(db)
+	s1 := server.CreateServer(db)
+	s2 := server.CreateServer(db)
 	for i := 0; i < 136; i++ {
 		startQuery := time.Now()
-		queries, st := c.Query(i)
+		queries, st := c.Query(i, 3)
 		elapsedQuery := time.Since(startQuery)
 		fmt.Printf("Query took %s \n", elapsedQuery)
 
 		startAnswerFirst := time.Now()
-		a0 := s0.Answer(db, queries[0])
+		a0 := s0.Answer(queries[0])
 		elapsedAnswerFirst := time.Since(startAnswerFirst)
 		fmt.Printf("Answer first took %s \n", elapsedAnswerFirst)
 
 		startAnswerSecond := time.Now()
-		a1 := s1.Answer(db, queries[1])
+		a1 := s1.Answer(queries[1])
 		elapsedAnswerSecond := time.Since(startAnswerSecond)
 		fmt.Printf("Answer second took %s \n", elapsedAnswerSecond)
 
 		startAnswerThird := time.Now()
-		a2 := s2.Answer(db, queries[2])
+		a2 := s2.Answer(queries[2])
 		elapsedAnswerThird := time.Since(startAnswerThird)
 		fmt.Printf("Answer third took %s \n", elapsedAnswerThird)
 
@@ -53,28 +58,26 @@ func main() {
 		elapsedReconstruct := time.Since(startReconstruct)
 		fmt.Printf("Reconstruct took %s \n", elapsedReconstruct)
 		if err != nil {
+			t.Error(err)
 			panic(err)
 		}
 		result += x.String()
 	}
-	b, err := bitStringToBytes(result)
+	b, err := client.BitStringToBytes(result)
 	if err != nil {
+		t.Error(err)
 		panic(err)
 	}
-	fmt.Println(string(b))
-	//elapsed := time.Since(start)
-	elapsed := totalTimer.record()
-	fmt.Printf("Took %.1fms", elapsed)
-}
 
-func bitStringToBytes(s string) ([]byte, error) {
-	b := make([]byte, (len(s)+(8-1))/8)
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if c < '0' || c > '1' {
-			return nil, errors.New("not a bit")
-		}
-		b[i>>3] |= (c - '0') << uint(7-i&7)
+	output := string(b)
+	fmt.Println(output)
+
+	const expected = "Playing with VPIR"
+	if expected != output {
+		t.Errorf("Expected '%v' but got '%v'", expected, output)
 	}
-	return b, nil
+
+	//elapsed := time.Since(start)
+	elapsed := totalTimer.Record()
+	fmt.Printf("Took %.1fms", elapsed)
 }
