@@ -10,5 +10,5 @@ test: $(PROTO_PB)
 	go test
 
 $(PROTO_PB): lib/proto/vpir.proto
-	protoc --go_out=plugins=grpc:. --go_opt=paths=source_relative lib/proto/vpir.proto
+	protoc --go_out=. --go_opt=paths=source_relative lib/proto/vpir.proto
 
