@@ -1,4 +1,4 @@
-package main
+package timer
 
 import (
 	"log"
@@ -7,27 +7,31 @@ import (
 
 // Helpers for measurement of CPU cost of operations
 type Monitor struct {
-	CPUtime float64
+	cpuTime float64
 }
 
-func newMonitor() *Monitor {
+func NewMonitor() *Monitor {
 	var m Monitor
-	m.CPUtime = getCPUTime()
+	m.cpuTime = getCPUTime()
 	return &m
 }
 
-func (m *Monitor) reset() {
-	m.CPUtime = getCPUTime()
+func (m *Monitor) Reset() {
+	m.cpuTime = getCPUTime()
 }
 
-func (m *Monitor) record() float64 {
-	return getCPUTime() - m.CPUtime
+func (m *Monitor) Record() float64 {
+	return getCPUTime() - m.cpuTime
 }
 
-func (m *Monitor) recordAndReset() float64 {
-	old := m.CPUtime
-	m.CPUtime = getCPUTime()
-	return m.CPUtime - old
+func (m *Monitor) RecordAndReset() float64 {
+	old := m.cpuTime
+	m.cpuTime = getCPUTime()
+	return m.cpuTime - old
+}
+
+func (m *Monitor) GetCpuTime() float64 {
+	return m.cpuTime
 }
 
 // Returns the sum of the system and the user CPU time used by the current process so far.
