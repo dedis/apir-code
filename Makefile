@@ -1,7 +1,7 @@
 PROTO_PB=lib/proto/vpir.pb.go
 
 run_server: $(PROTO_PB)
-	go run cmd/server/main.go
+	go run cmd/server/main.go -id=$(id)
 
 run_client: $(PROTO_PB)
 	go run cmd/client/main.go

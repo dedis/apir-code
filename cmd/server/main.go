@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/si-co/vpir-code/utils"
 	"log"
 	"math/big"
 	"net"
@@ -18,13 +19,18 @@ import (
 func main() {
 	log.SetOutput(os.Stdout)
 
-	index := flag.Int("index", -1, "Server index")
-	addr := flag.String("addr", "", "Server address")
+	sid := flag.Int("id", -1, "Server ID")
 	flag.Parse()
 
-	log.SetPrefix(fmt.Sprintf("[Server %v] ", *index))
+	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
 
-	lis, err := net.Listen("tcp", *addr)
+	addrs, err := utils.LoadServerConfig("config.toml")
+	if err != nil {
+		log.Fatalf("Could not load the server config file: %v", err)
+	}
+	addr := addrs[*sid]
+
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -33,11 +39,10 @@ func main() {
 		Server: server.NewITServer(db.CreateAsciiDatabase()),
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
-	log.Printf("Server %d is listening at %s", *index, *addr)
+	log.Printf("Server %d is listening at %s", *sid, addr)
 
 	if err := rpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
-		fmt.Println("here")
 	}
 }
 

@@ -10,25 +10,24 @@ import (
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/proto"
+	"github.com/si-co/vpir-code/utils"
 	"golang.org/x/crypto/blake2b"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	// TODO: read addresses from a configuration file
-	addresses := []string{
-		"localhost:50051",
-		"localhost:50051",
-		"localhost:50051",
+	addresses, err := utils.LoadServerConfig("config.toml")
+	if err != nil {
+		log.Fatalf("Could not load the server config file: %v", err)
 	}
-
-	// Contact the server and print out its response.
+	// New random generator
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
 		log.Fatalf("Could not create new XOF: %v", err)
 	}
 	c := client.NewITClient(xof)
 
+	// Contact the servers and print out its response.
 	output := ""
 	for i := 0; i < 136; i++ {
 		queries := c.Query(i, len(addresses))
