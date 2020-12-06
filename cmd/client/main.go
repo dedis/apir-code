@@ -27,13 +27,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not create new XOF: %v", err)
 	}
-	c := client.NewClient(xof)
+	c := client.NewITClient(xof)
 
 	output := ""
 	for i := 0; i < 136; i++ {
-		queries, st := c.Query(i, len(addresses))
+		queries := c.Query(i, len(addresses))
 		answers := runQueries(queries, addresses)
-		result, err := c.Reconstruct(answers, st)
+		result, err := c.Reconstruct(answers)
 		if err != nil {
 			log.Fatalf("Failed reconstructing %v with error: %v", i, err)
 		}
@@ -77,7 +77,7 @@ func query(ctx context.Context, address string, query []*big.Int) *big.Int {
 	defer conn.Close()
 
 	c := proto.NewVPIRClient(conn)
-	q := &proto.QueryRequest{Query: convertToString(query)}
+	q := &proto.Request{Query: convertToString(query)}
 	answer, err := c.Query(ctx, q)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)

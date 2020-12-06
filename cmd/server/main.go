@@ -11,7 +11,7 @@ import (
 
 	db "github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
-	srv "github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
 )
 
@@ -29,8 +29,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	rpcServer := grpc.NewServer()
-	vpirServer := &server{
-		server: srv.CreateServer(db.CreateAsciiDatabase()),
+	vpirServer := &vpirServer{
+		Server: server.NewITServer(db.CreateAsciiDatabase()),
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
 	log.Printf("Server %d is listening at %s", *index, *addr)
@@ -41,18 +41,14 @@ func main() {
 	}
 }
 
-type Server interface {
-	Answer(q []*big.Int) *big.Int
-}
-
-// server is used to implement vpir server protocol.
-type server struct {
+// vpirServer is used to implement VPIR Server protocol.
+type vpirServer struct {
 	proto.UnimplementedVPIRServer
-	server Server
+	server.Server
 }
 
-func (s *server) Query(ctx context.Context, qr *proto.QueryRequest) (
-	*proto.Answer, error) {
+func (s *vpirServer) Query(ctx context.Context, qr *proto.Request) (
+	*proto.Response, error) {
 
 	query := make([]*big.Int, len(qr.Query))
 	for i, v := range qr.Query {
@@ -63,6 +59,6 @@ func (s *server) Query(ctx context.Context, qr *proto.QueryRequest) (
 		}
 	}
 
-	a := s.server.Answer(query)
-	return &proto.Answer{Answer: a.String()}, nil
+	a := s.Answer(query)
+	return &proto.Response{Answer: a.String()}, nil
 }

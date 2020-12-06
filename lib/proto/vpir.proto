@@ -5,13 +5,13 @@ package proto;
 option go_package = "github.com/si-co/vpir-code/lib/proto;proto";
 
 service VPIR {
-	rpc Query(QueryRequest) returns (Answer) {}
+	rpc Query (Request) returns (Response) {}
 }
 
-message QueryRequest {
+message Request {
 	repeated string query = 1;
 }
 
-message Answer {
+message Response {
 	string answer = 1;
 }
