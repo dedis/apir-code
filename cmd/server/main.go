@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/si-co/vpir-code/utils"
+	"github.com/si-co/vpir-code/lib/utils"
 	"log"
 	"math/big"
 	"net"

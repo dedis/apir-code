@@ -10,7 +10,7 @@ import (
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/proto"
-	"github.com/si-co/vpir-code/utils"
+	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 	"google.golang.org/grpc"
 )
@@ -38,7 +38,7 @@ func main() {
 		}
 		output += result.String()
 	}
-	b, err := client.BitStringToBytes(output)
+	b, err := utils.BitStringToBytes(output)
 	if err != nil {
 		log.Fatalf("Could not convert bit string to bytes: %v", err)
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 	"math/big"
 	"testing"
@@ -53,7 +54,7 @@ func TestITRetrieval(t *testing.T) {
 		}
 		result += x.String()
 	}
-	b, err := client.BitStringToBytes(result)
+	b, err := utils.BitStringToBytes(result)
 	if err != nil {
 		t.Error(err)
 		panic(err)
