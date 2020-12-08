@@ -2,68 +2,59 @@ package main
 
 import (
 	"fmt"
+	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/crypto/blake2b"
 	"math/big"
 	"testing"
-	"time"
-
-	"golang.org/x/crypto/blake2b"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
-	"github.com/si-co/vpir-code/lib/timer"
 )
 
-func TestAlgorithm(t *testing.T) {
-	//start := time.Now()
-	totalTimer := timer.NewMonitor()
+func TestITRetrieval(t *testing.T) {
+	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiDatabase()
 	result := ""
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
 		panic(err)
 	}
-	c := client.NewClient(xof)
-	s0 := server.CreateServer(db)
-	s1 := server.CreateServer(db)
-	s2 := server.CreateServer(db)
+	c := client.NewITClient(xof)
+	s0 := server.NewITServer(db)
+	s1 := server.NewITServer(db)
+	s2 := server.NewITServer(db)
+	m := monitor.NewMonitor()
 	for i := 0; i < 136; i++ {
-		startQuery := time.Now()
-		queries, st := c.Query(i, 3)
-		elapsedQuery := time.Since(startQuery)
-		fmt.Printf("Query took %s \n", elapsedQuery)
+		m.Reset()
+		queries := c.Query(i, 3)
+		fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
 
-		startAnswerFirst := time.Now()
 		a0 := s0.Answer(queries[0])
-		elapsedAnswerFirst := time.Since(startAnswerFirst)
-		fmt.Printf("Answer first took %s \n", elapsedAnswerFirst)
+		fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
 
-		startAnswerSecond := time.Now()
 		a1 := s1.Answer(queries[1])
-		elapsedAnswerSecond := time.Since(startAnswerSecond)
-		fmt.Printf("Answer second took %s \n", elapsedAnswerSecond)
+		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
 
-		startAnswerThird := time.Now()
 		a2 := s2.Answer(queries[2])
-		elapsedAnswerThird := time.Since(startAnswerThird)
-		fmt.Printf("Answer third took %s \n", elapsedAnswerThird)
+		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
 		answers := make([]*big.Int, 3)
 		answers[0] = a0
 		answers[1] = a1
 		answers[2] = a2
 
-		startReconstruct := time.Now()
-		x, err := c.Reconstruct(answers, st)
-		elapsedReconstruct := time.Since(startReconstruct)
-		fmt.Printf("Reconstruct took %s \n", elapsedReconstruct)
+		m.Reset()
+		x, err := c.Reconstruct(answers)
+		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
 		if err != nil {
 			t.Error(err)
 			panic(err)
 		}
 		result += x.String()
 	}
-	b, err := client.BitStringToBytes(result)
+	b, err := utils.BitStringToBytes(result)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -77,7 +68,5 @@ func TestAlgorithm(t *testing.T) {
 		t.Errorf("Expected '%v' but got '%v'", expected, output)
 	}
 
-	//elapsed := time.Since(start)
-	elapsed := totalTimer.Record()
-	fmt.Printf("Took %.1fms", elapsed)
+	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
 }

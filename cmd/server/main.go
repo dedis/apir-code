@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/si-co/vpir-code/lib/utils"
 	"log"
 	"math/big"
 	"net"
@@ -11,48 +12,48 @@ import (
 
 	db "github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
-	srv "github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
 )
 
 func main() {
 	log.SetOutput(os.Stdout)
 
-	index := flag.Int("index", -1, "Server index")
-	addr := flag.String("addr", "", "Server address")
+	sid := flag.Int("id", -1, "Server ID")
 	flag.Parse()
 
-	log.SetPrefix(fmt.Sprintf("[Server %v] ", *index))
+	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
 
-	lis, err := net.Listen("tcp", *addr)
+	addrs, err := utils.LoadServerConfig("config.toml")
+	if err != nil {
+		log.Fatalf("Could not load the server config file: %v", err)
+	}
+	addr := addrs[*sid]
+
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	rpcServer := grpc.NewServer()
-	vpirServer := &server{
-		server: srv.CreateServer(db.CreateAsciiDatabase()),
+	vpirServer := &vpirServer{
+		Server: server.NewITServer(db.CreateAsciiDatabase()),
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
-	log.Printf("Server %d is listening at %s", *index, *addr)
+	log.Printf("Server %d is listening at %s", *sid, addr)
 
 	if err := rpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
-		fmt.Println("here")
 	}
 }
 
-type Server interface {
-	Answer(q []*big.Int) *big.Int
-}
-
-// server is used to implement vpir server protocol.
-type server struct {
+// vpirServer is used to implement VPIR Server protocol.
+type vpirServer struct {
 	proto.UnimplementedVPIRServer
-	server Server
+	server.Server
 }
 
-func (s *server) Query(ctx context.Context, qr *proto.QueryRequest) (
-	*proto.Answer, error) {
+func (s *vpirServer) Query(ctx context.Context, qr *proto.Request) (
+	*proto.Response, error) {
 
 	query := make([]*big.Int, len(qr.Query))
 	for i, v := range qr.Query {
@@ -63,6 +64,6 @@ func (s *server) Query(ctx context.Context, qr *proto.QueryRequest) (
 		}
 	}
 
-	a := s.server.Answer(query)
-	return &proto.Answer{Answer: a.String()}, nil
+	a := s.Answer(query)
+	return &proto.Response{Answer: a.String()}, nil
 }

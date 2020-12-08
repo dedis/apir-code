@@ -10,36 +10,35 @@ import (
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/proto"
+	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	// TODO: read addresses from a configuration file
-	addresses := []string{
-		"localhost:50051",
-		"localhost:50051",
-		"localhost:50051",
+	addresses, err := utils.LoadServerConfig("config.toml")
+	if err != nil {
+		log.Fatalf("Could not load the server config file: %v", err)
 	}
-
-	// Contact the server and print out its response.
+	// New random generator
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
 		log.Fatalf("Could not create new XOF: %v", err)
 	}
-	c := client.NewClient(xof)
+	c := client.NewITClient(xof)
 
+	// Contact the servers and print out its response.
 	output := ""
 	for i := 0; i < 136; i++ {
-		queries, st := c.Query(i, len(addresses))
+		queries := c.Query(i, len(addresses))
 		answers := runQueries(queries, addresses)
-		result, err := c.Reconstruct(answers, st)
+		result, err := c.Reconstruct(answers)
 		if err != nil {
 			log.Fatalf("Failed reconstructing %v with error: %v", i, err)
 		}
 		output += result.String()
 	}
-	b, err := client.BitStringToBytes(output)
+	b, err := utils.BitStringToBytes(output)
 	if err != nil {
 		log.Fatalf("Could not convert bit string to bytes: %v", err)
 	}
@@ -77,7 +76,7 @@ func query(ctx context.Context, address string, query []*big.Int) *big.Int {
 	defer conn.Close()
 
 	c := proto.NewVPIRClient(conn)
-	q := &proto.QueryRequest{Query: convertToString(query)}
+	q := &proto.Request{Query: convertToString(query)}
 	answer, err := c.Query(ctx, q)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)

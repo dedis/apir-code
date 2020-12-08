@@ -5,10 +5,17 @@ import (
 	"math/big"
 )
 
-var BigZero = big.NewInt(0)
-var BigOne = big.NewInt(1)
+const (
+	DBLength = 50000
+	FieldSize = 64
+)
 
-// scheme parameters
-var Modulo = big.NewInt(int64(math.Pow(2, 64)) - 1)
+var (
+	BigZero = big.NewInt(0)
+	BigOne = big.NewInt(1)
 
-const DBLength = 50000
+	// scheme parameters
+	Modulo = big.NewInt(int64(math.Pow(2, FieldSize)) - 1)
+)
+
+
