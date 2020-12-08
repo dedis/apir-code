@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/big"
 	"sync"
 	"time"
 
+	"github.com/ncw/gmp"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -45,7 +45,7 @@ func main() {
 	fmt.Println("Output: ", string(b))
 }
 
-func runQueries(queries [][]*big.Int, addresses []string) []*big.Int {
+func runQueries(queries [][]*gmp.Int, addresses []string) []*gmp.Int {
 	if len(addresses) != len(queries) {
 		log.Fatal("Queries and server addresses length mismatch")
 	}
@@ -54,7 +54,7 @@ func runQueries(queries [][]*big.Int, addresses []string) []*big.Int {
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan *big.Int, len(queries))
+	resCh := make(chan *gmp.Int, len(queries))
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
@@ -68,7 +68,7 @@ func runQueries(queries [][]*big.Int, addresses []string) []*big.Int {
 	return aggregateResults(resCh)
 }
 
-func query(ctx context.Context, address string, query []*big.Int) *big.Int {
+func query(ctx context.Context, address string, query []*gmp.Int) *gmp.Int {
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -82,7 +82,7 @@ func query(ctx context.Context, address string, query []*big.Int) *big.Int {
 		log.Fatalf("could not query: %v", err)
 	}
 
-	num, ok := big.NewInt(0).SetString(answer.Answer, 10)
+	num, ok := gmp.NewInt(0).SetString(answer.Answer, 10)
 	if !ok {
 		log.Fatal("Could not convert answer to big int")
 	}
@@ -90,7 +90,7 @@ func query(ctx context.Context, address string, query []*big.Int) *big.Int {
 	return num
 }
 
-func convertToString(query []*big.Int) []string {
+func convertToString(query []*gmp.Int) []string {
 	q := make([]string, len(query))
 	for i, v := range query {
 		q[i] = v.String()
@@ -98,8 +98,8 @@ func convertToString(query []*big.Int) []string {
 	return q
 }
 
-func aggregateResults(ch <-chan *big.Int) []*big.Int {
-	q := make([]*big.Int, 0)
+func aggregateResults(ch <-chan *gmp.Int) []*gmp.Int {
+	q := make([]*gmp.Int, 0)
 	for v := range ch {
 		q = append(q, v)
 	}

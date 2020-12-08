@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/si-co/vpir-code/lib/utils"
 	"log"
-	"math/big"
 	"net"
 	"os"
 
+	big "github.com/ncw/gmp"
 	db "github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/server"

@@ -1,11 +1,11 @@
 package client
 
 import (
-	"crypto/rand"
 	"errors"
-	"math/big"
-	
-	cst "github.com/si-co/vpir-code/lib/constants"
+	"math/rand"
+
+	"github.com/ncw/gmp"
+	"github.com/si-co/vpir-code/lib/constants"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -23,7 +23,7 @@ type ITClient struct {
 
 type itClientState struct {
 	i     int
-	alpha *big.Int
+	alpha *gmp.Int
 }
 
 func NewITClient(xof blake2b.XOF) *ITClient {
@@ -33,8 +33,8 @@ func NewITClient(xof blake2b.XOF) *ITClient {
 	}
 }
 
-func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
-	if index < 0 || index > cst.DBLength {
+func (c *ITClient) Query(index int, numServers int) [][]*gmp.Int {
+	if index < 0 || index > constants.DBLength {
 		panic("query index out of bound")
 	}
 	if numServers < 1 {
@@ -42,25 +42,24 @@ func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
 	}
 
 	// sample random alpha
-	alpha, err := rand.Int(c.xof, cst.Modulo)
-	if err != nil {
-		panic(err)
-	}
+	alpha := new(gmp.Int)
+	rnd := rand.New(rand.NewSource(777777))
+	alpha.Rand(rnd, constants.Modulo)
 
 	// set ITClient state
 	c.state = &itClientState{i: index, alpha: alpha}
 
 	// sample k (variable Servers) random vectors q0,..., q_{k-1} such
 	// that they sum to alpha * e_i
-	eialpha := make([]*big.Int, cst.DBLength)
-	vectors := make([][]*big.Int, numServers)
+	eialpha := make([]*gmp.Int, constants.DBLength)
+	vectors := make([][]*gmp.Int, numServers)
 	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]*big.Int, cst.DBLength)
+		vectors[k] = make([]*gmp.Int, constants.DBLength)
 	}
 
-	for i := 0; i < cst.DBLength; i++ {
+	for i := 0; i < constants.DBLength; i++ {
 		// create basic vector
-		eialpha[i] = big.NewInt(0)
+		eialpha[i] = gmp.NewInt(0)
 
 		// set alpha at the index we want to retrieve
 		if i == index {
@@ -68,33 +67,31 @@ func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
 		}
 
 		// create k - 1 random vectors
-		sum := big.NewInt(0)
+		sum := gmp.NewInt(0)
 		for k := 0; k < numServers-1; k++ {
-			randInt, err := rand.Int(c.xof, cst.Modulo)
-			if err != nil {
-				panic(err)
-			}
+			randInt := new(gmp.Int)
+			randInt.Rand(rnd, constants.Modulo)
 			vectors[k][i] = randInt
 			sum.Add(sum, randInt)
 		}
-		vectors[numServers-1][i] = new(big.Int)
+		vectors[numServers-1][i] = gmp.NewInt(0)
 		vectors[numServers-1][i].Sub(eialpha[i], sum)
 	}
 
 	return vectors
 }
 
-func (c *ITClient) Reconstruct(answers []*big.Int) (*big.Int, error) {
-	sum := big.NewInt(0)
+func (c *ITClient) Reconstruct(answers []*gmp.Int) (*gmp.Int, error) {
+	sum := gmp.NewInt(0)
 	for _, a := range answers {
 		sum.Add(sum, a)
 	}
 
 	switch {
 	case sum.Cmp(c.state.alpha) == 0:
-		return cst.BigOne, nil
-	case sum.Cmp(cst.BigZero) == 0:
-		return cst.BigZero, nil
+		return constants.BigOne, nil
+	case sum.Cmp(constants.BigZero) == 0:
+		return constants.BigZero, nil
 	default:
 		return nil, errors.New("REJECT!")
 	}

@@ -1,13 +1,13 @@
 package server
 
 import (
+	"github.com/ncw/gmp"
 	db "github.com/si-co/vpir-code/lib/database"
-	"math/big"
 )
 
 // Server represents the server instance in both the IT and C models
 type Server interface {
-	Answer(q []*big.Int) *big.Int
+	Answer(q []*gmp.Int) *gmp.Int
 }
 
 func NewITServer(db *db.Database) *ITServer {
@@ -19,14 +19,18 @@ type ITServer struct {
 	db *db.Database
 }
 
-func (s *ITServer) Answer(q []*big.Int) *big.Int {
+func (s *ITServer) Answer(q []*gmp.Int) *gmp.Int {
 	// Can't use BigZero because it's not deep-copied
-	a := big.NewInt(0)
+	a := gmp.NewInt(0)
+	mul := gmp.NewInt(0)
 	for i := range s.db.Entries {
-		mul := new(big.Int)
 		mul.Mul(s.db.Entries[i], q[i])
+		//fmt.Printf("%d ", mul)
+		//fmt.Printf("Adding %d and %d ", a, mul)
 		a.Add(a, mul)
+		//fmt.Printf("Result: %d\n", a)
 	}
+	//fmt.Printf("Server result: %d\n", a.Int64())
 
 	return a
 }

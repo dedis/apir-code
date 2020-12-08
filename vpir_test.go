@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/si-co/vpir-code/lib/utils"
-	"golang.org/x/crypto/blake2b"
-	"math/big"
 	"testing"
 
+	"github.com/ncw/gmp"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/crypto/blake2b"
 )
 
 func TestITRetrieval(t *testing.T) {
@@ -40,7 +40,7 @@ func TestITRetrieval(t *testing.T) {
 		a2 := s2.Answer(queries[2])
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
-		answers := make([]*big.Int, 3)
+		answers := make([]*gmp.Int, 3)
 		answers[0] = a0
 		answers[1] = a1
 		answers[2] = a2

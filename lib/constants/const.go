@@ -1,8 +1,8 @@
 package constants
 
 import (
+	"github.com/ncw/gmp"
 	"math"
-	"math/big"
 )
 
 const (
@@ -11,11 +11,11 @@ const (
 )
 
 var (
-	BigZero = big.NewInt(0)
-	BigOne = big.NewInt(1)
+	BigZero = gmp.NewInt(0)
+	BigOne = gmp.NewInt(1)
 
 	// scheme parameters
-	Modulo = big.NewInt(int64(math.Pow(2, FieldSize)) - 1)
+	Modulo = gmp.NewInt(int64(math.Pow(2, FieldSize)) - 1)
 )
 
 

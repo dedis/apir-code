@@ -1,17 +1,18 @@
 package database
 
 import (
-	cst "github.com/si-co/vpir-code/lib/constants"
-	"math/big"
 	"strconv"
+
+	"github.com/ncw/gmp"
+	cst "github.com/si-co/vpir-code/lib/constants"
 )
 
 type Database struct {
-	Entries []*big.Int
+	Entries []*gmp.Int
 }
 
 func CreateDatabase() *Database {
-	entries := make([]*big.Int, cst.DBLength)
+	entries := make([]*gmp.Int, cst.DBLength)
 	for i := 0; i < cst.DBLength; i++ {
 		entries[i] = cst.BigOne
 	}
@@ -29,7 +30,7 @@ func CreateAsciiDatabase() *Database {
 		if err != nil {
 			panic(err)
 		}
-		db.Entries[i] = new(big.Int).SetInt64(int64(currentBit))
+		db.Entries[i] = gmp.NewInt(int64(currentBit))
 	}
 
 	return db
