@@ -1,21 +1,21 @@
 package database
 
 import (
-	cst "github.com/si-co/vpir-code/lib/constants"
-	"math/big"
 	"strconv"
+	"github.com/holiman/uint256"
+	cst "github.com/si-co/vpir-code/lib/constants"
 )
 
 type Database struct {
-	Entries []*big.Int
+	Entries []*uint256.Int
 }
 
 func CreateDatabase() *Database {
-	entries := make([]*big.Int, cst.DBLength)
+	entries := make([]*uint256.Int, cst.DBLength)
 	for i := 0; i < cst.DBLength; i++ {
-		entries[i] = cst.BigOne
+		entries[i] = uint256.NewInt().SetOne()
 	}
-	entries[9] = cst.BigZero
+	entries[9] = uint256.NewInt().SetUint64(0)
 
 	return &Database{Entries: entries}
 }
@@ -29,7 +29,7 @@ func CreateAsciiDatabase() *Database {
 		if err != nil {
 			panic(err)
 		}
-		db.Entries[i] = new(big.Int).SetInt64(int64(currentBit))
+		db.Entries[i] = uint256.NewInt().SetUint64(uint64(currentBit))
 	}
 
 	return db

@@ -1,13 +1,13 @@
 package server
 
 import (
+	"github.com/holiman/uint256"
 	db "github.com/si-co/vpir-code/lib/database"
-	"math/big"
 )
 
 // Server represents the server instance in both the IT and C models
 type Server interface {
-	Answer(q []*big.Int) *big.Int
+	Answer(q []*uint256.Int) *uint256.Int
 }
 
 func NewITServer(db *db.Database) *ITServer {
@@ -19,11 +19,11 @@ type ITServer struct {
 	db *db.Database
 }
 
-func (s *ITServer) Answer(q []*big.Int) *big.Int {
+func (s *ITServer) Answer(q []*uint256.Int) *uint256.Int {
 	// Can't use BigZero because it's not deep-copied
-	a := big.NewInt(0)
+	a := uint256.NewInt().SetUint64(0)
 	for i := range s.db.Entries {
-		mul := new(big.Int)
+		mul := uint256.NewInt()
 		mul.Mul(s.db.Entries[i], q[i])
 		a.Add(a, mul)
 	}

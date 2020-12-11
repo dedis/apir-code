@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/si-co/vpir-code/lib/utils"
+	"github.com/holiman/uint256"
 	"golang.org/x/crypto/blake2b"
-	"math/big"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -40,7 +40,7 @@ func TestITRetrieval(t *testing.T) {
 		a2 := s2.Answer(queries[2])
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
-		answers := make([]*big.Int, 3)
+		answers := make([]*uint256.Int, 3)
 		answers[0] = a0
 		answers[1] = a1
 		answers[2] = a2
@@ -52,7 +52,7 @@ func TestITRetrieval(t *testing.T) {
 			t.Error(err)
 			panic(err)
 		}
-		result += x.String()
+		result += x.ToBig().String()
 	}
 	b, err := utils.BitStringToBytes(result)
 	if err != nil {
