@@ -1,9 +1,12 @@
 package database
 
 import (
-	cst "github.com/si-co/vpir-code/lib/constants"
+	"errors"
+	"math"
 	"math/big"
 	"strconv"
+
+	cst "github.com/si-co/vpir-code/lib/constants"
 )
 
 type Database struct {
@@ -33,4 +36,28 @@ func CreateAsciiDatabase() *Database {
 	}
 
 	return db
+}
+
+type Matrix struct {
+	Entries      [][]*big.Int
+	DBLengthSqrt int
+}
+
+func CreateMatrix() *Matrix {
+	// compute square root of db length
+	dbLengthSqrt := math.Sqrt(cst.DBLength)
+	if dbLengthSqrt != math.Floor(dbLengthSqrt) {
+		panic(errors.New("Square root of db length is not an integer"))
+	}
+
+	entries := make([][]*big.Int, dblengthSqrt)
+	for i := 0; i < dbLengthSqrt; i++ {
+		entries[i] = make([]*big.Int, dbLengthSqrt)
+		for j := 0; j < dbLengthSqrt; i++ {
+			entries[i][j] = cst.BigOne
+		}
+	}
+	//entries[9] = cst.BigZero
+
+	return &Database{Entries: entries, DbLengthSqrt: int(dbLengthSqrt)}
 }
