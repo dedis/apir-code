@@ -26,18 +26,24 @@ func main() {
 		log.Fatalf("Could not create new XOF: %v", err)
 	}
 	c := client.NewITClient(xof)
+	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// Contact the servers and print out its response.
 	output := ""
+	log.Printf("Start retrieving process")
 	for i := 0; i < 136; i++ {
 		queries := c.Query(i, len(addresses))
+		log.Printf("Send %d queries for i=%d", len(queries), i)
 		answers := runQueries(queries, addresses)
+		log.Printf("Receive %d queries for i=%d", len(answers), i)
 		result, err := c.Reconstruct(answers)
+		log.Printf("Reconstructed result: %s", result.String())
 		if err != nil {
 			log.Fatalf("Failed reconstructing %v with error: %v", i, err)
 		}
 		output += result.String()
 	}
+	log.Printf("End retrieving process")
 	b, err := utils.BitStringToBytes(output)
 	if err != nil {
 		log.Fatalf("Could not convert bit string to bytes: %v", err)
