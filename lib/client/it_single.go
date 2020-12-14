@@ -4,20 +4,14 @@ import (
 	"crypto/rand"
 	"errors"
 	"math/big"
-	
+
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"golang.org/x/crypto/blake2b"
 )
 
-// Client represents the client instance in both the IT and C models
-type Client interface {
-	Query()
-	Reconstruct()
-}
-
 // Information-theoretic PIR client implements the Client interface
 type ITClient struct {
-	xof blake2b.XOF
+	xof   blake2b.XOF
 	state *itClientState
 }
 
@@ -28,7 +22,7 @@ type itClientState struct {
 
 func NewITClient(xof blake2b.XOF) *ITClient {
 	return &ITClient{
-		xof: xof,
+		xof:   xof,
 		state: nil,
 	}
 }
