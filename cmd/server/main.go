@@ -4,11 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/si-co/vpir-code/lib/utils"
 	"log"
 	"math/big"
 	"net"
 	"os"
+
+	"github.com/si-co/vpir-code/lib/utils"
 
 	db "github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
@@ -36,7 +37,7 @@ func main() {
 	}
 	rpcServer := grpc.NewServer()
 	vpirServer := &vpirServer{
-		Server: server.NewITServer(db.CreateAsciiDatabase()),
+		Server: server.NewITServer(db.CreateAsciiVector()),
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
 	log.Printf("Server %d is listening at %s", *sid, addr)
