@@ -10,7 +10,6 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-// Information-theoretic PIR client implements the Client interface
 type ITMatrixClient struct {
 	xof   blake2b.XOF
 	state *itMatrixClientState
@@ -45,11 +44,13 @@ func (c *ITMatrixClient) Query(index int, numServers int) [][]*big.Int {
 
 	// verified at server side if integer square
 	dbLengthSqrt := int(math.Sqrt(cst.DBLength))
+	ix := index % dbLengthSqrt
+	iy := index / dbLengthSqrt
 
 	// set ITClient state
 	c.state = &itMatrixClientState{
-		ix:    index / dbLengthSqrt,
-		iy:    index % dbLengthSqrt,
+		ix:    ix,
+		iy:    iy,
 		alpha: alpha,
 	}
 
@@ -86,18 +87,24 @@ func (c *ITMatrixClient) Query(index int, numServers int) [][]*big.Int {
 
 }
 
-func (c *ITMatrixClient) Reconstruct(answers [][]*big.Int, rebalanced bool) (*big.Int, error) {
-	sum := big.NewInt(0)
-	for _, a := range answers {
-		for _, singleAnswer := range a {
-			sum.Add(sum, singleAnswer)
+func (c *ITMatrixClient) Reconstruct(answers [][]*big.Int) (*big.Int, error) {
+	sum := make([]*big.Int, len(answers[0]))
+	for i := 0; i < len(answers[0]); i++ {
+		sum[i] = big.NewInt(0)
+		for s := range answers {
+			sum[i].Add(sum[i], answers[s][i])
 		}
+
+		if sum[i].Cmp(c.state.alpha) != 0 && sum[i].Cmp(big.NewInt(0)) != 0 {
+			return nil, errors.New("REJECT!")
+		}
+
 	}
 
 	switch {
-	case sum.Cmp(c.state.alpha) == 0:
+	case sum[c.state.iy].Cmp(c.state.alpha) == 0:
 		return cst.BigOne, nil
-	case sum.Cmp(cst.BigZero) == 0:
+	case sum[c.state.iy].Cmp(cst.BigZero) == 0:
 		return cst.BigZero, nil
 	default:
 		return nil, errors.New("REJECT!")
