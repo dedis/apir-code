@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -54,33 +55,9 @@ func (c *ITMatrixClient) Query(index int, numServers int) [][]*big.Int {
 		alpha: alpha,
 	}
 
-	eialpha := make([]*big.Int, dbLengthSqrt)
-	vectors := make([][]*big.Int, numServers)
-	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]*big.Int, dbLengthSqrt)
-	}
-
-	for i := 0; i < dbLengthSqrt; i++ {
-		// create basic vector
-		eialpha[i] = big.NewInt(0)
-
-		// set alpha at the index we want to retrieve
-		if i == index {
-			eialpha[i] = alpha
-		}
-
-		// create k - 1 random vectors
-		sum := big.NewInt(0)
-		for k := 0; k < numServers-1; k++ {
-			randInt, err := rand.Int(c.xof, cst.Modulo)
-			if err != nil {
-				panic(err)
-			}
-			vectors[k][i] = randInt
-			sum.Add(sum, randInt)
-		}
-		vectors[numServers-1][i] = new(big.Int)
-		vectors[numServers-1][i].Sub(eialpha[i], sum)
+	vectors, err := utils.AdditiveSecretSharing(alpha, cst.Modulo, ix, dbLengthSqrt, numServers, c.xof)
+	if err != nil {
+		panic(err)
 	}
 
 	return vectors
