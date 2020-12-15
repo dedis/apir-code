@@ -2,9 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/BurntSushi/toml"
 	"golang.org/x/xerrors"
-	"strconv"
 )
 
 type serverConfig struct {
@@ -12,8 +13,8 @@ type serverConfig struct {
 }
 
 type server struct {
-	Ip string
-	Port int
+	ip   string
+	port int
 }
 
 func LoadServerConfig(configFile string) ([]string, error) {
@@ -30,19 +31,7 @@ func LoadServerConfig(configFile string) ([]string, error) {
 		if err != nil {
 			return nil, xerrors.Errorf("could not convert server index to integer: %v", err)
 		}
-		addresses[i] = fmt.Sprintf("%s:%d", server.Ip, server.Port)
+		addresses[i] = fmt.Sprintf("%s:%d", server.ip, server.port)
 	}
 	return addresses, nil
-}
-
-func BitStringToBytes(s string) ([]byte, error) {
-	b := make([]byte, (len(s)+(8-1))/8)
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if c < '0' || c > '1' {
-			return nil, xerrors.New("not a bit")
-		}
-		b[i>>3] |= (c - '0') << uint(7-i&7)
-	}
-	return b, nil
 }
