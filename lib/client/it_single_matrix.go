@@ -3,6 +3,7 @@ package client
 import (
 	"crypto/rand"
 	"errors"
+	"math"
 	"math/big"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
@@ -10,24 +11,25 @@ import (
 )
 
 // Information-theoretic PIR client implements the Client interface
-type ITClient struct {
+type ITMatrixClient struct {
 	xof   blake2b.XOF
-	state *itClientState
+	state *itMatrixClientState
 }
 
-type itClientState struct {
-	i     int
+type itMatrixClientState struct {
+	ix    int
+	iy    int
 	alpha *big.Int
 }
 
-func NewITClient(xof blake2b.XOF) *ITClient {
-	return &ITClient{
+func NewITMatrixClient(xof blake2b.XOF) *ITMatrixClient {
+	return &ITMatrixClient{
 		xof:   xof,
 		state: nil,
 	}
 }
 
-func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
+func (c *ITMatrixClient) Query(index int, numServers int) [][]*big.Int {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -41,18 +43,23 @@ func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
 		panic(err)
 	}
 
-	// set ITClient state
-	c.state = &itClientState{i: index, alpha: alpha}
+	// verified at server side if integer square
+	dbLengthSqrt := int(math.Sqrt(cst.DBLength))
 
-	// sample k (variable Servers) random vectors q0,..., q_{k-1} such
-	// that they sum to alpha * e_i
-	eialpha := make([]*big.Int, cst.DBLength)
-	vectors := make([][]*big.Int, numServers)
-	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]*big.Int, cst.DBLength)
+	// set ITClient state
+	c.state = &itMatrixClientState{
+		ix:    index / dbLengthSqrt,
+		iy:    index % dbLengthSqrt,
+		alpha: alpha,
 	}
 
-	for i := 0; i < cst.DBLength; i++ {
+	eialpha := make([]*big.Int, dbLengthSqrt)
+	vectors := make([][]*big.Int, numServers)
+	for k := 0; k < numServers; k++ {
+		vectors[k] = make([]*big.Int, dbLengthSqrt)
+	}
+
+	for i := 0; i < dbLengthSqrt; i++ {
 		// create basic vector
 		eialpha[i] = big.NewInt(0)
 
@@ -76,12 +83,15 @@ func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
 	}
 
 	return vectors
+
 }
 
-func (c *ITClient) Reconstruct(answers []*big.Int) (*big.Int, error) {
+func (c *ITMatrixClient) Reconstruct(answers [][]*big.Int, rebalanced bool) (*big.Int, error) {
 	sum := big.NewInt(0)
 	for _, a := range answers {
-		sum.Add(sum, a)
+		for _, singleAnswer := range a {
+			sum.Add(sum, singleAnswer)
+		}
 	}
 
 	switch {

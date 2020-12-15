@@ -53,7 +53,7 @@ func CreateMatrix() *Matrix {
 	entries := make([][]*big.Int, dbLengthSqrtInt)
 	for i := 0; i < dbLengthSqrtInt; i++ {
 		entries[i] = make([]*big.Int, dbLengthSqrtInt)
-		for j := 0; j < dbLengthSqrtInt; i++ {
+		for j := 0; j < dbLengthSqrtInt; j++ {
 			entries[i][j] = cst.BigOne
 		}
 	}
@@ -72,7 +72,7 @@ func CreateAsciiMatrix() *Matrix {
 			panic(err)
 		}
 		entry := new(big.Int).SetInt64(int64(currentBit))
-		db.Entries[i%db.DBLengthSqrt][i/db.DBLengthSqrt] = entry
+		db.Entries[i/db.DBLengthSqrt][i%db.DBLengthSqrt] = entry
 	}
 
 	return db
