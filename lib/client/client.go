@@ -5,3 +5,8 @@ type Client interface {
 	Query()
 	Reconstruct()
 }
+
+// General containts the elements needed by the clients of all schemes
+type General struct {
+	DBLength int
+}

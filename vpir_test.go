@@ -38,9 +38,7 @@ func TestDPF(t *testing.T) {
 		a1 := s1.Answer(fssKeys[1], prfKeys, 1)
 		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
 
-		answers := make([]*big.Int, 2)
-		answers[0] = a0
-		answers[1] = a1
+		answers := []*big.Int{a0, a1}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
@@ -94,10 +92,7 @@ func TestITVectorMatrix(t *testing.T) {
 		a2 := s2.Answer(queries[2])
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
-		answers := make([][]*big.Int, 3)
-		answers[0] = a0
-		answers[1] = a1
-		answers[2] = a2
+		answers := [][]*big.Int{a0, a1, a2}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
@@ -152,10 +147,7 @@ func TestITVectorRetrieval(t *testing.T) {
 		a2 := s2.Answer(queries[2])
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
-		answers := make([]*big.Int, 3)
-		answers[0] = a0
-		answers[1] = a1
-		answers[2] = a2
+		answers := []*big.Int{a0, a1, a2}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
