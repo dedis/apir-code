@@ -3,11 +3,11 @@ package client
 import (
 	"crypto/rand"
 	"errors"
-	"fmt"
-	"math"
 	"math/big"
+	"math/bits"
 
-	"github.com/dimakogan/dpf-go/dpf"
+	"github.com/frankw2/libfss/go/libfss"
+	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"golang.org/x/crypto/blake2b"
 )
@@ -29,7 +29,7 @@ func NewDPFClient(xof blake2b.XOF) *DPFClient {
 	}
 }
 
-func (c *DPFClient) Query(index int, numServers int) (dpf.DPFkey, dpf.DPFkey) {
+func (c *DPFClient) Query(index int, numServers int) ([][]byte, []libfss.FssKeyEq2P) {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -50,10 +50,10 @@ func (c *DPFClient) Query(index int, numServers int) (dpf.DPFkey, dpf.DPFkey) {
 	// set ITClient state
 	c.state = &itClientState{i: index, alpha: alpha}
 
-	fmt.Println(uint64(math.Log2(cst.DBLength)))
-	fmt.Println((1 << uint64(math.Log2(cst.DBLength))))
-	fmt.Println(alpha.Uint64())
-	return dpf.Gen(alpha.Uint64(), uint64(math.Log2(cst.DBLength)))
+	fClient := libfss.ClientInitialize(uint(bits.Len(uint(constants.DBLength))))
+	fssKeys := fClient.GenerateTreePF(uint(index), uint(alpha.Uint64()))
+
+	return fClient.PrfKeys, fssKeys
 
 }
 
