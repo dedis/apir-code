@@ -25,11 +25,15 @@ func main() {
 
 	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
 
-	addrs, err := utils.LoadServerConfig("config.toml")
+	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
 		log.Fatalf("Could not load the server config file: %v", err)
 	}
-	addr := addrs[*sid]
+	addresses, err := utils.ServerAddresses(config)
+	if err != nil {
+		panic(err)
+	}
+	addr := addresses[*sid]
 
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {

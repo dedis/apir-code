@@ -12,24 +12,24 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-type DPFClient struct {
+type DPF struct {
 	xof   blake2b.XOF
-	state *itClientState
+	state *dpfState
 }
 
-type dpfClientState struct {
+type dpfState struct {
 	i     int
 	alpha *big.Int
 }
 
-func NewDPFClient(xof blake2b.XOF) *DPFClient {
-	return &DPFClient{
+func NewDPF(xof blake2b.XOF) *DPF {
+	return &DPF{
 		xof:   xof,
 		state: nil,
 	}
 }
 
-func (c *DPFClient) Query(index int, numServers int) ([][]byte, []libfss.FssKeyEq2P) {
+func (c *DPF) Query(index int, numServers int) ([][]byte, []libfss.FssKeyEq2P) {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -48,7 +48,7 @@ func (c *DPFClient) Query(index int, numServers int) ([][]byte, []libfss.FssKeyE
 	alpha = big.NewInt(12)
 
 	// set ITClient state
-	c.state = &itClientState{i: index, alpha: alpha}
+	c.state = &dpfState{i: index, alpha: alpha}
 
 	fClient := libfss.ClientInitialize(uint(bits.Len(uint(constants.DBLength))))
 	fssKeys := fClient.GenerateTreePF(uint(index), uint(alpha.Uint64()))
@@ -57,7 +57,7 @@ func (c *DPFClient) Query(index int, numServers int) ([][]byte, []libfss.FssKeyE
 
 }
 
-func (c *DPFClient) Reconstruct(answers []*big.Int) (*big.Int, error) {
+func (c *DPF) Reconstruct(answers []*big.Int) (*big.Int, error) {
 	sum := big.NewInt(0)
 	for _, a := range answers {
 		sum.Add(sum, a)

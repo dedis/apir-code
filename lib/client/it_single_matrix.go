@@ -11,25 +11,25 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-type ITMatrixClient struct {
+type ITMatrix struct {
 	xof   blake2b.XOF
-	state *itMatrixClientState
+	state *itMatrixState
 }
 
-type itMatrixClientState struct {
+type itMatrixState struct {
 	ix    int
 	iy    int
 	alpha *big.Int
 }
 
-func NewITMatrixClient(xof blake2b.XOF) *ITMatrixClient {
-	return &ITMatrixClient{
+func NewITMatrix(xof blake2b.XOF) *ITMatrix {
+	return &ITMatrix{
 		xof:   xof,
 		state: nil,
 	}
 }
 
-func (c *ITMatrixClient) Query(index int, numServers int) [][]*big.Int {
+func (c *ITMatrix) Query(index int, numServers int) [][]*big.Int {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -49,7 +49,7 @@ func (c *ITMatrixClient) Query(index int, numServers int) [][]*big.Int {
 	iy := index / dbLengthSqrt
 
 	// set ITClient state
-	c.state = &itMatrixClientState{
+	c.state = &itMatrixState{
 		ix:    ix,
 		iy:    iy,
 		alpha: alpha,
@@ -64,7 +64,7 @@ func (c *ITMatrixClient) Query(index int, numServers int) [][]*big.Int {
 
 }
 
-func (c *ITMatrixClient) Reconstruct(answers [][]*big.Int) (*big.Int, error) {
+func (c *ITMatrix) Reconstruct(answers [][]*big.Int) (*big.Int, error) {
 	sum := make([]*big.Int, len(answers[0]))
 	for i := 0; i < len(answers[0]); i++ {
 		sum[i] = big.NewInt(0)

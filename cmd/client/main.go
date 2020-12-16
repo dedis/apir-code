@@ -16,16 +16,18 @@ import (
 )
 
 func main() {
-	addresses, err := utils.LoadServerConfig("config.toml")
+	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
-		log.Fatalf("Could not load the server config file: %v", err)
+		log.Fatalf("Could not load the config file: %v", err)
 	}
+	addresses, err := utils.ServerAddresses(config)
+
 	// New random generator
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
 		log.Fatalf("Could not create new XOF: %v", err)
 	}
-	c := client.NewITClient(xof)
+	c := client.NewITVector(xof)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// Contact the servers and print out its response.

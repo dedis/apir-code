@@ -22,7 +22,7 @@ func TestDPF(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	c := client.NewDPFClient(xof)
+	c := client.NewDPF(xof)
 	s0 := server.NewDPFServer(db)
 	s1 := server.NewDPFServer(db)
 	m := monitor.NewMonitor()
@@ -75,7 +75,7 @@ func TestITVectorMatrix(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	c := client.NewITMatrixClient(xof)
+	c := client.NewITMatrix(xof)
 	s0 := server.NewITMatrixServer(db)
 	s1 := server.NewITMatrixServer(db)
 	s2 := server.NewITMatrixServer(db)
@@ -133,7 +133,7 @@ func TestITVectorRetrieval(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	c := client.NewITClient(xof)
+	c := client.NewITVector(xof)
 	s0 := server.NewITServer(db)
 	s1 := server.NewITServer(db)
 	s2 := server.NewITServer(db)

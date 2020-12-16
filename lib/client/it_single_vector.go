@@ -11,24 +11,24 @@ import (
 )
 
 // Information-theoretic PIR client implements the Client interface
-type ITClient struct {
+type ITVector struct {
 	xof   blake2b.XOF
-	state *itClientState
+	state *itVectorState
 }
 
-type itClientState struct {
+type itVectorState struct {
 	i     int
 	alpha *big.Int
 }
 
-func NewITClient(xof blake2b.XOF) *ITClient {
-	return &ITClient{
+func NewITVector(xof blake2b.XOF) *ITVector {
+	return &ITVector{
 		xof:   xof,
 		state: nil,
 	}
 }
 
-func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
+func (c *ITVector) Query(index int, numServers int) [][]*big.Int {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -42,8 +42,8 @@ func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
 		panic(err)
 	}
 
-	// set ITClient state
-	c.state = &itClientState{i: index, alpha: alpha}
+	// set ITVector state
+	c.state = &itVectorState{i: index, alpha: alpha}
 
 	vectors, err := utils.AdditiveSecretSharing(alpha, cst.Modulo, index, cst.DBLength, numServers, c.xof)
 	if err != nil {
@@ -54,7 +54,7 @@ func (c *ITClient) Query(index int, numServers int) [][]*big.Int {
 
 }
 
-func (c *ITClient) Reconstruct(answers []*big.Int) (*big.Int, error) {
+func (c *ITVector) Reconstruct(answers []*big.Int) (*big.Int, error) {
 	sum := big.NewInt(0)
 	for _, a := range answers {
 		sum.Add(sum, a)
