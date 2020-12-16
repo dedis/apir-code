@@ -8,30 +8,36 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type serverConfig struct {
-	Servers map[string]server
+type Config struct {
+	DBLength int
+	Servers  map[string]Server
 }
 
-type server struct {
-	ip   string
-	port int
+type Server struct {
+	Index int
+	IP    string
+	Port  int
 }
 
-func LoadServerConfig(configFile string) ([]string, error) {
-	sc := serverConfig{
-		Servers: make(map[string]server),
-	}
-	_, err := toml.DecodeFile(configFile, &sc)
+func LoadConfig(configFile string) (*Config, error) {
+	c := new(Config)
+	_, err := toml.DecodeFile(configFile, c)
 	if err != nil {
 		return nil, xerrors.Errorf("toml decoding: %v", err)
 	}
-	addresses := make([]string, len(sc.Servers))
-	for index, server := range sc.Servers {
+
+	return c, nil
+}
+
+func ServerAddresses(c *Config) ([]string, error) {
+	addresses := make([]string, len(c.Servers))
+	for index, server := range c.Servers {
 		i, err := strconv.Atoi(index)
 		if err != nil {
 			return nil, xerrors.Errorf("could not convert server index to integer: %v", err)
 		}
-		addresses[i] = fmt.Sprintf("%s:%d", server.ip, server.port)
+		addresses[i] = fmt.Sprintf("%s:%d", server.IP, server.Port)
 	}
+
 	return addresses, nil
 }
