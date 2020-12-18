@@ -7,7 +7,36 @@ import (
 	"strconv"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 )
+
+type VectorGF struct {
+	Entries []*field.FieldElement
+}
+
+func CreateVectorGF() *VectorGF {
+	entries := make([]*field.FieldElement, cst.DBLength)
+	for i := 0; i < cst.DBLength; i++ {
+		entries[i] = field.NewUint64(0)
+	}
+
+	return &VectorGF{Entries: entries}
+}
+
+func CreateAsciiVectorGF() *VectorGF {
+	// playing with VPIR in ascii
+	text := "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
+	db := CreateVectorGF()
+	for i, b := range text {
+		currentBit, err := strconv.Atoi(string(b))
+		if err != nil {
+			panic(err)
+		}
+		db.Entries[i] = field.NewUint64(uint64(currentBit))
+	}
+
+	return db
+}
 
 type Vector struct {
 	Entries []*big.Int
