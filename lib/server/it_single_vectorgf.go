@@ -14,7 +14,7 @@ type ITVectorGF struct {
 	db *db.VectorGF
 }
 
-func (s *ITVectorGF) Answer(q []*field.FieldElement) *field.FieldElement {
+func (s *ITVectorGF) Answer(q []*field.Element) *field.Element {
 	// Can't use BigZero because it's not deep-copied
 	a := field.NewUint64(0)
 	for i := range s.db.Entries {

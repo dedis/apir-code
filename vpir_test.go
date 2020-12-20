@@ -42,7 +42,7 @@ func TestVectorGF(t *testing.T) {
 		a2 := s2.Answer(queries[2])
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
-		answers := []*field.FieldElement{a0, a1, a2}
+		answers := []*field.Element{a0, a1, a2}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)

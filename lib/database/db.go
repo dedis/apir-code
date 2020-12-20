@@ -11,11 +11,11 @@ import (
 )
 
 type VectorGF struct {
-	Entries []*field.FieldElement
+	Entries []*field.Element
 }
 
 func CreateVectorGF() *VectorGF {
-	entries := make([]*field.FieldElement, cst.DBLength)
+	entries := make([]*field.Element, cst.DBLength)
 	for i := 0; i < cst.DBLength; i++ {
 		entries[i] = field.NewUint64(0)
 	}

@@ -2,25 +2,26 @@ package field
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"strconv"
 )
 
-type FieldElement struct {
+type Element struct {
 	element      *gcmFieldElement
 	productTable [16]gcmFieldElement
 }
 
-func NewUint64(x uint64) *FieldElement {
+func NewUint64(x uint64) *Element {
 	low := make([]byte, 8)
 	binary.BigEndian.PutUint64(low, uint64(x))
 
 	in := make([]byte, 8)
 	in = append(in, low[:]...)
 
-	return NewByte(in)
+	return NewElement(in)
 }
 
-func NewByte(in []byte) *FieldElement {
+func NewElement(in []byte) *Element {
 	if len(in) != 16 {
 		panic("incorrect length")
 	}
@@ -35,7 +36,7 @@ func NewByte(in []byte) *FieldElement {
 
 	pt := createProductTable(e)
 
-	f := &FieldElement{
+	f := &Element{
 		element:      e,
 		productTable: pt,
 	}
@@ -43,14 +44,14 @@ func NewByte(in []byte) *FieldElement {
 	return f
 }
 
-func (f *FieldElement) Add(x, y *FieldElement) {
+func (f *Element) Add(x, y *Element) {
 	e := gcmAdd(x.element, y.element)
 	pt := createProductTable(&e)
 	f.element = &e
 	f.productTable = pt
 }
 
-func (f *FieldElement) Mul(x, y *FieldElement) {
+func (f *Element) Mul(x, y *Element) {
 	// x as H
 	x.mul(y.element)
 
@@ -59,18 +60,21 @@ func (f *FieldElement) Mul(x, y *FieldElement) {
 
 	f.element = y.element
 	f.productTable = pt
-
 }
 
-func (f *FieldElement) Equal(x *FieldElement) bool {
+func (f *Element) Equal(x *Element) bool {
 	return f.element.high == x.element.high && f.element.low == x.element.low
 }
 
-func (f *FieldElement) String() string {
+func (f *Element) String() string {
 	return strconv.FormatUint(f.element.low, 16) + strconv.FormatUint(f.element.high, 16)
 }
 
-func (f *FieldElement) Bytes() []byte {
+func (f *Element) HexString() string {
+	return hex.EncodeToString(f.Bytes())
+}
+
+func (f *Element) Bytes() []byte {
 	out := make([]byte, 16)
 	binary.BigEndian.PutUint64(out[:8], f.element.low)
 	binary.BigEndian.PutUint64(out[8:], f.element.high)
@@ -135,7 +139,7 @@ var gcmReductionTable = []uint16{
 }
 
 // mul sets y to y*H, where H is the GCM key, fixed during NewGCMWithNonceSize.
-func (g *FieldElement) mul(y *gcmFieldElement) {
+func (f *Element) mul(y *gcmFieldElement) {
 	var z gcmFieldElement
 
 	for i := 0; i < 2; i++ {
@@ -156,7 +160,7 @@ func (g *FieldElement) mul(y *gcmFieldElement) {
 			// the values in |table| are ordered for
 			// little-endian bit positions. See the comment
 			// in NewGCMWithNonceSize.
-			t := &g.productTable[word&0xf]
+			t := &f.productTable[word&0xf]
 
 			z.low ^= t.low
 			z.high ^= t.high

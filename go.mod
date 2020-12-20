@@ -8,6 +8,7 @@ require (
 	github.com/dkales/dpf-go v0.0.0-20190409133349-ba25eb14c6f7 // indirect
 	github.com/frankw2/libfss v0.0.0-20181115202207-03c7df90f8a9
 	github.com/golang/protobuf v1.4.1
+	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect

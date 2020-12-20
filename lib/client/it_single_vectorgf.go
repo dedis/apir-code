@@ -18,7 +18,7 @@ type ITVectorGF struct {
 
 type itVectorGFState struct {
 	i     int
-	alpha *field.FieldElement
+	alpha *field.Element
 }
 
 func NewITVectorGF(xof blake2b.XOF) *ITVectorGF {
@@ -28,7 +28,7 @@ func NewITVectorGF(xof blake2b.XOF) *ITVectorGF {
 	}
 }
 
-func (c *ITVectorGF) Query(index int, numServers int) [][]*field.FieldElement {
+func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -41,15 +41,15 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.FieldElement {
 	if err != nil {
 		panic(err)
 	}
-	alpha := field.NewByte(in)
+	alpha := field.NewElement(in)
 
 	// set ITVector state
 	c.state = &itVectorGFState{i: index, alpha: alpha}
 
-	eialpha := make([]*field.FieldElement, cst.DBLength)
-	vectors := make([][]*field.FieldElement, numServers)
+	eialpha := make([]*field.Element, cst.DBLength)
+	vectors := make([][]*field.Element, numServers)
 	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]*field.FieldElement, cst.DBLength)
+		vectors[k] = make([]*field.Element, cst.DBLength)
 	}
 
 	for i := 0; i < cst.DBLength; i++ {
@@ -69,7 +69,7 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.FieldElement {
 			if err != nil {
 				panic(err)
 			}
-			rand := field.NewByte(in)
+			rand := field.NewElement(in)
 			vectors[k][i] = rand
 			sum.Add(sum, rand)
 		}
@@ -81,7 +81,7 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.FieldElement {
 
 }
 
-func (c *ITVectorGF) Reconstruct(answers []*field.FieldElement) (*field.FieldElement, error) {
+func (c *ITVectorGF) Reconstruct(answers []*field.Element) (*field.Element, error) {
 	sum := field.NewUint64(0)
 	for _, a := range answers {
 		sum.Add(sum, a)
