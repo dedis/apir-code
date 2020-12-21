@@ -7,13 +7,13 @@ import (
 )
 
 type Element struct {
-	element      *gcmFieldElement
+	value        *gcmFieldElement
 	productTable [16]gcmFieldElement
 }
 
 func NewUint64(x uint64) *Element {
 	low := make([]byte, 8)
-	binary.BigEndian.PutUint64(low, uint64(x))
+	binary.BigEndian.PutUint64(low, x)
 
 	in := make([]byte, 8)
 	in = append(in, low[:]...)
@@ -37,47 +37,47 @@ func NewElement(in []byte) *Element {
 	pt := createProductTable(e)
 
 	f := &Element{
-		element:      e,
+		value:        e,
 		productTable: pt,
 	}
 
 	return f
 }
 
-func (f *Element) Add(x, y *Element) {
-	e := gcmAdd(x.element, y.element)
-	pt := createProductTable(&e)
-	f.element = &e
-	f.productTable = pt
+func (e *Element) Add(x, y *Element) {
+	g := gcmAdd(x.value, y.value)
+	pt := createProductTable(&g)
+	e.value = &g
+	e.productTable = pt
 }
 
-func (f *Element) Mul(x, y *Element) {
+func (e *Element) Mul(x, y *Element) {
 	// x as H
-	x.mul(y.element)
+	x.mul(y.value)
 
-	// create product table for f
-	pt := createProductTable(y.element)
+	// create product table for e
+	pt := createProductTable(y.value)
 
-	f.element = y.element
-	f.productTable = pt
+	e.value = y.value
+	e.productTable = pt
 }
 
-func (f *Element) Equal(x *Element) bool {
-	return f.element.high == x.element.high && f.element.low == x.element.low
+func (e *Element) Equal(x *Element) bool {
+	return e.value.high == x.value.high && e.value.low == x.value.low
 }
 
-func (f *Element) String() string {
-	return strconv.FormatUint(f.element.low, 16) + strconv.FormatUint(f.element.high, 16)
+func (e *Element) String() string {
+	return strconv.FormatUint(e.value.low, 16) + strconv.FormatUint(e.value.high, 16)
 }
 
-func (f *Element) HexString() string {
-	return hex.EncodeToString(f.Bytes())
+func (e *Element) HexString() string {
+	return hex.EncodeToString(e.Bytes())
 }
 
-func (f *Element) Bytes() []byte {
+func (e *Element) Bytes() []byte {
 	out := make([]byte, 16)
-	binary.BigEndian.PutUint64(out[:8], f.element.low)
-	binary.BigEndian.PutUint64(out[8:], f.element.high)
+	binary.BigEndian.PutUint64(out[:8], e.value.low)
+	binary.BigEndian.PutUint64(out[8:], e.value.high)
 
 	return out
 }
@@ -139,7 +139,7 @@ var gcmReductionTable = []uint16{
 }
 
 // mul sets y to y*H, where H is the GCM key, fixed during NewGCMWithNonceSize.
-func (f *Element) mul(y *gcmFieldElement) {
+func (e *Element) mul(y *gcmFieldElement) {
 	var z gcmFieldElement
 
 	for i := 0; i < 2; i++ {
@@ -160,7 +160,7 @@ func (f *Element) mul(y *gcmFieldElement) {
 			// the values in |table| are ordered for
 			// little-endian bit positions. See the comment
 			// in NewGCMWithNonceSize.
-			t := &f.productTable[word&0xf]
+			t := &e.productTable[word&0xf]
 
 			z.low ^= t.low
 			z.high ^= t.high
@@ -172,7 +172,6 @@ func (f *Element) mul(y *gcmFieldElement) {
 }
 
 // reverseBits reverses the order of the bits of 4-bit number in i.
-
 func reverseBits(i int) int {
 	i = ((i << 2) & 0xc) | ((i >> 2) & 0x3)
 	i = ((i << 1) & 0xa) | ((i >> 1) & 0x5)

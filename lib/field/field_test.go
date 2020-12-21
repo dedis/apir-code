@@ -2,7 +2,6 @@ package field
 
 import (
 	"encoding/hex"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,18 +9,16 @@ import (
 
 // source: https://tools.ietf.org/html/rfc8452#section-7
 func TestNewElement(t *testing.T) {
-	// s = 11111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010010000
-	x, err := hex.DecodeString("ff000000000000000000000000000090")
+	// s = 00011111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010010000
+	x, err := hex.DecodeString("1f000000000000000000000000000090")
 	require.NoError(t, err)
 	e := NewElement(x)
-	require.Equal(t, strconv.FormatUint(e.element.low, 2), "1111111100000000000000000000000000000000000000000000000000000000")
-	require.Equal(t, strconv.FormatUint(e.element.high, 2), "10010000")
-	require.Equal(t, uint64(0x0), (e.element.high >> 63) & 1)
-	require.Equal(t, uint64(0x1), (e.element.high >> 7) & 1)
-	require.Equal(t, uint64(0x0), (e.element.high >> 8) & 1)
-	require.Equal(t, uint64(0x0), e.element.low & 1)
-	require.Equal(t, uint64(0x1), e.element.low >> 63)
-	require.Equal(t, uint64(0x1), (e.element.low >> 56) & 1)
+	require.Equal(t, uint64(0x0), (e.value.high >> 63) & 1)
+	require.Equal(t, uint64(0x1), (e.value.high >> 7) & 1)
+	require.Equal(t, uint64(0x0), (e.value.high >> 8) & 1)
+	require.Equal(t, uint64(0x0), e.value.low & 1)
+	require.Equal(t, uint64(0x1), e.value.low >> 60)
+	require.Equal(t, uint64(0x0), (e.value.low >> 55) & 1)
 }
 
 func TestAdd(t *testing.T) {
@@ -49,13 +46,13 @@ func TestAdd(t *testing.T) {
 //}
 
 func TestSimpleMul(t *testing.T) {
-	x, err := hex.DecodeString("20000000000000000000000000000000")
+	x, err := hex.DecodeString("02000000000000000000000000000000")
 	require.NoError(t, err)
-	y, err := hex.DecodeString("10000000000000000000000000000000")
+	y, err := hex.DecodeString("01000000000000000000000000000000")
 	require.NoError(t, err)
 
 	res := &Element{}
 	res.Mul(NewElement(x), NewElement(y))
 
-	require.Equal(t, "20000000000000000000000000000000", res.HexString())
+	require.Equal(t, "02000000000000000000000000000000", res.HexString())
 }
