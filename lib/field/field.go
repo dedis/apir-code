@@ -3,6 +3,7 @@ package field
 import (
 	"encoding/binary"
 	"encoding/hex"
+	"math/bits"
 	"strconv"
 )
 
@@ -26,6 +27,7 @@ func NewElement(in []byte) *Element {
 		panic("incorrect length")
 	}
 
+	in = reverseBitsInBytes(in)
 	low := binary.BigEndian.Uint64(in[:8])
 	high := binary.BigEndian.Uint64(in[8:])
 
@@ -78,6 +80,7 @@ func (e *Element) Bytes() []byte {
 	out := make([]byte, 16)
 	binary.BigEndian.PutUint64(out[:8], e.value.low)
 	binary.BigEndian.PutUint64(out[8:], e.value.high)
+	out = reverseBitsInBytes(out)
 
 	return out
 }
@@ -176,4 +179,13 @@ func reverseBits(i int) int {
 	i = ((i << 2) & 0xc) | ((i >> 2) & 0x3)
 	i = ((i << 1) & 0xa) | ((i >> 1) & 0x5)
 	return i
+}
+
+// Reversing bit order in each byte of the given array.
+// Needed because GCM expect bits to be in little endian.
+func reverseBitsInBytes(arr []byte) []byte {
+	for i, b := range arr {
+		arr[i] = bits.Reverse8(b)
+	}
+	return arr
 }

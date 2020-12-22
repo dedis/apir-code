@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
 
@@ -46,11 +47,8 @@ func TestVectorGF(t *testing.T) {
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
+		require.NoError(t, err)
 		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
-		if err != nil {
-			t.Error(err)
-			panic(err)
-		}
 		result += x.String()
 	}
 	b, err := utils.BitStringToBytes(result)
