@@ -3,7 +3,6 @@ package field
 import (
   "bytes"
 	"encoding/hex"
-  "log"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -79,11 +78,8 @@ func TestMulZero(t *testing.T) {
 }
 
 func TestMulOneOne(t *testing.T) {
-  log.Printf("left")
   left := One()
-  log.Printf("right")
   right := One()
-  log.Printf("res")
   res := Mul(left, right)
   res = Mul(left, res)
 	require.Equal(t, One().Bytes(), res.Bytes())
@@ -99,7 +95,6 @@ func TestMulOne(t *testing.T) {
 }
 
 func TestSimpleMul(t *testing.T) {
-  log.Printf("Simple")
 	x, err := hex.DecodeString("02400000000000000000000000000000")
 	require.NoError(t, err)
 	//y, err := hex.DecodeString("01000000000000000000000000000000")
