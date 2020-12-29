@@ -1,25 +1,21 @@
 package field
 
+// Mostly adapted from:
+// https://golang.org/src/crypto/cipher/gcm.go
+
+// Copyright 2013 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 import (
+  "crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
-	"math/bits"
 	"strconv"
 )
 
 type Element struct {
 	value        *gcmFieldElement
-	productTable [16]gcmFieldElement
-}
-
-func NewUint64(x uint64) *Element {
-	low := make([]byte, 8)
-	binary.BigEndian.PutUint64(low, x)
-
-	in := make([]byte, 8)
-	in = append(in, low[:]...)
-
-	return NewElement(in)
 }
 
 func NewElement(in []byte) *Element {
@@ -27,41 +23,52 @@ func NewElement(in []byte) *Element {
 		panic("incorrect length")
 	}
 
-	in = reverseBitsInBytes(in)
 	low := binary.BigEndian.Uint64(in[:8])
 	high := binary.BigEndian.Uint64(in[8:])
 
 	e := &gcmFieldElement{
-		high: high,
 		low:  low,
+		high: high,
 	}
 
-	pt := createProductTable(e)
-
-	f := &Element{
-		value:        e,
-		productTable: pt,
+	return &Element{
+		value: e,
 	}
-
-	return f
 }
 
-func (e *Element) Add(x, y *Element) {
-	g := gcmAdd(x.value, y.value)
-	pt := createProductTable(&g)
-	e.value = &g
-	e.productTable = pt
+func Zero() *Element {
+  var zeros [16]byte
+  return NewElement(zeros[:])
 }
 
-func (e *Element) Mul(x, y *Element) {
-	// x as H
-	x.mul(y.value)
+func One() *Element {
+  one := Zero()
+  //   the coefficient of x⁰ can be obtained by v.low >> 63.
+  one.value.low ^= (1 << 63)
+  return one
+}
 
-	// create product table for e
-	pt := createProductTable(y.value)
+// Generator of the multiplicative group
+func Gen() *Element {
+  gen := Zero()
+  //   the coefficient of x^1 can be obtained by v.low >> 62.
+  gen .value.low ^= (1 << 62)
+  return gen
+}
 
-	e.value = y.value
-	e.productTable = pt
+func Random() *Element {
+  var bytes [16]byte
+  _, err := rand.Read(bytes[:])
+  if err != nil {
+    panic("Should never get here")
+  }
+
+  return NewElement(bytes[:])
+}
+
+func Add(x, y *Element) *Element {
+  v := gcmAdd(x.value, y.value)
+  return &Element{ value: &v }
 }
 
 func (e *Element) Equal(x *Element) bool {
@@ -80,7 +87,6 @@ func (e *Element) Bytes() []byte {
 	out := make([]byte, 16)
 	binary.BigEndian.PutUint64(out[:8], e.value.low)
 	binary.BigEndian.PutUint64(out[8:], e.value.high)
-	out = reverseBitsInBytes(out)
 
 	return out
 }
@@ -90,7 +96,7 @@ func createProductTable(e *gcmFieldElement) [16]gcmFieldElement {
 	productTable[reverseBits(1)] = *e
 
 	for i := 2; i < 16; i += 2 {
-		productTable[reverseBits(i)] = gcmDouble(&productTable[reverseBits(i/2)])
+		productTable[reverseBits(i)] = gcmMultiplyByH(&productTable[reverseBits(i/2)])
 		productTable[reverseBits(i+1)] = gcmAdd(&productTable[reverseBits(i)], e)
 	}
 
@@ -110,11 +116,12 @@ type gcmFieldElement struct {
 // gcmAdd adds two elements of GF(2¹²⁸) and returns the sum.
 func gcmAdd(x, y *gcmFieldElement) gcmFieldElement {
 	// Addition in a characteristic 2 field is just XOR.
-	return gcmFieldElement{x.low ^ y.low, x.high ^ y.high}
+  return gcmFieldElement{low: x.low ^ y.low, high: x.high ^ y.high}
 }
 
-// gcmDouble returns the result of doubling an element of GF(2¹²⁸).
-func gcmDouble(x *gcmFieldElement) (double gcmFieldElement) {
+// gcmMultiplyByH returns the result of multiplying an element of GF(2¹²⁸)
+// by the element x.
+func gcmMultiplyByH(x *gcmFieldElement) (double gcmFieldElement) {
 	msbSet := x.high&1 == 1
 
 	// Because of the bit-ordering, doubling is actually a right shift.
@@ -141,8 +148,12 @@ var gcmReductionTable = []uint16{
 	0xe100, 0xfd20, 0xd940, 0xc560, 0x9180, 0x8da0, 0xa9c0, 0xb5e0,
 }
 
-// mul sets y to y*H, where H is the GCM key, fixed during NewGCMWithNonceSize.
-func (e *Element) mul(y *gcmFieldElement) {
+// Multiply the two field elements
+func Mul(e_in,y_in *Element) *Element {
+  e := e_in.value
+  y := y_in.value
+
+	productTable := createProductTable(e)
 	var z gcmFieldElement
 
 	for i := 0; i < 2; i++ {
@@ -163,7 +174,7 @@ func (e *Element) mul(y *gcmFieldElement) {
 			// the values in |table| are ordered for
 			// little-endian bit positions. See the comment
 			// in NewGCMWithNonceSize.
-			t := &e.productTable[word&0xf]
+			t := &productTable[word&0xf]
 
 			z.low ^= t.low
 			z.high ^= t.high
@@ -171,7 +182,7 @@ func (e *Element) mul(y *gcmFieldElement) {
 		}
 	}
 
-	*y = z
+  return &Element{value: &z}
 }
 
 // reverseBits reverses the order of the bits of 4-bit number in i.
@@ -181,11 +192,3 @@ func reverseBits(i int) int {
 	return i
 }
 
-// Reversing bit order in each byte of the given array.
-// Needed because GCM expect bits to be in little endian.
-func reverseBitsInBytes(arr []byte) []byte {
-	for i, b := range arr {
-		arr[i] = bits.Reverse8(b)
-	}
-	return arr
-}

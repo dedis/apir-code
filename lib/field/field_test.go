@@ -1,26 +1,21 @@
 package field
 
 import (
+  "bytes"
 	"encoding/hex"
+  "log"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-// source: https://tools.ietf.org/html/rfc8452#section-7
-func TestNewElement(t *testing.T) {
-	// s = 11111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001101001
-	x, err := hex.DecodeString("1f000000000000000000000000000096")
+
+func TestBytes(t *testing.T) {
+  s := "1f000000000000000000000000000096"
+	x, err := hex.DecodeString(s)
 	require.NoError(t, err)
 	e := NewElement(x)
-	//fmt.Println(strconv.FormatUint(e.value.low, 2))
-	//fmt.Println(strconv.FormatUint(e.value.high, 2))
-	require.Equal(t, uint64(0x1), (e.value.low>>63)&1)
-	require.Equal(t, uint64(0x1), (e.value.low>>59)&1)
-	require.Equal(t, uint64(0x0), (e.value.low>>58)&1)
-	require.Equal(t, uint64(0x1), e.value.high&1)
-	require.Equal(t, uint64(0x1), (e.value.high>>6)&1)
-	require.Equal(t, uint64(0x0), (e.value.high>>7)&1)
+	require.Equal(t, s, e.HexString())
 }
 
 func TestAdd(t *testing.T) {
@@ -29,37 +24,89 @@ func TestAdd(t *testing.T) {
 	y, err := hex.DecodeString("ff000000000000000000000000000000")
 	require.NoError(t, err)
 
-	res := &Element{}
-	res.Add(NewElement(x), NewElement(y))
+	res := Add(NewElement(x), NewElement(y))
 
 	require.Equal(t, "99e94bd4ef8a2c3b884cfa59ca342b2e", res.HexString())
 }
 
+func TestSquare(t *testing.T) {
+  g := Gen()
+  g2 := Mul(g, g)
+  g3 := Mul(g, g2)
+  g4 := Mul(g2, g2)
+  g4_b := Mul(g3, g)
+
+	require.Equal(t, g4, g4_b)
+}
+
+func TestRandom(t *testing.T) {
+  var zeros [16]byte
+  for i := 0; i < 100; i++ {
+    b := Random().Bytes()
+    require.Equal(t, 16, len(b))
+    require.Equal(t, false, bytes.Compare(b[:], zeros[:]) == 0)
+  }
+}
+
 func TestMul(t *testing.T) {
-	x, err := hex.DecodeString("66e94bd4ef8a2c3b884cfa59ca342b2e")
-	require.NoError(t, err)
-	y, err := hex.DecodeString("ff000000000000000000000000000000")
-	require.NoError(t, err)
+  a := Random()
+  b := Random()
+  c := Random()
 
-	res := &Element{}
-	res.Mul(NewElement(x), NewElement(y))
+  b_plus_c := Add(b, c)
+  a_times_b := Mul(a, b)
+  a_times_c := Mul(a, c)
 
-	expectedString := "37856175e9dc9df26ebc6d6171aa0ae9"
-	expected, err := hex.DecodeString(expectedString)
+  abc := Mul(a, b_plus_c)
+  abc_prime := Add(a_times_b, a_times_c)
+
+	require.Equal(t, abc.Bytes(), abc_prime.Bytes())
+}
+
+func TestMulCommute(t *testing.T) {
+  r1 := Random()
+  r2 := Random()
+
+	res := Mul(r1, r2)
+	res2 := Mul(r2, r1)
+
+	require.Equal(t, res.Bytes(), res2.Bytes())
+}
+
+func TestMulZero(t *testing.T) {
+	res := Mul(One(), Zero())
+	require.Equal(t, Zero().Bytes(), res.Bytes())
+}
+
+func TestMulOneOne(t *testing.T) {
+  log.Printf("left")
+  left := One()
+  log.Printf("right")
+  right := One()
+  log.Printf("res")
+  res := Mul(left, right)
+  res = Mul(left, res)
+	require.Equal(t, One().Bytes(), res.Bytes())
+
+}
+
+func TestMulOne(t *testing.T) {
+	x := One()
+	y, err := hex.DecodeString("02400000000000000000000000000000")
 	require.NoError(t, err)
-
-	require.Equal(t, expected, res.Bytes())
-	require.Equal(t, expectedString, res.HexString())
+	res := Mul(x, NewElement(y))
+	require.Equal(t, "02400000000000000000000000000000", res.HexString())
 }
 
 func TestSimpleMul(t *testing.T) {
-	x, err := hex.DecodeString("02000000000000000000000000000000")
+  log.Printf("Simple")
+	x, err := hex.DecodeString("02400000000000000000000000000000")
 	require.NoError(t, err)
-	y, err := hex.DecodeString("01000000000000000000000000000000")
-	require.NoError(t, err)
+	//y, err := hex.DecodeString("01000000000000000000000000000000")
+	//require.NoError(t, err)
 
-	res := &Element{}
-	res.Mul(NewElement(x), NewElement(y))
+	res := Mul(NewElement(x), One())
 
-	require.Equal(t, "02000000000000000000000000000000", res.HexString())
+	require.Equal(t, NewElement(x).Bytes(), res.Bytes())
+	require.Equal(t, "02400000000000000000000000000000", res.HexString())
 }
