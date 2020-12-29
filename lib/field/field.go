@@ -8,14 +8,17 @@ package field
 // license that can be found in the LICENSE file.
 
 import (
-  "crypto/rand"
+	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
+	"io"
 	"strconv"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 type Element struct {
-	value        *gcmFieldElement
+	value *gcmFieldElement
 }
 
 func NewElement(in []byte) *Element {
@@ -37,38 +40,48 @@ func NewElement(in []byte) *Element {
 }
 
 func Zero() *Element {
-  var zeros [16]byte
-  return NewElement(zeros[:])
+	var zeros [16]byte
+	return NewElement(zeros[:])
 }
 
 func One() *Element {
-  one := Zero()
-  //   the coefficient of x⁰ can be obtained by v.low >> 63.
-  one.value.low ^= (1 << 63)
-  return one
+	one := Zero()
+	//   the coefficient of x⁰ can be obtained by v.low >> 63.
+	one.value.low ^= (1 << 63)
+	return one
 }
 
 // Generator of the multiplicative group
 func Gen() *Element {
-  gen := Zero()
-  //   the coefficient of x^1 can be obtained by v.low >> 62.
-  gen .value.low ^= (1 << 62)
-  return gen
+	gen := Zero()
+	//   the coefficient of x^1 can be obtained by v.low >> 62.
+	gen.value.low ^= (1 << 62)
+	return gen
+}
+
+func RandomXOF(xof blake2b.XOF) *Element {
+	var bytes [16]byte
+	_, err := io.ReadFull(xof, bytes[:])
+	if err != nil {
+		panic("Should never get here")
+	}
+
+	return NewElement(bytes[:])
 }
 
 func Random() *Element {
-  var bytes [16]byte
-  _, err := rand.Read(bytes[:])
-  if err != nil {
-    panic("Should never get here")
-  }
+	var bytes [16]byte
+	_, err := rand.Read(bytes[:])
+	if err != nil {
+		panic("Should never get here")
+	}
 
-  return NewElement(bytes[:])
+	return NewElement(bytes[:])
 }
 
 func Add(x, y *Element) *Element {
-  v := gcmAdd(x.value, y.value)
-  return &Element{ value: &v }
+	v := gcmAdd(x.value, y.value)
+	return &Element{value: &v}
 }
 
 func (e *Element) Equal(x *Element) bool {
@@ -116,7 +129,7 @@ type gcmFieldElement struct {
 // gcmAdd adds two elements of GF(2¹²⁸) and returns the sum.
 func gcmAdd(x, y *gcmFieldElement) gcmFieldElement {
 	// Addition in a characteristic 2 field is just XOR.
-  return gcmFieldElement{low: x.low ^ y.low, high: x.high ^ y.high}
+	return gcmFieldElement{low: x.low ^ y.low, high: x.high ^ y.high}
 }
 
 // gcmMultiplyByH returns the result of multiplying an element of GF(2¹²⁸)
@@ -149,9 +162,9 @@ var gcmReductionTable = []uint16{
 }
 
 // Multiply the two field elements
-func Mul(e_in,y_in *Element) *Element {
-  e := e_in.value
-  y := y_in.value
+func Mul(e_in, y_in *Element) *Element {
+	e := e_in.value
+	y := y_in.value
 
 	productTable := createProductTable(e)
 	var z gcmFieldElement
@@ -182,7 +195,7 @@ func Mul(e_in,y_in *Element) *Element {
 		}
 	}
 
-  return &Element{value: &z}
+	return &Element{value: &z}
 }
 
 // reverseBits reverses the order of the bits of 4-bit number in i.
@@ -191,4 +204,3 @@ func reverseBits(i int) int {
 	i = ((i << 1) & 0xa) | ((i >> 1) & 0x5)
 	return i
 }
-

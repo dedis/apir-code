@@ -34,7 +34,7 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 		panic("need at least 1 server")
 	}
 
-	alpha := field.Random()
+	alpha := field.RandomXOF(c.xof)
 
 	// set ITVector state
 	c.state = &itVectorGFState{i: index, alpha: alpha}
@@ -57,7 +57,7 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 		// create k - 1 random vectors
 		sum := field.Zero()
 		for k := 0; k < numServers-1; k++ {
-			rand := field.Random()
+			rand := field.RandomXOF(c.xof)
 			vectors[k][i] = rand
 			sum = field.Add(sum, rand)
 		}
