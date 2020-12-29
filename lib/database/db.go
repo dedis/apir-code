@@ -17,7 +17,7 @@ type VectorGF struct {
 func CreateVectorGF() *VectorGF {
 	entries := make([]*field.Element, cst.DBLength)
 	for i := 0; i < cst.DBLength; i++ {
-		entries[i] = field.NewUint64(0)
+		entries[i] = field.Zero()
 	}
 
 	return &VectorGF{Entries: entries}
@@ -32,7 +32,11 @@ func CreateAsciiVectorGF() *VectorGF {
 		if err != nil {
 			panic(err)
 		}
-		db.Entries[i] = field.NewUint64(uint64(currentBit))
+		if currentBit == 0 {
+			db.Entries[i] = field.Zero()
+		} else {
+			db.Entries[i] = field.One()
+		}
 	}
 
 	return db

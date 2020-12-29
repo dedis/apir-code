@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -47,8 +48,11 @@ func TestVectorGF(t *testing.T) {
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
+		fmt.Println("")
+		fmt.Println("x: ", x)
 		require.NoError(t, err)
 		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
+		fmt.Println("result: ", result)
 		result += x.String()
 	}
 	b, err := utils.BitStringToBytes(result)

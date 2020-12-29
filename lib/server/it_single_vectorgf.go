@@ -16,11 +16,10 @@ type ITVectorGF struct {
 
 func (s *ITVectorGF) Answer(q []*field.Element) *field.Element {
 	// Can't use BigZero because it's not deep-copied
-	a := field.NewUint64(0)
+	a := field.Zero()
 	for i := range s.db.Entries {
-		mul := field.NewUint64(1)
-		mul.Mul(s.db.Entries[i], q[i])
-		a.Add(a, mul)
+		mul := field.Mul(s.db.Entries[i], q[i])
+		a = field.Add(a, mul)
 	}
 
 	return a
