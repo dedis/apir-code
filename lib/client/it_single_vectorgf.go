@@ -59,19 +59,19 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 		for k := 0; k < numServers-1; k++ {
 			rand := field.RandomXOF(c.xof)
 			vectors[k][i] = rand
-			sum = field.Add(sum, rand)
+			sum.Add(sum, rand)
 		}
-		vectors[numServers-1][i] = field.Add(eialpha[i], sum)
+		vectors[numServers-1][i] = &field.Element{}
+		vectors[numServers-1][i].Add(eialpha[i], sum)
 	}
 
 	return vectors
-
 }
 
 func (c *ITVectorGF) Reconstruct(answers []*field.Element) (*field.Element, error) {
 	sum := field.Zero()
 	for _, a := range answers {
-		sum = field.Add(sum, a)
+		sum.Add(sum, a)
 	}
 
 	switch {

@@ -18,7 +18,8 @@ import (
 )
 
 type Element struct {
-	value *gcmFieldElement
+	value        *gcmFieldElement
+	productTable [16]gcmFieldElement
 }
 
 func NewElement(in []byte) *Element {
@@ -40,13 +41,13 @@ func NewElement(in []byte) *Element {
 }
 
 func Zero() *Element {
-	var zeros [16]byte
-	return NewElement(zeros[:])
+	v := &gcmFieldElement{low: 0, high: 0}
+	return &Element{value: v}
 }
 
 func One() *Element {
 	one := Zero()
-	//   the coefficient of x⁰ can be obtained by v.low >> 63.
+	// the coefficient of x⁰ can be obtained by v.low >> 63.
 	one.value.low ^= (1 << 63)
 	return one
 }
@@ -54,7 +55,7 @@ func One() *Element {
 // Generator of the multiplicative group
 func Gen() *Element {
 	gen := Zero()
-	//   the coefficient of x^1 can be obtained by v.low >> 62.
+	// the coefficient of x^1 can be obtained by v.low >> 62.
 	gen.value.low ^= (1 << 62)
 	return gen
 }
@@ -82,6 +83,125 @@ func Random() *Element {
 func Add(x, y *Element) *Element {
 	v := gcmAdd(x.value, y.value)
 	return &Element{value: &v}
+}
+
+func (e *Element) Add(x, y *Element) {
+	v := gcmAdd(x.value, y.value)
+	e.value = &v
+}
+
+// Multiply the two field elements
+func Mul(e_in, y_in *Element) *Element {
+	e := e_in.value
+	y := y_in.value
+
+	productTable := createProductTable(e)
+	var z gcmFieldElement
+
+	for i := 0; i < 2; i++ {
+		word := y.high
+		if i == 1 {
+			word = y.low
+		}
+
+		// Multiplication works by multiplying z by 16 and adding in
+		// one of the precomputed multiples of H.
+		for j := 0; j < 64; j += 4 {
+			msw := z.high & 0xf
+			z.high >>= 4
+			z.high |= z.low << 60
+			z.low >>= 4
+			z.low ^= uint64(gcmReductionTable[msw]) << 48
+
+			// the values in |table| are ordered for
+			// little-endian bit positions. See the comment
+			// in NewGCMWithNonceSize.
+			t := &productTable[word&0xf]
+
+			z.low ^= t.low
+			z.high ^= t.high
+			word >>= 4
+		}
+	}
+
+	return &Element{value: &z}
+}
+
+func (e *Element) PrecomputeMul() {
+	pt := createProductTable(e.value)
+	e.productTable = pt
+}
+
+func (e *Element) MulBy(in *Element) {
+	var z gcmFieldElement
+
+	for i := 0; i < 2; i++ {
+		word := in.value.high
+		if i == 1 {
+			word = in.value.low
+		}
+
+		// Multiplication works by multiplying z by 16 and adding in
+		// one of the precomputed multiples of H.
+		for j := 0; j < 64; j += 4 {
+			msw := z.high & 0xf
+			z.high >>= 4
+			z.high |= z.low << 60
+			z.low >>= 4
+			z.low ^= uint64(gcmReductionTable[msw]) << 48
+
+			// the values in |table| are ordered for
+			// little-endian bit positions. See the comment
+			// in NewGCMWithNonceSize.
+			t := &e.productTable[word&0xf]
+
+			z.low ^= t.low
+			z.high ^= t.high
+			word >>= 4
+		}
+	}
+
+	// create product table for e
+	pt := createProductTable(&z)
+
+	e.value = &z
+	e.productTable = pt
+}
+
+func (e *Element) Mul(x_in, y_in *Element) {
+	x := x_in.value
+	y := y_in.value
+
+	productTable := createProductTable(x)
+	var z gcmFieldElement
+
+	for i := 0; i < 2; i++ {
+		word := y.high
+		if i == 1 {
+			word = y.low
+		}
+
+		// Multiplication works by multiplying z by 16 and adding in
+		// one of the precomputed multiples of H.
+		for j := 0; j < 64; j += 4 {
+			msw := z.high & 0xf
+			z.high >>= 4
+			z.high |= z.low << 60
+			z.low >>= 4
+			z.low ^= uint64(gcmReductionTable[msw]) << 48
+
+			// the values in |table| are ordered for
+			// little-endian bit positions. See the comment
+			// in NewGCMWithNonceSize.
+			t := &productTable[word&0xf]
+
+			z.low ^= t.low
+			z.high ^= t.high
+			word >>= 4
+		}
+	}
+
+	e.value = &z
 }
 
 func (e *Element) Equal(x *Element) bool {
@@ -159,43 +279,6 @@ func gcmMultiplyByH(x *gcmFieldElement) (double gcmFieldElement) {
 var gcmReductionTable = []uint16{
 	0x0000, 0x1c20, 0x3840, 0x2460, 0x7080, 0x6ca0, 0x48c0, 0x54e0,
 	0xe100, 0xfd20, 0xd940, 0xc560, 0x9180, 0x8da0, 0xa9c0, 0xb5e0,
-}
-
-// Multiply the two field elements
-func Mul(e_in, y_in *Element) *Element {
-	e := e_in.value
-	y := y_in.value
-
-	productTable := createProductTable(e)
-	var z gcmFieldElement
-
-	for i := 0; i < 2; i++ {
-		word := y.high
-		if i == 1 {
-			word = y.low
-		}
-
-		// Multiplication works by multiplying z by 16 and adding in
-		// one of the precomputed multiples of H.
-		for j := 0; j < 64; j += 4 {
-			msw := z.high & 0xf
-			z.high >>= 4
-			z.high |= z.low << 60
-			z.low >>= 4
-			z.low ^= uint64(gcmReductionTable[msw]) << 48
-
-			// the values in |table| are ordered for
-			// little-endian bit positions. See the comment
-			// in NewGCMWithNonceSize.
-			t := &productTable[word&0xf]
-
-			z.low ^= t.low
-			z.high ^= t.high
-			word >>= 4
-		}
-	}
-
-	return &Element{value: &z}
 }
 
 // reverseBits reverses the order of the bits of 4-bit number in i.

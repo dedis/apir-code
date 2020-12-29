@@ -16,4 +16,5 @@ var (
 
 	// scheme parameters
 	Modulo = big.NewInt(int64(math.Pow(2, FieldSize)) - 1)
+	//Modulo = big.NewInt(math.MaxInt64)
 )

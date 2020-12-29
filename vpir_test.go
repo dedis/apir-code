@@ -48,12 +48,14 @@ func TestVectorGF(t *testing.T) {
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
-		fmt.Println("")
-		fmt.Println("x: ", x)
+		if x.String() == "00" {
+			result += "0"
+		} else {
+			result += "1"
+		}
 		require.NoError(t, err)
 		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
-		fmt.Println("result: ", result)
-		result += x.String()
+		//result += x.String()
 	}
 	b, err := utils.BitStringToBytes(result)
 	if err != nil {
