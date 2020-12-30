@@ -55,7 +55,6 @@ func TestVectorGF(t *testing.T) {
 		}
 		require.NoError(t, err)
 		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
-		//result += x.String()
 	}
 	b, err := utils.BitStringToBytes(result)
 	if err != nil {

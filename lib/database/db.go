@@ -18,6 +18,8 @@ func CreateVectorGF() *VectorGF {
 	entries := make([]*field.Element, cst.DBLength)
 	for i := 0; i < cst.DBLength; i++ {
 		entries[i] = field.Zero()
+		// precompute multiplication table
+		entries[i].PrecomputeMul()
 	}
 
 	return &VectorGF{Entries: entries}
@@ -34,9 +36,12 @@ func CreateAsciiVectorGF() *VectorGF {
 		}
 		if currentBit == 0 {
 			db.Entries[i] = field.Zero()
+			db.Entries[i].PrecomputeMul()
 		} else {
 			db.Entries[i] = field.One()
+			db.Entries[i].PrecomputeMul()
 		}
+
 	}
 
 	return db

@@ -87,7 +87,7 @@ func Add(x, y *Element) *Element {
 
 func (e *Element) Add(x, y *Element) {
 	v := gcmAdd(x.value, y.value)
-	e.value = &v
+	*e.value = v
 }
 
 // Multiply the two field elements
@@ -132,6 +132,7 @@ func (e *Element) PrecomputeMul() {
 	e.productTable = pt
 }
 
+// mul e by in and set result in in; e remains unchanged
 func (e *Element) MulBy(in *Element) {
 	var z gcmFieldElement
 
@@ -161,47 +162,14 @@ func (e *Element) MulBy(in *Element) {
 		}
 	}
 
-	// create product table for e
-	pt := createProductTable(&z)
-
-	e.value = &z
-	e.productTable = pt
+	// we need only the value of in, not the product table
+	*in.value = z
 }
 
 func (e *Element) Mul(x_in, y_in *Element) {
-	x := x_in.value
-	y := y_in.value
-
-	productTable := createProductTable(x)
-	var z gcmFieldElement
-
-	for i := 0; i < 2; i++ {
-		word := y.high
-		if i == 1 {
-			word = y.low
-		}
-
-		// Multiplication works by multiplying z by 16 and adding in
-		// one of the precomputed multiples of H.
-		for j := 0; j < 64; j += 4 {
-			msw := z.high & 0xf
-			z.high >>= 4
-			z.high |= z.low << 60
-			z.low >>= 4
-			z.low ^= uint64(gcmReductionTable[msw]) << 48
-
-			// the values in |table| are ordered for
-			// little-endian bit positions. See the comment
-			// in NewGCMWithNonceSize.
-			t := &productTable[word&0xf]
-
-			z.low ^= t.low
-			z.high ^= t.high
-			word >>= 4
-		}
-	}
-
-	e.value = &z
+	z := Mul(x_in, y_in)
+	e.value = z.value
+	e.productTable = z.productTable
 }
 
 func (e *Element) Equal(x *Element) bool {

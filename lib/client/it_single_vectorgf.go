@@ -61,7 +61,7 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 			vectors[k][i] = rand
 			sum.Add(sum, rand)
 		}
-		vectors[numServers-1][i] = &field.Element{}
+		vectors[numServers-1][i] = field.Zero()
 		vectors[numServers-1][i].Add(eialpha[i], sum)
 	}
 

@@ -17,8 +17,8 @@ type ITVectorGF struct {
 func (s *ITVectorGF) Answer(q []*field.Element) *field.Element {
 	a := field.Zero()
 	for i := range s.db.Entries {
-		mul := field.Zero()
-		mul.Mul(s.db.Entries[i], q[i])
+		mul := q[i]
+		s.db.Entries[i].MulBy(mul)
 		a.Add(a, mul)
 	}
 
