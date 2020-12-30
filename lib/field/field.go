@@ -80,6 +80,21 @@ func Random() *Element {
 	return NewElement(bytes[:])
 }
 
+func RandomVectorXOF(length int, xof blake2b.XOF) []*Element {
+	bytesLength := length*16 + 1
+	bytes := make([]byte, bytesLength)
+	_, err := io.ReadFull(xof, bytes[:])
+	if err != nil {
+		panic("Should never get here")
+	}
+	elements := make([]*Element, length)
+	for i := 0; i < bytesLength-16; i += 16 {
+		elements[i/16] = NewElement(bytes[i : i+16])
+	}
+
+	return elements
+}
+
 func Add(x, y *Element) *Element {
 	v := gcmAdd(x.value, y.value)
 	return &Element{value: &v}

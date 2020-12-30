@@ -45,9 +45,11 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 		vectors[k] = make([]*field.Element, cst.DBLength)
 	}
 
+	zero := field.Zero()
+	randomElements := field.RandomVectorXOF(cst.DBLength, c.xof)
 	for i := 0; i < cst.DBLength; i++ {
 		// create basic vector
-		eialpha[i] = field.Zero()
+		eialpha[i] = zero
 
 		// set alpha at the index we want to retrieve
 		if i == index {
@@ -57,7 +59,7 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 		// create k - 1 random vectors
 		sum := field.Zero()
 		for k := 0; k < numServers-1; k++ {
-			rand := field.RandomXOF(c.xof)
+			rand := randomElements[i]
 			vectors[k][i] = rand
 			sum.Add(sum, rand)
 		}
