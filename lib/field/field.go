@@ -12,6 +12,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"io"
+	"math/bits"
 	"strconv"
 
 	"golang.org/x/crypto/blake2b"
@@ -167,6 +168,13 @@ func (e *Element) PrecomputeMul() {
 // mul e by in and set result in in; e remains unchanged
 func (e *Element) MulBy(in *Element) {
 	var z gcmFieldElement
+
+	if bits.LeadingZeros64(e.value.low) == 64 &&
+		bits.LeadingZeros64(e.value.high) == 64 {
+
+		*in.value = gcmFieldElement{low: 0, high: 0}
+		return
+	}
 
 	for i := 0; i < 2; i++ {
 		word := in.value.high
