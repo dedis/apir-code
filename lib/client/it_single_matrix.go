@@ -61,7 +61,6 @@ func (c *ITMatrix) Query(index int, numServers int) [][]*big.Int {
 	}
 
 	return vectors
-
 }
 
 func (c *ITMatrix) Reconstruct(answers [][]*big.Int) (*big.Int, error) {

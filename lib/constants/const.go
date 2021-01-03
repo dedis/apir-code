@@ -3,6 +3,8 @@ package constants
 import (
 	"math"
 	"math/big"
+
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 const (
@@ -17,4 +19,12 @@ var (
 	// scheme parameters
 	Modulo = big.NewInt(int64(math.Pow(2, FieldSize)) - 1)
 	//Modulo = big.NewInt(math.MaxInt64)
+
+	Zero *field.Element
+	One  *field.Element
 )
+
+func init() {
+	Zero = field.Zero()
+	One = field.One()
+}

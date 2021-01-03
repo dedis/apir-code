@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 
+	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 	"golang.org/x/crypto/blake2b"
@@ -45,8 +46,9 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 		vectors[k] = make([]*field.Element, cst.DBLength)
 	}
 
-	zero := field.Zero()
+	zero := constants.Zero
 	randomElements := field.RandomVectorXOF(cst.DBLength, c.xof)
+	//randomElements := field.RandomVectorPRG(cst.DBLength, our_rand.RandomPRG())
 	for i := 0; i < cst.DBLength; i++ {
 		// create basic vector
 		eialpha[i] = zero
@@ -57,20 +59,20 @@ func (c *ITVectorGF) Query(index int, numServers int) [][]*field.Element {
 		}
 
 		// create k - 1 random vectors
-		sum := field.Zero()
+		sum := zero
 		for k := 0; k < numServers-1; k++ {
 			rand := randomElements[i]
 			vectors[k][i] = rand
 			sum.Add(sum, rand)
 		}
-		vectors[numServers-1][i] = field.Zero()
-		vectors[numServers-1][i].Add(eialpha[i], sum)
+		vectors[numServers-1][i] = field.Add(eialpha[i], sum)
 	}
 
 	return vectors
 }
 
 func (c *ITVectorGF) Reconstruct(answers []*field.Element) (*field.Element, error) {
+	// TODO: here constants.Zero is not working, don't know why
 	sum := field.Zero()
 	for _, a := range answers {
 		sum.Add(sum, a)
@@ -78,9 +80,9 @@ func (c *ITVectorGF) Reconstruct(answers []*field.Element) (*field.Element, erro
 
 	switch {
 	case sum.Equal(c.state.alpha):
-		return field.One(), nil
-	case sum.Equal(field.Zero()):
-		return field.Zero(), nil
+		return constants.One, nil
+	case sum.Equal(constants.Zero):
+		return constants.Zero, nil
 	default:
 		return nil, errors.New("REJECT!")
 	}

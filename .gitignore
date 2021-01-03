@@ -13,5 +13,9 @@
 
 # Goland project files
 .idea/
+
 # MacOS folder file
 .DS_Store
+
+# Profiling files
+*.prof

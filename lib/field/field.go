@@ -15,6 +15,8 @@ import (
 	"strconv"
 
 	"golang.org/x/crypto/blake2b"
+
+	our_rand "github.com/si-co/vpir-code/lib/utils"
 )
 
 type Element struct {
@@ -84,6 +86,21 @@ func RandomVectorXOF(length int, xof blake2b.XOF) []*Element {
 	bytesLength := length*16 + 1
 	bytes := make([]byte, bytesLength)
 	_, err := io.ReadFull(xof, bytes[:])
+	if err != nil {
+		panic("Should never get here")
+	}
+	elements := make([]*Element, length)
+	for i := 0; i < bytesLength-16; i += 16 {
+		elements[i/16] = NewElement(bytes[i : i+16])
+	}
+
+	return elements
+}
+
+func RandomVectorPRG(length int, prg *our_rand.PRGReader) []*Element {
+	bytesLength := length*16 + 1
+	bytes := make([]byte, bytesLength)
+	_, err := prg.Read(bytes)
 	if err != nil {
 		panic("Should never get here")
 	}
