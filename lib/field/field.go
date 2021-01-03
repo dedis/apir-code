@@ -169,6 +169,7 @@ func (e *Element) PrecomputeMul() {
 func (e *Element) MulBy(in *Element) {
 	var z gcmFieldElement
 
+	// multiply by zero
 	if bits.LeadingZeros64(e.value.low) == 64 &&
 		bits.LeadingZeros64(e.value.high) == 64 {
 
