@@ -17,6 +17,38 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 )
 
+func TestMatrixGFOneKb(t *testing.T) {
+	totalTimer := monitor.NewMonitor()
+	db := database.CreateAsciiMatrixOneKb()
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	if err != nil {
+		panic(err)
+	}
+	rebalanced := true
+	c := client.NewITSingleGF(xof, rebalanced)
+	s0 := server.NewITSingleGF(rebalanced, db)
+	s1 := server.NewITSingleGF(rebalanced, db)
+	s2 := server.NewITSingleGF(rebalanced, db)
+	m := monitor.NewMonitor()
+	for i := 0; i < 8191; i++ {
+		m.Reset()
+		queries := c.Query(i, 3)
+
+		a0 := s0.Answer(queries[0])
+
+		a1 := s1.Answer(queries[1])
+
+		a2 := s2.Answer(queries[2])
+
+		answers := [][]*field.Element{a0, a1, a2}
+
+		m.Reset()
+		_, err := c.Reconstruct(answers)
+		require.NoError(t, err)
+	}
+	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
+}
+
 func TestMatrixGF(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiMatrixGF()
@@ -46,19 +78,16 @@ func TestMatrixGF(t *testing.T) {
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
 		answers := [][]*field.Element{a0, a1, a2}
-		fmt.Println(answers)
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
-		fmt.Println(x.String())
 		if x.String() == "00" {
 			result += "0"
 		} else {
 			result += "1"
 		}
-		fmt.Println(result)
 	}
 	b, err := utils.BitStringToBytes(result)
 	if err != nil {

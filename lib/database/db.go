@@ -1,6 +1,7 @@
 package database
 
 import (
+	"crypto/rand"
 	"errors"
 	"math"
 	"math/big"
@@ -119,6 +120,37 @@ func CreateAsciiMatrixGF() *MatrixGF {
 	}
 
 	return db
+}
+
+func CreateAsciiMatrixOneKb() *MatrixGF {
+	data := make([]byte, 1024)
+	rand.Read(data)
+	db := CreateMatrixGF()
+
+	bits := Bytes2Bits(data)
+
+	for i, b := range bits {
+		entry := field.Zero()
+		entry.PrecomputeMul()
+		if b == 1 {
+			entry = field.One()
+			entry.PrecomputeMul()
+		}
+		db.Entries[i/db.DBLengthSqrt][i%db.DBLengthSqrt] = entry
+	}
+
+	return db
+}
+
+func Bytes2Bits(data []byte) []int {
+	dst := make([]int, 0)
+	for _, v := range data {
+		for i := 0; i < 8; i++ {
+			move := uint(7 - i)
+			dst = append(dst, int((v>>move)&1))
+		}
+	}
+	return dst
 }
 
 type Matrix struct {

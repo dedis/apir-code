@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -78,14 +77,6 @@ func (c *ITSingleGF) Query(index int, numServers int) [][]*field.Element {
 		panic(err)
 	}
 
-	fmt.Println("")
-	fmt.Println("VECTORS:")
-	fmt.Println(vectors)
-	fmt.Println("")
-	fmt.Println("")
-	fmt.Println("")
-	fmt.Println("")
-
 	return vectors
 }
 
@@ -131,7 +122,7 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]*field.Element, error) {
 	}
 
 	zero := field.Zero()
-	randomElements := field.RandomVectorXOF(c.state.dbLength, c.xof)
+	//randomElements := field.RandomVectorXOF(c.state.dbLength, c.xof)
 	for i := 0; i < c.state.dbLength; i++ {
 		// create basic vector
 		eialpha[i] = zero
@@ -144,11 +135,13 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]*field.Element, error) {
 		// create k - 1 random vectors
 		sum := field.Zero()
 		for k := 0; k < numServers-1; k++ {
-			rand := randomElements[i]
+			//rand := randomElements[i]
+			rand := field.RandomXOF(c.xof)
 			vectors[k][i] = rand
 			sum.Add(sum, rand)
 		}
-		vectors[numServers-1][i] = field.Add(eialpha[i], sum)
+		vectors[numServers-1][i] = field.Zero()
+		vectors[numServers-1][i].Add(eialpha[i], sum)
 	}
 
 	return vectors, nil
