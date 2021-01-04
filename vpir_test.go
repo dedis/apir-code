@@ -16,7 +16,34 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 )
 
-func TestMatrixGFOneKbVPIR(t *testing.T) {
+func TestMatrixOneKbByte(t *testing.T) {
+	totalTimer := monitor.NewMonitor()
+	db := database.CreateAsciiMatrixOneKbByte()
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	if err != nil {
+		panic(err)
+	}
+	rebalanced := true
+	c := client.NewITSingleByte(xof, rebalanced)
+	s0 := server.NewITSingleByte(rebalanced, db)
+	s1 := server.NewITSingleByte(rebalanced, db)
+	s2 := server.NewITSingleByte(rebalanced, db)
+	for i := 0; i < 8191; i++ {
+		queries := c.Query(i, 3)
+
+		a0 := s0.Answer(queries[0])
+		a1 := s1.Answer(queries[1])
+		a2 := s2.Answer(queries[2])
+
+		answers := [][]byte{a0, a1, a2}
+
+		_, err := c.Reconstruct(answers)
+		require.NoError(t, err)
+	}
+	fmt.Printf("Total time MatrixOneKbByte: %.1fms\n", totalTimer.Record())
+}
+
+func TestMatrixOneKbGF(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiMatrixOneKb()
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
@@ -41,35 +68,7 @@ func TestMatrixGFOneKbVPIR(t *testing.T) {
 		_, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 	}
-	fmt.Printf("Total time MatrixOneKbVPIR: %.1fms\n", totalTimer.Record())
-}
-
-func TestMatrixGFOneKbPIR(t *testing.T) {
-	totalTimer := monitor.NewMonitor()
-	db := database.CreateAsciiMatrixOneKb()
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
-	rebalanced := true
-	vpir := false
-	c := client.NewITSingleGF(xof, rebalanced, vpir)
-	s0 := server.NewITSingleGF(rebalanced, db)
-	s1 := server.NewITSingleGF(rebalanced, db)
-	s2 := server.NewITSingleGF(rebalanced, db)
-	for i := 0; i < 8191; i++ {
-		queries := c.Query(i, 3)
-
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
-		a2 := s2.Answer(queries[2])
-
-		answers := [][]*field.Element{a0, a1, a2}
-
-		_, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-	}
-	fmt.Printf("Total time MatrixOneKbPIR: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time MatrixOneKbGF: %.1fms\n", totalTimer.Record())
 }
 
 func TestMatrixGF(t *testing.T) {
