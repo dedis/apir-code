@@ -19,3 +19,4 @@
 
 # Profiling files
 *.prof
+.*.swp

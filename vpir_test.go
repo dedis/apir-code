@@ -63,7 +63,7 @@ func TestMatrixOneKbGF(t *testing.T) {
 		a1 := s1.Answer(queries[1])
 		a2 := s2.Answer(queries[2])
 
-		answers := [][]*field.Element{a0, a1, a2}
+		answers := [][]field.Element{a0, a1, a2}
 
 		_, err := c.Reconstruct(answers)
 		require.NoError(t, err)
@@ -100,7 +100,7 @@ func TestMatrixGF(t *testing.T) {
 		a2 := s2.Answer(queries[2])
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
-		answers := [][]*field.Element{a0, a1, a2}
+		answers := [][]field.Element{a0, a1, a2}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
@@ -158,7 +158,7 @@ func TestVectorGF(t *testing.T) {
 		a2 := s2.Answer(queries[2])
 		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
-		answers := [][]*field.Element{a0, a1, a2}
+		answers := [][]field.Element{a0, a1, a2}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
