@@ -51,8 +51,8 @@ func (c *ITSingleGF) Query(index int, numServers int) [][]*field.Element {
 
 	// sample random alpha using blake2b
 	alpha := field.One()
-	if vpir {
-		alpha := field.RandomXOF(c.xof)
+	if c.vpir {
+		alpha = field.RandomXOF(c.xof)
 	}
 
 	// set the client state depending on the db representation

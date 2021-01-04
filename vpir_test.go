@@ -24,7 +24,8 @@ func TestMatrixGFOneKb(t *testing.T) {
 		panic(err)
 	}
 	rebalanced := true
-	c := client.NewITSingleGF(xof, rebalanced)
+	vpir := true
+	c := client.NewITSingleGF(xof, rebalanced, vpir)
 	s0 := server.NewITSingleGF(rebalanced, db)
 	s1 := server.NewITSingleGF(rebalanced, db)
 	s2 := server.NewITSingleGF(rebalanced, db)
@@ -57,7 +58,8 @@ func TestMatrixGF(t *testing.T) {
 		panic(err)
 	}
 	rebalanced := true
-	c := client.NewITSingleGF(xof, rebalanced)
+	vpir := true
+	c := client.NewITSingleGF(xof, rebalanced, vpir)
 	s0 := server.NewITSingleGF(rebalanced, db)
 	s1 := server.NewITSingleGF(rebalanced, db)
 	s2 := server.NewITSingleGF(rebalanced, db)
@@ -114,7 +116,8 @@ func TestVectorGF(t *testing.T) {
 		panic(err)
 	}
 	rebalanced := false
-	c := client.NewITSingleGF(xof, rebalanced)
+	vpir := true
+	c := client.NewITSingleGF(xof, rebalanced, vpir)
 	s0 := server.NewITSingleGF(rebalanced, db)
 	s1 := server.NewITSingleGF(rebalanced, db)
 	s2 := server.NewITSingleGF(rebalanced, db)
