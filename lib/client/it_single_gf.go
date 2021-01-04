@@ -25,7 +25,7 @@ type itSingleGFState struct {
 	ix       int
 	iy       int // unused if not rebalanced
 	alpha    *field.Element
-	dbLength int // unused if not rebalanced
+	dbLength int
 }
 
 // NewItSingleGF return a client for the information theoretic single-bit
@@ -53,6 +53,7 @@ func (c *ITSingleGF) Query(index int, numServers int) [][]*field.Element {
 	// set the client state depending on the db representation
 	switch c.rebalanced {
 	case false:
+		// iy is unused if the database is represented as a vector
 		c.state = &itSingleGFState{
 			ix:       index,
 			alpha:    alpha,
@@ -139,7 +140,6 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]*field.Element, error) {
 		sum := field.Zero()
 		for k := 0; k < numServers-1; k++ {
 			rand := randomElements[c.state.dbLength*k+i]
-			//rand := field.RandomXOF(c.xof)
 			vectors[k][i] = rand
 			sum.Add(sum, rand)
 		}
