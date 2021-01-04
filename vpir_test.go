@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -163,6 +162,7 @@ func TestVectorGF(t *testing.T) {
 	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
 }
 
+/**
 func TestDPF(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiVector()
@@ -213,3 +213,4 @@ func TestDPF(t *testing.T) {
 
 	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
 }
+**/

@@ -15,3 +15,14 @@ func BitStringToBytes(s string) ([]byte, error) {
 	}
 	return b, nil
 }
+
+func Bytes2Bits(data []byte) []int {
+	dst := make([]int, 0)
+	for _, v := range data {
+		for i := 0; i < 8; i++ {
+			move := uint(7 - i)
+			dst = append(dst, int((v>>move)&1))
+		}
+	}
+	return dst
+}
