@@ -122,7 +122,10 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]*field.Element, error) {
 	}
 
 	zero := field.Zero()
-	//randomElements := field.RandomVectorXOF(c.state.dbLength, c.xof)
+	// for all except one server, we need dbLength random elements
+	// to perform the secret sharing
+	numRandomElements := c.state.dbLength * (numServers - 1)
+	randomElements := field.RandomVectorXOF(numRandomElements, c.xof)
 	for i := 0; i < c.state.dbLength; i++ {
 		// create basic vector
 		eialpha[i] = zero
@@ -135,8 +138,8 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]*field.Element, error) {
 		// create k - 1 random vectors
 		sum := field.Zero()
 		for k := 0; k < numServers-1; k++ {
-			//rand := randomElements[i]
-			rand := field.RandomXOF(c.xof)
+			rand := randomElements[c.state.dbLength*k+i]
+			//rand := field.RandomXOF(c.xof)
 			vectors[k][i] = rand
 			sum.Add(sum, rand)
 		}
