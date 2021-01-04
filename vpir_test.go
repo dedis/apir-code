@@ -29,20 +29,15 @@ func TestMatrixGFOneKbVPIR(t *testing.T) {
 	s0 := server.NewITSingleGF(rebalanced, db)
 	s1 := server.NewITSingleGF(rebalanced, db)
 	s2 := server.NewITSingleGF(rebalanced, db)
-	m := monitor.NewMonitor()
 	for i := 0; i < 8191; i++ {
-		m.Reset()
 		queries := c.Query(i, 3)
 
 		a0 := s0.Answer(queries[0])
-
 		a1 := s1.Answer(queries[1])
-
 		a2 := s2.Answer(queries[2])
 
 		answers := [][]*field.Element{a0, a1, a2}
 
-		m.Reset()
 		_, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 	}
@@ -62,20 +57,15 @@ func TestMatrixGFOneKbPIR(t *testing.T) {
 	s0 := server.NewITSingleGF(rebalanced, db)
 	s1 := server.NewITSingleGF(rebalanced, db)
 	s2 := server.NewITSingleGF(rebalanced, db)
-	m := monitor.NewMonitor()
 	for i := 0; i < 8191; i++ {
-		m.Reset()
 		queries := c.Query(i, 3)
 
 		a0 := s0.Answer(queries[0])
-
 		a1 := s1.Answer(queries[1])
-
 		a2 := s2.Answer(queries[2])
 
 		answers := [][]*field.Element{a0, a1, a2}
 
-		m.Reset()
 		_, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 	}
