@@ -185,7 +185,65 @@ func TestVectorGF(t *testing.T) {
 		t.Errorf("Expected '%v' but got '%v'", expected, output)
 	}
 
-	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time VectorGF: %.1fms\n", totalTimer.Record())
+}
+
+func TestVectorByte(t *testing.T) {
+	totalTimer := monitor.NewMonitor()
+	db := database.CreateAsciiVectorByte()
+	result := ""
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	if err != nil {
+		panic(err)
+	}
+	rebalanced := false
+	c := client.NewITSingleByte(xof, rebalanced)
+	s0 := server.NewITSingleByte(rebalanced, db)
+	s1 := server.NewITSingleByte(rebalanced, db)
+	s2 := server.NewITSingleByte(rebalanced, db)
+	m := monitor.NewMonitor()
+	for i := 0; i < 136; i++ {
+		m.Reset()
+		queries := c.Query(i, 3)
+		fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
+
+		a0 := s0.Answer(queries[0])
+		fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
+
+		a1 := s1.Answer(queries[1])
+		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
+
+		a2 := s2.Answer(queries[2])
+		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
+
+		answers := [][]byte{a0, a1, a2}
+
+		m.Reset()
+		x, err := c.Reconstruct(answers)
+		fmt.Println(x)
+		require.NoError(t, err)
+		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
+		if x == byte(0) {
+			result += "0"
+		} else {
+			result += "1"
+		}
+	}
+	b, err := utils.BitStringToBytes(result)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	output := string(b)
+	fmt.Println(output)
+
+	const expected = "Playing with VPIR"
+	if expected != output {
+		t.Errorf("Expected '%v' but got '%v'", expected, output)
+	}
+
+	fmt.Printf("Total time VectorByte: %.1fms\n", totalTimer.Record())
 }
 
 /**
