@@ -46,7 +46,7 @@ func TestMatrixGFOneKbVPIR(t *testing.T) {
 		_, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 	}
-	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time MatrixOneKbVPIR: %.1fms\n", totalTimer.Record())
 }
 
 func TestMatrixGFOneKbPIR(t *testing.T) {
@@ -79,7 +79,7 @@ func TestMatrixGFOneKbPIR(t *testing.T) {
 		_, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 	}
-	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time MatrixOneKbPIR: %.1fms\n", totalTimer.Record())
 }
 
 func TestMatrixGF(t *testing.T) {
