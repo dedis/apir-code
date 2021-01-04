@@ -17,8 +17,9 @@ import (
 // Client for the information theoretic single-bit scheme
 type ITSingleGF struct {
 	xof        blake2b.XOF
-	rebalanced bool
 	state      *itSingleGFState
+	rebalanced bool
+	vpir       bool
 }
 
 type itSingleGFState struct {
@@ -31,10 +32,11 @@ type itSingleGFState struct {
 // NewItSingleGF return a client for the information theoretic single-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITSingleGF(xof blake2b.XOF, rebalanced bool) *ITSingleGF {
+func NewITSingleGF(xof blake2b.XOF, rebalanced, vpir bool) *ITSingleGF {
 	return &ITSingleGF{
 		xof:        xof,
 		rebalanced: rebalanced,
+		vpir:       vpir,
 		state:      nil,
 	}
 }
@@ -48,7 +50,10 @@ func (c *ITSingleGF) Query(index int, numServers int) [][]*field.Element {
 	}
 
 	// sample random alpha using blake2b
-	alpha := field.RandomXOF(c.xof)
+	alpha := field.One()
+	if vpir {
+		alpha := field.RandomXOF(c.xof)
+	}
 
 	// set the client state depending on the db representation
 	switch c.rebalanced {
