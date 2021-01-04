@@ -16,7 +16,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 )
 
-func TestMatrixGFOneKb(t *testing.T) {
+func TestMatrixGFOneKbVPIR(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiMatrixOneKb()
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
@@ -25,6 +25,39 @@ func TestMatrixGFOneKb(t *testing.T) {
 	}
 	rebalanced := true
 	vpir := true
+	c := client.NewITSingleGF(xof, rebalanced, vpir)
+	s0 := server.NewITSingleGF(rebalanced, db)
+	s1 := server.NewITSingleGF(rebalanced, db)
+	s2 := server.NewITSingleGF(rebalanced, db)
+	m := monitor.NewMonitor()
+	for i := 0; i < 8191; i++ {
+		m.Reset()
+		queries := c.Query(i, 3)
+
+		a0 := s0.Answer(queries[0])
+
+		a1 := s1.Answer(queries[1])
+
+		a2 := s2.Answer(queries[2])
+
+		answers := [][]*field.Element{a0, a1, a2}
+
+		m.Reset()
+		_, err := c.Reconstruct(answers)
+		require.NoError(t, err)
+	}
+	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
+}
+
+func TestMatrixGFOneKbPIR(t *testing.T) {
+	totalTimer := monitor.NewMonitor()
+	db := database.CreateAsciiMatrixOneKb()
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	if err != nil {
+		panic(err)
+	}
+	rebalanced := true
+	vpir := false
 	c := client.NewITSingleGF(xof, rebalanced, vpir)
 	s0 := server.NewITSingleGF(rebalanced, db)
 	s1 := server.NewITSingleGF(rebalanced, db)
