@@ -25,7 +25,7 @@ type ITSingleGF struct {
 type itSingleGFState struct {
 	ix       int
 	iy       int // unused if not rebalanced
-	alpha    *field.Element
+	alpha    field.Element
 	dbLength int
 }
 
@@ -44,7 +44,7 @@ func NewITSingleGF(xof blake2b.XOF, rebalanced, vpir bool) *ITSingleGF {
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITSingleGF) Query(index int, numServers int) [][]*field.Element {
+func (c *ITSingleGF) Query(index int, numServers int) [][]field.Element {
 	if invalidQueryInputs(index, numServers) {
 		panic("invalid query inputs")
 	}
@@ -86,9 +86,9 @@ func (c *ITSingleGF) Query(index int, numServers int) [][]*field.Element {
 	return vectors
 }
 
-func (c *ITSingleGF) Reconstruct(answers [][]*field.Element) (*field.Element, error) {
+func (c *ITSingleGF) Reconstruct(answers [][]field.Element) (field.Element, error) {
 	answersLen := len(answers[0])
-	sum := make([]*field.Element, answersLen)
+	sum := make([]field.Element, answersLen)
 
 	// sum answers
 	for i := 0; i < answersLen; i++ {
@@ -98,7 +98,7 @@ func (c *ITSingleGF) Reconstruct(answers [][]*field.Element) (*field.Element, er
 		}
 
 		if !sum[i].Equal(c.state.alpha) && !sum[i].Equal(field.Zero()) {
-			return nil, errors.New("REJECT!")
+			return constants.Zero, errors.New("REJECT!")
 		}
 	}
 
@@ -114,17 +114,17 @@ func (c *ITSingleGF) Reconstruct(answers [][]*field.Element) (*field.Element, er
 	case sum[i].Equal(constants.Zero):
 		return constants.Zero, nil
 	default:
-		return nil, errors.New("REJECT!")
+		return constants.Zero, errors.New("REJECT!")
 	}
 }
 
-func (c *ITSingleGF) secretSharing(numServers int) ([][]*field.Element, error) {
-	eialpha := make([]*field.Element, c.state.dbLength)
-	vectors := make([][]*field.Element, numServers)
+func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
+	eialpha := make([]field.Element, c.state.dbLength)
+	vectors := make([][]field.Element, numServers)
 
 	// create query vectors for all the servers
 	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]*field.Element, c.state.dbLength)
+		vectors[k] = make([]field.Element, c.state.dbLength)
 	}
 
 	zero := field.Zero()

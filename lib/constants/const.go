@@ -20,8 +20,8 @@ var (
 	Modulo = big.NewInt(int64(math.Pow(2, FieldSize)) - 1)
 	//Modulo = big.NewInt(math.MaxInt64)
 
-	Zero *field.Element
-	One  *field.Element
+	Zero field.Element
+	One  field.Element
 )
 
 func init() {

@@ -21,11 +21,11 @@ import (
 )
 
 type Element struct {
-	value        *gcmFieldElement
-	productTable [16]gcmFieldElement
+	low, high uint64
+	//productTable [16]Element
 }
 
-func NewElement(in []byte) *Element {
+func NewElement(in []byte) Element {
 	if len(in) != 16 {
 		panic("incorrect length")
 	}
@@ -33,37 +33,32 @@ func NewElement(in []byte) *Element {
 	low := binary.BigEndian.Uint64(in[:8])
 	high := binary.BigEndian.Uint64(in[8:])
 
-	e := &gcmFieldElement{
+	return Element{
 		low:  low,
 		high: high,
 	}
-
-	return &Element{
-		value: e,
-	}
 }
 
-func Zero() *Element {
-	v := &gcmFieldElement{low: 0, high: 0}
-	return &Element{value: v}
+func Zero() Element {
+  return Element{low:0, high:0}
 }
 
-func One() *Element {
+func One() Element {
 	one := Zero()
 	// the coefficient of x⁰ can be obtained by v.low >> 63.
-	one.value.low ^= (1 << 63)
+	one.low ^= (1 << 63)
 	return one
 }
 
 // Generator of the multiplicative group
-func Gen() *Element {
+func Gen() Element {
 	gen := Zero()
 	// the coefficient of x^1 can be obtained by v.low >> 62.
-	gen.value.low ^= (1 << 62)
+	gen.low ^= (1 << 62)
 	return gen
 }
 
-func RandomXOF(xof blake2b.XOF) *Element {
+func RandomXOF(xof blake2b.XOF) Element {
 	var bytes [16]byte
 	_, err := io.ReadFull(xof, bytes[:])
 	if err != nil {
@@ -73,7 +68,7 @@ func RandomXOF(xof blake2b.XOF) *Element {
 	return NewElement(bytes[:])
 }
 
-func Random() *Element {
+func Random() Element {
 	var bytes [16]byte
 	_, err := rand.Read(bytes[:])
 	if err != nil {
@@ -83,14 +78,14 @@ func Random() *Element {
 	return NewElement(bytes[:])
 }
 
-func RandomVectorXOF(length int, xof blake2b.XOF) []*Element {
+func RandomVectorXOF(length int, xof blake2b.XOF) []Element {
 	bytesLength := length*16 + 1
 	bytes := make([]byte, bytesLength)
 	_, err := io.ReadFull(xof, bytes[:])
 	if err != nil {
 		panic("Should never get here")
 	}
-	elements := make([]*Element, length)
+	elements := make([]Element, length)
 	for i := 0; i < bytesLength-16; i += 16 {
 		elements[i/16] = NewElement(bytes[i : i+16])
 	}
@@ -98,14 +93,14 @@ func RandomVectorXOF(length int, xof blake2b.XOF) []*Element {
 	return elements
 }
 
-func RandomVectorPRG(length int, prg *our_rand.PRGReader) []*Element {
+func RandomVectorPRG(length int, prg *our_rand.PRGReader) []Element {
 	bytesLength := length*16 + 1
 	bytes := make([]byte, bytesLength)
 	_, err := prg.Read(bytes)
 	if err != nil {
 		panic("Should never get here")
 	}
-	elements := make([]*Element, length)
+	elements := make([]Element, length)
 	for i := 0; i < bytesLength-16; i += 16 {
 		elements[i/16] = NewElement(bytes[i : i+16])
 	}
@@ -113,23 +108,11 @@ func RandomVectorPRG(length int, prg *our_rand.PRGReader) []*Element {
 	return elements
 }
 
-func Add(x, y *Element) *Element {
-	v := gcmAdd(x.value, y.value)
-	return &Element{value: &v}
-}
-
-func (e *Element) Add(x, y *Element) {
-	v := gcmAdd(x.value, y.value)
-	*e.value = v
-}
-
 // Multiply the two field elements
-func Mul(e_in, y_in *Element) *Element {
-	e := e_in.value
-	y := y_in.value
+func Mul(e, y Element) Element {
 
 	productTable := createProductTable(e)
-	var z gcmFieldElement
+	var z Element
 
 	for i := 0; i < 2; i++ {
 		word := y.high
@@ -157,30 +140,32 @@ func Mul(e_in, y_in *Element) *Element {
 		}
 	}
 
-	return &Element{value: &z}
+  return z
 }
 
-func (e *Element) PrecomputeMul() {
-	pt := createProductTable(e.value)
-	e.productTable = pt
+/*
+func (e Element) PrecomputeMul() {
+	e.productTable = createProductTable(e)
 }
+*/
 
 // mul e by in and set result in in; e remains unchanged
-func (e *Element) MulBy(in *Element) {
-	var z gcmFieldElement
+func (e Element) MulBy(in *Element) {
+	var z Element
 
 	// multiply by zero
-	if bits.LeadingZeros64(e.value.low) == 64 &&
-		bits.LeadingZeros64(e.value.high) == 64 {
+	if bits.LeadingZeros64(e.low) == 64 &&
+		bits.LeadingZeros64(e.high) == 64 {
 
-		*in.value = gcmFieldElement{low: 0, high: 0}
+		*in = Element{low: 0, high: 0}
 		return
 	}
 
+  productTable := createProductTable(e)
 	for i := 0; i < 2; i++ {
-		word := in.value.high
+		word := in.high
 		if i == 1 {
-			word = in.value.low
+			word = in.low
 		}
 
 		// Multiplication works by multiplying z by 16 and adding in
@@ -195,7 +180,7 @@ func (e *Element) MulBy(in *Element) {
 			// the values in |table| are ordered for
 			// little-endian bit positions. See the comment
 			// in NewGCMWithNonceSize.
-			t := &e.productTable[word&0xf]
+			t := &productTable[word&0xf]
 
 			z.low ^= t.low
 			z.high ^= t.high
@@ -204,45 +189,43 @@ func (e *Element) MulBy(in *Element) {
 	}
 
 	// we need only the value of in, not the product table
-	*in.value = z
+	*in = z
 }
 
-func (e *Element) Mul(x_in, y_in *Element) {
-	z := Mul(x_in, y_in)
-	e.value = z.value
-	e.productTable = z.productTable
+func (e Element) Equal(x Element) bool {
+	return e.high == x.high && e.low == x.low
 }
 
-func (e *Element) Equal(x *Element) bool {
-	return e.value.high == x.value.high && e.value.low == x.value.low
+func (e Element) String() string {
+	return strconv.FormatUint(e.low, 16) + strconv.FormatUint(e.high, 16)
 }
 
-func (e *Element) String() string {
-	return strconv.FormatUint(e.value.low, 16) + strconv.FormatUint(e.value.high, 16)
-}
-
-func (e *Element) HexString() string {
+func (e Element) HexString() string {
 	return hex.EncodeToString(e.Bytes())
 }
 
-func (e *Element) Bytes() []byte {
+func (e Element) Bytes() []byte {
 	out := make([]byte, 16)
-	binary.BigEndian.PutUint64(out[:8], e.value.low)
-	binary.BigEndian.PutUint64(out[8:], e.value.high)
+	binary.BigEndian.PutUint64(out[:8], e.low)
+	binary.BigEndian.PutUint64(out[8:], e.high)
 
 	return out
 }
 
-func createProductTable(e *gcmFieldElement) [16]gcmFieldElement {
-	var productTable [16]gcmFieldElement
-	productTable[reverseBits(1)] = *e
+func createProductTable(e Element) [16]Element {
+	var productTable [16]Element
+	productTable[reverseBits(1)] = e
 
 	for i := 2; i < 16; i += 2 {
-		productTable[reverseBits(i)] = gcmMultiplyByH(&productTable[reverseBits(i/2)])
-		productTable[reverseBits(i+1)] = gcmAdd(&productTable[reverseBits(i)], e)
+		productTable[reverseBits(i)] = gcmMultiplyByH(productTable[reverseBits(i/2)])
+		productTable[reverseBits(i+1)] = gcmAdd(productTable[reverseBits(i)], e)
 	}
 
 	return productTable
+}
+
+func (e Element) PrecomputeMul() {
+  // Do nothing
 }
 
 // gcmFieldElement represents a value in GF(2¹²⁸).  The bits are stored in big
@@ -252,18 +235,23 @@ func createProductTable(e *gcmFieldElement) [16]gcmFieldElement {
 //   the coefficient of x⁶⁴ can be obtained by v.high >> 63.
 //   the coefficient of x¹²⁷ can be obtained by v.high & 1.
 type gcmFieldElement struct {
-	low, high uint64
 }
 
 // gcmAdd adds two elements of GF(2¹²⁸) and returns the sum.
-func gcmAdd(x, y *gcmFieldElement) gcmFieldElement {
+func gcmAdd(x, y Element) Element {
 	// Addition in a characteristic 2 field is just XOR.
-	return gcmFieldElement{low: x.low ^ y.low, high: x.high ^ y.high}
+	return Element{low: x.low ^ y.low, high: x.high ^ y.high}
+}
+
+func (e Element) Add(x, y Element) {
+	// Addition in a characteristic 2 field is just XOR.
+	e.low = x.low ^ y.low
+  e.high = x.high ^ y.high
 }
 
 // gcmMultiplyByH returns the result of multiplying an element of GF(2¹²⁸)
 // by the element x.
-func gcmMultiplyByH(x *gcmFieldElement) (double gcmFieldElement) {
+func gcmMultiplyByH(x Element) (double Element) {
 	msbSet := x.high&1 == 1
 
 	// Because of the bit-ordering, doubling is actually a right shift.

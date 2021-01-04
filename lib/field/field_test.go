@@ -23,7 +23,7 @@ func TestAdd(t *testing.T) {
 	y, err := hex.DecodeString("ff000000000000000000000000000000")
 	require.NoError(t, err)
 
-	res := Add(NewElement(x), NewElement(y))
+	res := gcmAdd(NewElement(x), NewElement(y))
 
 	require.Equal(t, "99e94bd4ef8a2c3b884cfa59ca342b2e", res.HexString())
 }
@@ -52,12 +52,12 @@ func TestMul(t *testing.T) {
   b := Random()
   c := Random()
 
-  b_plus_c := Add(b, c)
+  b_plus_c := gcmAdd(b, c)
   a_times_b := Mul(a, b)
   a_times_c := Mul(a, c)
 
   abc := Mul(a, b_plus_c)
-  abc_prime := Add(a_times_b, a_times_c)
+  abc_prime := gcmAdd(a_times_b, a_times_c)
 
 	require.Equal(t, abc.Bytes(), abc_prime.Bytes())
 }

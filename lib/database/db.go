@@ -14,7 +14,7 @@ import (
 var text = "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
 
 type GF struct {
-	Entries      [][]*field.Element
+	Entries      [][]field.Element
 	DBLengthSqrt int // unused for vector
 }
 
@@ -24,7 +24,7 @@ type Bytes struct {
 }
 
 func CreateVectorGF() *GF {
-	entries := make([][]*field.Element, 1)
+	entries := make([][]field.Element, 1)
 	entries[0] = zeroVectorGF(cst.DBLength)
 
 	return &GF{Entries: entries}
@@ -59,7 +59,7 @@ func CreateMatrixGF() *GF {
 	}
 	dbLengthSqrtInt := int(dbLengthSqrt)
 
-	entries := make([][]*field.Element, dbLengthSqrtInt)
+	entries := make([][]field.Element, dbLengthSqrtInt)
 	for i := 0; i < dbLengthSqrtInt; i++ {
 		entries[i] = zeroVectorGF(dbLengthSqrtInt)
 	}
@@ -107,8 +107,8 @@ func CreateAsciiMatrixOneKb() *GF {
 	return db
 }
 
-func zeroVectorGF(length int) []*field.Element {
-	v := make([]*field.Element, length)
+func zeroVectorGF(length int) []field.Element {
+	v := make([]field.Element, length)
 	for i := 0; i < length; i++ {
 		v[i] = field.Zero()
 		v[i].PrecomputeMul()
