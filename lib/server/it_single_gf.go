@@ -30,7 +30,7 @@ func (s *ITSingleGF) Answer(q []field.Element) []field.Element {
 		for j := range s.db.Entries[i] {
       prod := q[j]
 			s.db.Entries[i][j].MulBy(&prod)
-			a[i].AddTo(prod)
+			a[i].AddTo(&prod)
 		}
 	}
 

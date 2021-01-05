@@ -61,6 +61,15 @@ func Gen() Element {
 	return gen
 }
 
+func FromBytes(in []byte) Element {
+  if len(in) == 16 {
+    return NewElement(in[:])
+  }
+
+  sum := blake2b.Sum256(in[:])
+  return NewElement(sum[:16])
+}
+
 func RandomXOF(xof blake2b.XOF) Element {
 	var bytes [16]byte
 	_, err := io.ReadFull(xof, bytes[:])
@@ -69,6 +78,10 @@ func RandomXOF(xof blake2b.XOF) Element {
 	}
 
 	return NewElement(bytes[:])
+}
+
+func (e *Element) Negate() {
+  // Does nothing in field of characteristic 2
 }
 
 func Random() Element {
@@ -195,7 +208,7 @@ func createProductTable(e Element) [16]*Element {
 	return productTable
 }
 
-func (e *Element) AddTo(x Element) {
+func (e *Element) AddTo(x *Element) {
 	e.low ^= x.low
   e.high ^= x.high
 }
