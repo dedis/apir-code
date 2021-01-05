@@ -14,7 +14,7 @@ import (
 var text = "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
 
 type GF struct {
-	Entries      [][]field.PrecompElement
+	Entries      [][]field.Element
 	DBLengthSqrt int // unused for vector
 }
 
@@ -24,7 +24,7 @@ type Bytes struct {
 }
 
 func CreateVectorGF() *GF {
-	entries := make([][]field.PrecompElement, 1)
+	entries := make([][]field.Element, 1)
 	entries[0] = zeroVectorGF(cst.DBLength)
 
 	return &GF{Entries: entries}
@@ -40,10 +40,10 @@ func CreateAsciiVectorGF() *GF {
 		}
 		if currentBit == 0 {
       val := field.Zero()
-			db.Entries[0][i] = val.PrecomputeMul()
+			db.Entries[0][i] = val
 		} else {
       val := field.One()
-			db.Entries[0][i] = val.PrecomputeMul()
+			db.Entries[0][i] = val
 		}
 
 	}
@@ -59,7 +59,7 @@ func CreateMatrixGF() *GF {
 	}
 	dbLengthSqrtInt := int(dbLengthSqrt)
 
-	entries := make([][]field.PrecompElement, dbLengthSqrtInt)
+	entries := make([][]field.Element, dbLengthSqrtInt)
 	for i := 0; i < dbLengthSqrtInt; i++ {
 		entries[i] = zeroVectorGF(dbLengthSqrtInt)
 	}
@@ -75,9 +75,9 @@ func CreateAsciiMatrixGF() *GF {
 		if err != nil {
 			panic(err)
 		}
-		entry := field.Zero().PrecomputeMul()
+		entry := field.Zero()
 		if currentBit == 1 {
-      entry = field.One().PrecomputeMul()
+      entry = field.One()
 		}
 		db.Entries[i/db.DBLengthSqrt][i%db.DBLengthSqrt] = entry
 	}
@@ -93,9 +93,9 @@ func CreateAsciiMatrixOneKb() *GF {
 	bits := utils.Bytes2Bits(data)
 
 	for i, b := range bits {
-		entry := field.Zero().PrecomputeMul()
+		entry := field.Zero()
 		if b == 1 {
-			entry = field.One().PrecomputeMul()
+			entry = field.One()
 		}
 		db.Entries[i/db.DBLengthSqrt][i%db.DBLengthSqrt] = entry
 	}
@@ -103,11 +103,10 @@ func CreateAsciiMatrixOneKb() *GF {
 	return db
 }
 
-func zeroVectorGF(length int) []field.PrecompElement {
-	v := make([]field.PrecompElement, length)
+func zeroVectorGF(length int) []field.Element {
+	v := make([]field.Element, length)
 	for i := 0; i < length; i++ {
-    t := field.Zero()
-		v[i] = t.PrecomputeMul()
+		v[i] = field.Zero()
 	}
 
 	return v
