@@ -43,7 +43,7 @@ func NewElement(in []byte) Element {
 }
 
 func Zero() Element {
-  return Element{low:0, high:0}
+	return Element{low: 0, high: 0}
 }
 
 func One() Element {
@@ -62,12 +62,12 @@ func Gen() Element {
 }
 
 func FromBytes(in []byte) Element {
-  if len(in) == 16 {
-    return NewElement(in[:])
-  }
+	if len(in) == 16 {
+		return NewElement(in[:])
+	}
 
-  sum := blake2b.Sum256(in[:])
-  return NewElement(sum[:16])
+	sum := blake2b.Sum256(in[:])
+	return NewElement(sum[:16])
 }
 
 func RandomXOF(xof blake2b.XOF) Element {
@@ -81,7 +81,7 @@ func RandomXOF(xof blake2b.XOF) Element {
 }
 
 func (e *Element) Negate() {
-  // Does nothing in field of characteristic 2
+	// Does nothing in field of characteristic 2
 }
 
 func Random() Element {
@@ -126,7 +126,7 @@ func RandomVectorPRG(length int, prg *our_rand.PRGReader) []Element {
 
 // Set y = e*y, where the precomputed table is powers of e
 func mulPrecomp(y *Element, productTable [16]*Element) *Element {
-  z := new(Element)
+	z := new(Element)
 
 	for i := 0; i < 2; i++ {
 		word := y.high
@@ -154,22 +154,21 @@ func mulPrecomp(y *Element, productTable [16]*Element) *Element {
 		}
 	}
 
-  return z
+	return z
 }
 
 func Mul(x, y Element) Element {
 	productTable := createProductTable(x)
-  return *mulPrecomp(&y, productTable)
+	return *mulPrecomp(&y, productTable)
 }
 
 // Multiply other by precomputed element and store result in other
 func (pe *PrecompElement) MulBy(other *Element) {
-  *other = *mulPrecomp(other, pe.productTable)
+	*other = *mulPrecomp(other, pe.productTable)
 }
 
-
 func (e Element) PrecomputeMul() PrecompElement {
-  return PrecompElement { productTable: createProductTable(e) }
+	return PrecompElement{productTable: createProductTable(e)}
 }
 
 func (e Element) Equal(x Element) bool {
@@ -193,15 +192,15 @@ func (e Element) Bytes() []byte {
 }
 
 func createProductTable(e Element) [16]*Element {
-  var productTable [16]*Element
-  zero := Zero()
-  productTable[0] = &zero
+	var productTable [16]*Element
+	zero := Zero()
+	productTable[0] = &zero
 	productTable[reverseBits(1)] = &e
 
 	for i := 2; i < 16; i += 2 {
-    v1 := gcmMultiplyByH(*productTable[reverseBits(i/2)])
+		v1 := gcmMultiplyByH(*productTable[reverseBits(i/2)])
 		productTable[reverseBits(i)] = &v1
-    v2 := Add(*productTable[reverseBits(i)], e)
+		v2 := Add(*productTable[reverseBits(i)], e)
 		productTable[reverseBits(i+1)] = &v2
 	}
 
@@ -210,7 +209,7 @@ func createProductTable(e Element) [16]*Element {
 
 func (e *Element) AddTo(x *Element) {
 	e.low ^= x.low
-  e.high ^= x.high
+	e.high ^= x.high
 }
 
 func Add(x, y Element) Element {

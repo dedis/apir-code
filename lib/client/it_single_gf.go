@@ -14,7 +14,8 @@ import (
 // Both vector and matrix (rebalanced) representations of the
 // database are handled by this client, via a boolean variable
 
-// Client for the information theoretic single-bit scheme
+// ITSingleGF represents the client for the information theoretic
+// single-bit scheme
 type ITSingleGF struct {
 	xof        blake2b.XOF
 	state      *itSingleGFState

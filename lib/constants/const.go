@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	DBLength  = 40000
-	FieldSize = 64
+	DBLength    = 40000
+	FieldSize   = 64
+	BlockLength = 16
 )
 
 var (
