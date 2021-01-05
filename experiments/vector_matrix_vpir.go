@@ -30,36 +30,37 @@ func main() {
 	s1 := server.NewITSingleGF(rebalanced, db)
 	s2 := server.NewITSingleGF(rebalanced, db)
 
-	fmt.Println("query,answer0,answer1,answer2,reconstruct")
+	//fmt.Println("query,answer0,answer1,answer2,reconstruct")
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 
 	// run the experiment nRepeat times
-	for i := 0; i < nRepeat-1; i++ {
+	for j := 0; j < nRepeat; j++ {
+		totalTimer := monitor.NewMonitor()
 		for i := 0; i < 8191; i++ {
 			m.Reset()
 			queries := c.Query(i, 3)
-			fmt.Printf("%.3fms,", m.RecordAndReset())
+			//fmt.Printf("%.3fms,", m.RecordAndReset())
 
 			a0 := s0.Answer(queries[0])
-			fmt.Printf("%.3fms,", m.RecordAndReset())
+			//fmt.Printf("%.3fms,", m.RecordAndReset())
 
 			a1 := s1.Answer(queries[1])
-			fmt.Printf("%.3fms,", m.RecordAndReset())
+			//fmt.Printf("%.3fms,", m.RecordAndReset())
 
 			a2 := s2.Answer(queries[2])
-			fmt.Printf("%.3fms,", m.RecordAndReset())
+			//fmt.Printf("%.3fms,", m.RecordAndReset())
 
-			answers := [][]*field.Element{a0, a1, a2}
+			answers := [][]field.Element{a0, a1, a2}
 
 			m.Reset()
 			_, err := c.Reconstruct(answers)
-			fmt.Printf("%.3fms\n", m.RecordAndReset())
+			//fmt.Printf("%.3fms\n", m.RecordAndReset())
 			if err != nil {
 				panic(err)
 			}
 		}
-
+		fmt.Printf("Total time %dth iteration: %.1fms\n", j, totalTimer.Record())
 	}
 }
