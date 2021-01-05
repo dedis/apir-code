@@ -28,11 +28,10 @@ func (s *ITSingleGF) Answer(q []field.Element) []field.Element {
 	for i := range s.db.Entries {
 		a[i] = field.Zero()
 		for j := range s.db.Entries[i] {
-			mul := q[j]
-			s.db.Entries[i][j].MulBy(&q[j])
-			a[i].Add(a[i], mul)
+      prod := q[j]
+			s.db.Entries[i][j].MulBy(&prod)
+			a[i].AddTo(prod)
 		}
-
 	}
 
 	return a

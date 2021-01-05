@@ -94,7 +94,7 @@ func (c *ITSingleGF) Reconstruct(answers [][]field.Element) (field.Element, erro
 	for i := 0; i < answersLen; i++ {
 		sum[i] = field.Zero()
 		for s := range answers {
-			sum[i].Add(sum[i], answers[s][i])
+			sum[i] = field.Add(sum[i], answers[s][i])
 		}
 
 		if !sum[i].Equal(c.state.alpha) && !sum[i].Equal(field.Zero()) {
@@ -146,10 +146,9 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 		for k := 0; k < numServers-1; k++ {
 			rand := randomElements[c.state.dbLength*k+i]
 			vectors[k][i] = rand
-			sum.Add(sum, rand)
+			sum = field.Add(sum, rand)
 		}
-		vectors[numServers-1][i] = field.Zero()
-		vectors[numServers-1][i].Add(eialpha[i], sum)
+		vectors[numServers-1][i] = field.Add(eialpha[i], sum)
 	}
 
 	return vectors, nil

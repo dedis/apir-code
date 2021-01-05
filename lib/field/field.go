@@ -12,7 +12,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"io"
-	"math/bits"
 	"strconv"
 
 	"golang.org/x/crypto/blake2b"
@@ -23,6 +22,10 @@ import (
 type Element struct {
 	low, high uint64
 	//productTable [16]Element
+}
+
+type PrecompElement struct {
+	productTable [16]*Element
 }
 
 func NewElement(in []byte) Element {
@@ -108,11 +111,9 @@ func RandomVectorPRG(length int, prg *our_rand.PRGReader) []Element {
 	return elements
 }
 
-// Multiply the two field elements
-func Mul(e, y Element) Element {
-
-	productTable := createProductTable(e)
-	var z Element
+// Set y = e*y, where the precomputed table is powers of e
+func mulPrecomp(y *Element, productTable [16]*Element) *Element {
+  z := new(Element)
 
 	for i := 0; i < 2; i++ {
 		word := y.high
@@ -132,7 +133,7 @@ func Mul(e, y Element) Element {
 			// the values in |table| are ordered for
 			// little-endian bit positions. See the comment
 			// in NewGCMWithNonceSize.
-			t := &productTable[word&0xf]
+			t := productTable[word&0xf]
 
 			z.low ^= t.low
 			z.high ^= t.high
@@ -143,53 +144,19 @@ func Mul(e, y Element) Element {
   return z
 }
 
-/*
-func (e Element) PrecomputeMul() {
-	e.productTable = createProductTable(e)
+func Mul(x, y Element) Element {
+	productTable := createProductTable(x)
+  return *mulPrecomp(&y, productTable)
 }
-*/
 
-// mul e by in and set result in in; e remains unchanged
-func (e Element) MulBy(in *Element) {
-	var z Element
+// Multiply other by precomputed element and store result in other
+func (pe *PrecompElement) MulBy(other *Element) {
+  *other = *mulPrecomp(other, pe.productTable)
+}
 
-	// multiply by zero
-	if bits.LeadingZeros64(e.low) == 64 &&
-		bits.LeadingZeros64(e.high) == 64 {
 
-		*in = Element{low: 0, high: 0}
-		return
-	}
-
-  productTable := createProductTable(e)
-	for i := 0; i < 2; i++ {
-		word := in.high
-		if i == 1 {
-			word = in.low
-		}
-
-		// Multiplication works by multiplying z by 16 and adding in
-		// one of the precomputed multiples of H.
-		for j := 0; j < 64; j += 4 {
-			msw := z.high & 0xf
-			z.high >>= 4
-			z.high |= z.low << 60
-			z.low >>= 4
-			z.low ^= uint64(gcmReductionTable[msw]) << 48
-
-			// the values in |table| are ordered for
-			// little-endian bit positions. See the comment
-			// in NewGCMWithNonceSize.
-			t := &productTable[word&0xf]
-
-			z.low ^= t.low
-			z.high ^= t.high
-			word >>= 4
-		}
-	}
-
-	// we need only the value of in, not the product table
-	*in = z
+func (e Element) PrecomputeMul() PrecompElement {
+  return PrecompElement { productTable: createProductTable(e) }
 }
 
 func (e Element) Equal(x Element) bool {
@@ -212,41 +179,30 @@ func (e Element) Bytes() []byte {
 	return out
 }
 
-func createProductTable(e Element) [16]Element {
-	var productTable [16]Element
-	productTable[reverseBits(1)] = e
+func createProductTable(e Element) [16]*Element {
+  var productTable [16]*Element
+  zero := Zero()
+  productTable[0] = &zero
+	productTable[reverseBits(1)] = &e
 
 	for i := 2; i < 16; i += 2 {
-		productTable[reverseBits(i)] = gcmMultiplyByH(productTable[reverseBits(i/2)])
-		productTable[reverseBits(i+1)] = gcmAdd(productTable[reverseBits(i)], e)
+    v1 := gcmMultiplyByH(*productTable[reverseBits(i/2)])
+		productTable[reverseBits(i)] = &v1
+    v2 := Add(*productTable[reverseBits(i)], e)
+		productTable[reverseBits(i+1)] = &v2
 	}
 
 	return productTable
 }
 
-func (e Element) PrecomputeMul() {
-  // Do nothing
+func (e *Element) AddTo(x Element) {
+	e.low ^= x.low
+  e.high ^= x.high
 }
 
-// gcmFieldElement represents a value in GF(2¹²⁸).  The bits are stored in big
-// endian order. For example:
-//   the coefficient of x⁰ can be obtained by v.low >> 63.
-//   the coefficient of x⁶³ can be obtained by v.low & 1.
-//   the coefficient of x⁶⁴ can be obtained by v.high >> 63.
-//   the coefficient of x¹²⁷ can be obtained by v.high & 1.
-type gcmFieldElement struct {
-}
-
-// gcmAdd adds two elements of GF(2¹²⁸) and returns the sum.
-func gcmAdd(x, y Element) Element {
+func Add(x, y Element) Element {
 	// Addition in a characteristic 2 field is just XOR.
 	return Element{low: x.low ^ y.low, high: x.high ^ y.high}
-}
-
-func (e Element) Add(x, y Element) {
-	// Addition in a characteristic 2 field is just XOR.
-	e.low = x.low ^ y.low
-  e.high = x.high ^ y.high
 }
 
 // gcmMultiplyByH returns the result of multiplying an element of GF(2¹²⁸)
