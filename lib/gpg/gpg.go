@@ -24,6 +24,7 @@ func extractPrimaryKeys(el openpgp.EntityList) map[string]*packet.PublicKey {
 func importSingleDump(path string) (openpgp.EntityList, error) {
 	// open single dump file
 	f, err := os.Open(path)
+	defer f.Close()
 	if err != nil {
 		return nil, err
 	}
