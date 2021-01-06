@@ -24,8 +24,8 @@ package field
 // /!\ WARNING /!\
 
 import (
-	"crypto/rand"
 	"encoding/binary"
+	"golang.org/x/crypto/blake2b"
 	"io"
 	"math/big"
 	"math/bits"
@@ -199,9 +199,9 @@ func (z *Element) LexicographicallyLargest() bool {
 }
 
 // SetRandom sets z to a random element < q
-func (z *Element) SetRandom() (*Element, error) {
+func (z *Element) SetRandom(xof blake2b.XOF) (*Element, error) {
 	var bytes [16]byte
-	if _, err := io.ReadFull(rand.Reader, bytes[:]); err != nil {
+	if _, err := io.ReadFull(xof, bytes[:]); err != nil {
 		return nil, err
 	}
 	z[0] = binary.BigEndian.Uint64(bytes[0:8])
@@ -219,17 +219,29 @@ func (z *Element) SetRandom() (*Element, error) {
 	return z, nil
 }
 
-func RandomVector(length int) ([]Element, error) {
-	//var err error
-	zs := make([]Element, length)
-	for i := range zs {
-		var z Element
-		z.SetRandom()
-		zs[i] = z
-		//if err != nil {
-		//	return nil, err
-		//}
+func RandomVector(length int, xof blake2b.XOF) ([]Element, error) {
+	bytesLength := length*16 + 1
+	bytes := make([]byte, bytesLength)
+	if _, err := io.ReadFull(xof, bytes[:]); err != nil {
+		return nil, err
 	}
+	zs := make([]Element, length)
+	for i := 0; i < length; i++ {
+		var z Element
+		z[0] = binary.BigEndian.Uint64(bytes[8*i:8*(i+1)])
+		z[1] = binary.BigEndian.Uint64(bytes[8*(i+1):8*(i+2)])
+		z[1] %= 18446744073709551615
+
+		// if z > q --> z -= q
+		// note: this is NOT constant time
+		if !(z[1] < 18446744073709551615 || (z[1] == 18446744073709551615 && (z[0] < 18446744073709551615))) {
+			var b uint64
+			z[0], b = bits.Sub64(z[0], 18446744073709551615, 0)
+			z[1], _ = bits.Sub64(z[1], 18446744073709551615, b)
+		}
+		zs[i] = z
+	}
+
 	return zs, nil
 }
 
