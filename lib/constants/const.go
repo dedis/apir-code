@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	DBLength    = 40000
+	DBLength = 40000
+	//	DBLength    = 100
 	FieldSize   = 64
 	BlockLength = 16
 )

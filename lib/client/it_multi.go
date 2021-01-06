@@ -30,8 +30,8 @@ type itMultiState struct {
 // NewITSingleGF return a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITMulti(xof blake2b.XOF, rebalanced bool) *ITSingleGF {
-	return &ITSingleGF{
+func NewITMulti(xof blake2b.XOF, rebalanced bool) *ITMulti {
+	return &ITMulti{
 		xof:        xof,
 		rebalanced: rebalanced,
 		state:      nil,
@@ -65,7 +65,7 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 	// TODO: simplify field API
 	a := make([]field.Element, blockLength)
 	a[0] = alpha
-	for i := range a[1:] {
+	for i := 1; i < len(a); i++ {
 		e := &alpha
 		power := a[i-1].PrecomputeMul()
 		power.MulBy(e)
@@ -118,7 +118,7 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 
 		// we should perform component-wise additive secret sharing
 		sum := field.Zero()
-		for b := range eia {
+		for b := 0; b < blockLength; b++ {
 			for k := 0; k < numServers-1; k++ {
 				sum = field.Add(sum, vectors[k][i][b])
 			}

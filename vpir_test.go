@@ -16,6 +16,23 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 )
 
+func TestMultiBitVectorGF(t *testing.T) {
+	db := database.CreateMultiBitGF()
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	if err != nil {
+		panic(err)
+	}
+	rebalanced := false
+	c := client.NewITMulti(xof, rebalanced)
+	s0 := server.NewITMulti(rebalanced, db)
+	s1 := server.NewITMulti(rebalanced, db)
+
+	i := 0
+	queries := c.Query(i, 2)
+	s0.Answer(queries[0])
+	s1.Answer(queries[1])
+}
+
 func TestMatrixOneKbByte(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiMatrixOneKbByte()

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -24,5 +25,27 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 
 // Answer computes the answer for the given query
 func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
+	blockLength := constants.BlockLength
 
+	// parse the query
+	qZeroBase := make([]field.Element, len(q))
+	qOne := make([][]field.Element, constants.DBLength)
+
+	for i := range q {
+		qZeroBase[i] = q[i][0]
+		qOne[i] = make([]field.Element, blockLength)
+		qOne[i] = q[i][1:]
+	}
+
+	// extend qZeroBase
+	qZero := make([][]field.Element, constants.DBLength)
+	for i := range qZero {
+		qZero[i] = qZeroBase
+	}
+
+	// compute the matrix-vector inner products
+	// addition al multiplication of elements
+	// in GF(2^128)^b are executed component-wise
+
+	return nil
 }

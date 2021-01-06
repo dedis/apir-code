@@ -23,6 +23,15 @@ type Bytes struct {
 	DBLengthSqrt int // unused for vector
 }
 
+func CreateMultiBitGF() *GF {
+	entries := make([][]field.Element, 4)
+	for i := range entries {
+		entries[i] = zeroVectorGF(cst.DBLength)
+	}
+
+	return &GF{Entries: entries}
+}
+
 func CreateVectorGF() *GF {
 	entries := make([][]field.Element, 1)
 	entries[0] = zeroVectorGF(cst.DBLength)
@@ -39,10 +48,10 @@ func CreateAsciiVectorGF() *GF {
 			panic(err)
 		}
 		if currentBit == 0 {
-      val := field.Zero()
+			val := field.Zero()
 			db.Entries[0][i] = val
 		} else {
-      val := field.One()
+			val := field.One()
 			db.Entries[0][i] = val
 		}
 
@@ -77,7 +86,7 @@ func CreateAsciiMatrixGF() *GF {
 		}
 		entry := field.Zero()
 		if currentBit == 1 {
-      entry = field.One()
+			entry = field.One()
 		}
 		db.Entries[i/db.DBLengthSqrt][i%db.DBLengthSqrt] = entry
 	}
