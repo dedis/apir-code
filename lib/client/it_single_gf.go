@@ -149,7 +149,9 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 			vectors[k][i] = *rand
 			sum.Add(&sum, rand)
 		}
-		vectors[numServers-1][i].Add(&eialpha[i], &sum)
+		vectors[numServers-1][i].Set(&sum)
+		vectors[numServers-1][i].Neg(&vectors[numServers-1][i])
+		vectors[numServers-1][i].Add(&vectors[numServers-1][i], &eialpha[i])
 	}
 
 	return vectors, nil
