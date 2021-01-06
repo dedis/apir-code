@@ -39,19 +39,18 @@ func NewITMulti(xof blake2b.XOF, rebalanced bool) *ITSingleGF {
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITMulti) Query(index int, numServers int) [][]field.Element {
+func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 	// TODO: check query inputs
-	blockLength = constants.BlockLength
+	blockLength := constants.BlockLength
 
 	// sample random alpha using blake2b
 	alpha := field.RandomXOF(c.xof)
-	alphaPrecomp := alpha.PrecomputeMul()
 
 	// set state
 	switch c.rebalanced {
 	case false:
 		// iy is unused if the database is represented as a vector
-		c.state = &itSingleGFState{
+		c.state = &itMultiState{
 			ix:       index,
 			alpha:    alpha,
 			dbLength: cst.DBLength,
@@ -72,40 +71,58 @@ func (c *ITMulti) Query(index int, numServers int) [][]field.Element {
 	}
 
 	// additive secret sharing
-	eialpha := make([]field.Element, c.state.dbLength*(1+blockLength))
-	vectors := make([][]field.Element, numServers)
+	aExtended := []field.Element{field.One()}
+	aExtended = append(aExtended, a...)
+
+	eia := make([][]field.Element, c.state.dbLength)
+	for i := range eia {
+		eia[i] = make([]field.Element, 1+blockLength)
+	}
 
 	// create query vectors for all the servers
-	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]field.Element, c.state.dbLength*(1+blockLength))
+	vectors := make([][][]field.Element, numServers)
+	for k := range vectors {
+		vectors[k] = make([][]field.Element, c.state.dbLength)
+		for i := range vectors[0] {
+			vectors[k][i] = make([]field.Element, blockLength)
+		}
 	}
 
 	// zero vector in GF(2^128)^(1+b)
+	// TODO: can we use constant?
 	zeroVector := make([]field.Element, 1+blockLength)
 	for i := range zeroVector {
-		// TODO: can we use constant?
 		zeroVector[i] = field.Zero()
 	}
 
-	//numRandomElements := c.state.dbLength * (numServers - 1)
-	//randomElements := field.RandomVectorXOF(numRandomElements, c.xof)
+	// perform additive secret sharing
+	// TODO: optimize!
 	for i := 0; i < c.state.dbLength; i++ {
 		// create basic vector
-		eialpha[i] = zero
+		eia[i] = zeroVector
 
 		// set alpha at the index we want to retrieve
 		if i == c.state.ix {
-			eialpha[i] = c.state.alpha
+			// aExtended is a vector of 1+b field elements
+			eia[i] = aExtended
 		}
 
-		// create k - 1 random vectors
-		sum := field.Zero()
+		// create k - 1 random vectors of length dbLength containing
+		// elements in GF(2^128)^(1+b)
 		for k := 0; k < numServers-1; k++ {
-			rand := randomElements[c.state.dbLength*k+i]
+			rand := field.RandomVectorXOF(blockLength, c.xof)
 			vectors[k][i] = rand
-			sum = field.Add(sum, rand)
 		}
-		vectors[numServers-1][i] = field.Add(eialpha[i], sum)
+
+		// we should perform component-wise additive secret sharing
+		sum := field.Zero()
+		for b := range eia {
+			for k := 0; k < numServers-1; k++ {
+				sum = field.Add(sum, vectors[k][i][b])
+			}
+			vectors[numServers-1][i][b] = field.Add(eia[i][b], sum)
+		}
 	}
 
+	return vectors
 }
