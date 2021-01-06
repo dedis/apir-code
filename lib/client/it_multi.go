@@ -1,6 +1,8 @@
 package client
 
 import (
+	"errors"
+
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
@@ -125,4 +127,43 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 	}
 
 	return vectors
+}
+
+func (c *ITMulti) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
+	answersLen := len(answers[0])
+	sum := make([]field.Element, answersLen)
+
+	// sum answers as vectors in GF(2^128)^(1+b)
+	for i := 0; i < answersLen; i++ {
+		sum[i] = field.Zero()
+		for s := range answers {
+			sum[i] = field.Add(sum[i], answers[s][i])
+		}
+
+	}
+
+	tag := sum[len(sum)-1]
+	messages := sum[:len(sum)-1]
+
+	// compute reconstructed tag
+
+	// compute vector a = (alpha, alpha^2, ..., alpha^b)
+	// TODO: store this in the state to avoid recomputation
+	a := make([]field.Element, constants.BlockLength)
+	a[0] = c.state.alpha
+	prod := field.Mul(a[0], messages[0])
+	reconstructedTag := prod
+	for i := range a[1:] {
+		e := &c.state.alpha
+		power := a[i-1].PrecomputeMul()
+		power.MulBy(e)
+		prod := field.Mul(*e, messages[i])
+		reconstructedTag = field.Add(reconstructedTag, prod)
+	}
+
+	if !tag.Equal(reconstructedTag) {
+		return nil, errors.New("REJECT")
+	}
+
+	return messages, nil
 }
