@@ -1,11 +1,12 @@
 package client
 
 import (
-	"github.com/si-co/vpir-code/lib/field"
+  "errors"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -110,13 +111,12 @@ func (c *ITSingleGF) Reconstruct(answers [][]field.Element) (field.Element, erro
 	case sum[i].Equal(&constants.Zero):
 		return constants.Zero, nil
 	default:
-		//return constants.Zero, errors.New("REJECT!")
-		return constants.Zero, nil
+		return constants.Zero, errors.New("REJECT!")
+		//return constants.Zero, nil
 	}
 }
 
 func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
-	eialpha := make([]field.Element, c.state.dbLength)
 	vectors := make([][]field.Element, numServers)
 
 	// create query vectors for all the servers
@@ -124,7 +124,6 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 		vectors[k] = make([]field.Element, c.state.dbLength)
 	}
 
-	zero := field.Zero()
 	// for all except one server, we need dbLength random elements
 	// to perform the secret sharing
 	numRandomElements := c.state.dbLength * (numServers - 1)
@@ -133,14 +132,6 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 		panic(err)
 	}
 	for i := 0; i < c.state.dbLength; i++ {
-		// create basic vector
-		eialpha[i] = zero
-
-		// set alpha at the index we want to retrieve
-		if i == c.state.ix {
-			eialpha[i] = c.state.alpha
-		}
-
 		// create k - 1 random vectors
 		var sum field.Element
 		sum = field.Zero()
@@ -151,7 +142,11 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 		}
 		vectors[numServers-1][i].Set(&sum)
 		vectors[numServers-1][i].Neg(&vectors[numServers-1][i])
-		vectors[numServers-1][i].Add(&vectors[numServers-1][i], &eialpha[i])
+		// set alpha at the index we want to retrieve
+		if i == c.state.ix {
+//      fmt.Printf("Here: %v %v %v", i, c.state.ix, c.state.alpha)
+		  vectors[numServers-1][i].Add(&vectors[numServers-1][i], &c.state.alpha)
+		}
 	}
 
 	return vectors, nil
