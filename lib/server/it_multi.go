@@ -27,25 +27,28 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
 	blockLength := constants.BlockLength
 
+	// TODO: need to change the matrix logic for the tag
+
 	// parse the query
-	qZeroBase := make([]field.Element, len(q))
+	qZeroBase := make([]field.Element, constants.DBLength)
 	qOne := make([][]field.Element, constants.DBLength)
 
 	for i := range q {
 		qZeroBase[i] = q[i][0]
-		qOne[i] = make([]field.Element, blockLength)
 		qOne[i] = q[i][1:]
 	}
 
 	// extend qZeroBase
-	qZero := make([][]field.Element, constants.DBLength)
+	qZero := make([][]field.Element, blockLength)
 	for i := range qZero {
 		qZero[i] = qZeroBase
 	}
 
 	// compute the matrix-vector inner products
-	// addition al multiplication of elements
+	// addition and multiplication of elements
 	// in GF(2^128)^b are executed component-wise
+	//m := make([]lib.Element, blockLength)
+	//t := make([]lib.Element, blockLength)
 
 	return nil
 }
