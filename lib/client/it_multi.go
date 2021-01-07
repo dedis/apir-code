@@ -89,7 +89,7 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	return vectors
 }
 
-func (c *ITMulti) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
+func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field.Element, error) {
 	answersLen := len(answers[0])
 	sum := make([]field.Element, answersLen)
 
@@ -100,6 +100,18 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element) ([]field.Element, error
 			sum[i].Add(&sum[i], &answers[s][i])
 		}
 
+	}
+
+	i := 0
+	if blockSize == 1 {
+		switch {
+		case sum[i].Equal(&c.state.alpha):
+			return []field.Element{cst.One}, nil
+		case sum[i].Equal(&cst.Zero):
+			return []field.Element{cst.Zero}, nil
+		default:
+			return nil, errors.New("REJECT!")
+		}
 	}
 
 	tag := sum[len(sum)-1]

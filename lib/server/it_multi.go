@@ -25,6 +25,23 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 
 // Answer computes the answer for the given query
 func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
+	// Doing simplified scheme if block consists of one element
+	if blockSize == 1 {
+		//var tmp field.Element
+		a := make([]field.Element, len(s.db.Entries))
+		for i := range s.db.Entries {
+			a[i] = field.Zero()
+			for j := range s.db.Entries[i] {
+				//tmp.Mul(&q[j][0], &s.db.Entries[i][j])
+				//a[i].Add(&a[i], &tmp)
+				if s.db.Entries[i][j].Equal(&constants.One) {
+					a[i].Add(&a[i], &q[j][0])
+				}
+			}
+		}
+		return a
+	}
+
 	// parse the query
 	qZeroBase := make([]field.Element, constants.DBLength)
 	qOne := make([][]field.Element, constants.DBLength)

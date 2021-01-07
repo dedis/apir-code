@@ -17,15 +17,11 @@ import (
 
 func TestMultiBitOneKb(t *testing.T) {
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	db := database.CreateRandomMultiBitOneMBGF(xofDB)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	rebalanced := false
 
 	totalTimer := monitor.NewMonitor()
@@ -44,11 +40,46 @@ func TestMultiBitOneKb(t *testing.T) {
 
 		answers := [][]field.Element{a0, a1}
 
-		_, err = c.Reconstruct(answers)
+		_, err = c.Reconstruct(answers, constants.BlockLength)
 		require.NoError(t, err)
 	}
 
 	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())
+}
+
+func TestSingleBitOneKb(t *testing.T) {
+	blockLen := 1
+
+	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
+	require.NoError(t, err)
+	db := database.CreateRandomMultiBitOneMBGF(xofDB)
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+
+	rebalanced := false
+
+	totalTimer := monitor.NewMonitor()
+
+	c := client.NewITMulti(xof, rebalanced)
+	s0 := server.NewITMulti(rebalanced, db)
+	s1 := server.NewITMulti(rebalanced, db)
+
+	fieldElements := 128 * 8
+
+	for i := 0; i < fieldElements/16; i++ {
+		queries := c.Query(i, blockLen, 2)
+
+		a0 := s0.Answer(queries[0], blockLen)
+		a1 := s1.Answer(queries[1], blockLen)
+
+		answers := [][]field.Element{a0, a1}
+
+		_, err = c.Reconstruct(answers, blockLen)
+		require.NoError(t, err)
+	}
+
+	fmt.Printf("Total time SingleBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
 func TestMultiBitVectorGF(t *testing.T) {
@@ -70,7 +101,7 @@ func TestMultiBitVectorGF(t *testing.T) {
 
 	answers := [][]field.Element{a0, a1}
 
-	_, err = c.Reconstruct(answers)
+	_, err = c.Reconstruct(answers, constants.BlockLength)
 	require.NoError(t, err)
 }
 
@@ -145,23 +176,23 @@ func TestMatrixGF(t *testing.T) {
 	for i := 0; i < 136; i++ {
 		m.Reset()
 		queries := c.Query(i, 3)
-		fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
 
 		a0 := s0.Answer(queries[0])
-		fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
 
 		a1 := s1.Answer(queries[1])
-		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
 
 		a2 := s2.Answer(queries[2])
-		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
 		answers := [][]field.Element{a0, a1, a2}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
+		//fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
 		if x.String() == "0" {
 			result += "0"
 		} else {
@@ -204,23 +235,23 @@ func TestVectorGF(t *testing.T) {
 	for i := 0; i < 136; i++ {
 		m.Reset()
 		queries := c.Query(i, 3)
-		fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
 
 		a0 := s0.Answer(queries[0])
-		fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
 
 		a1 := s1.Answer(queries[1])
-		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
 
 		a2 := s2.Answer(queries[2])
-		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
+		//fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
 
 		answers := [][]field.Element{a0, a1, a2}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
+		//fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
 		if x.String() == "0" {
 			result += "0"
 		} else {
