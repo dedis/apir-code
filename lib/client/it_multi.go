@@ -87,7 +87,7 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 	for k := range vectors {
 		vectors[k] = make([][]field.Element, c.state.dbLength)
 		for i := range vectors[0] {
-			vectors[k][i] = make([]field.Element, blockLength)
+			vectors[k][i] = make([]field.Element, 1+blockLength)
 		}
 	}
 
@@ -113,13 +113,13 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 		// create k - 1 random vectors of length dbLength containing
 		// elements in GF(2^128)^(1+b)
 		for k := 0; k < numServers-1; k++ {
-			rand := field.RandomVectorXOF(blockLength, c.xof)
+			rand := field.RandomVectorXOF(1+blockLength, c.xof)
 			vectors[k][i] = rand
 		}
 
 		// we should perform component-wise additive secret sharing
-		sum := field.Zero()
-		for b := 0; b < blockLength; b++ {
+		for b := 0; b < 1+blockLength; b++ {
+			sum := field.Zero()
 			for k := 0; k < numServers-1; k++ {
 				sum = field.Add(sum, vectors[k][i][b])
 			}
