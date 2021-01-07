@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -47,8 +49,20 @@ func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
 	// in GF(2^128)^b are executed component-wise
-	//m := make([]lib.Element, blockLength)
+	m := make([]field.Element, blockLength)
 	//t := make([]lib.Element, blockLength)
+	// we have to traverse column by column for m
+	for i := range q[0] {
+		sum := field.Zero()
+		for j := range q {
+			prod := field.Mul(q[j][i], qZeroBase[i])
+			(&sum).AddTo(&prod)
+		}
+		m[i] = sum
+	}
 
-	return nil
+	// add random tag
+	m = append(m, field.Zero())
+	fmt.Println(len(m))
+	return m
 }

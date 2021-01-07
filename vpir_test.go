@@ -18,6 +18,7 @@ import (
 
 func TestMultiBitVectorGF(t *testing.T) {
 	db := database.CreateMultiBitGF()
+	fmt.Println(db)
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
 		panic(err)
@@ -29,8 +30,16 @@ func TestMultiBitVectorGF(t *testing.T) {
 
 	i := 0
 	queries := c.Query(i, 2)
-	s0.Answer(queries[0])
-	s1.Answer(queries[1])
+
+	a0 := s0.Answer(queries[0])
+	a1 := s1.Answer(queries[1])
+
+	answers := [][]field.Element{a0, a1}
+
+	result, err := c.Reconstruct(answers)
+	require.NoError(t, err)
+
+	fmt.Println(result)
 }
 
 func TestMatrixOneKbByte(t *testing.T) {

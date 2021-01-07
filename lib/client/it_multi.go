@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
@@ -153,14 +154,14 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element) ([]field.Element, error
 	a[0] = c.state.alpha
 	prod := field.Mul(a[0], messages[0])
 	reconstructedTag := prod
-	for i := range a[1:] {
+	for i := 1; i < len(a); i++ {
 		e := &c.state.alpha
 		power := a[i-1].PrecomputeMul()
 		power.MulBy(e)
 		prod := field.Mul(*e, messages[i])
 		reconstructedTag = field.Add(reconstructedTag, prod)
 	}
-
+	fmt.Println(messages)
 	if !tag.Equal(reconstructedTag) {
 		return nil, errors.New("REJECT")
 	}
