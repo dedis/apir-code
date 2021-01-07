@@ -6,3 +6,4 @@
 * Update gRPC logic and add TLS
 * General clanup and refactoring --> Kirill
 * Organize iccluster servers --> Simone
+* Improve config/constants
