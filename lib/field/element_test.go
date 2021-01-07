@@ -148,7 +148,7 @@ package field
 //
 //func BenchmarkElementMul(b *testing.B) {
 //	x := Element{
-//		1,
+//		4,
 //		0,
 //	}
 //	benchResElement.SetOne()
@@ -160,7 +160,7 @@ package field
 //
 //func BenchmarkElementCmp(b *testing.B) {
 //	x := Element{
-//		1,
+//		4,
 //		0,
 //	}
 //	benchResElement = x
@@ -233,7 +233,7 @@ package field
 //func init() {
 //	staticTestValues = append(staticTestValues, Element{}) // zero
 //	staticTestValues = append(staticTestValues, One())     // one
-//	staticTestValues = append(staticTestValues, rSquare)             // r^2
+//	staticTestValues = append(staticTestValues, rSquare)   // r^2
 //	var e, one Element
 //	one.SetOne()
 //	e.Sub(&qElement, &one)

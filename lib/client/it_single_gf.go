@@ -94,9 +94,9 @@ func (c *ITSingleGF) Reconstruct(answers [][]field.Element) (field.Element, erro
 			sum[i].Add(&sum[i], &answers[s][i])
 		}
 
-		//if !sum[i].Equal(&c.state.alpha) && !sum[i].Equal(&constants.Zero) {
-		//	return constants.Zero, errors.New("REJECT!")
-		//}
+		if !sum[i].Equal(&c.state.alpha) && !sum[i].Equal(&constants.Zero) {
+			return constants.Zero, errors.New("REJECT!")
+		}
 	}
 
 	// select index depending on the matrix representation
@@ -112,7 +112,6 @@ func (c *ITSingleGF) Reconstruct(answers [][]field.Element) (field.Element, erro
 		return constants.Zero, nil
 	default:
 		return constants.Zero, errors.New("REJECT!")
-		//return constants.Zero, nil
 	}
 }
 

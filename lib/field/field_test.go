@@ -32,7 +32,7 @@ func TestAdd(t *testing.T) {
 	res.Add(&r1, &r2)
 	resb := res.Bytes()
 
-	require.Equal(t, "00010000000000000000000000000000", hex.EncodeToString(resb[:]))
+	require.Equal(t, "00000000000000000000000000000002", hex.EncodeToString(resb[:]))
 }
 
 func TestSquare(t *testing.T) {
