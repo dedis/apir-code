@@ -25,7 +25,7 @@ func NewITSingleGF(rebalanced bool, db *database.GF) *ITSingleGF {
 // Answer computes the answer for the given query
 func (s *ITSingleGF) Answer(q []field.Element) []field.Element {
 	//zero := field.Zero()
-  	tmp:= field.Zero()
+  tmp:= field.Zero()
 	a := make([]field.Element, len(s.db.Entries))
 	for i := range s.db.Entries {
 		a[i] = field.Zero()

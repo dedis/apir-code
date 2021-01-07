@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/si-co/vpir-code/lib/constants"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -36,10 +37,10 @@ func TestMultiBitOneKb(t *testing.T) {
 	fieldElements := 128 * 8
 
 	for i := 0; i < fieldElements/16; i++ {
-		queries := c.Query(i, 2)
+		queries := c.Query(i, constants.BlockLength, 2)
 
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
+		a0 := s0.Answer(queries[0], constants.BlockLength)
+		a1 := s1.Answer(queries[1], constants.BlockLength)
 
 		answers := [][]field.Element{a0, a1}
 
@@ -62,17 +63,15 @@ func TestMultiBitVectorGF(t *testing.T) {
 	s1 := server.NewITMulti(rebalanced, db)
 
 	i := 0
-	queries := c.Query(i, 2)
+	queries := c.Query(i, constants.BlockLength, 2)
 
-	a0 := s0.Answer(queries[0])
-	a1 := s1.Answer(queries[1])
+	a0 := s0.Answer(queries[0], constants.BlockLength)
+	a1 := s1.Answer(queries[1], constants.BlockLength)
 
 	answers := [][]field.Element{a0, a1}
 
-	result, err := c.Reconstruct(answers)
+	_, err = c.Reconstruct(answers)
 	require.NoError(t, err)
-	fmt.Println(result)
-
 }
 
 func TestMatrixOneKbByte(t *testing.T) {

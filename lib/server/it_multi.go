@@ -24,9 +24,7 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 }
 
 // Answer computes the answer for the given query
-func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
-	blockLength := constants.BlockLength
-
+func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 	// parse the query
 	qZeroBase := make([]field.Element, constants.DBLength)
 	qOne := make([][]field.Element, constants.DBLength)
@@ -38,12 +36,12 @@ func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
 	// in GF(2^128)^b are executed component-wise
-	m := make([]field.Element, blockLength)
+	m := make([]field.Element, blockSize)
 	tag := field.Zero()
 
 	var prod, prodTag field.Element
 	// we have to traverse column by column
-	for i := 0; i < blockLength; i++ {
+	for i := 0; i < blockSize; i++ {
 		sum := field.Zero()
 		sumTag := field.Zero()
 		for j := 0; j < constants.DBLength; j++ {

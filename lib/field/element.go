@@ -200,9 +200,7 @@ func (z *Element) LexicographicallyLargest() bool {
 // SetRandom sets z to a random element < q
 func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	var bytes [16]byte
-	//if _, err := io.ReadFull(rand.Reader, bytes[:]); err != nil {
-	//	return nil, err
-	//}
+
 	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
 		return nil, err
 	}
@@ -247,6 +245,16 @@ func RandomVector(length int, rnd io.Reader) ([]Element, error) {
 	return zs, nil
 }
 
+// ZeroVector returns a vector of zero elements
+func ZeroVector(length int) []Element {
+	zeroVector := make([]Element, length)
+	for i := range zeroVector {
+		zero := Zero()
+		zeroVector[i] = zero
+	}
+	return zeroVector
+}
+
 // One returns 1 (in montgommery form)
 func One() Element {
 	var one Element
@@ -254,7 +262,7 @@ func One() Element {
 	return one
 }
 
-// One returns 0
+// Zero returns 0
 func Zero() Element {
 	var zero Element
 	zero.SetZero()

@@ -1,7 +1,7 @@
 package client
 
 import (
-  "errors"
+ "errors"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -143,8 +143,7 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 		vectors[numServers-1][i].Neg(&vectors[numServers-1][i])
 		// set alpha at the index we want to retrieve
 		if i == c.state.ix {
-//      fmt.Printf("Here: %v %v %v", i, c.state.ix, c.state.alpha)
-		  vectors[numServers-1][i].Add(&vectors[numServers-1][i], &c.state.alpha)
+		  	vectors[numServers-1][i].Add(&vectors[numServers-1][i], &c.state.alpha)
 		}
 	}
 
