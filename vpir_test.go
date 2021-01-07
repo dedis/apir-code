@@ -38,7 +38,6 @@ func TestMultiBitOneKb(t *testing.T) {
 	fieldElements := 128 * 8
 
 	for i := 0; i < fieldElements/16; i++ {
-		fmt.Println(i)
 		queries := c.Query(i, 2)
 
 		a0 := s0.Answer(queries[0])
