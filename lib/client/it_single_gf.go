@@ -136,8 +136,8 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 		sum = field.Zero()
 		for k := 0; k < numServers-1; k++ {
 			rand := randomElements[c.state.dbLength*k+i]
-			vectors[k][i] = *rand
-			sum.Add(&sum, rand)
+			vectors[k][i] = rand
+			sum.Add(&sum, &rand)
 		}
 		vectors[numServers-1][i].Set(&sum)
 		vectors[numServers-1][i].Neg(&vectors[numServers-1][i])

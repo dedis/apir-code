@@ -221,13 +221,13 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	return z, nil
 }
 
-func RandomVector(length int, rnd io.Reader) ([]*Element, error) {
+func RandomVector(length int, rnd io.Reader) ([]Element, error) {
 	bytesLength := length*16 + 1
 	bytes := make([]byte, bytesLength)
 	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
 		return nil, err
 	}
-	zs := make([]*Element, length)
+	zs := make([]Element, length)
 	for i := 0; i < length; i++ {
 		var z Element
 		z[0] = binary.BigEndian.Uint64(bytes[0:8])
@@ -241,7 +241,7 @@ func RandomVector(length int, rnd io.Reader) ([]*Element, error) {
 			z[0], b = bits.Sub64(z[0], 18446744073709551615, 0)
 			z[1], _ = bits.Sub64(z[1], 9223372036854775807, b)
 		}
-		zs[i] = &z
+		zs[i] = z
 	}
 
 	return zs, nil

@@ -32,9 +32,13 @@ func CreateRandomMultiBitOneMBGF(xof blake2b.XOF) *GF {
 	}
 
 	fieldElements := 1048576 * 8 / 128
+	var err error
 	for i := 0; i < fieldElements/16; i++ {
 		for j := 0; j < constants.BlockLength; j++ {
-			entries[i] = field.RandomVectorXOF(constants.BlockLength, xof)
+			entries[i], err = field.RandomVector(constants.BlockLength, xof)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 
