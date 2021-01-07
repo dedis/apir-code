@@ -16,6 +16,43 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 )
 
+func TestMultiBitOneKb(t *testing.T) {
+	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
+	if err != nil {
+		panic(err)
+	}
+	db := database.CreateRandomMultiBitOneMBGF(xofDB)
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	if err != nil {
+		panic(err)
+	}
+	rebalanced := false
+
+	totalTimer := monitor.NewMonitor()
+
+	c := client.NewITMulti(xof, rebalanced)
+	s0 := server.NewITMulti(rebalanced, db)
+	s1 := server.NewITMulti(rebalanced, db)
+
+	fieldElements := 128 * 8
+
+	for i := 0; i < fieldElements/16; i++ {
+		fmt.Println(i)
+		queries := c.Query(i, 2)
+
+		a0 := s0.Answer(queries[0])
+		a1 := s1.Answer(queries[1])
+
+		answers := [][]field.Element{a0, a1}
+
+		_, err = c.Reconstruct(answers)
+		require.NoError(t, err)
+	}
+
+	fmt.Printf("Total time MultiBitOneMB: %.1fms\n", totalTimer.Record())
+}
+
 func TestMultiBitVectorGF(t *testing.T) {
 	db := database.CreateMultiBitGF()
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
