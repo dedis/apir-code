@@ -25,8 +25,14 @@ type Bytes struct {
 
 func CreateMultiBitGF() *GF {
 	entries := make([][]field.Element, 4)
+	one := field.One()
+	toRetrieve := []field.Element{one, one, one, one, one, one, one, one, one, one, one, one, one, one, one, one}
 	for i := range entries {
-		entries[i] = zeroVectorGF(cst.BlockLength)
+		if i == 0 {
+			entries[i] = toRetrieve
+		} else {
+			entries[i] = zeroVectorGF(cst.BlockLength)
+		}
 	}
 
 	return &GF{Entries: entries}

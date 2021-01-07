@@ -162,6 +162,7 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element) ([]field.Element, error
 		reconstructedTag = field.Add(reconstructedTag, prod)
 	}
 	fmt.Println(messages)
+	fmt.Println(len(messages))
 	if !tag.Equal(reconstructedTag) {
 		return nil, errors.New("REJECT")
 	}

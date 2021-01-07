@@ -18,7 +18,6 @@ import (
 
 func TestMultiBitVectorGF(t *testing.T) {
 	db := database.CreateMultiBitGF()
-	fmt.Println(db)
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
 		panic(err)
