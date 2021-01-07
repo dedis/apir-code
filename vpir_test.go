@@ -49,7 +49,7 @@ func TestMultiBitOneKb(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	fmt.Printf("Total time MultiBitOneMB: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
 func TestMultiBitVectorGF(t *testing.T) {
