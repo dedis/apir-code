@@ -35,10 +35,9 @@ func TestMultiBitVectorGF(t *testing.T) {
 
 	answers := [][]field.Element{a0, a1}
 
-	result, err := c.Reconstruct(answers)
+	_, err = c.Reconstruct(answers)
 	require.NoError(t, err)
 
-	fmt.Println(result)
 }
 
 func TestMatrixOneKbByte(t *testing.T) {

@@ -38,28 +38,26 @@ func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
 		qOne[i] = q[i][1:]
 	}
 
-	// extend qZeroBase
-	qZero := make([][]field.Element, blockLength)
-	for i := range qZero {
-		qZero[i] = qZeroBase
-	}
-
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
 	// in GF(2^128)^b are executed component-wise
 	m := make([]field.Element, blockLength)
-	//t := make([]lib.Element, blockLength)
 	// we have to traverse column by column for m
+	tag := field.Zero()
 	for i := 0; i < blockLength; i++ {
 		sum := field.Zero()
+		sumTag := field.Zero()
 		for j := 0; j < constants.DBLength; j++ {
 			prod := field.Mul(s.db.Entries[j][i], qZeroBase[j])
 			sum.AddTo(&prod)
+			prodTag := field.Mul(s.db.Entries[j][i], qOne[j][i])
+			sumTag.AddTo(&prodTag)
 		}
 		m[i] = sum
+		tag.AddTo(&sumTag)
 	}
 
-	// add random tag
-	m = append(m, field.Zero())
+	// add tag
+	m = append(m, tag)
 	return m
 }

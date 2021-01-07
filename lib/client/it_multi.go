@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
@@ -149,20 +148,23 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element) ([]field.Element, error
 	// compute reconstructed tag
 
 	// compute vector a = (alpha, alpha^2, ..., alpha^b)
+	// TODO: simplify field API
 	// TODO: store this in the state to avoid recomputation
 	a := make([]field.Element, constants.BlockLength)
 	a[0] = c.state.alpha
-	prod := field.Mul(a[0], messages[0])
-	reconstructedTag := prod
 	for i := 1; i < len(a); i++ {
 		e := &c.state.alpha
 		power := a[i-1].PrecomputeMul()
 		power.MulBy(e)
-		prod := field.Mul(*e, messages[i])
-		reconstructedTag = field.Add(reconstructedTag, prod)
+		a[i] = *e
 	}
-	fmt.Println(messages)
-	fmt.Println(len(messages))
+
+	reconstructedTag := field.Zero()
+	for i := 0; i < len(messages); i++ {
+		prod := field.Mul(a[i], messages[i])
+		reconstructedTag.AddTo(&prod)
+	}
+
 	if !tag.Equal(reconstructedTag) {
 		return nil, errors.New("REJECT")
 	}
