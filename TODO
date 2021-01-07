@@ -5,3 +5,4 @@
 * Continue with PoC app implementation (gpg, db, cli) --> Simone
 * Update gRPC logic and add TLS
 * General clanup and refactoring --> Kirill
+* Organize iccluster servers --> Simone
