@@ -119,7 +119,9 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 			for k := 0; k < numServers-1; k++ {
 				sum.Add(&sum, &vectors[k][i][b])
 			}
-			vectors[numServers-1][i][b].Add(&eia[i][b], &sum)
+			vectors[numServers-1][i][b].Set(&sum)
+			vectors[numServers-1][i][b].Neg(&vectors[numServers-1][i][b])
+			vectors[numServers-1][i][b].Add(&vectors[numServers-1][i][b], &eia[i][b])
 		}
 	}
 
