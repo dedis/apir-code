@@ -24,6 +24,7 @@ type itMultiState struct {
 	ix       int
 	iy       int // unused if not rebalanced
 	alpha    field.Element
+	a        []field.Element
 	dbLength int
 }
 
@@ -48,19 +49,6 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 	// sample random alpha using blake2b
 	alpha := field.RandomXOF(c.xof)
 
-	// set state
-	switch c.rebalanced {
-	case false:
-		// iy is unused if the database is represented as a vector
-		c.state = &itMultiState{
-			ix:       index,
-			alpha:    alpha,
-			dbLength: cst.DBLength,
-		}
-	case true:
-		panic("not yet implemented")
-	}
-
 	// compute vector a = (alpha, alpha^2, ..., alpha^b)
 	// TODO: simplify field API
 	a := make([]field.Element, blockLength)
@@ -72,14 +60,23 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 		a[i] = *e
 	}
 
+	// set state
+	switch c.rebalanced {
+	case false:
+		// iy is unused if the database is represented as a vector
+		c.state = &itMultiState{
+			ix:       index,
+			alpha:    alpha,
+			a:        a,
+			dbLength: cst.DBLength,
+		}
+	case true:
+		panic("not yet implemented")
+	}
+
 	// additive secret sharing
 	aExtended := []field.Element{field.One()}
 	aExtended = append(aExtended, a...)
-
-	eia := make([][]field.Element, c.state.dbLength)
-	for i := range eia {
-		eia[i] = make([]field.Element, 1+blockLength)
-	}
 
 	// create query vectors for all the servers
 	vectors := make([][][]field.Element, numServers)
@@ -99,6 +96,7 @@ func (c *ITMulti) Query(index int, numServers int) [][][]field.Element {
 
 	// perform additive secret sharing
 	// TODO: optimize!
+	eia := make([][]field.Element, c.state.dbLength)
 	for i := 0; i < c.state.dbLength; i++ {
 		// create basic vector
 		eia[i] = zeroVector
@@ -146,22 +144,9 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element) ([]field.Element, error
 	messages := sum[:len(sum)-1]
 
 	// compute reconstructed tag
-
-	// compute vector a = (alpha, alpha^2, ..., alpha^b)
-	// TODO: simplify field API
-	// TODO: store this in the state to avoid recomputation
-	a := make([]field.Element, constants.BlockLength)
-	a[0] = c.state.alpha
-	for i := 1; i < len(a); i++ {
-		e := &c.state.alpha
-		power := a[i-1].PrecomputeMul()
-		power.MulBy(e)
-		a[i] = *e
-	}
-
 	reconstructedTag := field.Zero()
 	for i := 0; i < len(messages); i++ {
-		prod := field.Mul(a[i], messages[i])
+		prod := field.Mul(c.state.a[i], messages[i])
 		reconstructedTag.AddTo(&prod)
 	}
 
