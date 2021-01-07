@@ -1,0 +1,7 @@
+* Pick field library, probably goff
+* Optimize multi-bit scheme with selected field library
+* Implement dbf-based single- and multi-bit schemes
+* Merge single-bit and multi-bit scheme --> Kirill
+* Continue with PoC app implementation (gpg, db, cli) --> Simone
+* Update gRPC logic and add TLS
+* General clanup and refactoring --> Kirill
