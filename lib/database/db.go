@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -24,7 +25,7 @@ type Bytes struct {
 }
 
 func CreateMultiBitGF() *GF {
-	entries := make([][]field.Element, 4)
+	entries := make([][]field.Element, constants.DBLength)
 	one := field.One()
 	toRetrieve := []field.Element{one, one, one, one, one, one, one, one, one, one, one, one, one, one, one, one}
 	for i := range entries {

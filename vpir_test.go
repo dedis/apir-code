@@ -35,8 +35,9 @@ func TestMultiBitVectorGF(t *testing.T) {
 
 	answers := [][]field.Element{a0, a1}
 
-	_, err = c.Reconstruct(answers)
+	result, err := c.Reconstruct(answers)
 	require.NoError(t, err)
+	fmt.Println(result)
 
 }
 
