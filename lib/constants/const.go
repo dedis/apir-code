@@ -1,10 +1,9 @@
 package constants
 
 import (
+	"github.com/si-co/vpir-code/lib/field"
 	"math"
 	"math/big"
-
-	"github.com/si-co/vpir-code/lib/field"
 )
 
 const (
@@ -26,6 +25,6 @@ var (
 )
 
 func init() {
-	Zero = field.Zero()
-	One = field.One()
+	Zero.SetZero()
+	One.SetOne()
 }

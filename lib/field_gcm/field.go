@@ -1,4 +1,4 @@
-package field
+package field_gcm
 
 // Mostly adapted from:
 // https://golang.org/src/crypto/cipher/gcm.go

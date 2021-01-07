@@ -29,8 +29,8 @@ func (s *ITSingleGF) Answer(q []field.Element) []field.Element {
 	for i := range s.db.Entries {
 		a[i] = field.Zero()
 		for j := range s.db.Entries[i] {
-			if !zero.Equal(s.db.Entries[i][j]) {
-				a[i].AddTo(&q[j])
+			if !zero.Equal(&s.db.Entries[i][j]) {
+				a[i].Add(&a[i], &q[j])
 			}
 		}
 	}

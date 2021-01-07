@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/si-co/vpir-code/lib/field_gcm"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
 	"golang.org/x/crypto/blake2b"
@@ -52,7 +52,7 @@ func main() {
 			a2 := s2.Answer(queries[2])
 			//fmt.Printf("%.3fms,", m.RecordAndReset())
 
-			answers := [][]field.Element{a0, a1, a2}
+			answers := [][]field_gcm.Element{a0, a1, a2}
 
 			m.Reset()
 			_, err := c.Reconstruct(answers)

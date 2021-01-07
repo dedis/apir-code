@@ -2,11 +2,12 @@ package client
 
 import (
 	"errors"
+	"fmt"
+	"github.com/si-co/vpir-code/lib/field"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -49,7 +50,8 @@ func (c *ITSingleGF) Query(index int, numServers int) [][]field.Element {
 	}
 
 	// sample random alpha using blake2b
-	alpha := field.RandomXOF(c.xof)
+	var alpha field.Element
+	alpha.SetRandom()
 
 	// set the client state depending on the db representation
 	switch c.rebalanced {
@@ -88,12 +90,13 @@ func (c *ITSingleGF) Reconstruct(answers [][]field.Element) (field.Element, erro
 
 	// sum answers
 	for i := 0; i < answersLen; i++ {
+		fmt.Println(answers[i])
 		sum[i] = field.Zero()
 		for s := range answers {
-			sum[i] = field.Add(sum[i], answers[s][i])
+			sum[i].Add(&sum[i], &answers[s][i])
 		}
 
-		if !sum[i].Equal(c.state.alpha) && !sum[i].Equal(field.Zero()) {
+		if !sum[i].Equal(&c.state.alpha) && !sum[i].Equal(&constants.Zero) {
 			return constants.Zero, errors.New("REJECT!")
 		}
 	}
@@ -105,9 +108,9 @@ func (c *ITSingleGF) Reconstruct(answers [][]field.Element) (field.Element, erro
 	}
 
 	switch {
-	case sum[i].Equal(c.state.alpha):
+	case sum[i].Equal(&c.state.alpha):
 		return constants.One, nil
-	case sum[i].Equal(constants.Zero):
+	case sum[i].Equal(&constants.Zero):
 		return constants.Zero, nil
 	default:
 		return constants.Zero, errors.New("REJECT!")
@@ -127,7 +130,10 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 	// for all except one server, we need dbLength random elements
 	// to perform the secret sharing
 	numRandomElements := c.state.dbLength * (numServers - 1)
-	randomElements := field.RandomVectorXOF(numRandomElements, c.xof)
+	randomElements, err := field.RandomVector(numRandomElements)
+	if err != nil {
+		panic(err)
+	}
 	for i := 0; i < c.state.dbLength; i++ {
 		// create basic vector
 		eialpha[i] = zero
@@ -138,13 +144,14 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 		}
 
 		// create k - 1 random vectors
-		sum := field.Zero()
+		var sum field.Element
+		sum = field.Zero()
 		for k := 0; k < numServers-1; k++ {
 			rand := randomElements[c.state.dbLength*k+i]
 			vectors[k][i] = rand
-			sum = field.Add(sum, rand)
+			sum.Add(&sum, &rand)
 		}
-		vectors[numServers-1][i] = field.Add(eialpha[i], sum)
+		vectors[numServers-1][i].Add(&eialpha[i], &sum)
 	}
 
 	return vectors, nil

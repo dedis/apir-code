@@ -3,12 +3,12 @@ package database
 import (
 	"crypto/rand"
 	"errors"
+	"github.com/si-co/vpir-code/lib/field"
 	"math"
 	"strconv"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 )

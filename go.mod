@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/consensys/goff v0.3.9 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dimakogan/dpf-go v0.0.0-20201114031700-ca9e532cdd7f
 	github.com/dkales/dpf-go v0.0.0-20190409133349-ba25eb14c6f7 // indirect
@@ -14,8 +15,9 @@ require (
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
-	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
+	golang.org/x/sys v0.0.0-20201223074533-0d417f636930
 	golang.org/x/text v0.3.4 // indirect
+	golang.org/x/tools v0.0.0-20210105164027-a548c3f4af2d // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d // indirect
 	google.golang.org/grpc v1.34.0

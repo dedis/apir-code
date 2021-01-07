@@ -1,7 +1,7 @@
-package field
+package field_gcm
 
 import (
-  "bytes"
+	"bytes"
 	"encoding/hex"
 	"testing"
 
