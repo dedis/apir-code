@@ -27,12 +27,9 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
 	blockLength := constants.BlockLength
 
-	// TODO: need to change the matrix logic for the tag
-
 	// parse the query
 	qZeroBase := make([]field.Element, constants.DBLength)
 	qOne := make([][]field.Element, constants.DBLength)
-
 	for i := range q {
 		qZeroBase[i] = q[i][0]
 		qOne[i] = q[i][1:]
@@ -42,14 +39,16 @@ func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
 	// addition and multiplication of elements
 	// in GF(2^128)^b are executed component-wise
 	m := make([]field.Element, blockLength)
-	// we have to traverse column by column for m
 	tag := field.Zero()
+
+	// we have to traverse column by column
 	for i := 0; i < blockLength; i++ {
 		sum := field.Zero()
 		sumTag := field.Zero()
 		for j := 0; j < constants.DBLength; j++ {
 			prod := field.Mul(s.db.Entries[j][i], qZeroBase[j])
 			sum.AddTo(&prod)
+
 			prodTag := field.Mul(s.db.Entries[j][i], qOne[j][i])
 			sumTag.AddTo(&prodTag)
 		}
@@ -59,5 +58,6 @@ func (s *ITMulti) Answer(q [][]field.Element) []field.Element {
 
 	// add tag
 	m = append(m, tag)
+
 	return m
 }
