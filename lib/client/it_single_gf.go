@@ -44,9 +44,9 @@ func NewITSingleGF(xof blake2b.XOF, rebalanced bool) *ITSingleGF {
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
 func (c *ITSingleGF) Query(index int, numServers int) [][]field.Element {
-	if invalidQueryInputs(index, numServers) {
-		panic("invalid query inputs")
-	}
+	//if invalidQueryInputs(index, numServers) {
+	//	panic("invalid query inputs")
+	//}
 
 	// sample random alpha using blake2b
 	var alpha field.Element
@@ -148,9 +148,4 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 	}
 
 	return vectors, nil
-}
-
-// return true if the query inputs are invalid
-func invalidQueryInputs(index int, numServers int) bool {
-	return (index < 0 || index > cst.DBLength) && numServers < 1
 }

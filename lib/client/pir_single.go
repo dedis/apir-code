@@ -40,9 +40,9 @@ func NewITSingleByte(xof blake2b.XOF, rebalanced bool) *ITSingleByte {
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
 func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
-	if invalidQueryInputs(index, numServers) {
-		panic("invalid query inputs")
-	}
+	//if invalidQueryInputs(index, numServers) {
+	//	panic("invalid query inputs")
+	//}
 
 	// set the client state depending on the db representation
 	switch c.rebalanced {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/utils"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -10,7 +11,6 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
-	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/blake2b"
 )

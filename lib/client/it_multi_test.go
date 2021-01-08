@@ -20,7 +20,7 @@ func TestVectorQuery(t *testing.T) {
 	c := NewITMulti(xof, rebalanced)
 
 	index := 0
-	queries := c.Query(index, numServers)
+	queries := c.Query(index, constants.BlockLength, numServers)
 
 	// two servers
 	require.Equal(t, 2, len(queries))
@@ -37,7 +37,7 @@ func TestVectorQuery(t *testing.T) {
 	for n := 0; n < constants.DBLength; n++ {
 		query[n] = make([]field.Element, constants.BlockLength+1)
 		for b := 0; b < constants.BlockLength+1; b++ {
-			query[n][b] = field.Add(queries[0][n][b], queries[1][n][b])
+			query[n][b].Add(&queries[0][n][b], &queries[1][n][b])
 
 		}
 	}
