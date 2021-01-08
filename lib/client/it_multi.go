@@ -8,9 +8,10 @@ import (
 	"log"
 )
 
-// Information theoretic client for multi-bit scheme working in
-// GF(2^128). Both vector and matrix (rebalanced) representations of
-// the database are handled by this client, via a boolean variable
+// Information theoretic client for single-bit and multi-bit schemes
+// working in F(2^127-1). Both vector and matrix (rebalanced)
+// representations of the database are handled by this client, via
+// a boolean variable
 
 // ITMulti represents the client for the information theoretic multi-bit scheme
 type ITMulti struct {
@@ -46,7 +47,9 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	var vectors [][][]field.Element
 	var err error
 
-	// TODO: check query inputs
+	if invalidQueryInputs(index, blockSize, numServers) {
+		log.Fatal("invalid query inputs")
+	}
 
 	// sample random alpha using blake2b
 	alpha.SetRandom(c.xof)
