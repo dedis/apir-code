@@ -1,4 +1,4 @@
-package main
+package gpg
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/openpgp/packet"
 )
 
-func readPublicKeysFromDisk() (map[string][]byte, error) {
+func ReadPublicKeysFromDisk() (map[string][]byte, error) {
 	b, err := ioutil.ReadFile("keys.data")
 	if err != nil {
 		return nil, err

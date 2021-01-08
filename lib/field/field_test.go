@@ -2,12 +2,12 @@ package field
 
 import (
 	"encoding/hex"
-	"golang.org/x/crypto/blake2b"
 	"testing"
+
+	"golang.org/x/crypto/blake2b"
 
 	"github.com/stretchr/testify/require"
 )
-
 
 func TestBytes(t *testing.T) {
 	s := "1f000000000000000000000000000096"
@@ -50,6 +50,7 @@ func TestSquare(t *testing.T) {
 
 	require.Equal(t, true, g4.Equal(&g4_b))
 }
+
 //
 //func TestRandom(t *testing.T) {
 //  var zeros [16]byte

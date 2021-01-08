@@ -1,4 +1,4 @@
-package main
+package gpg
 
 import (
 	"fmt"
@@ -9,10 +9,8 @@ import (
 )
 
 func TestReadFromDisk(t *testing.T) {
-	keys, err := readPublicKeysFromDisk()
+	keys, err := ReadPublicKeysFromDisk()
 	require.NoError(t, err)
-
-	fmt.Println(keys)
 }
 
 func TestImportEntireDump(t *testing.T) {

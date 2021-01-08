@@ -2,14 +2,16 @@ package database
 
 import (
 	"crypto/rand"
+	"encoding/binary"
 	"errors"
-	"github.com/si-co/vpir-code/lib/field"
 	"log"
 	"math"
 	"strconv"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/gpg"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 )
@@ -26,6 +28,51 @@ type Bytes struct {
 	DBLengthSqrt int // unused for vector
 }
 
+func FromKeysFile() (*GF, error) {
+	// read gpg keys from file
+	keys, err := gpg.ReadPublicKeysFromDisk()
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: find a way to automatize this
+	db := CreateMultiBitGFLength(40)
+
+	j := 0
+	for _, v := range keys {
+		elements := make([]field.Element, 0)
+		// determine bytes length of key
+		l := int64(len(v))
+		bytesLength := make([]byte, 2)
+		binary.PutVarint(bytesLength, l)
+
+		e := new(field.Element).SetBytes(bytesLength)
+		elements = append(elements, *e)
+
+		// embed the key into field elements
+		chunkLength := 32
+		for i := 0; i < len(v); i += 32 {
+			end := i + chunkLength
+			if end > len(v) {
+				end = len(v)
+			}
+			e := new(field.Element).SetBytes(v[i:end])
+			elements = append(elements, *e)
+		}
+
+		// pad to have a full block
+		for len(elements) < 40 {
+			elements = append(elements, field.Zero())
+		}
+
+		// store in db
+		db.Entries[j] = elements
+		j++
+	}
+
+	return db, nil
+}
+
 func CreateRandomMultiBitOneMBGF(xof blake2b.XOF) *GF {
 	entries := make([][]field.Element, constants.DBLength)
 	for i := range entries {
@@ -39,6 +86,15 @@ func CreateRandomMultiBitOneMBGF(xof blake2b.XOF) *GF {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	return &GF{Entries: entries}
+}
+
+func CreateMultiBitGFLength(length int) *GF {
+	entries := make([][]field.Element, constants.DBLength)
+	for i := range entries {
+		entries[i] = zeroVectorGF(length)
 	}
 
 	return &GF{Entries: entries}
