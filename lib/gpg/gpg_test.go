@@ -8,6 +8,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestReadFromDisk(t *testing.T) {
+	keys, err := readPublicKeysFromDisk()
+	require.NoError(t, err)
+
+	fmt.Println(keys)
+}
+
 func TestImportEntireDump(t *testing.T) {
 	errorCounts := 0
 	basePath := ""
@@ -25,6 +32,22 @@ func TestImportEntireDump(t *testing.T) {
 	}
 
 	fmt.Println("Total errors: ", errorCounts, " over 287 files.")
+}
+
+func TestMarshalPublicKeysFromDump(t *testing.T) {
+	path := ""
+	if path == "" {
+		panic("path not specified")
+	}
+	el, err := importSingleDump(path)
+	require.NoError(t, err)
+
+	primaryKeys := extractPrimaryKeys(el)
+
+	keys := marshalPublicKeys(primaryKeys)
+
+	err = writePublicKeysOnDisk(keys)
+	require.NoError(t, err)
 }
 
 func TestImportSingleDump(t *testing.T) {
