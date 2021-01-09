@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"log"
 	"math"
 	"strconv"
@@ -40,18 +41,11 @@ func FromKeysFile() (*GF, error) {
 
 	j := 0
 	for _, v := range keys {
+		fmt.Println("v:", v)
 		elements := make([]field.Element, 0)
-		// determine bytes length of key
-		l := int64(len(v))
-		bytesLength := make([]byte, 2)
-		binary.PutVarint(bytesLength, l)
-
-		e := new(field.Element).SetBytes(bytesLength)
-		elements = append(elements, *e)
-
 		// embed the key into field elements
-		chunkLength := 32
-		for i := 0; i < len(v); i += 32 {
+		chunkLength := 16
+		for i := 0; i < len(v); i += 16 {
 			end := i + chunkLength
 			if end > len(v) {
 				end = len(v)
@@ -59,6 +53,15 @@ func FromKeysFile() (*GF, error) {
 			e := new(field.Element).SetBytes(v[i:end])
 			elements = append(elements, *e)
 		}
+
+		// determine elements length of key
+		l := int64(len(elements))
+		fmt.Println(l)
+		elementsLength := make([]byte, 2)
+		binary.PutVarint(elementsLength, l)
+
+		e := new(field.Element).SetBytes(elementsLength)
+		elements = append([]field.Element{*e}, elements...)
 
 		// pad to have a full block
 		for len(elements) < 40 {
@@ -68,6 +71,7 @@ func FromKeysFile() (*GF, error) {
 		// store in db
 		db.Entries[j] = elements
 		j++
+		break
 	}
 
 	return db, nil

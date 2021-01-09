@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/dsa"
 	"crypto/ecdsa"
 	"crypto/ed25519"
@@ -25,7 +26,7 @@ import (
 func TestRetrieveKey(t *testing.T) {
 	db, err := database.FromKeysFile()
 	require.NoError(t, err)
-	blockLength := 20
+	blockLength := 40
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
@@ -43,25 +44,30 @@ func TestRetrieveKey(t *testing.T) {
 	answers := [][]field.Element{a0, a1}
 
 	result, err := c.Reconstruct(answers, blockLength)
-	fmt.Println(len(result))
 	require.NoError(t, err)
 
 	// parse result
 	// TODO: logic for this should be in lib/gpg
 	lengthBytes := result[0].Bytes()
-	lengthBytesEx := []byte{lengthBytes[len(lengthBytes)-2], lengthBytes[len(lengthBytes)-1]}
-	length, _ := binary.Varint(lengthBytesEx)
-	fmt.Println(length / 8)
+	length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
+	fmt.Println("length:", length)
 
 	resultBytes := make([]byte, 0)
 	for i := 1; i < len(result); i++ {
 		elementBytes := result[i].Bytes()
-		resultBytes = append(resultBytes, elementBytes[:]...)
+		bytesSlice := elementBytes[:]
+		if i >= int(length) {
+			// trim zeros for last uncomplete bytes block
+			bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
+		}
+		if len(bytesSlice) > 0 {
+			resultBytes = append(resultBytes, bytesSlice...)
+		}
 	}
-	fmt.Println("resultBytes completo", resultBytes)
-	fmt.Println("resultBytes", resultBytes[2:length/8+2])
+	fmt.Println("resultBytes:", resultBytes)
+	fmt.Println("lastElement:", resultBytes[length-1])
 
-	pub, err := x509.ParsePKIXPublicKey(resultBytes[2 : length/8+2])
+	pub, err := x509.ParsePKIXPublicKey(resultBytes)
 	if err != nil {
 		panic("failed to parse DER encoded public key: " + err.Error())
 	}
@@ -78,7 +84,6 @@ func TestRetrieveKey(t *testing.T) {
 	default:
 		panic("unknown type of public key")
 	}
-
 }
 
 func TestMultiBitOneKb(t *testing.T) {

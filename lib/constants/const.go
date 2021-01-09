@@ -1,9 +1,10 @@
 package constants
 
 import (
-	"github.com/si-co/vpir-code/lib/field"
 	"math"
 	"math/big"
+
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 const (
