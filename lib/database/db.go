@@ -68,7 +68,6 @@ func FromKeysFile() (*GF, error) {
 		// store in db
 		db.Entries[j] = elements
 		j++
-		break
 	}
 
 	return db, nil

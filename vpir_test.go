@@ -36,51 +36,53 @@ func TestRetrieveKey(t *testing.T) {
 	s0 := server.NewITMulti(rebalanced, db)
 	s1 := server.NewITMulti(rebalanced, db)
 
-	queries := c.Query(0, blockLength, 2)
+	for i := 0; i < 100; i++ {
+		queries := c.Query(i, blockLength, 2)
 
-	a0 := s0.Answer(queries[0], blockLength)
-	a1 := s1.Answer(queries[1], blockLength)
+		a0 := s0.Answer(queries[0], blockLength)
+		a1 := s1.Answer(queries[1], blockLength)
 
-	answers := [][]field.Element{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
-	result, err := c.Reconstruct(answers, blockLength)
-	require.NoError(t, err)
+		result, err := c.Reconstruct(answers, blockLength)
+		require.NoError(t, err)
 
-	// parse result
-	// TODO: logic for this should be in lib/gpg
-	lengthBytes := result[0].Bytes()
-	length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
+		// parse result
+		// TODO: logic for this should be in lib/gpg
+		lengthBytes := result[0].Bytes()
+		length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
 
-	resultBytes := make([]byte, 0)
-	for i := 1; i < len(result); i++ {
-		elementBytes := result[i].Bytes()
-		bytesSlice := elementBytes[:]
-		if i >= int(length) {
-			// trim zeros for last uncomplete bytes block
-			// and padding blocks
-			bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
+		resultBytes := make([]byte, 0)
+		for i := 1; i < len(result); i++ {
+			elementBytes := result[i].Bytes()
+			bytesSlice := elementBytes[:]
+			if i >= int(length) {
+				// trim zeros for last uncomplete bytes block
+				// and padding blocks
+				bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
+			}
+			if len(bytesSlice) > 0 {
+				resultBytes = append(resultBytes, bytesSlice...)
+			}
 		}
-		if len(bytesSlice) > 0 {
-			resultBytes = append(resultBytes, bytesSlice...)
+
+		pub, err := x509.ParsePKIXPublicKey(resultBytes)
+		if err != nil {
+			panic("failed to parse DER encoded public key: " + err.Error())
 		}
-	}
 
-	pub, err := x509.ParsePKIXPublicKey(resultBytes)
-	if err != nil {
-		panic("failed to parse DER encoded public key: " + err.Error())
-	}
-
-	switch pub := pub.(type) {
-	case *rsa.PublicKey:
-		fmt.Println("pub is of type RSA:", pub)
-	case *dsa.PublicKey:
-		fmt.Println("pub is of type DSA:", pub)
-	case *ecdsa.PublicKey:
-		fmt.Println("pub is of type ECDSA:", pub)
-	case ed25519.PublicKey:
-		fmt.Println("pub is of type Ed25519:", pub)
-	default:
-		panic("unknown type of public key")
+		switch pub := pub.(type) {
+		case *rsa.PublicKey:
+			fmt.Println("pub is of type RSA:", pub)
+		case *dsa.PublicKey:
+			fmt.Println("pub is of type DSA:", pub)
+		case *ecdsa.PublicKey:
+			fmt.Println("pub is of type ECDSA:", pub)
+		case ed25519.PublicKey:
+			fmt.Println("pub is of type Ed25519:", pub)
+		default:
+			panic("unknown type of public key")
+		}
 	}
 }
 
