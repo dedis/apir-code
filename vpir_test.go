@@ -50,7 +50,6 @@ func TestRetrieveKey(t *testing.T) {
 	// TODO: logic for this should be in lib/gpg
 	lengthBytes := result[0].Bytes()
 	length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
-	fmt.Println("length:", length)
 
 	resultBytes := make([]byte, 0)
 	for i := 1; i < len(result); i++ {
@@ -58,14 +57,13 @@ func TestRetrieveKey(t *testing.T) {
 		bytesSlice := elementBytes[:]
 		if i >= int(length) {
 			// trim zeros for last uncomplete bytes block
+			// and padding blocks
 			bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
 		}
 		if len(bytesSlice) > 0 {
 			resultBytes = append(resultBytes, bytesSlice...)
 		}
 	}
-	fmt.Println("resultBytes:", resultBytes)
-	fmt.Println("lastElement:", resultBytes[length-1])
 
 	pub, err := x509.ParsePKIXPublicKey(resultBytes)
 	if err != nil {

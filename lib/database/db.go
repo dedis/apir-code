@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"log"
 	"math"
 	"strconv"
@@ -41,7 +40,6 @@ func FromKeysFile() (*GF, error) {
 
 	j := 0
 	for _, v := range keys {
-		fmt.Println("v:", v)
 		elements := make([]field.Element, 0)
 		// embed the key into field elements
 		chunkLength := 16
@@ -56,7 +54,6 @@ func FromKeysFile() (*GF, error) {
 
 		// determine elements length of key
 		l := int64(len(elements))
-		fmt.Println(l)
 		elementsLength := make([]byte, 2)
 		binary.PutVarint(elementsLength, l)
 
