@@ -2,10 +2,11 @@ package client
 
 import (
 	"errors"
+	"log"
+
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 	"golang.org/x/crypto/blake2b"
-	"log"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -76,14 +77,11 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	}
 
 	if blockSize > 1 {
-		// Inserting secret-shared 1 into vectors before alphas
-		//a = append(a, field.Zero())
-		//copy(a[1:], a)
-		//a[0] = field.One()
+		// inserting secret-shared 1 into vectors before alphas
 		a = append([]field.Element{field.One()}, a...)
-		vectors, err = c.secretShare(a, blockSize + 1, numServers)
+		vectors, err = c.secretShare(a, numServers)
 	} else {
-		vectors, err = c.secretShare(a, blockSize, numServers)
+		vectors, err = c.secretShare(a, numServers)
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -135,8 +133,10 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 	return messages, nil
 }
 
-// Additive secret sharing
-func (c *ITMulti) secretShare(a []field.Element, size, numServers int) ([][][]field.Element, error){
+// secretShare the vector a among numServers non-colluding servers
+func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.Element, error) {
+	size := len(a)
+
 	// create query vectors for all the servers
 	vectors := make([][][]field.Element, numServers)
 	for k := range vectors {
