@@ -1,14 +1,13 @@
 package client
 
 import (
-	"crypto/rand"
 	"errors"
-	"math/big"
 	"math/bits"
 
-	"github.com/frankw2/libfss/go/libfss"
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/dpf"
+	"github.com/si-co/vpir-code/lib/field"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -19,7 +18,7 @@ type DPF struct {
 
 type dpfState struct {
 	i     int
-	alpha *big.Int
+	alpha field.Element
 }
 
 func NewDPF(xof blake2b.XOF) *DPF {
@@ -29,7 +28,7 @@ func NewDPF(xof blake2b.XOF) *DPF {
 	}
 }
 
-func (c *DPF) Query(index int, numServers int) ([][]byte, []libfss.FssKeyEq2P) {
+func (c *DPF) Query(index int, numServers int) ([][]byte, []dpf.FssKeyEq2P) {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -41,35 +40,34 @@ func (c *DPF) Query(index int, numServers int) ([][]byte, []libfss.FssKeyEq2P) {
 	}
 
 	// sample random alpha
-	alpha, err := rand.Int(c.xof, cst.Modulo)
+	alpha, err := new(field.Element).SetRandom(c.xof)
 	if err != nil {
 		panic(err)
 	}
-	alpha = big.NewInt(12)
 
 	// set ITClient state
-	c.state = &dpfState{i: index, alpha: alpha}
+	c.state = &dpfState{i: index, alpha: *alpha}
 
-	fClient := libfss.ClientInitialize(uint(bits.Len(uint(constants.DBLength))))
-	fssKeys := fClient.GenerateTreePF(uint(index), uint(alpha.Uint64()))
+	fClient := dpf.ClientInitialize(uint(bits.Len(uint(constants.DBLength))))
+	fssKeys := fClient.GenerateTreePF(uint(index), alpha)
 
 	return fClient.PrfKeys, fssKeys
 
 }
 
-func (c *DPF) Reconstruct(answers []*big.Int) (*big.Int, error) {
-	sum := big.NewInt(0)
+func (c *DPF) Reconstruct(answers []field.Element) (field.Element, error) {
+	sum := field.Zero()
 	for _, a := range answers {
-		sum.Add(sum, a)
+		sum.Add(&sum, &a)
 	}
 
 	switch {
-	case sum.Cmp(c.state.alpha) == 0:
-		return cst.BigOne, nil
-	case sum.Cmp(cst.BigZero) == 0:
-		return cst.BigZero, nil
+	case sum.Equal(&c.state.alpha):
+		return cst.One, nil
+	case sum.Equal(&cst.Zero):
+		return cst.Zero, nil
 	default:
-		return nil, errors.New("REJECT!")
+		return cst.Zero, errors.New("REJECT!")
 	}
 
 }
