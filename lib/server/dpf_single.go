@@ -21,13 +21,13 @@ func (s *DPFServer) Answer(q dpf.FssKeyEq2P, prfKeys [][]byte, serverNum byte) [
 	// initialize dpf server
 	fServer := dpf.ServerInitialize(prfKeys, uint(bits.Len(uint(constants.DBLength))))
 
+	var tmp field.Element
 	a := make([]field.Element, len(s.db.Entries))
 	for i := range s.db.Entries {
 		a[i] = field.Zero()
 		for j := range s.db.Entries[i] {
-			mul := new(field.Element)
-			mul.Mul(&s.db.Entries[i][j], fServer.EvaluatePF(serverNum, q, uint(i)))
-			a[i].Add(&a[i], mul)
+			tmp.Mul(&s.db.Entries[i][j], fServer.EvaluatePF(serverNum, q, uint(i)))
+			a[i].Add(&a[i], &tmp)
 		}
 	}
 
