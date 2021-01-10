@@ -7,3 +7,4 @@
 * General clanup and refactoring --> Kirill
 * Organize iccluster servers --> Simone
 * Improve config/constants
+* Multi-bit scheme should verify the reconstructed entires as soon as they are computed, as before
