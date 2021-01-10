@@ -5,6 +5,7 @@ package dpf
 import (
 	"crypto/aes"
 	"crypto/cipher"
+
 	//"fmt"
 
 	"github.com/si-co/vpir-code/lib/field"
@@ -21,8 +22,8 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 	for i := range prfKeys {
 		f.PrfKeys[i] = make([]byte, aes.BlockSize)
 		copy(f.PrfKeys[i], prfKeys[i])
-	//	fmt.Println("server")
-	//	fmt.Println(f.PrfKeys[i])
+		//	fmt.Println("server")
+		//	fmt.Println(f.PrfKeys[i])
 		block, err := aes.NewCipher(f.PrfKeys[i])
 		if err != nil {
 			panic(err.Error())
@@ -54,7 +55,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint) *field.Element {
 	copy(sCurr, k.SInit)
 	tCurr := k.TInit
 	for i := uint(0); i < f.NumBits; i++ {
-        var xBit byte = 0
+		var xBit byte = 0
 		if i != f.N {
 			xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
 		}
@@ -85,14 +86,13 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint) *field.Element {
 		}
 		//fmt.Println(f.Out)
 	}
-	out := field.FromBytes(sCurr)
-  if tCurr > 0 {
-    out.AddTo(&k.FinalCW)
-  }
+	out := new(field.Element).SetBytes(sCurr)
+	if tCurr > 0 {
+		out.Add(out, &k.FinalCW)
+	}
 	if serverNum == 1 {
-    out.Negate()
-  }
+		out.Neg(out)
+	}
 
-  return &out
+	return out
 }
-

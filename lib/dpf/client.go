@@ -6,6 +6,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+
 	//"fmt"
 
 	"github.com/si-co/vpir-code/lib/field"
@@ -131,17 +132,28 @@ func (f Fss) GenerateTreePF(a uint, b *field.Element) []FssKeyEq2P {
 		tCurr1 = (prfOut1[keep+aes.BlockSize] % 2) ^ tCWKeep*tCurr1
 	}
 	// Convert final CW to integer
-	sFinal0 := field.FromBytes(sCurr0)
-	sFinal1 := field.FromBytes(sCurr1)
-  sFinal0.Negate()
-	fssKeys[0].FinalCW.AddTo(&sFinal0)
-	fssKeys[0].FinalCW.AddTo(&sFinal1)
-	fssKeys[0].FinalCW.AddTo(b)
+	//sFinal0 := field.FromBytes(sCurr0)
+	//sFinal1 := field.FromBytes(sCurr1)
+	//sFinal0.Negate()
+	//fssKeys[0].FinalCW.AddTo(&sFinal0)
+	//fssKeys[0].FinalCW.AddTo(&sFinal1)
+	//fssKeys[0].FinalCW.AddTo(b)
+	//fssKeys[1].FinalCW = fssKeys[0].FinalCW
+	//if tCurr1 == 1 {
+	//fssKeys[0].FinalCW.Negate()
+	//fssKeys[1].FinalCW = fssKeys[0].FinalCW
+	//}
+	// Convert final CW to integer
+	sFinal0 := new(field.Element).SetBytes(sCurr0)
+	sFinal1 := new(field.Element).SetBytes(sCurr1)
+	sFinal0.Neg(sFinal0)
+	fssKeys[0].FinalCW.Add(&fssKeys[0].FinalCW, sFinal0)
+	fssKeys[0].FinalCW.Add(&fssKeys[0].FinalCW, sFinal1)
+	fssKeys[0].FinalCW.Add(&fssKeys[0].FinalCW, b)
 	fssKeys[1].FinalCW = fssKeys[0].FinalCW
 	if tCurr1 == 1 {
-		fssKeys[0].FinalCW.Negate()
+		fssKeys[0].FinalCW.Neg(&fssKeys[0].FinalCW)
 		fssKeys[1].FinalCW = fssKeys[0].FinalCW
 	}
 	return fssKeys
 }
-
