@@ -36,7 +36,7 @@ func TestRetrieveKey(t *testing.T) {
 	s0 := server.NewITMulti(rebalanced, db)
 	s1 := server.NewITMulti(rebalanced, db)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		queries := c.Query(i, blockLength, 2)
 
 		a0 := s0.Answer(queries[0], blockLength)

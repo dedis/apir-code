@@ -44,15 +44,13 @@ func NewITMulti(xof blake2b.XOF, rebalanced bool) *ITMulti {
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
 func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
-	var alpha field.Element
-	var vectors [][][]field.Element
-	var err error
 
 	if invalidQueryInputs(index, blockSize, numServers) {
 		log.Fatal("invalid query inputs")
 	}
 
 	// sample random alpha using blake2b
+	var alpha field.Element
 	alpha.SetRandom(c.xof)
 
 	// compute vector a = (alpha, alpha^2, ..., alpha^b)
@@ -76,6 +74,8 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 		panic("not yet implemented")
 	}
 
+	var vectors [][][]field.Element
+	var err error
 	if blockSize > 1 {
 		// inserting secret-shared 1 into vectors before alphas
 		a = append([]field.Element{field.One()}, a...)
@@ -100,7 +100,6 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 		for s := range answers {
 			sum[i].Add(&sum[i], &answers[s][i])
 		}
-
 	}
 
 	i := 0
@@ -135,6 +134,7 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 
 // secretShare the vector a among numServers non-colluding servers
 func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.Element, error) {
+	// get block length
 	size := len(a)
 
 	// create query vectors for all the servers
@@ -159,11 +159,12 @@ func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.El
 
 		// create k - 1 random vectors of length dbLength containing
 		// elements in F^(b)
+		randElements, err := field.RandomVector(size*(numServers-1), c.xof)
+		if err != nil {
+			return nil, err
+		}
 		for k := 0; k < numServers-1; k++ {
-			rand, err := field.RandomVector(size, c.xof)
-			if err != nil {
-				return nil, err
-			}
+			rand := randElements[i+k]
 			vectors[k][i] = rand
 		}
 
