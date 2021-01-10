@@ -1,95 +1,88 @@
 package main
 
 import (
-	"bytes"
-	"crypto/dsa"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/binary"
 	"fmt"
 	"testing"
 
-	"github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/utils"
-
 	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/blake2b"
 )
 
-func TestRetrieveKey(t *testing.T) {
-	db, err := database.FromKeysFile()
-	require.NoError(t, err)
-	blockLength := 40
-
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-	rebalanced := false
-
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
-
-	for i := 0; i < 10; i++ {
-		queries := c.Query(i, blockLength, 2)
-
-		a0 := s0.Answer(queries[0], blockLength)
-		a1 := s1.Answer(queries[1], blockLength)
-
-		answers := [][]field.Element{a0, a1}
-
-		result, err := c.Reconstruct(answers, blockLength)
-		require.NoError(t, err)
-
-		// parse result
-		// TODO: logic for this should be in lib/gpg
-		lengthBytes := result[0].Bytes()
-		length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
-
-		resultBytes := make([]byte, 0)
-		for i := 1; i < len(result); i++ {
-			elementBytes := result[i].Bytes()
-			bytesSlice := elementBytes[:]
-			if i >= int(length) {
-				// trim zeros for last uncomplete bytes block
-				// and padding blocks
-				bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
-			}
-			if len(bytesSlice) > 0 {
-				resultBytes = append(resultBytes, bytesSlice...)
-			}
-		}
-
-		pub, err := x509.ParsePKIXPublicKey(resultBytes)
-		if err != nil {
-			panic("failed to parse DER encoded public key: " + err.Error())
-		}
-
-		switch pub := pub.(type) {
-		case *rsa.PublicKey:
-			fmt.Println("pub is of type RSA:", pub)
-		case *dsa.PublicKey:
-			fmt.Println("pub is of type DSA:", pub)
-		case *ecdsa.PublicKey:
-			fmt.Println("pub is of type ECDSA:", pub)
-		case ed25519.PublicKey:
-			fmt.Println("pub is of type Ed25519:", pub)
-		default:
-			panic("unknown type of public key")
-		}
-	}
-}
+//func TestRetrieveKey(t *testing.T) {
+//	db, err := database.FromKeysFile()
+//	require.NoError(t, err)
+//	blockLength := 40
+//
+//	xof, err := blake2b.NewXOF(0, []byte("my key"))
+//	require.NoError(t, err)
+//	rebalanced := false
+//
+//	c := client.NewITMulti(xof, rebalanced)
+//	s0 := server.NewITMulti(rebalanced, db)
+//	s1 := server.NewITMulti(rebalanced, db)
+//
+//	for i := 0; i < 10; i++ {
+//		queries := c.Query(i, blockLength, 2)
+//
+//		a0 := s0.Answer(queries[0], blockLength)
+//		a1 := s1.Answer(queries[1], blockLength)
+//
+//		answers := [][]field.Element{a0, a1}
+//
+//		result, err := c.Reconstruct(answers, blockLength)
+//		require.NoError(t, err)
+//
+//		// parse result
+//		// TODO: logic for this should be in lib/gpg
+//		lengthBytes := result[0].Bytes()
+//		length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
+//
+//		resultBytes := make([]byte, 0)
+//		for i := 1; i < len(result); i++ {
+//			elementBytes := result[i].Bytes()
+//			bytesSlice := elementBytes[:]
+//			if i >= int(length) {
+//				// trim zeros for last uncomplete bytes block
+//				// and padding blocks
+//				bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
+//			}
+//			if len(bytesSlice) > 0 {
+//				resultBytes = append(resultBytes, bytesSlice...)
+//			}
+//		}
+//
+//		pub, err := x509.ParsePKIXPublicKey(resultBytes)
+//		if err != nil {
+//			log.Printf("failed to parse DER encoded public key: %v", err)
+//		}
+//
+//		switch pub := pub.(type) {
+//		case *rsa.PublicKey:
+//			fmt.Println("pub is of type RSA:", pub)
+//		case *dsa.PublicKey:
+//			fmt.Println("pub is of type DSA:", pub)
+//		case *ecdsa.PublicKey:
+//			fmt.Println("pub is of type ECDSA:", pub)
+//		case ed25519.PublicKey:
+//			fmt.Println("pub is of type Ed25519:", pub)
+//		default:
+//			panic("unknown type of public key")
+//		}
+//	}
+//}
 
 func TestMultiBitOneKb(t *testing.T) {
+	dbLenMB := 1048576 * 8
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomMultiBitOneMBGF(xofDB)
+	db := database.CreateRandomMultiBitOneMBGF(xofDB, dbLenMB, constants.BlockLength)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
@@ -111,19 +104,21 @@ func TestMultiBitOneKb(t *testing.T) {
 
 		answers := [][]field.Element{a0, a1}
 
-		_, err = c.Reconstruct(answers, constants.BlockLength)
+		res, err := c.Reconstruct(answers, constants.BlockLength)
 		require.NoError(t, err)
+		require.ElementsMatch(t, db.Entries[i], res)
 	}
 
 	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
 func TestSingleBitOneKb(t *testing.T) {
+	dbLenMB := 1048576 * 8
 	blockLen := 1
 
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomMultiBitOneMBGF(xofDB)
+	db := database.CreateRandomSingleBitDB(xofDB, dbLenMB, blockLen)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
@@ -146,7 +141,7 @@ func TestSingleBitOneKb(t *testing.T) {
 
 		answers := [][]field.Element{a0, a1}
 
-		_, err = c.Reconstruct(answers, blockLen)
+		_, err := c.Reconstruct(answers, blockLen)
 		require.NoError(t, err)
 	}
 
@@ -156,9 +151,8 @@ func TestSingleBitOneKb(t *testing.T) {
 func TestMultiBitVectorGF(t *testing.T) {
 	db := database.CreateMultiBitGF()
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
+
 	rebalanced := false
 	c := client.NewITMulti(xof, rebalanced)
 	s0 := server.NewITMulti(rebalanced, db)
@@ -180,9 +174,8 @@ func TestMatrixOneKbByte(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiMatrixOneKbByte()
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
+
 	rebalanced := true
 	c := client.NewITSingleByte(xof, rebalanced)
 	s0 := server.NewITSingleByte(rebalanced, db)

@@ -16,8 +16,7 @@ func TestBytes(t *testing.T) {
 
 	var e Element
 	e.SetBytes(x)
-	eb := e.Bytes()
-	require.Equal(t, s, hex.EncodeToString(eb[:]))
+	require.Equal(t, s, e.HexString())
 }
 
 func TestAdd(t *testing.T) {
@@ -30,9 +29,8 @@ func TestAdd(t *testing.T) {
 	r1.SetBytes(x)
 	r2.SetBytes(y)
 	res.Add(&r1, &r2)
-	resb := res.Bytes()
 
-	require.Equal(t, "00000000000000000000000000000002", hex.EncodeToString(resb[:]))
+	require.Equal(t, "00000000000000000000000000000002", res.HexString())
 }
 
 func TestSquare(t *testing.T) {

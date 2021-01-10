@@ -126,7 +126,7 @@ func (c *ITSingleGF) secretSharing(numServers int) ([][]field.Element, error) {
 	// for all except one server, we need dbLength random elements
 	// to perform the secret sharing
 	numRandomElements := c.state.dbLength * (numServers - 1)
-	randomElements, err := field.RandomVector(numRandomElements, c.xof)
+	randomElements, err := field.RandomVector(c.xof, numRandomElements)
 	if err != nil {
 		panic(err)
 	}

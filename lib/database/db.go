@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
+	"io"
 	"log"
 	"math"
 	"strconv"
@@ -13,7 +14,6 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/gpg"
 	"github.com/si-co/vpir-code/lib/utils"
-	"golang.org/x/crypto/blake2b"
 )
 
 var text = "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
@@ -73,16 +73,34 @@ func FromKeysFile() (*GF, error) {
 	return db, nil
 }
 
-func CreateRandomMultiBitOneMBGF(xof blake2b.XOF) *GF {
+func CreateRandomMultiBitOneMBGF(rnd io.Reader, dbLen, blockLen int) *GF {
 	entries := make([][]field.Element, constants.DBLength)
 	for i := range entries {
-		entries[i] = zeroVectorGF(cst.BlockLength)
+		entries[i] = zeroVectorGF(blockLen)
 	}
 
-	fieldElements := 1048576 * 8 / 128
+	numFieldElements := dbLen / field.Bytes
 	var err error
-	for i := 0; i < fieldElements/constants.BlockLength; i++ {
-		entries[i], err = field.RandomVector(constants.BlockLength, xof)
+	for i := 0; i < numFieldElements/blockLen; i++ {
+		entries[i], err = field.RandomVector(rnd, blockLen)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return &GF{Entries: entries}
+}
+
+func CreateRandomSingleBitDB(rnd io.Reader, dbLen, blockLen int) *GF {
+	entries := make([][]field.Element, constants.DBLength)
+	for i := range entries {
+		entries[i] = zeroVectorGF(blockLen)
+	}
+
+	numFieldElements := constants.DBLength / field.Bytes
+	var err error
+	for i := 0; i < numFieldElements/blockLen; i++ {
+		entries[i], err = field.RandomVector(rnd, blockLen)
 		if err != nil {
 			log.Fatal(err)
 		}

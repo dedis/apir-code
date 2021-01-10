@@ -25,6 +25,7 @@ package field
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"io"
 	"math/big"
 	"math/bits"
@@ -219,7 +220,7 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	return z, nil
 }
 
-func RandomVector(length int, rnd io.Reader) ([]Element, error) {
+func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	bytesLength := length*16 + 1
 	bytes := make([]byte, bytesLength)
 	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
@@ -606,6 +607,11 @@ func (z *Element) String() string {
 	vv := bigIntPool.Get().(*big.Int)
 	defer bigIntPool.Put(vv)
 	return z.ToBigIntRegular(vv).String()
+}
+
+func (z *Element) HexString() string {
+	_z := z.Bytes()
+	return hex.EncodeToString(_z[:])
 }
 
 // ToBigInt returns z as a big.Int in Montgomery form

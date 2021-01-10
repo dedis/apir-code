@@ -160,7 +160,7 @@ func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.El
 		// create k - 1 random vectors of length dbLength containing
 		// elements in F^(b)
 		for k := 0; k < numServers-1; k++ {
-			rand, err := field.RandomVector(size, c.xof)
+			rand, err := field.RandomVector(c.xof, size)
 			if err != nil {
 				return nil, err
 			}
