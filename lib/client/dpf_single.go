@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -55,19 +56,26 @@ func (c *DPF) Query(index int, numServers int) ([][]byte, []dpf.FssKeyEq2P) {
 
 }
 
-func (c *DPF) Reconstruct(answers []field.Element) (field.Element, error) {
-	sum := field.Zero()
-	for _, a := range answers {
-		sum.Add(&sum, &a)
-	}
+func (c *DPF) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
+	answersLen := len(answers[0])
+	sum := make([]field.Element, answersLen)
 
+	for i := 0; i < answersLen; i++ {
+		sum[i] = field.Zero()
+		for s := range answers {
+			sum[i].Add(&sum[i], &answers[s][i])
+		}
+
+	}
+	i := 0
+	fmt.Println(sum[i])
 	switch {
-	case sum.Equal(&c.state.alpha):
-		return cst.One, nil
-	case sum.Equal(&cst.Zero):
-		return cst.Zero, nil
+	case sum[i].Equal(&c.state.alpha):
+		return []field.Element{cst.One}, nil
+	case sum[i].Equal(&cst.Zero):
+		return []field.Element{cst.Zero}, nil
 	default:
-		return cst.Zero, errors.New("REJECT!")
+		return nil, errors.New("REJECT!")
 	}
 
 }

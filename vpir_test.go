@@ -404,10 +404,9 @@ func TestVectorByte(t *testing.T) {
 	fmt.Printf("Total time VectorByte: %.1fms\n", totalTimer.Record())
 }
 
-/**
 func TestDPF(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
-	db := database.CreateAsciiVector()
+	db := database.CreateAsciiVectorGF()
 	result := ""
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	if err != nil {
@@ -429,7 +428,7 @@ func TestDPF(t *testing.T) {
 		a1 := s1.Answer(fssKeys[1], prfKeys, 1)
 		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
 
-		answers := []*big.Int{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
 		m.Reset()
 		x, err := c.Reconstruct(answers)
@@ -437,7 +436,12 @@ func TestDPF(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		result += x.String()
+		if x[0].String() == "0" {
+			result += "0"
+		} else {
+			result += "1"
+		}
+
 	}
 	b, err := utils.BitStringToBytes(result)
 	if err != nil {
@@ -455,4 +459,3 @@ func TestDPF(t *testing.T) {
 
 	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
 }
-**/
