@@ -3,10 +3,55 @@ package database
 import (
 	"crypto/rand"
 	"hash/maphash"
+	"math"
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 )
+
+func GenerateRandomDB() *GF {
+	n := 200
+	hashTable := generateHashTable(n)
+
+	// get maximal []byte length in hashTable
+	max := 0
+	for _, v := range hashTable {
+		if len(v) > max {
+			max = len(v)
+		}
+	}
+
+	// create all zeros db
+	// TODO: this is actually useless, but just for testing
+	db := CreateMultiBitGFLength(int(math.Ceil(float64(max) / 15.0)))
+
+	// embed data into field elements
+	chunkLength := 15
+	for id, v := range hashTable {
+		elements := make([]field.Element, 0)
+
+		// embed all bytes
+		for i := 0; i < len(v); i += 16 {
+			end := i + chunkLength
+			if end > len(v) {
+				end = len(v)
+			}
+			e := new(field.Element).SetBytes(v[i:end])
+			elements = append(elements, *e)
+		}
+
+		// pad to have a full block
+		for len(elements) < max {
+			elements = append(elements, field.Zero())
+		}
+
+		// store in db
+		db.Entries[id] = elements
+	}
+
+	return db
+}
 
 func generateHashTable(n int) map[int][]byte {
 	var h maphash.Hash
