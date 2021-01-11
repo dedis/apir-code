@@ -1,7 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"crypto/dsa"
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/binary"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -15,68 +23,68 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-//func TestRetrieveKey(t *testing.T) {
-//	db, err := database.FromKeysFile()
-//	require.NoError(t, err)
-//	blockLength := 40
-//
-//	xof, err := blake2b.NewXOF(0, []byte("my key"))
-//	require.NoError(t, err)
-//	rebalanced := false
-//
-//	c := client.NewITMulti(xof, rebalanced)
-//	s0 := server.NewITMulti(rebalanced, db)
-//	s1 := server.NewITMulti(rebalanced, db)
-//
-//	for i := 0; i < 10; i++ {
-//		queries := c.Query(i, blockLength, 2)
-//
-//		a0 := s0.Answer(queries[0], blockLength)
-//		a1 := s1.Answer(queries[1], blockLength)
-//
-//		answers := [][]field.Element{a0, a1}
-//
-//		result, err := c.Reconstruct(answers, blockLength)
-//		require.NoError(t, err)
-//
-//		// parse result
-//		// TODO: logic for this should be in lib/gpg
-//		lengthBytes := result[0].Bytes()
-//		length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
-//
-//		resultBytes := make([]byte, 0)
-//		for i := 1; i < len(result); i++ {
-//			elementBytes := result[i].Bytes()
-//			bytesSlice := elementBytes[:]
-//			if i >= int(length) {
-//				// trim zeros for last uncomplete bytes block
-//				// and padding blocks
-//				bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
-//			}
-//			if len(bytesSlice) > 0 {
-//				resultBytes = append(resultBytes, bytesSlice...)
-//			}
-//		}
-//
-//		pub, err := x509.ParsePKIXPublicKey(resultBytes)
-//		if err != nil {
-//			log.Printf("failed to parse DER encoded public key: %v", err)
-//		}
-//
-//		switch pub := pub.(type) {
-//		case *rsa.PublicKey:
-//			fmt.Println("pub is of type RSA:", pub)
-//		case *dsa.PublicKey:
-//			fmt.Println("pub is of type DSA:", pub)
-//		case *ecdsa.PublicKey:
-//			fmt.Println("pub is of type ECDSA:", pub)
-//		case ed25519.PublicKey:
-//			fmt.Println("pub is of type Ed25519:", pub)
-//		default:
-//			panic("unknown type of public key")
-//		}
-//	}
-//}
+func TestRetrieveKey(t *testing.T) {
+	db, err := database.FromKeysFile()
+	require.NoError(t, err)
+	blockLength := 40
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+	rebalanced := false
+
+	c := client.NewITMulti(xof, rebalanced)
+	s0 := server.NewITMulti(rebalanced, db)
+	s1 := server.NewITMulti(rebalanced, db)
+
+	for i := 0; i < 10; i++ {
+		queries := c.Query(i, blockLength, 2)
+
+		a0 := s0.Answer(queries[0], blockLength)
+		a1 := s1.Answer(queries[1], blockLength)
+
+		answers := [][]field.Element{a0, a1}
+
+		result, err := c.Reconstruct(answers, blockLength)
+		require.NoError(t, err)
+
+		// parse result
+		// TODO: logic for this should be in lib/gpg
+		lengthBytes := result[0].Bytes()
+		length, _ := binary.Varint(lengthBytes[len(lengthBytes)-2:])
+
+		resultBytes := make([]byte, 0)
+		for i := 1; i < len(result); i++ {
+			elementBytes := result[i].Bytes()
+			bytesSlice := elementBytes[:]
+			if i >= int(length) {
+				// trim zeros for last uncomplete bytes block
+				// and padding blocks
+				bytesSlice = bytes.TrimLeft(bytesSlice, "\x00")
+			}
+			if len(bytesSlice) > 0 {
+				resultBytes = append(resultBytes, bytesSlice...)
+			}
+		}
+
+		pub, err := x509.ParsePKIXPublicKey(resultBytes)
+		if err != nil {
+			log.Printf("failed to parse DER encoded public key: %v", err)
+		}
+
+		switch pub := pub.(type) {
+		case *rsa.PublicKey:
+			fmt.Println("pub is of type RSA:", pub)
+		case *dsa.PublicKey:
+			fmt.Println("pub is of type DSA:", pub)
+		case *ecdsa.PublicKey:
+			fmt.Println("pub is of type ECDSA:", pub)
+		case ed25519.PublicKey:
+			fmt.Println("pub is of type Ed25519:", pub)
+		default:
+			panic("unknown type of public key")
+		}
+	}
+}
 
 func TestMultiBitOneKb(t *testing.T) {
 	dbLenMB := 1048576 * 8
