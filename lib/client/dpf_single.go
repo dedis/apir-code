@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -67,8 +66,8 @@ func (c *DPF) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 		}
 
 	}
+
 	i := 0
-	fmt.Println(sum[i])
 	switch {
 	case sum[i].Equal(&c.state.alpha):
 		return []field.Element{cst.One}, nil

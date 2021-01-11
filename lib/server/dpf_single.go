@@ -26,7 +26,7 @@ func (s *DPFServer) Answer(q dpf.FssKeyEq2P, prfKeys [][]byte, serverNum byte) [
 	for i := range s.db.Entries {
 		a[i] = field.Zero()
 		for j := range s.db.Entries[i] {
-			tmp.Mul(&s.db.Entries[i][j], fServer.EvaluatePF(serverNum, q, uint(i)))
+			tmp.Mul(&s.db.Entries[i][j], fServer.EvaluatePF(serverNum, q, uint(j)))
 			a[i].Add(&a[i], &tmp)
 		}
 	}
