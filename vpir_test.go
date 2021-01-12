@@ -43,7 +43,18 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 		result, err := c.Reconstruct(answers, blockLength)
 		require.NoError(t, err)
-		fmt.Println(result)
+		if !(&result[0]).IsZero() {
+			// we know that an (id, key) block is 300 bytes, i.e. 20 field elements
+			resultBytes := make([]byte, 0)
+			for i := 0; i < 20; i++ {
+				fieldBytes := result[i].Bytes()
+				resultBytes = append(resultBytes, fieldBytes[:]...)
+			}
+
+			key := resultBytes
+			fmt.Println(len(key))
+			fmt.Println(key)
+		}
 	}
 }
 
