@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	DBLength    = 40000
-	FieldSize   = 64
-	BlockLength = 16
-	BlockSizeSingleBit = 0
+	DBLength             = 40000
+	FieldSize            = 64
+	BlockLength          = 16
+	SingleBitBlockLength = 0
 )
 
 var (

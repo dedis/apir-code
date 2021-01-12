@@ -26,7 +26,7 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 // Answer computes the answer for the given query
 func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 	// Doing simplified scheme if block consists of a single bit
-	if blockSize == cst.BlockSizeSingleBit {
+	if blockSize == cst.SingleBitBlockLength {
 		a := make([]field.Element, 1)
 		a[0].SetZero()
 		for i := range s.db.Entries {

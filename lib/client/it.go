@@ -2,12 +2,12 @@ package client
 
 import (
 	"errors"
+	"io"
 	"log"
 	"math"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
-	"golang.org/x/crypto/blake2b"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -17,7 +17,7 @@ import (
 
 // ITMulti represents the client for the information theoretic multi-bit scheme
 type ITMulti struct {
-	xof        blake2b.XOF
+	rnd        io.Reader
 	state      *itMultiState
 	rebalanced bool
 }
@@ -33,9 +33,9 @@ type itMultiState struct {
 // NewITSingleGF return a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITMulti(xof blake2b.XOF, rebalanced bool) *ITMulti {
+func NewITMulti(rnd io.Reader, rebalanced bool) *ITMulti {
 	return &ITMulti{
-		xof:        xof,
+		rnd:        rnd,
 		rebalanced: rebalanced,
 		state:      nil,
 	}
@@ -45,24 +45,29 @@ func NewITMulti(xof blake2b.XOF, rebalanced bool) *ITMulti {
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
 func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
-	var a []field.Element
 	if invalidQueryInputs(index, blockSize, numServers) {
 		log.Fatal("invalid query inputs")
 	}
+	var alpha field.Element
+	var a []field.Element
+	var vectors [][][]field.Element
+	var err error
 
 	// sample random alpha using blake2b
-	var alpha field.Element
-	alpha.SetRandom(c.xof)
+	if _, err = alpha.SetRandom(c.rnd); err != nil {
+		log.Fatal(err)
+	}
 
-	// TODO: it is useless to compute this if blockSize = 1
-	// compute vector a = (alpha, alpha^2, ..., alpha^b)
-	if blockSize != cst.BlockSizeSingleBit {
-		a = make([]field.Element, blockSize)
-		a[0] = alpha
-		for i := 1; i < len(a); i++ {
+	if blockSize != cst.SingleBitBlockLength {
+		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the multi-bit scheme
+		a = make([]field.Element, blockSize + 1)
+		a[0] = field.One()
+		a[1] = alpha
+		for i := 2; i < len(a); i++ {
 			a[i].Mul(&a[i-1], &alpha)
 		}
 	} else {
+		// the single-bit scheme needs a single alpha
 		a = make([]field.Element, 1)
 		a[0] = alpha
 	}
@@ -74,7 +79,7 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 		c.state = &itMultiState{
 			ix:       index,
 			alpha:    alpha,
-			a:        a,
+			a:        a[1:],
 			dbLength: cst.DBLength,
 		}
 	case true:
@@ -87,20 +92,12 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 			ix:       ix,
 			iy:       iy,
 			alpha:    alpha,
-			a:        a,
+			a:        a[1:],
 			dbLength: dbLengthSqrt,
 		}
 	}
 
-	var vectors [][][]field.Element
-	var err error
-	if blockSize != cst.BlockSizeSingleBit {
-		// inserting secret-shared 1 into vectors before alphas
-		a = append([]field.Element{field.One()}, a...)
-		vectors, err = c.secretShare(a, numServers)
-	} else {
-		vectors, err = c.secretShare(a, numServers)
-	}
+	vectors, err = c.secretShare(a, numServers)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -112,7 +109,7 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 	answersLen := len(answers[0])
 	sum := make([]field.Element, answersLen)
 
-	// sum answers as vectors in GF(2^128)^(1+b)
+	// sum answers as vectors in F(2^128)^(1+b)
 	for i := 0; i < answersLen; i++ {
 		sum[i] = field.Zero()
 		for s := range answers {
@@ -126,7 +123,7 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 		i = c.state.iy
 	}
 
-	if blockSize == cst.BlockSizeSingleBit {
+	if blockSize == cst.SingleBitBlockLength {
 		switch {
 		case sum[i].Equal(&c.state.alpha):
 			return []field.Element{cst.One}, nil
@@ -170,7 +167,7 @@ func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.El
 	}
 
 	// Get random elements for all numServers-1 vectors
-	rand, err := field.RandomVectors(c.xof, c.state.dbLength*(numServers-1), blockSize)
+	rand, err := field.RandomVectors(c.rnd, c.state.dbLength*(numServers-1), blockSize)
 	if err != nil {
 		return nil, err
 	}
