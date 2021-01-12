@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/consensys/goff v0.3.9 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dimakogan/dpf-go v0.0.0-20201114031700-ca9e532cdd7f
