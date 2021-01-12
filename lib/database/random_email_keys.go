@@ -62,18 +62,22 @@ func generateHashTable(path string) (map[int][]byte, error) {
 	// analyze pairs
 	maxIDLength, maxKeyLength := utils.AnalyzeIDKeys(pairs)
 
+	// prepare db
 	db := make(map[int][]byte)
 
+	// range over all id,key pairs and assign every pair to a given bucket
 	for id, k := range pairs {
 		hashKey := utils.HashToIndex(id, constants.DBLength)
-		id += ","
-		idKey := make([]byte, 44)
-		copy(idKey, id)
-		idKey = append(idKey, k...)
+
+		// prepare entry
+		idBytes := make([]byte, maxIDLength)
+		copy(idBytes, id)
+		entry = append(idKey, k...)
+
 		if _, ok := db[hashKey]; !ok {
-			db[hashKey] = idKey
+			db[hashKey] = entry
 		} else {
-			db[hashKey] = append(db[hashKey], idKey...)
+			db[hashKey] = append(db[hashKey], entry...)
 		}
 	}
 
