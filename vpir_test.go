@@ -22,6 +22,31 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
+func TestRetrieveRandomKeyBlock(t *testing.T) {
+	db, blockLength := database.GenerateRandomDB()
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+	rebalanced := false
+
+	c := client.NewITMulti(xof, rebalanced)
+	s0 := server.NewITMulti(rebalanced, db)
+	s1 := server.NewITMulti(rebalanced, db)
+
+	for i := 0; i < 10; i++ {
+		queries := c.Query(i, blockLength, 2)
+
+		a0 := s0.Answer(queries[0], blockLength)
+		a1 := s1.Answer(queries[1], blockLength)
+
+		answers := [][]field.Element{a0, a1}
+
+		result, err := c.Reconstruct(answers, blockLength)
+		require.NoError(t, err)
+		fmt.Println(result)
+	}
+}
+
 func TestRetrieveKey(t *testing.T) {
 	db, err := database.FromKeysFile()
 	require.NoError(t, err)

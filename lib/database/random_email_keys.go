@@ -10,8 +10,8 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-func GenerateRandomDB() *GF {
-	n := 200
+func GenerateRandomDB() (*GF, int) {
+	n := 10000
 	hashTable := generateHashTable(n)
 
 	// get maximal []byte length in hashTable
@@ -22,9 +22,11 @@ func GenerateRandomDB() *GF {
 		}
 	}
 
+	fieldElementsMax := int(math.Ceil(float64(max) / 15.0))
+
 	// create all zeros db
 	// TODO: this is actually useless, but just for testing
-	db := CreateMultiBitGFLength(int(math.Ceil(float64(max) / 15.0)))
+	db := CreateMultiBitGFLength(fieldElementsMax)
 
 	// embed data into field elements
 	chunkLength := 15
@@ -32,7 +34,7 @@ func GenerateRandomDB() *GF {
 		elements := make([]field.Element, 0)
 
 		// embed all bytes
-		for i := 0; i < len(v); i += 16 {
+		for i := 0; i < len(v); i += chunkLength {
 			end := i + chunkLength
 			if end > len(v) {
 				end = len(v)
@@ -50,7 +52,7 @@ func GenerateRandomDB() *GF {
 		db.Entries[id] = elements
 	}
 
-	return db
+	return db, fieldElementsMax
 }
 
 func generateHashTable(n int) map[int][]byte {
