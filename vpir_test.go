@@ -157,12 +157,12 @@ func TestMultiBitOneKb(t *testing.T) {
 }
 
 func TestSingleBitOneKb(t *testing.T) {
-	dbLenMB := 1048576 * 8
+	dbLenKB := 1024 * 8
 	blockLen := constants.BlockSizeSingleBit
 
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomSingleBitDB(xofDB, dbLenMB)
+	db := database.CreateRandomSingleBitDB(xofDB, dbLenKB)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
@@ -185,8 +185,10 @@ func TestSingleBitOneKb(t *testing.T) {
 
 		answers := [][]field.Element{a0, a1}
 
-		_, err := c.Reconstruct(answers, blockLen)
+		res, err := c.Reconstruct(answers, blockLen)
+		//fmt.Printf("Real: %s, Got: %s\n", db.Entries[i][0].String(), res[0].String())
 		require.NoError(t, err)
+		require.ElementsMatch(t, db.Entries[i], res)
 	}
 
 	fmt.Printf("Total time SingleBitOneKb: %.1fms\n", totalTimer.Record())

@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"log"
+	"math"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
@@ -77,7 +78,18 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 			dbLength: cst.DBLength,
 		}
 	case true:
-		panic("not yet implemented")
+		// verified at server side if integer square
+		dbLengthSqrt := int(math.Sqrt(cst.DBLength))
+		ix := index % dbLengthSqrt
+		iy := index / dbLengthSqrt
+
+		c.state = &itMultiState{
+			ix:       ix,
+			iy:       iy,
+			alpha:    alpha,
+			a:        a,
+			dbLength: dbLengthSqrt,
+		}
 	}
 
 	var vectors [][][]field.Element
@@ -108,7 +120,12 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 		}
 	}
 
+	// select index depending on the matrix representation
 	i := 0
+	if c.rebalanced {
+		i = c.state.iy
+	}
+
 	if blockSize == cst.BlockSizeSingleBit {
 		switch {
 		case sum[i].Equal(&c.state.alpha):

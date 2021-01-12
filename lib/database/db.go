@@ -105,7 +105,7 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen int) *GF {
 		entries[i] = zeroVectorGF(1)
 	}
 
-	numFieldElements := constants.DBLength / field.Bytes
+	numFieldElements := dbLen / field.Bytes
 	var tmp field.Element
 	var tmpb byte
 	for i := 0; i < numFieldElements; i++ {
@@ -117,7 +117,6 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen int) *GF {
 			entries[i][0].SetZero()
 		}
 	}
-
 	return &GF{Entries: entries}
 }
 

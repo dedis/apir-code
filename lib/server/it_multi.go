@@ -25,17 +25,14 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 
 // Answer computes the answer for the given query
 func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
-	// Doing simplified scheme if block consists of one element
+	// Doing simplified scheme if block consists of a single bit
 	if blockSize == cst.BlockSizeSingleBit {
-		//var tmp field.Element
-		a := make([]field.Element, len(s.db.Entries))
+		a := make([]field.Element, 1)
+		a[0].SetZero()
 		for i := range s.db.Entries {
-			a[i] = field.Zero()
 			for j := range s.db.Entries[i] {
-				//tmp.Mul(&q[j][0], &s.db.Entries[i][j])
-				//a[i].Add(&a[i], &tmp)
 				if s.db.Entries[i][j].Equal(&cst.One) {
-					a[i].Add(&a[i], &q[j][0])
+					a[0].Add(&a[0], &q[i][j])
 				}
 			}
 		}
