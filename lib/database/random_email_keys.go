@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -23,6 +24,11 @@ func GenerateRandomDB(path string) (*GF, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(hashTable)
+
+	// TODO: analyze the hash table to get the maximal number of (id, key)
+	// pairs per bucket
 
 	// get maximal []byte length in hashTable
 	maximalEntryLength := maxIDLength + maxKeyLength
