@@ -11,6 +11,7 @@ const (
 	DBLength    = 40000
 	FieldSize   = 64
 	BlockLength = 16
+	BlockSizeSingleBit = 0
 )
 
 var (

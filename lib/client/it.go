@@ -44,7 +44,7 @@ func NewITMulti(xof blake2b.XOF, rebalanced bool) *ITMulti {
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
 func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
-
+	var a []field.Element
 	if invalidQueryInputs(index, blockSize, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -55,10 +55,15 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 
 	// TODO: it is useless to compute this if blockSize = 1
 	// compute vector a = (alpha, alpha^2, ..., alpha^b)
-	a := make([]field.Element, blockSize)
-	a[0] = alpha
-	for i := 1; i < len(a); i++ {
-		a[i].Mul(&a[i-1], &alpha)
+	if blockSize != cst.BlockSizeSingleBit {
+		a = make([]field.Element, blockSize)
+		a[0] = alpha
+		for i := 1; i < len(a); i++ {
+			a[i].Mul(&a[i-1], &alpha)
+		}
+	} else {
+		a = make([]field.Element, 1)
+		a[0] = alpha
 	}
 
 	// set state
@@ -77,7 +82,7 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 
 	var vectors [][][]field.Element
 	var err error
-	if blockSize > 1 {
+	if blockSize != cst.BlockSizeSingleBit {
 		// inserting secret-shared 1 into vectors before alphas
 		a = append([]field.Element{field.One()}, a...)
 		vectors, err = c.secretShare(a, numServers)
@@ -104,7 +109,7 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 	}
 
 	i := 0
-	if blockSize == 1 {
+	if blockSize == cst.BlockSizeSingleBit {
 		switch {
 		case sum[i].Equal(&c.state.alpha):
 			return []field.Element{cst.One}, nil

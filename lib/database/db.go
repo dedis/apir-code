@@ -99,18 +99,22 @@ func CreateRandomMultiBitOneMBGF(rnd io.Reader, dbLen, blockLen int) *GF {
 	return &GF{Entries: entries}
 }
 
-func CreateRandomSingleBitDB(rnd io.Reader, dbLen, blockLen int) *GF {
+func CreateRandomSingleBitDB(rnd io.Reader, dbLen int) *GF {
 	entries := make([][]field.Element, constants.DBLength)
 	for i := range entries {
-		entries[i] = zeroVectorGF(blockLen)
+		entries[i] = zeroVectorGF(1)
 	}
 
 	numFieldElements := constants.DBLength / field.Bytes
-	var err error
-	for i := 0; i < numFieldElements/blockLen; i++ {
-		entries[i], err = field.RandomVector(rnd, blockLen)
-		if err != nil {
-			log.Fatal(err)
+	var tmp field.Element
+	var tmpb byte
+	for i := 0; i < numFieldElements; i++ {
+		tmp.SetRandom(rnd)
+		tmpb = tmp.Bytes()[len(tmp.Bytes()) - 1]
+		if tmpb >> 7 == 1 {
+			entries[i][0].SetOne()
+		} else {
+			entries[i][0].SetZero()
 		}
 	}
 

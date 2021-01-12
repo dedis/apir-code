@@ -158,11 +158,11 @@ func TestMultiBitOneKb(t *testing.T) {
 
 func TestSingleBitOneKb(t *testing.T) {
 	dbLenMB := 1048576 * 8
-	blockLen := 1
+	blockLen := constants.BlockSizeSingleBit
 
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomSingleBitDB(xofDB, dbLenMB, blockLen)
+	db := database.CreateRandomSingleBitDB(xofDB, dbLenMB)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/si-co/vpir-code/lib/constants"
+	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -26,7 +26,7 @@ func NewITMulti(rebalanced bool, db *database.GF) *ITMulti {
 // Answer computes the answer for the given query
 func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 	// Doing simplified scheme if block consists of one element
-	if blockSize == 1 {
+	if blockSize == cst.BlockSizeSingleBit {
 		//var tmp field.Element
 		a := make([]field.Element, len(s.db.Entries))
 		for i := range s.db.Entries {
@@ -34,7 +34,7 @@ func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 			for j := range s.db.Entries[i] {
 				//tmp.Mul(&q[j][0], &s.db.Entries[i][j])
 				//a[i].Add(&a[i], &tmp)
-				if s.db.Entries[i][j].Equal(&constants.One) {
+				if s.db.Entries[i][j].Equal(&cst.One) {
 					a[i].Add(&a[i], &q[j][0])
 				}
 			}
@@ -43,8 +43,8 @@ func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 	}
 
 	// parse the query
-	qZeroBase := make([]field.Element, constants.DBLength)
-	qOne := make([][]field.Element, constants.DBLength)
+	qZeroBase := make([]field.Element, cst.DBLength)
+	qOne := make([][]field.Element, cst.DBLength)
 	for i := range q {
 		qZeroBase[i] = q[i][0]
 		qOne[i] = q[i][1:]
@@ -61,7 +61,7 @@ func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 	for i := 0; i < blockSize; i++ {
 		sum := field.Zero()
 		sumTag := field.Zero()
-		for j := 0; j < constants.DBLength; j++ {
+		for j := 0; j < cst.DBLength; j++ {
 			prod.Mul(&s.db.Entries[j][i], &qZeroBase[j])
 			sum.Add(&sum, &prod)
 
