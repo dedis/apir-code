@@ -15,16 +15,11 @@ def bytes_len(s):
     return len(s.encode('utf-8'))
 
 filename = "random_id_key.csv"
-fields = ["id", "key"]
 n = 10000
 
 with open(filename, 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
     
-    # write fileds
-    csvwriter.writerow(fields)
-
     for x in range(n):
         row = [generate_id(32), generate_key().decode('utf-8')]
         csvwriter.writerow(row)
-

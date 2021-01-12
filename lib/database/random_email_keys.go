@@ -1,11 +1,9 @@
 package database
 
 import (
-	"crypto/rand"
 	"hash/maphash"
 	"math"
 
-	"github.com/Pallinder/go-randomdata"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -75,39 +73,6 @@ func generateHashTable(n int) map[int][]byte {
 	}
 
 	return db
-}
-
-func generateRandomIdKeyPairs(n int) map[string][]byte {
-	// generate emails
-	emails := generateRandomEmails(n)
-
-	// generate key for each email and store in map
-	out := make(map[string][]byte)
-	for _, e := range emails {
-		out[e] = generateRandom256BytesKey()
-	}
-
-	return out
-}
-
-func generateRandom256BytesKey() []byte {
-	c := 256
-	b := make([]byte, c)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic("randomness generation error")
-	}
-
-	return b
-}
-
-func generateRandomEmails(n int) []string {
-	emails := make([]string, n)
-	for i := range emails {
-		emails[i] = randomdata.Email()
-	}
-
-	return emails
 }
 
 func hashFunction(h maphash.Hash, dbLength uint64, id string) int {
