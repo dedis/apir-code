@@ -25,11 +25,13 @@ func GenerateRandomDB(path string) (*GF, error) {
 		return nil, err
 	}
 
-	fmt.Println(hashTable)
-
-	// TODO: analyze the hash table to get the maximal number of (id, key)
-	// pairs per bucket
-
+	maxBytes := 0
+	for _, v := range hashTable {
+		if len(v) > maxBytes {
+			maxBytes = len(v)
+		}
+	}
+	fmt.Println(maxBytes)
 	// get maximal []byte length in hashTable
 	maximalEntryLength := maxIDLength + maxKeyLength
 
