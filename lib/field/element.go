@@ -198,6 +198,24 @@ func (z *Element) LexicographicallyLargest() bool {
 	return b == 0
 }
 
+func FitElement(bytes []byte) Element {
+	var z Element
+
+	z[0] = binary.BigEndian.Uint64(bytes[0:8])
+	z[1] = binary.BigEndian.Uint64(bytes[8:16])
+	z[1] %= 9223372036854775807
+
+	// if z > q --> z -= q
+	// note: this is NOT constant time
+	if !(z[1] < 9223372036854775807 || (z[1] == 9223372036854775807 && (z[0] < 18446744073709551615))) {
+		var b uint64
+		z[0], b = bits.Sub64(z[0], 18446744073709551615, 0)
+		z[1], _ = bits.Sub64(z[1], 9223372036854775807, b)
+	}
+
+	return z
+}
+
 // SetRandom sets z to a random element < q
 func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	var bytes [16]byte
@@ -228,21 +246,25 @@ func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	}
 	zs := make([]Element, length)
 	for i := 0; i < length; i++ {
-		var z Element
-		z[0] = binary.BigEndian.Uint64(bytes[0:8])
-		z[1] = binary.BigEndian.Uint64(bytes[8:16])
-		z[1] %= 9223372036854775807
-
-		// if z > q --> z -= q
-		// note: this is NOT constant time
-		if !(z[1] < 9223372036854775807 || (z[1] == 9223372036854775807 && (z[0] < 18446744073709551615))) {
-			var b uint64
-			z[0], b = bits.Sub64(z[0], 18446744073709551615, 0)
-			z[1], _ = bits.Sub64(z[1], 9223372036854775807, b)
-		}
-		zs[i] = z
+		zs[i] = FitElement(bytes[i*8:(i+2)*8])
 	}
 
+	return zs, nil
+}
+
+func RandomVectors(rnd io.Reader, length, block int) ([][]Element, error) {
+	bytesLength := length*block*16 + 1
+	bytes := make([]byte, bytesLength)
+	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
+		return nil, err
+	}
+	zs := make([][]Element, length)
+	for i := 0; i < length; i++ {
+		zs[i] = make([]Element, block)
+		for j := 0; j < block; j++ {
+			zs[i][j] = FitElement(bytes[i*8:(i+2)*8])
+		}
+	}
 	return zs, nil
 }
 
