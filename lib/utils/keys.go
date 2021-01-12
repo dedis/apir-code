@@ -15,7 +15,7 @@ import (
 func HashToIndex(id string, length int) int {
 	hash := blake2b.Sum256([]byte(id))
 
-	return int(binary.BigEndian.Uint64(hash)) % length
+	return int(binary.BigEndian.Uint64(hash[:])) % length
 }
 
 // AnalyzeIDKeys analyzes the given id->key samples and returns the maximal id
@@ -29,7 +29,7 @@ func AnalyzeIDKeys(in map[string][]byte) (int, int) {
 		keyBytesLength := len(key)
 
 		if maxIDLength < idBytesLength {
-			maxIDlength = idBytesLength
+			maxIDLength = idBytesLength
 		}
 
 		if maxKeyLength < keyBytesLength {
