@@ -1,16 +1,15 @@
 package database
 
 import (
-	"hash/maphash"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-func GenerateRandomDB() (*GF, int) {
+func GenerateRandomDB(path string) (*GF, int) {
 	n := 10000
-	hashTable := generateHashTable(n)
+	hashTable := generateHashTable(path)
 
 	// get maximal []byte length in hashTable
 	max := 0
@@ -53,14 +52,20 @@ func GenerateRandomDB() (*GF, int) {
 	return db, fieldElementsMax
 }
 
-func generateHashTable(n int) map[int][]byte {
-	var h maphash.Hash
-	pairs := generateRandomIdKeyPairs(n)
+func generateHashTable(path string) (map[int][]byte, error) {
+	// parse id->key file
+	pairs, err := utils.ParseRandomIDKeys(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// analyze pairs
+	maxIDLength, maxKeyLength := utils.AnalyzeIDKeys(pairs)
 
 	db := make(map[int][]byte)
 
 	for id, k := range pairs {
-		hashKey := hashFunction(h, uint64(constants.DBLength), id)
+		hashKey := utils.HashToIndex(id, constants.DBLength)
 		id += ","
 		idKey := make([]byte, 44)
 		copy(idKey, id)
@@ -73,12 +78,4 @@ func generateHashTable(n int) map[int][]byte {
 	}
 
 	return db
-}
-
-func hashFunction(h maphash.Hash, dbLength uint64, id string) int {
-	h.WriteString(id)
-	sum := h.Sum64()
-	h.Reset()
-
-	return int(sum % dbLength)
 }
