@@ -22,6 +22,7 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
+/*
 func TestRetrieveRandomKeyBlock(t *testing.T) {
 	db, blockLength := database.GenerateRandomDB()
 
@@ -57,6 +58,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		}
 	}
 }
+*/
 
 func TestRetrieveKey(t *testing.T) {
 	db, err := database.FromKeysFile()

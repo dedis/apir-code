@@ -5,28 +5,36 @@ import (
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateRandomDB(path string) (*GF, int) {
-	n := 10000
-	hashTable := generateHashTable(path)
-
-	// get maximal []byte length in hashTable
-	max := 0
-	for _, v := range hashTable {
-		if len(v) > max {
-			max = len(v)
-		}
+func GenerateRandomDB(path string) (*GF, error) {
+	// parse id->key file
+	pairs, err := utils.ParseCSVRandomIDKeys(path)
+	if err != nil {
+		return nil, err
 	}
 
-	fieldElementsMax := int(math.Ceil(float64(max) / 15.0))
+	// analyze pairs
+	maxIDLength, maxKeyLength := utils.AnalyzeIDKeys(pairs)
+
+	// generate hash table
+	hashTable, err := generateHashTable(pairs, maxIDLength)
+	if err != nil {
+		return nil, err
+	}
+
+	// get maximal []byte length in hashTable
+	maximalEntryLength := maxIDLength + maxKeyLength
+
+	chunkLength := 15
+	fieldElementsMax := int(math.Ceil(float64(maximalEntryLength) / float64(chunkLength)))
 
 	// create all zeros db
 	// TODO: this is actually useless, but just for testing
 	db := CreateMultiBitGFLength(fieldElementsMax)
 
 	// embed data into field elements
-	chunkLength := 15
 	for id, v := range hashTable {
 		elements := make([]field.Element, 0)
 
@@ -41,7 +49,7 @@ func GenerateRandomDB(path string) (*GF, int) {
 		}
 
 		// pad to have a full block
-		for len(elements) < max {
+		for len(elements) < fieldElementsMax {
 			elements = append(elements, field.Zero())
 		}
 
@@ -49,18 +57,10 @@ func GenerateRandomDB(path string) (*GF, int) {
 		db.Entries[id] = elements
 	}
 
-	return db, fieldElementsMax
+	return db, nil
 }
 
-func generateHashTable(path string) (map[int][]byte, error) {
-	// parse id->key file
-	pairs, err := utils.ParseRandomIDKeys(path)
-	if err != nil {
-		return nil, err
-	}
-
-	// analyze pairs
-	maxIDLength, maxKeyLength := utils.AnalyzeIDKeys(pairs)
+func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte, error) {
 
 	// prepare db
 	db := make(map[int][]byte)
@@ -72,7 +72,7 @@ func generateHashTable(path string) (map[int][]byte, error) {
 		// prepare entry
 		idBytes := make([]byte, maxIDLength)
 		copy(idBytes, id)
-		entry = append(idKey, k...)
+		entry := append(idBytes, k...)
 
 		if _, ok := db[hashKey]; !ok {
 			db[hashKey] = entry
@@ -81,5 +81,5 @@ func generateHashTable(path string) (map[int][]byte, error) {
 		}
 	}
 
-	return db
+	return db, nil
 }
