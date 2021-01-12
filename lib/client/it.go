@@ -59,8 +59,9 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	}
 
 	if blockSize != cst.SingleBitBlockLength {
-		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the multi-bit scheme
-		a = make([]field.Element, blockSize + 1)
+		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
+		// multi-bit scheme
+		a = make([]field.Element, blockSize+1)
 		a[0] = field.One()
 		a[1] = alpha
 		for i := 2; i < len(a); i++ {
@@ -185,7 +186,7 @@ func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.El
 		// Assign k - 1 random vectors of length dbLength containing
 		// elements in F^(b)
 		for k := 0; k < numServers-1; k++ {
-			vectors[k][i] = rand[k*c.state.dbLength + i]
+			vectors[k][i] = rand[k*c.state.dbLength+i]
 		}
 
 		// we should perform component-wise additive secret sharing
