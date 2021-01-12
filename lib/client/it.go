@@ -158,40 +158,41 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 // secretShare the vector a among numServers non-colluding servers
 func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.Element, error) {
 	// get block length
-	size := len(a)
+	blockSize := len(a)
 
 	// create query vectors for all the servers
 	vectors := make([][][]field.Element, numServers)
 	for k := range vectors {
 		vectors[k] = make([][]field.Element, c.state.dbLength)
 		for i := 0; i < c.state.dbLength; i++ {
-			vectors[k][i] = make([]field.Element, size)
+			vectors[k][i] = make([]field.Element, blockSize)
 		}
 	}
 
+	// Get random elements for all numServers-1 vectors
+	rand, err := field.RandomVectors(c.xof, c.state.dbLength*(numServers-1), blockSize)
+	if err != nil {
+		return nil, err
+	}
 	// perform additive secret sharing
 	eia := make([][]field.Element, c.state.dbLength)
 	for i := 0; i < c.state.dbLength; i++ {
 		// create basic zero vector in F^(b)
-		eia[i] = field.ZeroVector(size)
+		eia[i] = field.ZeroVector(blockSize)
 
 		// set alpha at the index we want to retrieve
 		if i == c.state.ix {
 			copy(eia[i], a)
 		}
 
-		// create k - 1 random vectors of length dbLength containing
+		// Assign k - 1 random vectors of length dbLength containing
 		// elements in F^(b)
 		for k := 0; k < numServers-1; k++ {
-			rand, err := field.RandomVector(c.xof, size)
-			if err != nil {
-				return nil, err
-			}
-			vectors[k][i] = rand
+			vectors[k][i] = rand[k*c.state.dbLength + i]
 		}
 
 		// we should perform component-wise additive secret sharing
-		for b := 0; b < size; b++ {
+		for b := 0; b < blockSize; b++ {
 			sum := field.Zero()
 			for k := 0; k < numServers-1; k++ {
 				sum.Add(&sum, &vectors[k][i][b])
