@@ -53,6 +53,7 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	var alpha field.Element
 	alpha.SetRandom(c.xof)
 
+	// TODO: it is useless to compute this if blockSize = 1
 	// compute vector a = (alpha, alpha^2, ..., alpha^b)
 	a := make([]field.Element, blockSize)
 	a[0] = alpha
