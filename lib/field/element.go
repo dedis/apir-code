@@ -241,7 +241,7 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 // PowerVectorWithOne returns vector (1, alpha, ..., alpha^(length))
 func PowerVectorWithOne(alpha Element, length int) []Element {
 	a := make([]Element, length+1)
-	a[0] = field.One()
+	a[0] = One()
 	a[1] = alpha
 	for i := 2; i < len(a); i++ {
 		a[i].Mul(&a[i-1], &alpha)

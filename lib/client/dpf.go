@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"math/bits"
 
@@ -13,9 +14,8 @@ import (
 
 // DPF represent the client for the DPF-based single- and multi-bit schemes
 type DPF struct {
-	rnd        io.Reader
-	state      *dpfState
-	rebalanced bool
+	rnd   io.Reader
+	state *dpfState
 }
 
 type dpfState struct {
@@ -26,9 +26,8 @@ type dpfState struct {
 
 func NewDPF(rnd io.Reader) *DPF {
 	return &DPF{
-		rnd:        rnd,
-		state:      nil,
-		rebalanced: False, // just to avoid code duplication
+		rnd:   rnd,
+		state: nil,
 	}
 }
 
@@ -49,12 +48,14 @@ func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, [][]dpf.FssKeyE
 		panic(err)
 	}
 
+	var a []field.Element
 	if blockSize != cst.SingleBitBlockLength {
-		a := powerVectorWithOne(alpha, blockSize)
+		a = field.PowerVectorWithOne(*alpha, blockSize)
 	} else {
+		fmt.Println("here")
 		// the single-bit scheme needs a single alpha
-		a := make([]field.Element, 1)
-		a[0] = alpha
+		a = make([]field.Element, 1)
+		a[0] = *alpha
 	}
 
 	// set ITClient state
@@ -66,11 +67,11 @@ func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, [][]dpf.FssKeyE
 	// compute dpf keys
 	fssKeysVector := make([][]dpf.FssKeyEq2P, 2)
 	if blockSize != cst.SingleBitBlockLength {
+		fssKeysVector = fClient.GenerateTreePFVector(uint(index), alpha, blockSize)
+	} else {
 		fssKeys := fClient.GenerateTreePF(uint(index), alpha)
 		fssKeysVector[0] = append(fssKeysVector[0], fssKeys[0])
 		fssKeysVector[1] = append(fssKeysVector[1], fssKeys[1])
-	} else {
-		fssKeysVector = fClient.GenerateTreePFVector(uint(index), alpha, blockSize)
 	}
 
 	return fClient.PrfKeys, fssKeysVector
