@@ -238,6 +238,19 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	return z, nil
 }
 
+// PowerVectorWithOne returns vector (1, alpha, ..., alpha^(length))
+func PowerVectorWithOne(alpha Element, length int) []Element {
+	a := make([]Element, length+1)
+	a[0] = field.One()
+	a[1] = alpha
+	for i := 2; i < len(a); i++ {
+		a[i].Mul(&a[i-1], &alpha)
+	}
+
+	return a
+}
+
+// RandomVector returns a vector composed of length random field elements
 func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	bytesLength := length*16 + 1
 	bytes := make([]byte, bytesLength)
@@ -246,12 +259,13 @@ func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	}
 	zs := make([]Element, length)
 	for i := 0; i < length; i++ {
-		zs[i] = FitElement(bytes[i*8:(i+2)*8])
+		zs[i] = FitElement(bytes[i*8 : (i+2)*8])
 	}
 
 	return zs, nil
 }
 
+// RandomVectors returns length vectors composed of block random field elements
 func RandomVectors(rnd io.Reader, length, block int) ([][]Element, error) {
 	bytesLength := length*block*16 + 1
 	bytes := make([]byte, bytesLength)
@@ -262,7 +276,7 @@ func RandomVectors(rnd io.Reader, length, block int) ([][]Element, error) {
 	for i := 0; i < length; i++ {
 		zs[i] = make([]Element, block)
 		for j := 0; j < block; j++ {
-			zs[i][j] = FitElement(bytes[i*8:(i+2)*8])
+			zs[i][j] = FitElement(bytes[i*8 : (i+2)*8])
 		}
 	}
 	return zs, nil

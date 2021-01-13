@@ -2,33 +2,37 @@ package client
 
 import (
 	"errors"
+	"io"
 	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/dpf"
 	"github.com/si-co/vpir-code/lib/field"
-	"golang.org/x/crypto/blake2b"
 )
 
+// DPF represent the client for the DPF-based single- and multi-bit schemes
 type DPF struct {
-	xof   blake2b.XOF
-	state *dpfState
+	rnd        io.Reader
+	state      *dpfState
+	rebalanced bool
 }
 
 type dpfState struct {
 	i     int
 	alpha field.Element
+	a     []field.Element
 }
 
-func NewDPF(xof blake2b.XOF) *DPF {
+func NewDPF(rnd io.Reader) *DPF {
 	return &DPF{
-		xof:   xof,
-		state: nil,
+		rnd:        rnd,
+		state:      nil,
+		rebalanced: False, // just to avoid code duplication
 	}
 }
 
-func (c *DPF) Query(index int, numServers int) ([][]byte, []dpf.FssKeyEq2P) {
+func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, [][]dpf.FssKeyEq2P) {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -40,41 +44,76 @@ func (c *DPF) Query(index int, numServers int) ([][]byte, []dpf.FssKeyEq2P) {
 	}
 
 	// sample random alpha
-	alpha, err := new(field.Element).SetRandom(c.xof)
+	alpha, err := new(field.Element).SetRandom(c.rnd)
 	if err != nil {
 		panic(err)
 	}
 
+	if blockSize != cst.SingleBitBlockLength {
+		a := powerVectorWithOne(alpha, blockSize)
+	} else {
+		// the single-bit scheme needs a single alpha
+		a := make([]field.Element, 1)
+		a[0] = alpha
+	}
+
 	// set ITClient state
-	c.state = &dpfState{i: index, alpha: *alpha}
+	c.state = &dpfState{i: index, alpha: *alpha, a: a[1:]}
 
+	// client initialization is the same for both single- and multi-bit scheme
 	fClient := dpf.ClientInitialize(uint(bits.Len(uint(constants.DBLength))))
-	fssKeys := fClient.GenerateTreePF(uint(index), alpha)
 
-	return fClient.PrfKeys, fssKeys
+	// compute dpf keys
+	fssKeysVector := make([][]dpf.FssKeyEq2P, 2)
+	if blockSize != cst.SingleBitBlockLength {
+		fssKeys := fClient.GenerateTreePF(uint(index), alpha)
+		fssKeysVector[0] = append(fssKeysVector[0], fssKeys[0])
+		fssKeysVector[1] = append(fssKeysVector[1], fssKeys[1])
+	} else {
+		fssKeysVector = fClient.GenerateTreePFVector(uint(index), alpha, blockSize)
+	}
 
+	return fClient.PrfKeys, fssKeysVector
 }
 
-func (c *DPF) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
+func (c *DPF) Reconstruct(answers [][]field.Element, blockSize int) ([]field.Element, error) {
 	answersLen := len(answers[0])
 	sum := make([]field.Element, answersLen)
 
+	// sum answers as vectors in F(2^128)^(1+b)
 	for i := 0; i < answersLen; i++ {
 		sum[i] = field.Zero()
 		for s := range answers {
 			sum[i].Add(&sum[i], &answers[s][i])
 		}
-
 	}
 
-	i := 0
-	switch {
-	case sum[i].Equal(&c.state.alpha):
-		return []field.Element{cst.One}, nil
-	case sum[i].Equal(&cst.Zero):
-		return []field.Element{cst.Zero}, nil
-	default:
-		return nil, errors.New("REJECT!")
+	// select index depending on the matrix representation
+	if blockSize == cst.SingleBitBlockLength {
+		switch {
+		case sum[0].Equal(&c.state.alpha):
+			return []field.Element{cst.One}, nil
+		case sum[0].Equal(&cst.Zero):
+			return []field.Element{cst.Zero}, nil
+		default:
+			return nil, errors.New("REJECT!")
+		}
 	}
 
+	tag := sum[len(sum)-1]
+	messages := sum[:len(sum)-1]
+
+	// compute reconstructed tag
+	reconstructedTag := field.Zero()
+	for i := 0; i < len(messages); i++ {
+		var prod field.Element
+		prod.Mul(&c.state.a[i], &messages[i])
+		reconstructedTag.Add(&reconstructedTag, &prod)
+	}
+
+	if !tag.Equal(&reconstructedTag) {
+		return nil, errors.New("REJECT")
+	}
+
+	return messages, nil
 }
