@@ -324,11 +324,7 @@ func TestDPFSingle(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		if x[0].String() == "0" {
-			result += "0"
-		} else {
-			result += "1"
-		}
+		result += x[0].String()
 	}
 
 	testBitResult(t, result)
