@@ -261,7 +261,41 @@ func TestVectorByte(t *testing.T) {
 	fmt.Printf("Total time VectorByte: %.1fms\n", totalTimer.Record())
 }
 
-func TestDPF(t *testing.T) {
+func TestDPFMulti(t *testing.T) {
+	dbLenMB := 1048576 * 8
+	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
+	require.NoError(t, err)
+	db := database.CreateRandomMultiBitOneMBGF(xofDB, dbLenMB, constants.BlockLength)
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+
+	totalTimer := monitor.NewMonitor()
+
+	c := client.NewDPF(xof)
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
+
+	fieldElements := 128 * 8
+
+	for i := 0; i < fieldElements/16; i++ {
+		prfKeys, fssKeys := c.Query(i, constants.BlockLength, 2)
+
+		a0 := s0.Answer(fssKeys[0], prfKeys, 0, constants.BlockLength)
+		a1 := s1.Answer(fssKeys[1], prfKeys, 1, constants.BlockLength)
+
+		answers := [][]field.Element{a0, a1}
+
+		res, err := c.Reconstruct(answers, constants.BlockLength)
+		require.NoError(t, err)
+		require.ElementsMatch(t, db.Entries[i], res)
+		fmt.Println("query ok")
+	}
+
+	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())
+}
+
+func TestDPFSingle(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiVectorGF()
 	result := ""
@@ -273,26 +307,19 @@ func TestDPF(t *testing.T) {
 	blockLen := constants.SingleBitBlockLength
 
 	c := client.NewDPF(xof)
-	s0 := server.NewDPFServer(db)
-	s1 := server.NewDPFServer(db)
-	m := monitor.NewMonitor()
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
 
 	for i := 0; i < 136; i++ {
-		m.Reset()
 		prfKeys, fssKeys := c.Query(i, blockLen, 2)
-		fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
 
 		a0 := s0.Answer(fssKeys[0], prfKeys, 0, blockLen)
-		fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
 
 		a1 := s1.Answer(fssKeys[1], prfKeys, 1, blockLen)
-		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
 
 		answers := [][]field.Element{a0, a1}
 
-		m.Reset()
 		x, err := c.Reconstruct(answers, blockLen)
-		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
 		if err != nil {
 			panic(err)
 		}
@@ -301,7 +328,6 @@ func TestDPF(t *testing.T) {
 		} else {
 			result += "1"
 		}
-
 	}
 
 	testBitResult(t, result)
