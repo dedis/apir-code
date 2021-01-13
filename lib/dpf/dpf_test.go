@@ -51,7 +51,7 @@ func TestVector(t *testing.T) {
 
 	alpha := uint(129)
 	nBits := uint(20)
-	length := 10
+	length := 5
 
 	fClient := ClientInitialize(nBits)
 	fssKeysVector := fClient.GenerateTreePFVector(alpha, rand, length)
