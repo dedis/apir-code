@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"math/bits"
 
@@ -52,7 +51,6 @@ func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, [][]dpf.FssKeyE
 	if blockSize != cst.SingleBitBlockLength {
 		a = field.PowerVectorWithOne(*alpha, blockSize)
 	} else {
-		fmt.Println("here")
 		// the single-bit scheme needs a single alpha
 		a = make([]field.Element, 1)
 		a[0] = *alpha
