@@ -1,6 +1,7 @@
 package dpf
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -41,6 +42,51 @@ func TestAll(t *testing.T) {
 	require.Equal(t,
 		new(field.Element).Add(ans0, ans1).String(),
 		zero.String())
+}
+
+func TestVector(t *testing.T) {
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+	rand, err := new(field.Element).SetRandom(xof)
+	require.NoError(t, err)
+
+	alpha := uint(129)
+	nBits := uint(20)
+	length := 10
+
+	fClient := ClientInitialize(nBits)
+	fssKeysVector := fClient.GenerateTreePFVector(alpha, rand, 10)
+
+	// Simulate server
+	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
+
+	// compute expected vector
+	expectedVector := make([]*field.Element, length+1)
+	expectedVector[0] = new(field.Element).SetOne()
+	mul := new(field.Element).SetOne()
+	for i := 1; i < length+1; i++ {
+		mul = mul.Mul(mul, rand)
+		expectedVector[i] = mul
+	}
+
+	zero := field.Zero()
+	for i := uint(0); i < (1 << nBits); i++ {
+		// Test 2-party vector Equality Function
+
+		// generate vector of answers
+		ans0 := fServer.EvaluatePFVector(0, fssKeysVector[0], i)
+		ans1 := fServer.EvaluatePFVector(1, fssKeysVector[1], i)
+		fmt.Println(len(ans0))
+		for j := range ans0 {
+			val := new(field.Element).Add(ans0[j], ans1[j]).String()
+			if i == alpha {
+				require.Equal(t, val, expectedVector[j].String())
+			} else {
+				require.Equal(t, val, zero.String())
+			}
+		}
+	}
+
 }
 
 func TestEval(t *testing.T) {

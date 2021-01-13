@@ -12,9 +12,8 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-// Initialize client with this function
-// numBits represents the input domain for the function, i.e. the number
-// of bits to check
+// ClientInitialize initializes client with this function numBits represents
+// the input domain for the function, i.e. the number of bits to check
 func ClientInitialize(numBits uint) *Fss {
 	f := new(Fss)
 	f.NumBits = numBits
@@ -45,11 +44,12 @@ func ClientInitialize(numBits uint) *Fss {
 }
 
 // This is based on the following paper:
-// Boyle, Elette, Niv Gilboa, and Yuval Ishai. "Function Secret Sharing: Improvements and Extensions." Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security. ACM, 2016.
+// Boyle, Elette, Niv Gilboa, and Yuval Ishai. "Function Secret Sharing:
+// Improvements and Extensions." Proceedings of the 2016 ACM SIGSAC Conference
+// on Computer and Communications Security. ACM, 2016.
 
-// Generate Keys for 2-party point functions
+// GenerateTreePF generates keys for 2-party point functions
 // It creates keys for a function that evaluates to b when input x = a.
-
 func (f Fss) GenerateTreePF(a uint, b *field.Element) []FssKeyEq2P {
 	fssKeys := make([]FssKeyEq2P, 2)
 	// Set up initial values
@@ -131,18 +131,7 @@ func (f Fss) GenerateTreePF(a uint, b *field.Element) []FssKeyEq2P {
 		tCurr0 = (prfOut0[keep+aes.BlockSize] % 2) ^ tCWKeep*tCurr0
 		tCurr1 = (prfOut1[keep+aes.BlockSize] % 2) ^ tCWKeep*tCurr1
 	}
-	// Convert final CW to integer
-	//sFinal0 := field.FromBytes(sCurr0)
-	//sFinal1 := field.FromBytes(sCurr1)
-	//sFinal0.Negate()
-	//fssKeys[0].FinalCW.AddTo(&sFinal0)
-	//fssKeys[0].FinalCW.AddTo(&sFinal1)
-	//fssKeys[0].FinalCW.AddTo(b)
-	//fssKeys[1].FinalCW = fssKeys[0].FinalCW
-	//if tCurr1 == 1 {
-	//fssKeys[0].FinalCW.Negate()
-	//fssKeys[1].FinalCW = fssKeys[0].FinalCW
-	//}
+
 	// Convert final CW to integer
 	sFinal0 := new(field.Element).SetBytes(sCurr0)
 	sFinal1 := new(field.Element).SetBytes(sCurr1)
@@ -156,4 +145,23 @@ func (f Fss) GenerateTreePF(a uint, b *field.Element) []FssKeyEq2P {
 		fssKeys[1].FinalCW = fssKeys[0].FinalCW
 	}
 	return fssKeys
+}
+
+// GenerateTreePFVector generates keys for 2-party point functions It creates a
+// vector of keys for a function that evaluates to (1, b, b^2, b^(length)) when
+// input x = a.
+func (f Fss) GenerateTreePFVector(a uint, b *field.Element, length int) [][]FssKeyEq2P {
+	fssKeysVector := make([][]FssKeyEq2P, 2)
+	mul := new(field.Element).SetOne()
+	fssKeyOne := f.GenerateTreePF(a, mul)
+	fssKeysVector[0] = append(fssKeysVector[0], fssKeyOne[0])
+	fssKeysVector[1] = append(fssKeysVector[1], fssKeyOne[1])
+	for i := 1; i < length+1; i++ {
+		mul = mul.Mul(mul, b)
+		fssKey := f.GenerateTreePF(a, mul)
+		fssKeysVector[0] = append(fssKeysVector[0], fssKey[0])
+		fssKeysVector[1] = append(fssKeysVector[1], fssKey[1])
+	}
+
+	return fssKeysVector
 }
