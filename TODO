@@ -1,4 +1,3 @@
-* Optimize multi-bit scheme with selected field library
 * Implement dbf-based multi-bit schemes
 * Implement rebalanced multi-bit scheme
 * Continue with PoC app implementation (gpg, db, cli) --> Simone
@@ -6,4 +5,3 @@
 * General clanup and refactoring --> Kirill
 * Organize iccluster servers --> Simone
 * Improve config/constants
-* Multi-bit scheme should verify the reconstructed entires as soon as they are computed, as before
