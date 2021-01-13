@@ -1,7 +1,6 @@
 package dpf
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -55,18 +54,17 @@ func TestVector(t *testing.T) {
 	length := 10
 
 	fClient := ClientInitialize(nBits)
-	fssKeysVector := fClient.GenerateTreePFVector(alpha, rand, 10)
+	fssKeysVector := fClient.GenerateTreePFVector(alpha, rand, length)
 
 	// Simulate server
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
 
 	// compute expected vector
-	expectedVector := make([]*field.Element, length+1)
-	expectedVector[0] = new(field.Element).SetOne()
-	mul := new(field.Element).SetOne()
-	for i := 1; i < length+1; i++ {
-		mul = mul.Mul(mul, rand)
-		expectedVector[i] = mul
+	expectedVector := make([]field.Element, length+1)
+	expectedVector[0] = field.One()
+	expectedVector[1] = *rand
+	for i := 2; i < len(expectedVector); i++ {
+		expectedVector[i].Mul(&expectedVector[i-1], rand)
 	}
 
 	zero := field.Zero()
@@ -76,13 +74,14 @@ func TestVector(t *testing.T) {
 		// generate vector of answers
 		ans0 := fServer.EvaluatePFVector(0, fssKeysVector[0], i)
 		ans1 := fServer.EvaluatePFVector(1, fssKeysVector[1], i)
-		fmt.Println(len(ans0))
+
+		// test all elements of vector
 		for j := range ans0 {
 			val := new(field.Element).Add(ans0[j], ans1[j]).String()
 			if i == alpha {
-				require.Equal(t, val, expectedVector[j].String())
+				require.Equal(t, expectedVector[j].String(), val)
 			} else {
-				require.Equal(t, val, zero.String())
+				require.Equal(t, zero.String(), val)
 			}
 		}
 	}

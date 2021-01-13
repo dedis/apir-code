@@ -101,10 +101,15 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint) *field.Element {
 // EvaluatePFVector is executed by each of the 2 server to evaluate their function
 // share on a value. Then, the client adds the results from both servers.
 func (f Fss) EvaluatePFVector(serverNum byte, ks []FssKeyEq2P, x uint) []*field.Element {
-	out := make([]*field.Element, 0)
-	for _, k := range ks {
-		out = append(out, f.EvaluatePF(serverNum, k, x))
+	out := make([]*field.Element, len(ks))
+	//wg := sync.WaitGroup{}
+	for i, k := range ks {
+		//go func(i int, serverNum byte, k FssKeyEq2P, x uint) {
+		//	defer wg.Done()
+		out[i] = f.EvaluatePF(serverNum, k, x)
+		//}(i, serverNum, k, x)
 	}
+	//wg.Wait()
 
 	return out
 }
