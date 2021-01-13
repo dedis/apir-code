@@ -15,6 +15,7 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
+/*
 func TestRetrieveRandomKeyBlock(t *testing.T) {
 	path := "data/random_id_key.csv"
 	//db, fieldElementsEntry, bytesLastFieldElement, blockLength, err := database.GenerateRandomDB(path)
@@ -50,6 +51,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 	}
 }
+*/
 
 /*
 func TestRetrieveKey(t *testing.T) {
@@ -289,7 +291,6 @@ func TestDPFMulti(t *testing.T) {
 		res, err := c.Reconstruct(answers, constants.BlockLength)
 		require.NoError(t, err)
 		require.ElementsMatch(t, db.Entries[i], res)
-		fmt.Println("query ok")
 	}
 
 	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())

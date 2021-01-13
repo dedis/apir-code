@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"io"
 	"log"
 	"math"
@@ -102,50 +101,13 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 }
 
 func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field.Element, error) {
-	answersLen := len(answers[0])
-	sum := make([]field.Element, answersLen)
-
-	// sum answers as vectors in F(2^128)^(1+b)
-	for i := 0; i < answersLen; i++ {
-		sum[i] = field.Zero()
-		for s := range answers {
-			sum[i].Add(&sum[i], &answers[s][i])
-		}
-	}
-
 	// select index depending on the matrix representation
-	i := 0
+	index := 0
 	if c.rebalanced {
-		i = c.state.iy
+		index = c.state.iy
 	}
 
-	if blockSize == cst.SingleBitBlockLength {
-		switch {
-		case sum[i].Equal(&c.state.alpha):
-			return []field.Element{cst.One}, nil
-		case sum[i].Equal(&cst.Zero):
-			return []field.Element{cst.Zero}, nil
-		default:
-			return nil, errors.New("REJECT!")
-		}
-	}
-
-	tag := sum[len(sum)-1]
-	messages := sum[:len(sum)-1]
-
-	// compute reconstructed tag
-	reconstructedTag := field.Zero()
-	for i := 0; i < len(messages); i++ {
-		var prod field.Element
-		prod.Mul(&c.state.a[i], &messages[i])
-		reconstructedTag.Add(&reconstructedTag, &prod)
-	}
-
-	if !tag.Equal(&reconstructedTag) {
-		return nil, errors.New("REJECT")
-	}
-
-	return messages, nil
+	return reconstruct(answers, blockSize, index, c.state.alpha, c.state.a)
 }
 
 // secretShare the vector a among numServers non-colluding servers
