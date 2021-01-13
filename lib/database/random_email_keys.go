@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -8,11 +9,11 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateRandomDB(path string) (*GF, int, int, error) {
+func GenerateRandomDB(path string) (*GF, int, int, int, error) {
 	// parse id->key file
 	pairs, err := utils.ParseCSVRandomIDKeys(path)
 	if err != nil {
-		return nil, 0, 0, err
+		return nil, 0, 0, 0, err
 	}
 
 	// analyze pairs
@@ -22,7 +23,7 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 	// generate hash table
 	hashTable, err := generateHashTable(pairs, maxIDLength)
 	if err != nil {
-		return nil, 0, 0, err
+		return nil, 0, 0, 0, err
 	}
 
 	// get maximal []byte length in hashTable
@@ -43,6 +44,7 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 	// field element
 	fieldElementsEntry := int(math.Ceil(float64(entryLength) / float64(chunkLength)))
 	bytesLastFieldElement := entryLength % chunkLength
+	fmt.Println(bytesLastFieldElement)
 
 	// create all zeros db
 	// TODO: useless to create an all zero db, better to build the db from scratch
@@ -51,7 +53,6 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 	// embed data into field elements
 	for id, v := range hashTable {
 		elements := make([]field.Element, 0)
-
 		// embed all bytes
 		for i := 0; i < len(v); i += chunkLength {
 			end := i + chunkLength
@@ -71,7 +72,7 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 		db.Entries[id] = elements
 	}
 
-	return db, fieldElementsEntry, bytesLastFieldElement, nil
+	return db, fieldElementsEntry, bytesLastFieldElement, fieldElementsMax, nil
 }
 
 func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte, error) {

@@ -1,14 +1,7 @@
 package main
 
 import (
-	"crypto/dsa"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/binary"
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -22,19 +15,22 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-/*
 func TestRetrieveRandomKeyBlock(t *testing.T) {
-	db, blockLength := database.GenerateRandomDB()
+	path := "data/random_id_key.csv"
+	//db, fieldElementsEntry, bytesLastFieldElement, blockLength, err := database.GenerateRandomDB(path)
+	db, _, _, blockLength, err := database.GenerateRandomDB(path)
+	require.NoError(t, err)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
+
 	rebalanced := false
 
 	c := client.NewITMulti(xof, rebalanced)
 	s0 := server.NewITMulti(rebalanced, db)
 	s1 := server.NewITMulti(rebalanced, db)
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 1; i++ {
 		queries := c.Query(i, blockLength, 2)
 
 		a0 := s0.Answer(queries[0], blockLength)
@@ -44,22 +40,18 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 		result, err := c.Reconstruct(answers, blockLength)
 		require.NoError(t, err)
-		if !(&result[0]).IsZero() {
-			// we know that an (id, key) block is 300 bytes, i.e. 20 field elements
-			resultBytes := make([]byte, 0)
-			for i := 0; i < 20; i++ {
-				fieldBytes := result[i].Bytes()
-				resultBytes = append(resultBytes, fieldBytes[:]...)
-			}
 
-			key := resultBytes
-			fmt.Println(len(key))
-			fmt.Println(key)
+		resultBytes := make([]byte, 0)
+		for _, e := range result {
+			fieldBytes := e.Bytes()
+			resultBytes = append(resultBytes, fieldBytes[:]...)
 		}
+		fmt.Println(resultBytes[0:289])
+
 	}
 }
-*/
 
+/*
 func TestRetrieveKey(t *testing.T) {
 	db, err := database.FromKeysFile()
 	require.NoError(t, err)
@@ -123,6 +115,7 @@ func TestRetrieveKey(t *testing.T) {
 		}
 	}
 }
+*/
 
 func TestMultiBitOneKb(t *testing.T) {
 	dbLenMB := 1048576 * 8
