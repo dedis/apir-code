@@ -188,28 +188,6 @@ func TestSingleBitOneKb(t *testing.T) {
 	fmt.Printf("Total time SingleBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
-func TestMultiBitVectorGF(t *testing.T) {
-	db := database.CreateMultiBitGF()
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	rebalanced := false
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
-
-	i := 0
-	queries := c.Query(i, constants.BlockLength, 2)
-
-	a0 := s0.Answer(queries[0], constants.BlockLength)
-	a1 := s1.Answer(queries[1], constants.BlockLength)
-
-	answers := [][]field.Element{a0, a1}
-
-	_, err = c.Reconstruct(answers, constants.BlockLength)
-	require.NoError(t, err)
-}
-
 func TestMatrixOneKbByte(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiMatrixOneKbByte()
