@@ -4,7 +4,7 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 )
 
-// Information theoretic server for classical PIR scheme working in GF(2).
+// Information theoretic server for classical PIR scheme working in DB(2).
 // Both vector and matrix (rebalanced) representations of the database are
 // handled by this server, via a boolean variable
 

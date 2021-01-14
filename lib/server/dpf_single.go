@@ -9,12 +9,12 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-func NewDPFServer(db *database.GF) *DPFServer {
+func NewDPFServer(db *database.DB) *DPFServer {
 	return &DPFServer{db: db}
 }
 
 type DPFServer struct {
-	db *database.GF
+	db *database.DB
 }
 
 func (s *DPFServer) Answer(q dpf.FssKeyEq2P, prfKeys [][]byte, serverNum byte) []field.Element {

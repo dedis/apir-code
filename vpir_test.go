@@ -1,14 +1,7 @@
 package main
 
 import (
-	"crypto/dsa"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/binary"
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -17,7 +10,6 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
-	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/blake2b"
 )
@@ -60,7 +52,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 }
 */
 
-func TestRetrieveKey(t *testing.T) {
+/*func TestRetrieveKey(t *testing.T) {
 	db, err := database.FromKeysFile()
 	require.NoError(t, err)
 	blockLength := 40
@@ -122,13 +114,13 @@ func TestRetrieveKey(t *testing.T) {
 			}
 		}
 	}
-}
+}*/
 
 func TestMultiBitOneKb(t *testing.T) {
 	dbLenMB := 1048576 * 8
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomMultiBitOneMBGF(xofDB, dbLenMB, constants.BlockLength)
+	db := database.CreateRandomMultiBitVectorDB(xofDB, dbLenMB, constants.BlockLength)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
@@ -159,12 +151,12 @@ func TestMultiBitOneKb(t *testing.T) {
 }
 
 func TestSingleBitOneKb(t *testing.T) {
-	dbLenKB := 1024 * 8
+	dbLenKB := 1048576 * 8
 	blockLen := constants.SingleBitBlockLength
 
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomSingleBitDB(xofDB, dbLenKB)
+	db := database.CreateRandomSingleBitVectorDB(xofDB, dbLenKB)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
@@ -196,7 +188,7 @@ func TestSingleBitOneKb(t *testing.T) {
 	fmt.Printf("Total time SingleBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
-func TestMultiBitVectorGF(t *testing.T) {
+/*func TestMultiBitVectorGF(t *testing.T) {
 	db := database.CreateMultiBitGF()
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
@@ -499,4 +491,4 @@ func TestDPF(t *testing.T) {
 	}
 
 	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
-}
+}*/

@@ -1,6 +1,6 @@
 package database
 
-import (
+/*import (
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -8,7 +8,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateRandomDB(path string) (*GF, int, int, error) {
+func GenerateRandomDB(path string) (*DB, int, int, error) {
 	// parse id->key file
 	pairs, err := utils.ParseCSVRandomIDKeys(path)
 	if err != nil {
@@ -96,4 +96,4 @@ func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte
 	}
 
 	return db, nil
-}
+}*/

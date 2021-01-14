@@ -1,24 +1,24 @@
 package server
 
-import (
+/*import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-// Information theoretic server for scheme working in GF(2^128).
+// Information theoretic server for scheme working in DB(2^128).
 // Both vector and matrix (rebalanced) representations of the
 // database are handled by this server, via a boolean variable
 
 // ITSingleGF is the server for the information theoretic single-bit scheme
 type ITSingleGF struct {
 	rebalanced bool
-	db         *database.GF
+	db         *database.DB
 }
 
 // NewITSingleGF return a server for the information theoretic single-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITSingleGF(rebalanced bool, db *database.GF) *ITSingleGF {
+func NewITSingleGF(rebalanced bool, db *database.DB) *ITSingleGF {
 	return &ITSingleGF{rebalanced: rebalanced, db: db}
 }
 
@@ -35,4 +35,4 @@ func (s *ITSingleGF) Answer(q []field.Element) []field.Element {
 	}
 
 	return a
-}
+}*/
