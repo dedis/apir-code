@@ -83,12 +83,12 @@ func (f Fss) GenerateTreePF(a uint, b *field.Element) []FssKeyEq2P {
 	rightStart := aes.BlockSize + 1
 	for i := uint(0); i < f.NumBits; i++ {
 		// "expand" seed into two seeds + 2 bits
-		//prf(sCurr0, f.FixedBlocks, 3, f.Temp, f.Out)
-		prfKey(sCurr0, f.PrfKeys, 3, f.Temp, f.Out)
+		prf(sCurr0, f.FixedBlocks, 3, f.Temp, f.Out)
+		//prfKey(sCurr0, f.PrfKeys, 3, f.Temp, f.Out)
 		prfOut0 := make([]byte, aes.BlockSize*3)
 		copy(prfOut0, f.Out[:aes.BlockSize*3])
-		//prf(sCurr1, f.FixedBlocks, 3, f.Temp, f.Out)
-		prfKey(sCurr1, f.PrfKeys, 3, f.Temp, f.Out)
+		prf(sCurr1, f.FixedBlocks, 3, f.Temp, f.Out)
+		//prfKey(sCurr1, f.PrfKeys, 3, f.Temp, f.Out)
 		prfOut1 := make([]byte, aes.BlockSize*3)
 		copy(prfOut1, f.Out[:aes.BlockSize*3])
 
@@ -182,12 +182,12 @@ func (f Fss) GenerateTreePFVector(a uint, b []field.Element) []FssKeyVectorEq2P 
 	rightStart := aes.BlockSize + 1
 	for i := uint(0); i < f.NumBits; i++ {
 		// "expand" seed into two seeds + 2 bits
-		//prf(sCurr0, f.FixedBlocks, 3, f.Temp, f.Out)
-		prfKey(sCurr0, f.PrfKeys, 3, f.Temp, f.Out)
+		prf(sCurr0, f.FixedBlocks, 3, f.Temp, f.Out)
+		//prfKey(sCurr0, f.PrfKeys, 3, f.Temp, f.Out)
 		prfOut0 := make([]byte, aes.BlockSize*3)
 		copy(prfOut0, f.Out[:aes.BlockSize*3])
-		//prf(sCurr1, f.FixedBlocks, 3, f.Temp, f.Out)
-		prfKey(sCurr1, f.PrfKeys, 3, f.Temp, f.Out)
+		prf(sCurr1, f.FixedBlocks, 3, f.Temp, f.Out)
+		//prfKey(sCurr1, f.PrfKeys, 3, f.Temp, f.Out)
 		prfOut1 := make([]byte, aes.BlockSize*3)
 		copy(prfOut1, f.Out[:aes.BlockSize*3])
 
