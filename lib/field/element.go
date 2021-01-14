@@ -250,6 +250,23 @@ func PowerVectorWithOne(alpha Element, length int) []Element {
 	return a
 }
 
+// RandomVectorPointers returns a vector composed of length random pointers
+// to field elements
+func RandomVectorPointers(rnd io.Reader, length int) ([]*Element, error) {
+	bytesLength := length*16 + 1
+	bytes := make([]byte, bytesLength)
+	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
+		return nil, err
+	}
+	zs := make([]*Element, length)
+	for i := 0; i < length; i++ {
+		e := FitElement(bytes[i*8 : (i+2)*8])
+		zs[i] = &e
+	}
+
+	return zs, nil
+}
+
 // RandomVector returns a vector composed of length random field elements
 func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	bytesLength := length*16 + 1

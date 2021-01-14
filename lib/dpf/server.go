@@ -9,6 +9,7 @@ import (
 	//"fmt"
 
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Upon receiving query from client, initialize server with
@@ -100,16 +101,61 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint) *field.Element {
 
 // EvaluatePFVector is executed by each of the 2 server to evaluate their function
 // share on a value. Then, the client adds the results from both servers.
-func (f Fss) EvaluatePFVector(serverNum byte, ks []FssKeyEq2P, x uint) []*field.Element {
-	out := make([]*field.Element, len(ks))
-	//wg := sync.WaitGroup{}
-	for i, k := range ks {
-		//go func(i int, serverNum byte, k FssKeyEq2P, x uint) {
-		//	defer wg.Done()
-		out[i] = f.EvaluatePF(serverNum, k, x)
-		//}(i, serverNum, k, x)
+func (f Fss) EvaluatePFVector(serverNum byte, k FssKeyVectorEq2P, x uint) []*field.Element {
+	sCurr := make([]byte, aes.BlockSize)
+	copy(sCurr, k.SInit)
+	tCurr := k.TInit
+	for i := uint(0); i < f.NumBits; i++ {
+		var xBit byte
+		if i != f.N {
+			xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
+		}
+
+		prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+		//fmt.Println(i, sCurr)
+		//fmt.Println(i, "f.Out:", f.Out)
+		// Keep counter to ensure we are accessing CW correctly
+		count := 0
+		for j := 0; j < aes.BlockSize*2+2; j++ {
+			// Make sure we are doing G(s) ^ (t*sCW||tLCW||sCW||tRCW)
+			if j == aes.BlockSize+1 {
+				count = 0
+			} else if j == aes.BlockSize*2+1 {
+				count = aes.BlockSize + 1
+			}
+			f.Out[j] = f.Out[j] ^ (tCurr * k.CW[i][count])
+			count++
+		}
+		//fmt.Println("xBit", xBit)
+		// Pick right seed expansion based on
+		if xBit == 0 {
+			copy(sCurr, f.Out[:aes.BlockSize])
+			tCurr = f.Out[aes.BlockSize] % 2
+		} else {
+			copy(sCurr, f.Out[(aes.BlockSize+1):(aes.BlockSize*2+1)])
+			tCurr = f.Out[aes.BlockSize*2+1] % 2
+		}
+		//fmt.Println(f.Out)
 	}
-	//wg.Wait()
+
+	length := len(k.FinalCW)
+	var key utils.PRGKey
+	copy(key[:], sCurr)
+	prg := utils.NewPRG(&key)
+	out, err := field.RandomVectorPointers(prg, length)
+	if err != nil {
+		panic(err)
+	}
+	if tCurr > 0 {
+		for i := 0; i < length; i++ {
+			out[i].Add(out[i], &k.FinalCW[i])
+		}
+	}
+	if serverNum == 1 {
+		for i := 0; i < length; i++ {
+			out[i].Neg(out[i])
+		}
+	}
 
 	return out
 }

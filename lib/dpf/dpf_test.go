@@ -53,19 +53,13 @@ func TestVector(t *testing.T) {
 	nBits := uint(20)
 	length := 5
 
+	vector := field.PowerVectorWithOne(*rand, length)
+
 	fClient := ClientInitialize(nBits)
-	fssKeysVector := fClient.GenerateTreePFVector(alpha, rand, length)
+	fssKeysVector := fClient.GenerateTreePFVector(alpha, vector)
 
 	// Simulate server
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
-
-	// compute expected vector
-	expectedVector := make([]field.Element, length+1)
-	expectedVector[0] = field.One()
-	expectedVector[1] = *rand
-	for i := 2; i < len(expectedVector); i++ {
-		expectedVector[i].Mul(&expectedVector[i-1], rand)
-	}
 
 	zero := field.Zero()
 	for i := uint(0); i < (1 << nBits); i++ {
@@ -75,11 +69,11 @@ func TestVector(t *testing.T) {
 		ans0 := fServer.EvaluatePFVector(0, fssKeysVector[0], i)
 		ans1 := fServer.EvaluatePFVector(1, fssKeysVector[1], i)
 
-		// test all elements of vector
+		// test all elments of vector
 		for j := range ans0 {
 			val := new(field.Element).Add(ans0[j], ans1[j]).String()
 			if i == alpha {
-				require.Equal(t, expectedVector[j].String(), val)
+				require.Equal(t, vector[j].String(), val)
 			} else {
 				require.Equal(t, zero.String(), val)
 			}

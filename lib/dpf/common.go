@@ -21,13 +21,20 @@ type Fss struct {
 
 const initPRFLen uint = 4
 
-// Structs for keys
-
+// Structs for keys for DPF with output in F
 type FssKeyEq2P struct {
 	SInit   []byte
 	TInit   byte
 	CW      [][]byte // there are n
 	FinalCW field.Element
+}
+
+// Structs for keys for DPF with output in F^(length)
+type FssKeyVectorEq2P struct {
+	SInit   []byte
+	TInit   byte
+	CW      [][]byte // there are n
+	FinalCW []field.Element
 }
 
 // Helper functions
