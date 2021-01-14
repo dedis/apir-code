@@ -69,3 +69,29 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 		}
 	}
 }
+
+// TODO: fix comment
+// fixed key PRF (Matyas–Meyer–Oseas one way compression function)
+// numBlocks represents the number
+func prfKey(x []byte, key [][]byte, numBlocks uint, temp, out []byte) {
+	// If request blocks greater than actual needed blocks, grow output array
+	if numBlocks > initPRFLen {
+		out = make([]byte, numBlocks*aes.BlockSize)
+	}
+	for i := uint(0); i < numBlocks; i++ {
+		// get AES_k[i](x)
+		currentKey := key[i]
+		nk := len(currentKey) / 4
+		k := make([]uint32, nk)
+		for j := 0; j < nk; i++ {
+			k[j] = binary.BigEndian.Uint32(currentKey[4*j:])
+		}
+		aes128MMO(&k[0], &temp[0], &x[0])
+		//aesBlocks[i].Encrypt(temp, x)
+		// get AES_k[i](x) ^ x
+		for j := range temp {
+			out[i*aes.BlockSize+uint(j)] = temp[j] ^ x[j]
+		}
+
+	}
+}

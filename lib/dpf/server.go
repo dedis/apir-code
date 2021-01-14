@@ -62,7 +62,8 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint) *field.Element {
 			xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
 		}
 
-		prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+		//prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+		prfKey(sCurr, f.PrfKeys, 3, f.Temp, f.Out)
 		//fmt.Println(i, sCurr)
 		//fmt.Println(i, "f.Out:", f.Out)
 		// Keep counter to ensure we are accessing CW correctly
@@ -111,7 +112,8 @@ func (f Fss) EvaluatePFVector(serverNum byte, k FssKeyVectorEq2P, x uint) []*fie
 			xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
 		}
 
-		prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+		//prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+		prfKey(sCurr, f.PrfKeys, 3, f.Temp, f.Out)
 		//fmt.Println(i, sCurr)
 		//fmt.Println(i, "f.Out:", f.Out)
 		// Keep counter to ensure we are accessing CW correctly
