@@ -48,21 +48,23 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 			resultBytes = append(resultBytes, fieldBytes[:]...)
 		}
 
-		id := string(resultBytes[0:45])
-		fmt.Println(id)
-		keyBytes := resultBytes[49 : 49+256+16+15]
-		fmt.Println("len:", len(keyBytes))
 		// strip zeros
-		for i := 15; i < len(keyBytes)-15; i += 15 {
-			fmt.Println(keyBytes[i])
-			keyBytes = append(keyBytes[:i], keyBytes[i+1:]...)
+		for i := 0; i < len(resultBytes)-15; i += 15 {
+			resultBytes = append(resultBytes[:i], resultBytes[i+1:]...)
 		}
-		fmt.Println("before:", keyBytes)
-		keyBytes = append(keyBytes[:len(keyBytes)-15], keyBytes[len(keyBytes)-1])
-		fmt.Println("key for id: ", keyBytes)
-		key := base64.StdEncoding.EncodeToString(keyBytes)
-		fmt.Println(key)
+		// id is 45 bytes long by definition
+		id := string(resultBytes[0:45])
+		fmt.Println("id:", id)
 
+		// key is 256 bytes long, meaning that it can be represented in ceil(256/15)*15 = 270 bytes
+		keyBytes := resultBytes[45 : 45+270]
+
+		// remove padding for last element
+		keyBytes = append(keyBytes[:len(keyBytes)-15], keyBytes[len(keyBytes)-1])
+
+		// encode and print key
+		key := base64.StdEncoding.EncodeToString(keyBytes)
+		fmt.Println("key:", key)
 	}
 }
 
