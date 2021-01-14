@@ -10,13 +10,19 @@ import (
 var text = "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
 
 type DB struct {
-	Entries    [][][]field.Element
-	Dimensions
+	Entries [][][]field.Element
+	Info
 }
 
-type Dimensions struct {
+type Info struct {
 	NumColumns int
-	NumRows int
+	NumRows    int
+	BlockSize  int
+}
+
+type Bytes struct {
+	Entries      [][]byte
+	DBLengthSqrt int // unused for vector
 }
 
 //type Bytes struct {
@@ -89,7 +95,7 @@ func CreateRandomMultiBitVectorDB(rnd io.Reader, dbLen, blockLen int) *DB {
 			}
 		}
 	}
-	return &DB{Entries: entries, Dimensions: Dimensions{NumColumns: numBlocksPerRow, NumRows: 1}}
+	return &DB{Entries: entries, Info: Info{NumColumns: numBlocksPerRow, NumRows: 1, BlockSize: blockLen}}
 }
 
 func CreateRandomSingleBitVectorDB(rnd io.Reader, dbLen int) *DB {
@@ -110,7 +116,7 @@ func CreateRandomSingleBitVectorDB(rnd io.Reader, dbLen int) *DB {
 			}
 		}
 	}
-	return &DB{Entries: entries, Dimensions: Dimensions{NumColumns: numBlocksPerRow, NumRows: 1}}
+	return &DB{Entries: entries, Info: Info{NumColumns: numBlocksPerRow, NumRows: 1, BlockSize: 0}}
 }
 
 /*

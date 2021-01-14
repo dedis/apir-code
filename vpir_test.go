@@ -127,21 +127,21 @@ func TestMultiBitOneKb(t *testing.T) {
 
 	totalTimer := monitor.NewMonitor()
 
-	c := client.NewITMulti(xof, db.Dimensions)
+	c := client.NewITMulti(xof, db.Info)
 	s0 := server.NewITMulti(db)
 	s1 := server.NewITMulti(db)
 
 	fieldElements := 128 * 8
 
 	for i := 0; i < fieldElements/16; i++ {
-		queries := c.Query(i, constants.BlockLength, 2)
+		queries := c.Query(i, 2)
 
-		a0 := s0.Answer(queries[0], constants.BlockLength)
-		a1 := s1.Answer(queries[1], constants.BlockLength)
+		a0 := s0.Answer(queries[0])
+		a1 := s1.Answer(queries[1])
 
 		answers := [][][]field.Element{a0, a1}
 
-		res, err := c.Reconstruct(answers, constants.BlockLength)
+		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		require.ElementsMatch(t, db.Entries[i], res)
 	}
@@ -151,7 +151,6 @@ func TestMultiBitOneKb(t *testing.T) {
 
 func TestSingleBitOneKb(t *testing.T) {
 	dbLenKB := 1048576 * 8
-	blockLen := constants.SingleBitBlockLength
 
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
@@ -162,21 +161,21 @@ func TestSingleBitOneKb(t *testing.T) {
 
 	totalTimer := monitor.NewMonitor()
 
-	c := client.NewITMulti(xof, db.Dimensions)
+	c := client.NewITMulti(xof, db.Info)
 	s0 := server.NewITMulti(db)
 	s1 := server.NewITMulti(db)
 
 	fieldElements := 128 * 8
 
 	for i := 0; i < fieldElements/16; i++ {
-		queries := c.Query(i, blockLen, 2)
+		queries := c.Query(i, 2)
 
-		a0 := s0.Answer(queries[0], blockLen)
-		a1 := s1.Answer(queries[1], blockLen)
+		a0 := s0.Answer(queries[0])
+		a1 := s1.Answer(queries[1])
 
 		answers := [][][]field.Element{a0, a1}
 
-		res, err := c.Reconstruct(answers, blockLen)
+		res, err := c.Reconstruct(answers)
 		//fmt.Printf("Real: %s, Got: %s\n", db.Entries[i][0].String(), res[0].String())
 		require.NoError(t, err)
 		require.ElementsMatch(t, db.Entries[i], res)

@@ -1,7 +1,5 @@
 package client
 
-import cst "github.com/si-co/vpir-code/lib/constants"
-
 // Client represents the client instance in both the IT and C models
 type Client interface {
 	Query()
@@ -14,6 +12,6 @@ type General struct {
 }
 
 // return true if the query inputs are invalid
-func invalidQueryInputs(index, blockSize, numServers int) bool {
-	return (index < 0 || blockSize < 1 || index > cst.DBLength) && numServers < 1
+func invalidQueryInputs(index, numServers int) bool {
+	return index < 0 && numServers < 1
 }

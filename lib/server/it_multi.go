@@ -23,9 +23,9 @@ func NewITMulti(db *database.DB) *ITMulti {
 }
 
 // Answer computes the answer for the given query
-func (s *ITMulti) Answer(q [][]field.Element, blockSize int) [][]field.Element {
+func (s *ITMulti) Answer(q [][]field.Element) [][]field.Element {
 	// Doing simplified scheme if block consists of a single bit
-	if blockSize == cst.SingleBitBlockLength {
+	if s.db.BlockSize == cst.SingleBitBlockLength {
 		a := make([][]field.Element, s.db.NumRows)
 		for i := 0; i < s.db.NumRows; i++ {
 			a[i] = make([]field.Element, 1)
@@ -52,14 +52,14 @@ func (s *ITMulti) Answer(q [][]field.Element, blockSize int) [][]field.Element {
 	m := make([][]field.Element, s.db.NumRows)
 	tags := field.ZeroVector(s.db.NumRows)
 	var prodTag field.Element
-	prod := make([]field.Element, blockSize)
+	prod := make([]field.Element, s.db.BlockSize)
 	// we have to traverse column by column
 	for i := 0; i < s.db.NumRows; i++ {
 		sumTag := field.Zero()
-		sum := field.ZeroVector(blockSize)
-		m[i] = make([]field.Element, blockSize)
+		sum := field.ZeroVector(s.db.BlockSize)
+		m[i] = make([]field.Element, s.db.BlockSize)
 		for j := 0; j < s.db.NumColumns; j++ {
-			for b := 0; b < blockSize; b++ {
+			for b := 0; b < s.db.BlockSize; b++ {
 				prod[b].Mul(&s.db.Entries[i][j][b], &qZeroBase[j])
 				sum[b].Add(&sum[b], &prod[b])
 

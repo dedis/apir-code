@@ -18,7 +18,7 @@ import (
 type ITMulti struct {
 	rnd    io.Reader
 	state  *itMultiState
-	dbInfo database.Dimensions
+	dbInfo database.Info
 }
 
 type itMultiState struct {
@@ -31,10 +31,10 @@ type itMultiState struct {
 // NewITSingleGF return a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITMulti(rnd io.Reader, dimensions database.Dimensions) *ITMulti {
+func NewITMulti(rnd io.Reader, info database.Info) *ITMulti {
 	return &ITMulti{
 		rnd:    rnd,
-		dbInfo: dimensions,
+		dbInfo: info,
 		state:  nil,
 	}
 }
@@ -42,8 +42,8 @@ func NewITMulti(rnd io.Reader, dimensions database.Dimensions) *ITMulti {
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
-	if invalidQueryInputs(index, blockSize, numServers) {
+func (c *ITMulti) Query(index, numServers int) [][][]field.Element {
+	if invalidQueryInputs(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
 	var alpha field.Element
@@ -56,10 +56,10 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 		log.Fatal(err)
 	}
 
-	if blockSize != cst.SingleBitBlockLength {
+	if c.dbInfo.BlockSize != cst.SingleBitBlockLength {
 		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
 		// multi-bit scheme
-		a = make([]field.Element, blockSize+1)
+		a = make([]field.Element, c.dbInfo.BlockSize+1)
 		a[0] = field.One()
 		a[1] = alpha
 		for i := 2; i < len(a); i++ {
@@ -90,48 +90,54 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	return vectors
 }
 
-func (c *ITMulti) Reconstruct(answers [][][]field.Element, blockSize int) ([]field.Element, error) {
-	answersLen := len(answers[0])
-	sum := make([]field.Element, answersLen)
-
-	// sum answers as vectors in F(2^128)^(1+b)
-	for i := 0; i < answersLen; i++ {
-		sum[i] = field.Zero()
-		for s := range answers {
-			sum[i].Add(&sum[i], &answers[s][i])
+func (c *ITMulti) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
+	sum := make([][]field.Element, c.dbInfo.NumRows)
+	// sum answers as vectors in F(2^128)^(b+1)
+	for i := 0; i < c.dbInfo.NumRows; i++ {
+		sum[i] = make([]field.Element, c.dbInfo.BlockSize)
+		for b := 0; b < c.dbInfo.BlockSize; b++ {
+			for k := range answers {
+				sum[i][b].Add(&sum[i][b], &answers[k][i][b])
+			}
 		}
 	}
 
-	// select index depending on the matrix representation
-	i := c.state.iy
-
-	if blockSize == cst.SingleBitBlockLength {
-		switch {
-		case sum[i].Equal(&c.state.alpha):
-			return []field.Element{cst.One}, nil
-		case sum[i].Equal(&cst.Zero):
-			return []field.Element{cst.Zero}, nil
-		default:
-			return nil, errors.New("REJECT!")
+	if c.dbInfo.BlockSize == cst.SingleBitBlockLength {
+		for i := 0; i < c.dbInfo.NumRows; i++ {
+			if i == c.state.iy {
+				switch {
+				case sum[i][0].Equal(&c.state.alpha):
+					return []field.Element{cst.One}, nil
+				case sum[i][0].Equal(&cst.Zero):
+					return []field.Element{cst.Zero}, nil
+				default:
+					return nil, errors.New("REJECT!")
+				}
+			} else {
+				if !sum[i][0].Equal(&c.state.alpha) && !sum[i][0].Equal(&cst.Zero) {
+					return nil, errors.New("REJECT!")
+				}
+			}
 		}
 	}
 
-	tag := sum[len(sum)-1]
-	messages := sum[:len(sum)-1]
-
-	// compute reconstructed tag
-	reconstructedTag := field.Zero()
-	for i := 0; i < len(messages); i++ {
-		var prod field.Element
-		prod.Mul(&c.state.a[i], &messages[i])
-		reconstructedTag.Add(&reconstructedTag, &prod)
+	var tag, prod field.Element
+	var messages []field.Element
+	for i := 0; i < c.dbInfo.NumRows; i++ {
+		tag = sum[i][len(sum)-1]
+		messages = sum[i][:len(sum)-1]
+		// compute reconstructed tag
+		reconstructedTag := field.Zero()
+		for i := 0; i < len(messages); i++ {
+			prod.Mul(&c.state.a[i], &messages[i])
+			reconstructedTag.Add(&reconstructedTag, &prod)
+		}
+		if !tag.Equal(&reconstructedTag) {
+			return nil, errors.New("REJECT")
+		}
 	}
 
-	if !tag.Equal(&reconstructedTag) {
-		return nil, errors.New("REJECT")
-	}
-
-	return messages, nil
+	return sum[c.state.iy][:len(sum)-1], nil
 }
 
 // secretShare the vector a among numServers non-colluding servers
