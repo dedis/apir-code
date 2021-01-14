@@ -18,28 +18,27 @@ func TestAll(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(6)
 	// Test with if x = 10, evaluate to 2
-	fssKeys := fClient.GenerateTreePF(10, rand)
+	fssKeys := fClient.GenerateTreePFVector(10, []field.Element{*rand})
 
 	// Simulate server
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
 
 	// Test 2-party Equality Function
-	var ans0, ans1 *field.Element
-	ans0 = fServer.EvaluatePF(0, fssKeys[0], 10)
-	ans1 = fServer.EvaluatePF(1, fssKeys[1], 10)
-	require.Equal(t, new(field.Element).Add(ans0, ans1).String(), rand.String())
+	ans0 := fServer.EvaluatePFVector(0, fssKeys[0], 10)
+	ans1 := fServer.EvaluatePFVector(1, fssKeys[1], 10)
+	require.Equal(t, new(field.Element).Add(ans0[0], ans1[0]).String(), rand.String())
 
-	ans0 = fServer.EvaluatePF(0, fssKeys[0], 11)
-	ans1 = fServer.EvaluatePF(1, fssKeys[1], 11)
+	ans0 = fServer.EvaluatePFVector(0, fssKeys[0], 11)
+	ans1 = fServer.EvaluatePFVector(1, fssKeys[1], 11)
 	zero := new(field.Element).SetZero()
 	require.Equal(t,
-		new(field.Element).Add(ans0, ans1).String(),
+		new(field.Element).Add(ans0[0], ans1[0]).String(),
 		zero.String())
 
-	ans0 = fServer.EvaluatePF(0, fssKeys[0], 9)
-	ans1 = fServer.EvaluatePF(1, fssKeys[1], 9)
+	ans0 = fServer.EvaluatePFVector(0, fssKeys[0], 9)
+	ans1 = fServer.EvaluatePFVector(1, fssKeys[1], 9)
 	require.Equal(t,
-		new(field.Element).Add(ans0, ans1).String(),
+		new(field.Element).Add(ans0[0], ans1[0]).String(),
 		zero.String())
 }
 

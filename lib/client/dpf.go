@@ -29,7 +29,7 @@ func NewDPF(rnd io.Reader) *DPF {
 	}
 }
 
-func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, [][]dpf.FssKeyEq2P) {
+func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, []dpf.FssKeyVectorEq2P) {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -62,16 +62,9 @@ func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, [][]dpf.FssKeyE
 	fClient := dpf.ClientInitialize(uint(bits.Len(uint(constants.DBLength))))
 
 	// compute dpf keys
-	fssKeysVector := make([][]dpf.FssKeyEq2P, 2)
-	if blockSize != cst.SingleBitBlockLength {
-		fssKeysVector = fClient.GenerateTreePFVector(uint(index), alpha, blockSize)
-	} else {
-		fssKeys := fClient.GenerateTreePF(uint(index), alpha)
-		fssKeysVector[0] = append(fssKeysVector[0], fssKeys[0])
-		fssKeysVector[1] = append(fssKeysVector[1], fssKeys[1])
-	}
+	fssKeys := fClient.GenerateTreePFVector(uint(index), a)
+	return fClient.PrfKeys, fssKeys
 
-	return fClient.PrfKeys, fssKeysVector
 }
 
 func (c *DPF) Reconstruct(answers [][]field.Element, blockSize int) ([]field.Element, error) {

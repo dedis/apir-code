@@ -264,17 +264,4 @@ func (f Fss) GenerateTreePFVector(a uint, b []field.Element) []FssKeyVectorEq2P 
 		}
 	}
 	return fssKeys
-	//fssKeysVector := make([][]FssKeyEq2P, 2)
-	//fssKeyOne := f.GenerateTreePF(a, new(field.Element).SetOne())
-	//fssKeysVector[0] = append(fssKeysVector[0], fssKeyOne[0])
-	//fssKeysVector[1] = append(fssKeysVector[1], fssKeyOne[1])
-	//mul := new(field.Element).SetOne()
-	//for i := 1; i < length+1; i++ {
-	//mul = mul.Mul(mul, b)
-	//fssKey := f.GenerateTreePF(a, mul)
-	//fssKeysVector[0] = append(fssKeysVector[0], fssKey[0])
-	//fssKeysVector[1] = append(fssKeysVector[1], fssKey[1])
-	//}
-
-	//return fssKeysVector
 }

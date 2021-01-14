@@ -18,7 +18,7 @@ type DPF struct {
 	db *database.GF
 }
 
-func (s *DPF) Answer(q []dpf.FssKeyEq2P, prfKeys [][]byte, serverNum byte, blockSize int) []field.Element {
+func (s *DPF) Answer(q dpf.FssKeyVectorEq2P, prfKeys [][]byte, serverNum byte, blockSize int) []field.Element {
 	// initialize dpf server
 	fServer := dpf.ServerInitialize(prfKeys, uint(bits.Len(uint(constants.DBLength))))
 
@@ -29,7 +29,8 @@ func (s *DPF) Answer(q []dpf.FssKeyEq2P, prfKeys [][]byte, serverNum byte, block
 		for i := range s.db.Entries {
 			for j := range s.db.Entries[i] {
 				if s.db.Entries[i][j].Equal(&cst.One) {
-					a[i].Add(&a[i], fServer.EvaluatePF(serverNum, q[0], uint(j)))
+					eval := fServer.EvaluatePFVector(serverNum, q, uint(j))
+					a[i].Add(&a[i], eval[0])
 				}
 			}
 		}
@@ -51,10 +52,11 @@ func (s *DPF) Answer(q []dpf.FssKeyEq2P, prfKeys [][]byte, serverNum byte, block
 		sum := field.Zero()
 		sumTag := field.Zero()
 		for j := 0; j < cst.DBLength; j++ {
-			prod.Mul(&s.db.Entries[j][i], fServer.EvaluatePF(serverNum, q[0], uint(j)))
+			eval := fServer.EvaluatePFVector(serverNum, q, uint(j))
+			prod.Mul(&s.db.Entries[j][i], eval[0])
 			sum.Add(&sum, &prod)
 
-			prodTag.Mul(&s.db.Entries[j][i], fServer.EvaluatePF(serverNum, q[i+1], uint(j)))
+			prodTag.Mul(&s.db.Entries[j][i], eval[i+1])
 			sumTag.Add(&sumTag, &prodTag)
 		}
 		m[i] = sum
