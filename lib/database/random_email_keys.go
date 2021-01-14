@@ -9,21 +9,25 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateRandomDB(path string) (*GF, int, int, int, error) {
+func GenerateRandomDB(path string) (*GF, int, int, error) {
 	// parse id->key file
 	pairs, err := utils.ParseCSVRandomIDKeys(path)
 	if err != nil {
-		return nil, 0, 0, 0, err
+		return nil, 0, 0, err
 	}
 
 	// analyze pairs
 	maxIDLength, maxKeyLength := utils.AnalyzeIDKeys(pairs)
+	fmt.Println(maxIDLength)
+	maxIDLength = 45
 	entryLength := maxIDLength + maxKeyLength
+
+	fmt.Println(entryLength)
 
 	// generate hash table
 	hashTable, err := generateHashTable(pairs, maxIDLength)
 	if err != nil {
-		return nil, 0, 0, 0, err
+		return nil, 0, 0, err
 	}
 
 	// get maximal []byte length in hashTable
@@ -39,10 +43,11 @@ func GenerateRandomDB(path string) (*GF, int, int, int, error) {
 
 	// compute field elements necessary to encode the maximum length
 	fieldElementsMax := int(math.Ceil(float64(maxBytes) / float64(chunkLength)))
+	entryLengthPadding := int(math.Ceil(float64(entryLength)/float64(chunkLength))) * 15
 
 	// compute number of field elements to encode an entry and the bytes of data in last
 	// field element
-	fieldElementsEntry := int(math.Ceil(float64(entryLength) / float64(chunkLength)))
+	//fieldElementsEntry := int(math.Ceil(float64(entryLength) / float64(chunkLength)))
 	bytesLastFieldElement := entryLength % chunkLength
 	fmt.Println(bytesLastFieldElement)
 
@@ -53,14 +58,18 @@ func GenerateRandomDB(path string) (*GF, int, int, int, error) {
 	// embed data into field elements
 	for id, v := range hashTable {
 		elements := make([]field.Element, 0)
-		// embed all bytes
-		for i := 0; i < len(v); i += chunkLength {
-			end := i + chunkLength
-			if end > len(v) {
-				end = len(v)
+		// loop over all entries in v to avoid mixing bytes in element
+		for i := 0; i < len(v); i += entryLength {
+			entry := v[i : i+entryLength]
+			// embed all bytes
+			for i := 0; i < len(entry); i += chunkLength {
+				end := i + chunkLength
+				if end > len(entry) {
+					end = len(entry)
+				}
+				e := new(field.Element).SetBytes(entry[i:end])
+				elements = append(elements, *e)
 			}
-			e := new(field.Element).SetBytes(v[i:end])
-			elements = append(elements, *e)
 		}
 
 		// pad to have a full block
@@ -72,7 +81,7 @@ func GenerateRandomDB(path string) (*GF, int, int, int, error) {
 		db.Entries[id] = elements
 	}
 
-	return db, fieldElementsEntry, bytesLastFieldElement, fieldElementsMax, nil
+	return db, entryLengthPadding, fieldElementsMax, nil
 }
 
 func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte, error) {
@@ -86,6 +95,9 @@ func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte
 
 		// prepare entry
 		idBytes := make([]byte, maxIDLength)
+		if id == "UaiI_NgkuLvoZkEyo_vvy_mQpLavaO-j" {
+			fmt.Println("key for id: ", k)
+		}
 		copy(idBytes, id)
 		entry := append(idBytes, k...)
 

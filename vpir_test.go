@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
 
@@ -15,11 +16,10 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-/*
 func TestRetrieveRandomKeyBlock(t *testing.T) {
 	path := "data/random_id_key.csv"
 	//db, fieldElementsEntry, bytesLastFieldElement, blockLength, err := database.GenerateRandomDB(path)
-	db, _, _, blockLength, err := database.GenerateRandomDB(path)
+	db, _, blockLength, err := database.GenerateRandomDB(path)
 	require.NoError(t, err)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
@@ -47,11 +47,24 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 			fieldBytes := e.Bytes()
 			resultBytes = append(resultBytes, fieldBytes[:]...)
 		}
-		fmt.Println(resultBytes[0:289])
+
+		id := string(resultBytes[0:45])
+		fmt.Println(id)
+		keyBytes := resultBytes[49 : 49+256+16+15]
+		fmt.Println("len:", len(keyBytes))
+		// strip zeros
+		for i := 15; i < len(keyBytes)-15; i += 15 {
+			fmt.Println(keyBytes[i])
+			keyBytes = append(keyBytes[:i], keyBytes[i+1:]...)
+		}
+		fmt.Println("before:", keyBytes)
+		keyBytes = append(keyBytes[:len(keyBytes)-15], keyBytes[len(keyBytes)-1])
+		fmt.Println("key for id: ", keyBytes)
+		key := base64.StdEncoding.EncodeToString(keyBytes)
+		fmt.Println(key)
 
 	}
 }
-*/
 
 /*
 func TestRetrieveKey(t *testing.T) {
