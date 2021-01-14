@@ -1,4 +1,3 @@
-* Implement rebalanced multi-bit scheme
 * Continue with PoC app implementation (gpg, db, cli) --> Simone
 * Update gRPC logic and add TLS
 * Organize iccluster servers --> Simone
