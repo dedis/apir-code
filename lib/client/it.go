@@ -2,12 +2,11 @@ package client
 
 import (
 	"errors"
+	cst "github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"io"
 	"log"
-	"math"
-
-	cst "github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -17,27 +16,26 @@ import (
 
 // ITMulti represents the client for the information theoretic multi-bit scheme
 type ITMulti struct {
-	rnd        io.Reader
-	state      *itMultiState
-	rebalanced bool
+	rnd    io.Reader
+	state  *itMultiState
+	dbInfo database.Dimensions
 }
 
 type itMultiState struct {
-	ix       int
-	iy       int // unused if not rebalanced
-	alpha    field.Element
-	a        []field.Element
-	dbLength int
+	ix    int
+	iy    int // unused if not rebalanced
+	alpha field.Element
+	a     []field.Element
 }
 
 // NewITSingleGF return a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITMulti(rnd io.Reader, rebalanced bool) *ITMulti {
+func NewITMulti(rnd io.Reader, dimensions database.Dimensions) *ITMulti {
 	return &ITMulti{
-		rnd:        rnd,
-		rebalanced: rebalanced,
-		state:      nil,
+		rnd:    rnd,
+		dbInfo: dimensions,
+		state:  nil,
 	}
 }
 
@@ -74,28 +72,14 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	}
 
 	// set state
-	switch c.rebalanced {
-	case false:
-		// iy is unused if the database is represented as a vector
-		c.state = &itMultiState{
-			ix:       index,
-			alpha:    alpha,
-			a:        a[1:],
-			dbLength: cst.DBLength,
-		}
-	case true:
-		// verified at server side if integer square
-		dbLengthSqrt := int(math.Sqrt(cst.DBLength))
-		ix := index % dbLengthSqrt
-		iy := index / dbLengthSqrt
-
-		c.state = &itMultiState{
-			ix:       ix,
-			iy:       iy,
-			alpha:    alpha,
-			a:        a[1:],
-			dbLength: dbLengthSqrt,
-		}
+	ix := index % c.dbInfo.NumColumns
+	// if dbInfo is a vector, iy always equals 0
+	iy := index / c.dbInfo.NumColumns
+	c.state = &itMultiState{
+		ix:       ix,
+		iy:       iy,
+		alpha:    alpha,
+		a:        a[1:],
 	}
 
 	vectors, err = c.secretShare(a, numServers)
@@ -106,7 +90,7 @@ func (c *ITMulti) Query(index, blockSize, numServers int) [][][]field.Element {
 	return vectors
 }
 
-func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field.Element, error) {
+func (c *ITMulti) Reconstruct(answers [][][]field.Element, blockSize int) ([]field.Element, error) {
 	answersLen := len(answers[0])
 	sum := make([]field.Element, answersLen)
 
@@ -119,10 +103,7 @@ func (c *ITMulti) Reconstruct(answers [][]field.Element, blockSize int) ([]field
 	}
 
 	// select index depending on the matrix representation
-	i := 0
-	if c.rebalanced {
-		i = c.state.iy
-	}
+	i := c.state.iy
 
 	if blockSize == cst.SingleBitBlockLength {
 		switch {
@@ -161,43 +142,43 @@ func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.El
 	// create query vectors for all the servers
 	vectors := make([][][]field.Element, numServers)
 	for k := range vectors {
-		vectors[k] = make([][]field.Element, c.state.dbLength)
-		for i := 0; i < c.state.dbLength; i++ {
-			vectors[k][i] = make([]field.Element, blockSize)
+		vectors[k] = make([][]field.Element, c.dbInfo.NumColumns)
+		for j := 0; j < c.dbInfo.NumColumns; j++ {
+			vectors[k][j] = make([]field.Element, blockSize)
 		}
 	}
 
 	// Get random elements for all numServers-1 vectors
-	rand, err := field.RandomVectors(c.rnd, c.state.dbLength*(numServers-1), blockSize)
+	rand, err := field.RandomVectors(c.rnd, c.dbInfo.NumColumns*(numServers-1), blockSize)
 	if err != nil {
 		return nil, err
 	}
 	// perform additive secret sharing
-	eia := make([][]field.Element, c.state.dbLength)
-	for i := 0; i < c.state.dbLength; i++ {
+	eia := make([][]field.Element, c.dbInfo.NumColumns)
+	for j := 0; j < c.dbInfo.NumColumns; j++ {
 		// create basic zero vector in F^(b)
-		eia[i] = field.ZeroVector(blockSize)
+		eia[j] = field.ZeroVector(blockSize)
 
 		// set alpha at the index we want to retrieve
-		if i == c.state.ix {
-			copy(eia[i], a)
+		if j == c.state.ix {
+			copy(eia[j], a)
 		}
 
 		// Assign k - 1 random vectors of length dbLength containing
 		// elements in F^(b)
 		for k := 0; k < numServers-1; k++ {
-			vectors[k][i] = rand[k*c.state.dbLength+i]
+			vectors[k][j] = rand[k*c.dbInfo.NumColumns+j]
 		}
 
 		// we should perform component-wise additive secret sharing
 		for b := 0; b < blockSize; b++ {
 			sum := field.Zero()
 			for k := 0; k < numServers-1; k++ {
-				sum.Add(&sum, &vectors[k][i][b])
+				sum.Add(&sum, &vectors[k][j][b])
 			}
-			vectors[numServers-1][i][b].Set(&sum)
-			vectors[numServers-1][i][b].Neg(&vectors[numServers-1][i][b])
-			vectors[numServers-1][i][b].Add(&vectors[numServers-1][i][b], &eia[i][b])
+			vectors[numServers-1][j][b].Set(&sum)
+			vectors[numServers-1][j][b].Neg(&vectors[numServers-1][j][b])
+			vectors[numServers-1][j][b].Add(&vectors[numServers-1][j][b], &eia[j][b])
 		}
 	}
 

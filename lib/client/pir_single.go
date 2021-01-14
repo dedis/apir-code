@@ -44,7 +44,7 @@ func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
 	//	panic("invalid query inputs")
 	//}
 
-	// set the client state depending on the db representation
+	// set the client state depending on the dbInfo representation
 	switch c.rebalanced {
 	case false:
 		// iy is unused if the database is represented as a vector

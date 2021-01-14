@@ -12,29 +12,26 @@ import (
 
 // ITMulti is the server for the information theoretic multi-bit scheme
 type ITMulti struct {
-	rebalanced bool
 	db         *database.DB
 }
 
 // NewITMulti return a server for the information theoretic multi-bit scheme,
 // working both with the vector and the rebalanced representation of the
 // database.
-func NewITMulti(rebalanced bool, db *database.DB) *ITMulti {
-	return &ITMulti{rebalanced: rebalanced, db: db}
+func NewITMulti(db *database.DB) *ITMulti {
+	return &ITMulti{db: db}
 }
 
 // Answer computes the answer for the given query
-func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
+func (s *ITMulti) Answer(q [][]field.Element, blockSize int) [][]field.Element {
 	// Doing simplified scheme if block consists of a single bit
 	if blockSize == cst.SingleBitBlockLength {
-		a := make([]field.Element, s.db.NumColumns)
-		for i := range s.db.Entries {
-			a[i].SetZero()
-			for j := range s.db.Entries[i] {
-				for b := range s.db.Entries[i][j] {
-					if s.db.Entries[i][j][b].Equal(&cst.One) {
-						a[i].Add(&a[i], &q[i][j])
-					}
+		a := make([][]field.Element, s.db.NumRows)
+		for i := 0; i < s.db.NumRows; i++ {
+			a[i] = make([]field.Element, 1)
+			for j := 0; j < s.db.NumColumns; j++ {
+				if s.db.Entries[i][j][0].Equal(&cst.One) {
+					a[i][0].Add(&a[i][0], &q[i][j])
 				}
 			}
 		}
@@ -42,8 +39,8 @@ func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 	}
 
 	// parse the query
-	qZeroBase := make([]field.Element, len(s.db.Entries))
-	qOne := make([][]field.Element, len(s.db.Entries))
+	qZeroBase := make([]field.Element, s.db.NumColumns)
+	qOne := make([][]field.Element, s.db.NumColumns)
 	for i := range q {
 		qZeroBase[i] = q[i][0]
 		qOne[i] = q[i][1:]
@@ -52,27 +49,32 @@ func (s *ITMulti) Answer(q [][]field.Element, blockSize int) []field.Element {
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
 	// in DB(2^128)^b are executed component-wise
-	m := make([]field.Element, blockSize)
-	tag := field.Zero()
-
-	var prod, prodTag field.Element
+	m := make([][]field.Element, s.db.NumRows)
+	tags := field.ZeroVector(s.db.NumRows)
+	var prodTag field.Element
+	prod := make([]field.Element, blockSize)
 	// we have to traverse column by column
-	for i := 0; i < blockSize; i++ {
-		sum := field.Zero()
+	for i := 0; i < s.db.NumRows; i++ {
 		sumTag := field.Zero()
-		for j := 0; j < cst.DBLength; j++ {
-			prod.Mul(&s.db.Entries[j][i], &qZeroBase[j])
-			sum.Add(&sum, &prod)
+		sum := field.ZeroVector(blockSize)
+		m[i] = make([]field.Element, blockSize)
+		for j := 0; j < s.db.NumColumns; j++ {
+			for b := 0; b < blockSize; b++ {
+				prod[b].Mul(&s.db.Entries[i][j][b], &qZeroBase[j])
+				sum[b].Add(&sum[b], &prod[b])
 
-			prodTag.Mul(&s.db.Entries[j][i], &qOne[j][i])
-			sumTag.Add(&sumTag, &prodTag)
+				prodTag.Mul(&s.db.Entries[i][j][b], &qOne[j][b])
+				sumTag.Add(&sumTag, &prodTag)
+			}
+			tags[i].Add(&tags[i], &sumTag)
 		}
 		m[i] = sum
-		tag.Add(&tag, &sumTag)
 	}
 
 	// add tag
-	m = append(m, tag)
+	for i := range m {
+		m[i] = append(m[i], tags[i])
+	}
 
 	return m
 }

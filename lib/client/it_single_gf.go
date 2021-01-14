@@ -52,7 +52,7 @@ func (c *ITSingleGF) Query(index int, numServers int) [][]field.Element {
 	var alpha field.Element
 	alpha.SetRandom(c.xof)
 
-	// set the client state depending on the db representation
+	// set the client state depending on the dbInfo representation
 	switch c.rebalanced {
 	case false:
 		// iy is unused if the database is represented as a vector

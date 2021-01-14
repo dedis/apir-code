@@ -124,13 +124,12 @@ func TestMultiBitOneKb(t *testing.T) {
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
-	rebalanced := false
 
 	totalTimer := monitor.NewMonitor()
 
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
+	c := client.NewITMulti(xof, db.Dimensions)
+	s0 := server.NewITMulti(db)
+	s1 := server.NewITMulti(db)
 
 	fieldElements := 128 * 8
 
@@ -140,7 +139,7 @@ func TestMultiBitOneKb(t *testing.T) {
 		a0 := s0.Answer(queries[0], constants.BlockLength)
 		a1 := s1.Answer(queries[1], constants.BlockLength)
 
-		answers := [][]field.Element{a0, a1}
+		answers := [][][]field.Element{a0, a1}
 
 		res, err := c.Reconstruct(answers, constants.BlockLength)
 		require.NoError(t, err)
@@ -161,13 +160,11 @@ func TestSingleBitOneKb(t *testing.T) {
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
-	rebalanced := false
-
 	totalTimer := monitor.NewMonitor()
 
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
+	c := client.NewITMulti(xof, db.Dimensions)
+	s0 := server.NewITMulti(db)
+	s1 := server.NewITMulti(db)
 
 	fieldElements := 128 * 8
 
@@ -177,7 +174,7 @@ func TestSingleBitOneKb(t *testing.T) {
 		a0 := s0.Answer(queries[0], blockLen)
 		a1 := s1.Answer(queries[1], blockLen)
 
-		answers := [][]field.Element{a0, a1}
+		answers := [][][]field.Element{a0, a1}
 
 		res, err := c.Reconstruct(answers, blockLen)
 		//fmt.Printf("Real: %s, Got: %s\n", db.Entries[i][0].String(), res[0].String())
