@@ -293,7 +293,7 @@ func TestDPFMulti(t *testing.T) {
 		require.ElementsMatch(t, db.Entries[i], res)
 	}
 
-	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time dpf-based MultiBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
 func TestDPFSingle(t *testing.T) {
