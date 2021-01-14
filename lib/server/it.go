@@ -10,20 +10,20 @@ import (
 // Both vector and matrix (rebalanced) representations of the database are
 // handled by this server, via a boolean variable
 
-// ITMulti is the server for the information theoretic multi-bit scheme
-type ITMulti struct {
+// ITServer is the server for the information theoretic multi-bit scheme
+type ITServer struct {
 	db         *database.DB
 }
 
-// NewITMulti return a server for the information theoretic multi-bit scheme,
+// NewITServer return a server for the information theoretic multi-bit scheme,
 // working both with the vector and the rebalanced representation of the
 // database.
-func NewITMulti(db *database.DB) *ITMulti {
-	return &ITMulti{db: db}
+func NewITServer(db *database.DB) *ITServer {
+	return &ITServer{db: db}
 }
 
 // Answer computes the answer for the given query
-func (s *ITMulti) Answer(q [][]field.Element) [][]field.Element {
+func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 	// Doing simplified scheme if block consists of a single bit
 	if s.db.BlockSize == cst.SingleBitBlockLength {
 		a := make([][]field.Element, s.db.NumRows)

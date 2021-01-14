@@ -17,7 +17,7 @@ func TestVectorQuery(t *testing.T) {
 	numServers := 2
 	rebalanced := false
 
-	c := NewITMulti(xof, rebalanced)
+	c := NewITClient(xof, rebalanced)
 
 	index := 0
 	queries := c.Query(index, constants.BlockLength, numServers)

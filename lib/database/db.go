@@ -85,9 +85,9 @@ type Bytes struct {
 func CreateRandomMultiBitVectorDB(rnd io.Reader, dbLen, blockLen int) *DB {
 	var err error
 	entries := make([][][]field.Element, 1)
-	numBlocksPerRow := dbLen / (field.Bytes * blockLen)
+	numColumns := dbLen / (128 * blockLen)
 	for i := range entries {
-		entries[i] = make([][]field.Element, numBlocksPerRow)
+		entries[i] = make([][]field.Element, numColumns)
 		for j := range entries[i] {
 			entries[i][j], err = field.RandomVector(rnd, blockLen)
 			if err != nil {
@@ -95,7 +95,7 @@ func CreateRandomMultiBitVectorDB(rnd io.Reader, dbLen, blockLen int) *DB {
 			}
 		}
 	}
-	return &DB{Entries: entries, Info: Info{NumColumns: numBlocksPerRow, NumRows: 1, BlockSize: blockLen}}
+	return &DB{Entries: entries, Info: Info{NumColumns: numColumns, NumRows: 1, BlockSize: blockLen}}
 }
 
 func CreateRandomSingleBitVectorDB(rnd io.Reader, dbLen int) *DB {
@@ -103,10 +103,11 @@ func CreateRandomSingleBitVectorDB(rnd io.Reader, dbLen int) *DB {
 	var tmpb byte
 
 	entries := make([][][]field.Element, 1)
-	numBlocksPerRow := dbLen / field.Bytes
+	numColumns := dbLen / 128
 	for i := range entries {
-		entries[i] = make([][]field.Element, numBlocksPerRow)
-		for j := range entries[i] {
+		entries[i] = make([][]field.Element, numColumns)
+		for j := 0; j < numColumns; j++ {
+			entries[i][j] = make([]field.Element, 1)
 			tmp.SetRandom(rnd)
 			tmpb = tmp.Bytes()[len(tmp.Bytes())-1]
 			if tmpb>>7 == 1 {
@@ -116,7 +117,7 @@ func CreateRandomSingleBitVectorDB(rnd io.Reader, dbLen int) *DB {
 			}
 		}
 	}
-	return &DB{Entries: entries, Info: Info{NumColumns: numBlocksPerRow, NumRows: 1, BlockSize: 0}}
+	return &DB{Entries: entries, Info: Info{NumColumns: numColumns, NumRows: 1, BlockSize: 0}}
 }
 
 /*

@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -14,14 +15,14 @@ import (
 // representations of the database are handled by this client, via
 // a boolean variable
 
-// ITMulti represents the client for the information theoretic multi-bit scheme
-type ITMulti struct {
+// ITClient represents the client for the information theoretic multi-bit scheme
+type ITClient struct {
 	rnd    io.Reader
-	state  *itMultiState
+	state  *itState
 	dbInfo database.Info
 }
 
-type itMultiState struct {
+type itState struct {
 	ix    int
 	iy    int // unused if not rebalanced
 	alpha field.Element
@@ -31,8 +32,8 @@ type itMultiState struct {
 // NewITSingleGF return a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITMulti(rnd io.Reader, info database.Info) *ITMulti {
-	return &ITMulti{
+func NewITClient(rnd io.Reader, info database.Info) *ITClient {
+	return &ITClient{
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
@@ -42,7 +43,7 @@ func NewITMulti(rnd io.Reader, info database.Info) *ITMulti {
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITMulti) Query(index, numServers int) [][][]field.Element {
+func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 	if invalidQueryInputs(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -59,7 +60,9 @@ func (c *ITMulti) Query(index, numServers int) [][][]field.Element {
 	if c.dbInfo.BlockSize != cst.SingleBitBlockLength {
 		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
 		// multi-bit scheme
-		a = make([]field.Element, c.dbInfo.BlockSize+1)
+		// +1 for recovering true value
+		c.dbInfo.BlockSize += 1
+		a = make([]field.Element, c.dbInfo.BlockSize)
 		a[0] = field.One()
 		a[1] = alpha
 		for i := 2; i < len(a); i++ {
@@ -73,9 +76,9 @@ func (c *ITMulti) Query(index, numServers int) [][][]field.Element {
 
 	// set state
 	ix := index % c.dbInfo.NumColumns
-	// if dbInfo is a vector, iy always equals 0
+	// if db is a vector, iy always equals 0
 	iy := index / c.dbInfo.NumColumns
-	c.state = &itMultiState{
+	c.state = &itState{
 		ix:       ix,
 		iy:       iy,
 		alpha:    alpha,
@@ -90,7 +93,8 @@ func (c *ITMulti) Query(index, numServers int) [][][]field.Element {
 	return vectors
 }
 
-func (c *ITMulti) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
+func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
+	fmt.Println(answers[0])
 	sum := make([][]field.Element, c.dbInfo.NumRows)
 	// sum answers as vectors in F(2^128)^(b+1)
 	for i := 0; i < c.dbInfo.NumRows; i++ {
@@ -141,7 +145,7 @@ func (c *ITMulti) Reconstruct(answers [][][]field.Element) ([]field.Element, err
 }
 
 // secretShare the vector a among numServers non-colluding servers
-func (c *ITMulti) secretShare(a []field.Element, numServers int) ([][][]field.Element, error) {
+func (c *ITClient) secretShare(a []field.Element, numServers int) ([][][]field.Element, error) {
 	// get block length
 	blockSize := len(a)
 

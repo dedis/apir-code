@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -22,9 +23,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	require.NoError(t, err)
 	rebalanced := false
 
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
+	c := client.NewITClient(xof, rebalanced)
+	s0 := server.NewITClient(rebalanced, db)
+	s1 := server.NewITClient(rebalanced, db)
 
 	for i := 0; i < 10; i++ {
 		queries := c.Query(i, blockLength, 2)
@@ -61,9 +62,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	require.NoError(t, err)
 	rebalanced := false
 
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
+	c := client.NewITClient(xof, rebalanced)
+	s0 := server.NewITClient(rebalanced, db)
+	s1 := server.NewITClient(rebalanced, db)
 
 	for i := 0; i < 1; i++ {
 		queries := c.Query(i, blockLength, 2)
@@ -116,7 +117,26 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	}
 }*/
 
-func TestMultiBitOneKb(t *testing.T) {
+func retrieveBlocks(t *testing.T, xof io.Reader, db *database.DB, num int) {
+	c := client.NewITClient(xof, db.Info)
+	s0 := server.NewITServer(db)
+	s1 := server.NewITServer(db)
+
+	for i := 0; i < num; i++ {
+		queries := c.Query(i, 2)
+
+		a0 := s0.Answer(queries[0])
+		a1 := s1.Answer(queries[1])
+
+		answers := [][][]field.Element{a0, a1}
+
+		res, err := c.Reconstruct(answers)
+		require.NoError(t, err)
+		require.ElementsMatch(t, db.Entries[i], res)
+	}
+}
+
+func TestMultiBitVectorOneMb(t *testing.T) {
 	dbLenMB := 1048576 * 8
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
@@ -125,62 +145,26 @@ func TestMultiBitOneKb(t *testing.T) {
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
+	numBlocks := dbLenMB / (128 * constants.BlockLength)
+
 	totalTimer := monitor.NewMonitor()
-
-	c := client.NewITMulti(xof, db.Info)
-	s0 := server.NewITMulti(db)
-	s1 := server.NewITMulti(db)
-
-	fieldElements := 128 * 8
-
-	for i := 0; i < fieldElements/16; i++ {
-		queries := c.Query(i, 2)
-
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
-
-		answers := [][][]field.Element{a0, a1}
-
-		res, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-		require.ElementsMatch(t, db.Entries[i], res)
-	}
-
+	retrieveBlocks(t, xof, db, numBlocks)
 	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
-func TestSingleBitOneKb(t *testing.T) {
-	dbLenKB := 1048576 * 8
-
+func TestSingleBitVectorOneMb(t *testing.T) {
+	dbLenMB := 1048576 * 8
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomSingleBitVectorDB(xofDB, dbLenKB)
+	db := database.CreateRandomSingleBitVectorDB(xofDB, dbLenMB)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
+	numBlocks := dbLenMB / (128 * constants.BlockLength)
+
 	totalTimer := monitor.NewMonitor()
-
-	c := client.NewITMulti(xof, db.Info)
-	s0 := server.NewITMulti(db)
-	s1 := server.NewITMulti(db)
-
-	fieldElements := 128 * 8
-
-	for i := 0; i < fieldElements/16; i++ {
-		queries := c.Query(i, 2)
-
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
-
-		answers := [][][]field.Element{a0, a1}
-
-		res, err := c.Reconstruct(answers)
-		//fmt.Printf("Real: %s, Got: %s\n", db.Entries[i][0].String(), res[0].String())
-		require.NoError(t, err)
-		require.ElementsMatch(t, db.Entries[i], res)
-	}
-
+	retrieveBlocks(t, xof, db, numBlocks)
 	fmt.Printf("Total time SingleBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
@@ -190,9 +174,9 @@ func TestSingleBitOneKb(t *testing.T) {
 	require.NoError(t, err)
 
 	rebalanced := false
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
+	c := client.NewITClient(xof, rebalanced)
+	s0 := server.NewITClient(rebalanced, db)
+	s1 := server.NewITClient(rebalanced, db)
 
 	i := 0
 	queries := c.Query(i, constants.BlockLength, 2)
