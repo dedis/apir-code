@@ -125,13 +125,14 @@ func TestMultiBitOneKb(t *testing.T) {
 	require.NoError(t, err)
 	db := database.CreateRandomMultiBitOneMBGF(xofDB, dbLenMB, constants.BlockLength)
 
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
+	var key1 utils.PRGKey
+	copy(key1[:], []byte("my key"))
+	prg := utils.NewPRG(&key1)
 	rebalanced := false
 
 	totalTimer := monitor.NewMonitor()
 
-	c := client.NewITMulti(xof, rebalanced)
+	c := client.NewITMulti(prg, rebalanced)
 	s0 := server.NewITMulti(rebalanced, db)
 	s1 := server.NewITMulti(rebalanced, db)
 

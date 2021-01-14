@@ -231,6 +231,7 @@ func (f Fss) GenerateTreePFVector(a uint, b []field.Element) []FssKeyVectorEq2P 
 	// Convert final CW to integer
 	// Use bytes in sCurr0 and sCurr1 as a seed to generate a stream of
 	// pseudorandom field elements
+	// TODO: this is useless if only one bit element: add an if
 	var key0 utils.PRGKey
 	copy(key0[:], sCurr0)
 	prg0 := utils.NewPRG(&key0)
