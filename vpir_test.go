@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -49,18 +50,24 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		}
 
 		// strip zeros
-		for i := 0; i < len(resultBytes)-15; i += 15 {
+		chunkLength := 15
+		for i := 0; i < len(resultBytes)-chunkLength; i += chunkLength {
 			resultBytes = append(resultBytes[:i], resultBytes[i+1:]...)
 		}
+
 		// id is 45 bytes long by definition
-		id := string(resultBytes[0:45])
+		idLength := 45
+		id := string(resultBytes[0:idLength])
 		fmt.Println("id:", id)
 
 		// key is 256 bytes long, meaning that it can be represented in ceil(256/15)*15 = 270 bytes
-		keyBytes := resultBytes[45 : 45+270]
+		keyLength := 256
+		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * 15
+		keyBytes := resultBytes[45 : 45+keyLengthWithPadding]
 
 		// remove padding for last element
-		keyBytes = append(keyBytes[:len(keyBytes)-15], keyBytes[len(keyBytes)-1])
+		lastElementBytes := keyLength % chunkLength
+		keyBytes = append(keyBytes[:len(keyBytes)-(16-lastElementBytes)], keyBytes[len(keyBytes)-lastElementBytes])
 
 		// encode and print key
 		key := base64.StdEncoding.EncodeToString(keyBytes)
