@@ -140,7 +140,7 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 		}
 	}
 
-	return sum[c.state.iy][:len(sum)-1], nil
+	return sum[c.state.iy][:len(sum[c.state.iy])-1], nil
 }
 
 // secretShare the vector a among numServers non-colluding servers

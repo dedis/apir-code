@@ -121,6 +121,22 @@ func CreateRandomSingleBitVectorDB(rnd io.Reader, dbLen int) *DB {
 	return &DB{Entries: entries, Info: Info{NumColumns: numColumns, NumRows: 1, BlockSize: 0}}
 }
 
+func CreateRandomMultiBitMatrixDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
+	var err error
+	entries := make([][][]field.Element, numRows)
+	numColumns := dbLen / (128 * numRows * blockLen)
+	for i := 0; i < numRows; i++ {
+		entries[i] = make([][]field.Element, numColumns)
+		for j := 0; j < numColumns; j++ {
+			entries[i][j], err = field.RandomVector(rnd, blockLen)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+	return &DB{Entries: entries, Info: Info{NumColumns: numColumns, NumRows: numRows, BlockSize: blockLen}}
+}
+
 /*
 func CreateRandomMultiBitMatrix(rnd io.Reader, dbLen, blockLen int) *DB {
 	var err error
