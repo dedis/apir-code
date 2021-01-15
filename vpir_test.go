@@ -25,10 +25,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	path := "data/random_id_key.csv"
 
 	// generate db from data
-	db, _, blockLength, err := database.GenerateRandomDB(path)
+	db, idLength, keyLength, blockLength, err := database.GenerateRandomDB(path)
 	require.NoError(t, err)
 
-	// TODO: move to AES
 	var key1 utils.PRGKey
 	copy(key1[:], []byte("my key"))
 	prg := utils.NewPRG(&key1)
@@ -61,6 +60,8 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		}
 		require.NoError(t, err)
 
+		totalTimer := monitor.NewMonitor()
+
 		// for testing
 		expectedID := record[0]
 		expectedKey := record[1]
@@ -83,12 +84,11 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		// retrieve result bytes
 		resultBytes := field.VectorToBytes(result)
 
-		idLength := 45   // TODO: this should come from db creation
-		keyLength := 256 // TODO: this should come from db creation
 		lastElementBytes := keyLength % chunkLength
-		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * 15
+		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
 		totalLength := idLength + keyLengthWithPadding
 
+		// parse block entries
 		idKey := make(map[string]string)
 		for i := 0; i < len(resultBytes)-(totalLength); i += totalLength {
 			idBytes := resultBytes[i : i+idLength]
@@ -108,7 +108,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		}
 
 		require.Equal(t, idKey[expectedID], expectedKey)
-		fmt.Println("succesfully retrieved")
+		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 	}
 
 }
