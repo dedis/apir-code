@@ -38,8 +38,7 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 		}
 	}
 
-	// use maximal chunk length
-	chunkLength := 15
+	chunkLength := constants.ChunkBytesLength
 
 	// compute field elements necessary to encode the maximum length
 	fieldElementsMax := int(math.Ceil(float64(maxBytes) / float64(chunkLength)))

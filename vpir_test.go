@@ -34,10 +34,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	prg := utils.NewPRG(&key1)
 
 	// client and servers
-	rebalanced := false
-	c := client.NewITMulti(prg, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
+	c := client.NewDPF(prg)
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
 
 	// open id->key file
 	f, err := os.Open(path)
@@ -46,6 +45,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 	// Parse the file
 	r := csv.NewReader(f)
+
+	// scheme variables
+	chunkLength := constants.ChunkBytesLength
 
 	// Iterate through the records
 	for {
@@ -56,6 +58,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		}
 		require.NoError(t, err)
 
+		// for testing
 		expectedID := record[0]
 		expectedKey := record[1]
 
@@ -63,30 +66,29 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		hashKey := utils.HashToIndex(expectedID, constants.DBLength)
 
 		// query given hash key
-		queries := c.Query(hashKey, blockLength, 2)
+		prfKeys, fssKeys := c.Query(hashKey, blockLength, 2)
 
-		a0 := s0.Answer(queries[0], blockLength)
-		a1 := s1.Answer(queries[1], blockLength)
-
+		// get servers answers
+		a0 := s0.Answer(fssKeys[0], prfKeys, 0, blockLength)
+		a1 := s1.Answer(fssKeys[1], prfKeys, 1, blockLength)
 		answers := [][]field.Element{a0, a1}
 
+		// reconstruct block
 		result, err := c.Reconstruct(answers, blockLength)
 		require.NoError(t, err)
-
-		chunkLength := 15 // TODO: this should come from db creation
 
 		// retrieve result bytes
 		resultBytes := field.VectorToBytes(result)
 
 		idLength := 45   // TODO: this should come from db creation
 		keyLength := 256 // TODO: this should come from db creation
+		lastElementBytes := keyLength % chunkLength
 		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * 15
 		totalLength := idLength + keyLengthWithPadding
-		// TODO: iterate over all the entries and find the rigth one
+
 		idKey := make(map[string]string)
 		zeroSlice := make([]byte, 45)
 		for i := 0; i < len(resultBytes)-(totalLength); i += totalLength {
-			// id is 45 bytes long by definition
 			idBytes := resultBytes[i : i+idLength]
 			// test if we are in padding elements already
 			if bytes.Equal(idBytes, zeroSlice) {
@@ -94,20 +96,17 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 			}
 			idReconstructed := string(bytes.Trim(idBytes, "\x00"))
 
-			// key is 256 bytes long, meaning that it can be represented in ceil(256/15)*15 = 270 bytes
-			keyBytes := resultBytes[i+45 : i+45+keyLengthWithPadding]
-
+			keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
 			// remove padding for last element
-			lastElementBytes := keyLength % chunkLength
 			keyBytes = append(keyBytes[:len(keyBytes)-(16-lastElementBytes)],
 				keyBytes[len(keyBytes)-lastElementBytes])
 
-			// encode and print key
+			// encode key
 			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
 		}
 
-		require.Contains(t, idKey, expectedID)
 		require.Equal(t, idKey[expectedID], expectedKey)
+		fmt.Println("succesfully retrieved")
 	}
 
 }
