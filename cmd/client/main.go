@@ -2,55 +2,52 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"flag"
 	"fmt"
+	"io"
 	"log"
 	"math/big"
 	"sync"
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
-	"golang.org/x/crypto/blake2b"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	log.SetPrefix(fmt.Sprintf("[Client] "))
+
 	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
 		log.Fatalf("Could not load the config file: %v", err)
 	}
 	addresses, err := utils.ServerAddresses(config)
+	fmt.Println(addresses)
 
 	// New random generator
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	var key utils.PRGKey
+	_, err = io.ReadFull(rand.Reader, key[:])
 	if err != nil {
-		log.Fatalf("Could not create new XOF: %v", err)
+		panic(err)
 	}
-	c := client.NewITVector(xof)
-	log.SetPrefix(fmt.Sprintf("[Client] "))
+	prg := utils.NewPRG(&key)
 
-	// Contact the servers and print out its response.
-	output := ""
-	log.Printf("Start retrieving process")
-	for i := 0; i < 136; i++ {
-		queries := c.Query(i, len(addresses))
-		log.Printf("Send %d queries for i=%d", len(queries), i)
-		answers := runQueries(queries, addresses)
-		log.Printf("Receive %d queries for i=%d", len(answers), i)
-		result, err := c.Reconstruct(answers)
-		log.Printf("Reconstructed result: %s", result.String())
-		if err != nil {
-			log.Fatalf("Failed reconstructing %v with error: %v", i, err)
-		}
-		output += result.String()
-	}
-	log.Printf("End retrieving process")
-	b, err := utils.BitStringToBytes(output)
-	if err != nil {
-		log.Fatalf("Could not convert bit string to bytes: %v", err)
-	}
-	fmt.Println("Output: ", string(b))
+	// start client
+	c := client.NewDPF(prg)
+	fmt.Println(c)
+
+	// get id and compute corresponding hash
+	idPtr := flag.String("id", "", "id for which key should be retrieved")
+	flag.Parse()
+	id := *idPtr
+	idHash := utils.HashToIndex(id, constants.DBLength)
+
+	// query for given idHash
+	fmt.Println(idHash)
 }
 
 func runQueries(queries [][]*big.Int, addresses []string) []*big.Int {
