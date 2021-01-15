@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -94,7 +93,6 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 }
 
 func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
-	fmt.Println(answers[0])
 	sum := make([][]field.Element, c.dbInfo.NumRows)
 	// sum answers as vectors in F(2^128)^(b+1)
 	for i := 0; i < c.dbInfo.NumRows; i++ {
@@ -126,17 +124,18 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 	}
 
 	var tag, prod field.Element
-	var messages []field.Element
+	messages := make([]field.Element, c.dbInfo.BlockSize-1)
 	for i := 0; i < c.dbInfo.NumRows; i++ {
-		tag = sum[i][len(sum)-1]
-		messages = sum[i][:len(sum)-1]
+		copy(messages, sum[i][:len(sum[i])-1])
+		tag = sum[i][len(sum[i])-1]
 		// compute reconstructed tag
 		reconstructedTag := field.Zero()
-		for i := 0; i < len(messages); i++ {
-			prod.Mul(&c.state.a[i], &messages[i])
+		for b := 0; b < len(messages); b++ {
+			prod.Mul(&c.state.a[b], &messages[b])
 			reconstructedTag.Add(&reconstructedTag, &prod)
 		}
 		if !tag.Equal(&reconstructedTag) {
+			//fmt.Printf("Actual: %s, Computed: %s", tag.String(), reconstructedTag.String())
 			return nil, errors.New("REJECT")
 		}
 	}

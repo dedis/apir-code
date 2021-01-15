@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/si-co/vpir-code/lib/database"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -15,12 +16,12 @@ func TestVectorQuery(t *testing.T) {
 	require.NoError(t, err)
 
 	numServers := 2
-	rebalanced := false
+	db := database.CreateRandomMultiBitVectorDB(xof, constants.DBLength, 2)
 
-	c := NewITClient(xof, rebalanced)
+	c := NewITClient(xof, db.Info)
 
 	index := 0
-	queries := c.Query(index, constants.BlockLength, numServers)
+	queries := c.Query(index, numServers)
 
 	// two servers
 	require.Equal(t, 2, len(queries))

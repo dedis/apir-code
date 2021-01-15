@@ -41,17 +41,17 @@ func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 	// parse the query
 	qZeroBase := make([]field.Element, s.db.NumColumns)
 	qOne := make([][]field.Element, s.db.NumColumns)
-	for i := range q {
-		qZeroBase[i] = q[i][0]
-		qOne[i] = q[i][1:]
+	for j := range q {
+		qZeroBase[j] = q[j][0]
+		qOne[j] = q[j][1:]
 	}
 
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
 	// in DB(2^128)^b are executed component-wise
-	m := make([][]field.Element, s.db.NumRows)
-	tags := field.ZeroVector(s.db.NumRows)
 	var prodTag field.Element
+	tags := field.ZeroVector(s.db.NumRows)
+	m := make([][]field.Element, s.db.NumRows)
 	prod := make([]field.Element, s.db.BlockSize)
 	// we have to traverse column by column
 	for i := 0; i < s.db.NumRows; i++ {
@@ -69,10 +69,7 @@ func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 			tags[i].Add(&tags[i], &sumTag)
 		}
 		m[i] = sum
-	}
-
-	// add tag
-	for i := range m {
+		// add tag
 		m[i] = append(m[i], tags[i])
 	}
 
