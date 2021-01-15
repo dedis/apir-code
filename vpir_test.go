@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/csv"
 	"fmt"
+	"io"
 	"math"
+	"os"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -19,21 +23,46 @@ import (
 
 func TestRetrieveRandomKeyBlock(t *testing.T) {
 	path := "data/random_id_key.csv"
-	//db, fieldElementsEntry, bytesLastFieldElement, blockLength, err := database.GenerateRandomDB(path)
+
+	// generate db from data
 	db, _, blockLength, err := database.GenerateRandomDB(path)
 	require.NoError(t, err)
 
+	// TODO: move to AES
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
+	// client and servers
 	rebalanced := false
-
 	c := client.NewITMulti(xof, rebalanced)
 	s0 := server.NewITMulti(rebalanced, db)
 	s1 := server.NewITMulti(rebalanced, db)
 
-	for i := 0; i < 1; i++ {
-		queries := c.Query(i, blockLength, 2)
+	// open id->key file
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	defer f.Close()
+
+	// Parse the file
+	r := csv.NewReader(f)
+
+	// Iterate through the records
+	for {
+		// Read each record from csv
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		require.NoError(t, err)
+
+		expectedID := record[0]
+		expectedKey := record[1]
+
+		// compute hash key for id
+		hashKey := utils.HashToIndex(expectedID, constants.DBLength)
+
+		// query given hash key
+		queries := c.Query(hashKey, blockLength, 2)
 
 		a0 := s0.Answer(queries[0], blockLength)
 		a1 := s1.Answer(queries[1], blockLength)
@@ -55,10 +84,13 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 			resultBytes = append(resultBytes[:i], resultBytes[i+1:]...)
 		}
 
+		fmt.Println("len result bytes:", len(resultBytes))
+		fmt.Println("entries:", len(resultBytes)/301)
+
 		// id is 45 bytes long by definition
 		idLength := 45
-		id := string(resultBytes[0:idLength])
-		fmt.Println("id:", id)
+		idReconstructed := string(bytes.Trim(resultBytes[0:idLength], "\x00"))
+		require.EqualValues(t, expectedID, idReconstructed)
 
 		// key is 256 bytes long, meaning that it can be represented in ceil(256/15)*15 = 270 bytes
 		keyLength := 256
@@ -70,9 +102,13 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		keyBytes = append(keyBytes[:len(keyBytes)-(16-lastElementBytes)], keyBytes[len(keyBytes)-lastElementBytes])
 
 		// encode and print key
-		key := base64.StdEncoding.EncodeToString(keyBytes)
-		fmt.Println("key:", key)
+		keyReconstructed := base64.StdEncoding.EncodeToString(keyBytes)
+		require.Equal(t, expectedKey, keyReconstructed)
+
+		// just one iteration for now
+		break
 	}
+
 }
 
 /*

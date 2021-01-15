@@ -95,9 +95,6 @@ func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte
 
 		// prepare entry
 		idBytes := make([]byte, maxIDLength)
-		if id == "UaiI_NgkuLvoZkEyo_vvy_mQpLavaO-j" {
-			fmt.Println("key for id: ", k)
-		}
 		copy(idBytes, id)
 		entry := append(idBytes, k...)
 
