@@ -73,31 +73,41 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		result, err := c.Reconstruct(answers, blockLength)
 		require.NoError(t, err)
 
-		chunkLength := 15
+		chunkLength := 15 // TODO: this should come from db creation
+
+		// retrieve result bytes
 		resultBytes := field.VectorToBytes(result)
 
-		fmt.Println("entries:", len(resultBytes)/301)
-
-		// id is 45 bytes long by definition
-		idLength := 45
-		idReconstructed := string(bytes.Trim(resultBytes[0:idLength], "\x00"))
-		require.EqualValues(t, expectedID, idReconstructed)
-
-		// key is 256 bytes long, meaning that it can be represented in ceil(256/15)*15 = 270 bytes
-		keyLength := 256
+		idLength := 45   // TODO: this should come from db creation
+		keyLength := 256 // TODO: this should come from db creation
 		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * 15
-		keyBytes := resultBytes[45 : 45+keyLengthWithPadding]
+		totalLength := idLength + keyLengthWithPadding
+		// TODO: iterate over all the entries and find the rigth one
+		idKey := make(map[string]string)
+		zeroSlice := make([]byte, 45)
+		for i := 0; i < len(resultBytes)-(totalLength); i += totalLength {
+			// id is 45 bytes long by definition
+			idBytes := resultBytes[i : i+idLength]
+			// test if we are in padding elements already
+			if bytes.Equal(idBytes, zeroSlice) {
+				break
+			}
+			idReconstructed := string(bytes.Trim(idBytes, "\x00"))
 
-		// remove padding for last element
-		lastElementBytes := keyLength % chunkLength
-		keyBytes = append(keyBytes[:len(keyBytes)-(16-lastElementBytes)], keyBytes[len(keyBytes)-lastElementBytes])
+			// key is 256 bytes long, meaning that it can be represented in ceil(256/15)*15 = 270 bytes
+			keyBytes := resultBytes[i+45 : i+45+keyLengthWithPadding]
 
-		// encode and print key
-		keyReconstructed := base64.StdEncoding.EncodeToString(keyBytes)
-		require.Equal(t, expectedKey, keyReconstructed)
+			// remove padding for last element
+			lastElementBytes := keyLength % chunkLength
+			keyBytes = append(keyBytes[:len(keyBytes)-(16-lastElementBytes)],
+				keyBytes[len(keyBytes)-lastElementBytes])
 
-		// just one iteration for now
-		break
+			// encode and print key
+			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
+		}
+
+		require.Contains(t, idKey, expectedID)
+		require.Equal(t, idKey[expectedID], expectedKey)
 	}
 
 }
