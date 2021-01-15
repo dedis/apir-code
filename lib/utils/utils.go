@@ -4,6 +4,18 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// MaxBytesLength get maximal []byte length in map[int][]byte
+func MaxBytesLength(in map[int][]byte) int {
+	max := 0
+	for _, v := range in {
+		if len(v) > max {
+			max = len(v)
+		}
+	}
+
+	return max
+}
+
 func BitStringToBytes(s string) ([]byte, error) {
 	b := make([]byte, (len(s)+(8-1))/8)
 	for i := 0; i < len(s); i++ {

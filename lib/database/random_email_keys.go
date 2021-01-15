@@ -22,8 +22,6 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 	maxIDLength = 45
 	entryLength := maxIDLength + maxKeyLength
 
-	fmt.Println(entryLength)
-
 	// generate hash table
 	hashTable, err := generateHashTable(pairs, maxIDLength)
 	if err != nil {
@@ -31,28 +29,22 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 	}
 
 	// get maximal []byte length in hashTable
-	maxBytes := 0
-	for _, v := range hashTable {
-		if len(v) > maxBytes {
-			maxBytes = len(v)
-		}
-	}
+	maxBytes := utils.MaxBytesLength(hashTable)
 
 	chunkLength := constants.ChunkBytesLength
 
 	// compute field elements necessary to encode the maximum length
-	fieldElementsMax := int(math.Ceil(float64(maxBytes) / float64(chunkLength)))
+	blockLength := int(math.Ceil(float64(maxBytes) / float64(chunkLength)))
 	entryLengthPadding := int(math.Ceil(float64(entryLength)/float64(chunkLength))) * 15
 
 	// compute number of field elements to encode an entry and the bytes of data in last
 	// field element
-	//fieldElementsEntry := int(math.Ceil(float64(entryLength) / float64(chunkLength)))
 	bytesLastFieldElement := entryLength % chunkLength
 	fmt.Println(bytesLastFieldElement)
 
 	// create all zeros db
 	// TODO: useless to create an all zero db, better to build the db from scratch
-	db := CreateMultiBitGFLength(fieldElementsMax)
+	db := CreateMultiBitGFLength(blockLength)
 
 	// embed data into field elements
 	for id, v := range hashTable {
@@ -72,7 +64,7 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 		}
 
 		// pad to have a full block
-		for len(elements) < fieldElementsMax {
+		for len(elements) < blockLength {
 			elements = append(elements, field.Zero())
 		}
 
@@ -80,7 +72,7 @@ func GenerateRandomDB(path string) (*GF, int, int, error) {
 		db.Entries[id] = elements
 	}
 
-	return db, entryLengthPadding, fieldElementsMax, nil
+	return db, entryLengthPadding, blockLength, nil
 }
 
 func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte, error) {

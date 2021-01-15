@@ -49,6 +49,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	// scheme variables
 	chunkLength := constants.ChunkBytesLength
 
+	// helping variables
+	zeroSlice := make([]byte, 45)
+
 	// Iterate through the records
 	for {
 		// Read each record from csv
@@ -87,7 +90,6 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		totalLength := idLength + keyLengthWithPadding
 
 		idKey := make(map[string]string)
-		zeroSlice := make([]byte, 45)
 		for i := 0; i < len(resultBytes)-(totalLength); i += totalLength {
 			idBytes := resultBytes[i : i+idLength]
 			// test if we are in padding elements already
@@ -110,72 +112,6 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	}
 
 }
-
-/*
-func TestRetrieveKey(t *testing.T) {
-	db, err := database.FromKeysFile()
-	require.NoError(t, err)
-	blockLength := 40
-
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-	rebalanced := false
-
-	c := client.NewITMulti(xof, rebalanced)
-	s0 := server.NewITMulti(rebalanced, db)
-	s1 := server.NewITMulti(rebalanced, db)
-
-	for i := 0; i < 1; i++ {
-		queries := c.Query(i, blockLength, 2)
-
-		a0 := s0.Answer(queries[0], blockLength)
-		a1 := s1.Answer(queries[1], blockLength)
-
-		answers := [][]field.Element{a0, a1}
-
-		result, err := c.Reconstruct(answers, blockLength)
-		require.NoError(t, err)
-
-		// parse result
-		// TODO: logic for this should be in lib/gpg
-		//lengthBytes := result[0].Bytes()
-		//length, _ := binary.Varint(lengthBytes[len(lengthBytes)-1:])
-
-		resultBytes := make([]byte, 0)
-		for i := 0; i < len(result); i++ {
-			elementBytes := result[i].Bytes()
-			//fmt.Println("recon:", elementBytes)
-			resultBytes = append(resultBytes, elementBytes[:]...)
-		}
-		elementsLength, _ := binary.Varint([]byte{resultBytes[0]})
-		lastElementLength, _ := binary.Varint([]byte{resultBytes[1]})
-
-		fmt.Println("")
-		fmt.Println(elementsLength)
-		fmt.Println(lastElementLength)
-		fmt.Println(resultBytes[2 : 14+(elementsLength-2)*16+1])
-
-		pub, err := x509.ParsePKIXPublicKey(resultBytes)
-		if err != nil {
-			log.Printf("failed to parse DER encoded public key: %v", err)
-		} else {
-
-			switch pub := pub.(type) {
-			case *rsa.PublicKey:
-				fmt.Println("pub is of type RSA:", pub)
-			case *dsa.PublicKey:
-				fmt.Println("pub is of type DSA:", pub)
-			case *ecdsa.PublicKey:
-				fmt.Println("pub is of type ECDSA:", pub)
-			case ed25519.PublicKey:
-				fmt.Println("pub is of type Ed25519:", pub)
-			default:
-				panic("unknown type of public key")
-			}
-		}
-	}
-}
-*/
 
 func TestMultiBitOneKb(t *testing.T) {
 	dbLenMB := 1048576 * 8
@@ -404,3 +340,69 @@ func testBitResult(t *testing.T, result string) {
 		t.Errorf("Expected '%v' but got '%v'", expected, output)
 	}
 }
+
+/*
+func TestRetrieveKey(t *testing.T) {
+	db, err := database.FromKeysFile()
+	require.NoError(t, err)
+	blockLength := 40
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+	rebalanced := false
+
+	c := client.NewITMulti(xof, rebalanced)
+	s0 := server.NewITMulti(rebalanced, db)
+	s1 := server.NewITMulti(rebalanced, db)
+
+	for i := 0; i < 1; i++ {
+		queries := c.Query(i, blockLength, 2)
+
+		a0 := s0.Answer(queries[0], blockLength)
+		a1 := s1.Answer(queries[1], blockLength)
+
+		answers := [][]field.Element{a0, a1}
+
+		result, err := c.Reconstruct(answers, blockLength)
+		require.NoError(t, err)
+
+		// parse result
+		// TODO: logic for this should be in lib/gpg
+		//lengthBytes := result[0].Bytes()
+		//length, _ := binary.Varint(lengthBytes[len(lengthBytes)-1:])
+
+		resultBytes := make([]byte, 0)
+		for i := 0; i < len(result); i++ {
+			elementBytes := result[i].Bytes()
+			//fmt.Println("recon:", elementBytes)
+			resultBytes = append(resultBytes, elementBytes[:]...)
+		}
+		elementsLength, _ := binary.Varint([]byte{resultBytes[0]})
+		lastElementLength, _ := binary.Varint([]byte{resultBytes[1]})
+
+		fmt.Println("")
+		fmt.Println(elementsLength)
+		fmt.Println(lastElementLength)
+		fmt.Println(resultBytes[2 : 14+(elementsLength-2)*16+1])
+
+		pub, err := x509.ParsePKIXPublicKey(resultBytes)
+		if err != nil {
+			log.Printf("failed to parse DER encoded public key: %v", err)
+		} else {
+
+			switch pub := pub.(type) {
+			case *rsa.PublicKey:
+				fmt.Println("pub is of type RSA:", pub)
+			case *dsa.PublicKey:
+				fmt.Println("pub is of type DSA:", pub)
+			case *ecdsa.PublicKey:
+				fmt.Println("pub is of type ECDSA:", pub)
+			case ed25519.PublicKey:
+				fmt.Println("pub is of type Ed25519:", pub)
+			default:
+				panic("unknown type of public key")
+			}
+		}
+	}
+}
+*/
