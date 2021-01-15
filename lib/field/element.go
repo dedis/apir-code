@@ -309,6 +309,21 @@ func ZeroVector(length int) []Element {
 	return zeroVector
 }
 
+// VectorToBytes extracts bytes from a vector of field elements.  Assume that
+// only 15 bytes worth of data are embedded in each field element and therefore
+// strips the initial zero from each byte.
+func VectorToBytes(in []Element) []byte {
+	// TODO: preallocate array for efficiency
+	out := make([]byte, 0)
+	for _, e := range in {
+		fieldBytes := e.Bytes()
+		// strip first zero
+		out = append(out, fieldBytes[1:]...)
+	}
+
+	return out
+}
+
 // One returns 1 (in montgommery form)
 func One() Element {
 	var one Element

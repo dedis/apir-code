@@ -73,19 +73,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		result, err := c.Reconstruct(answers, blockLength)
 		require.NoError(t, err)
 
-		resultBytes := make([]byte, 0)
-		for _, e := range result {
-			fieldBytes := e.Bytes()
-			resultBytes = append(resultBytes, fieldBytes[:]...)
-		}
-
-		// strip zeros
 		chunkLength := 15
-		for i := 0; i < len(resultBytes)-chunkLength; i += chunkLength {
-			resultBytes = append(resultBytes[:i], resultBytes[i+1:]...)
-		}
+		resultBytes := field.VectorToBytes(result)
 
-		fmt.Println("len result bytes:", len(resultBytes))
 		fmt.Println("entries:", len(resultBytes)/301)
 
 		// id is 45 bytes long by definition
