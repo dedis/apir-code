@@ -21,6 +21,11 @@ import (
 func main() {
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
+	// flags
+	idPtr := flag.String("id", "", "id for which key should be retrieved")
+	flag.Parse()
+
+	// configs
 	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
 		log.Fatalf("Could not load the config file: %v", err)
@@ -32,17 +37,20 @@ func main() {
 	var key utils.PRGKey
 	_, err = io.ReadFull(rand.Reader, key[:])
 	if err != nil {
-		panic(err)
+		log.Fatalf("PRG initialization error: %v", err)
 	}
 	prg := utils.NewPRG(&key)
 
-	// start client
+	// start client and initialize top-level Context
 	c := client.NewDPF(prg)
 	fmt.Println(c)
+	ctx := context.Background()
+
+	// get db info
+	dbInfo := runDBInfoRequest(ctx, addresses)
+	fmt.Println(dbInfo)
 
 	// get id and compute corresponding hash
-	idPtr := flag.String("id", "", "id for which key should be retrieved")
-	flag.Parse()
 	id := *idPtr
 	idHash := utils.HashToIndex(id, constants.DBLength)
 
@@ -50,12 +58,62 @@ func main() {
 	fmt.Println(idHash)
 }
 
-func runQueries(queries [][]*big.Int, addresses []string) []*big.Int {
-	if len(addresses) != len(queries) {
+func runDBInfoRequest(ctx context.Context, addresses []string) int {
+	subCtx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	wg := sync.WaitGroup{}
+	resCh := make(chan int, len(addresses))
+	for _, a := range addresses {
+		wg.Add(1)
+		go func(addr string) {
+			resCh <- dbInfo(subCtx, addr)
+			wg.Done()
+		}(a)
+	}
+	wg.Wait()
+	close(resCh)
+
+	// check if db info are all equal before returning
+	dbInfo := make([]int, 0)
+	for i := range ch {
+		dbInfo = append(dbInfo, i)
+	}
+	for i := range dbInfo {
+		if dbInfo[0] != dbInfo[i] {
+			log.Fatal("got different database info from servers")
+		}
+	}
+
+	return dbInfo[0]
+
+}
+
+func dbInfo(ctx context.Context, address string) int {
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	c := proto.NewVPIRClient(conn)
+	q := &proto.DatabaseInfoRequest{}
+	answer, err := c.DatabaseInfo(ctx, q)
+	if err != nil {
+		log.Fatalf("could not send database info request: %v", err)
+	}
+
+	blockLength := answer.BlockLength
+
+	return int(blockLength)
+}
+
+func runQueries(ctx context.Context, queries [][]*big.Int, addrs []string) []*big.Int {
+	if len(addrs) != len(queries) {
 		log.Fatal("Queries and server addresses length mismatch")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	subCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
@@ -63,7 +121,7 @@ func runQueries(queries [][]*big.Int, addresses []string) []*big.Int {
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
-			resCh <- query(ctx, addresses[j], queries[j])
+			resCh <- query(subCtx, addrs[j], queries[j])
 			wg.Done()
 		}(i)
 	}
