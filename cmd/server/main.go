@@ -18,23 +18,26 @@ import (
 )
 
 func main() {
+	// set logs
 	log.SetOutput(os.Stdout)
+	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
 
+	// flags
 	sid := flag.Int("id", -1, "Server ID")
 	flag.Parse()
 
-	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
-
+	// configs
 	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
-		log.Fatalf("Could not load the server config file: %v", err)
+		log.Fatalf("could not load the server config file: %v", err)
 	}
 	addresses, err := utils.ServerAddresses(config)
 	if err != nil {
-		panic(err)
+		log.Fatalf("could not parse servers addresses: %v", err)
 	}
 	addr := addresses[*sid]
 
+	// connect server
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -54,7 +57,16 @@ func main() {
 // vpirServer is used to implement VPIR Server protocol.
 type vpirServer struct {
 	proto.UnimplementedVPIRServer
-	server.Server
+	server.Server // TODO: create a general server
+}
+
+func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
+	*proto.DatabaseInfoResponse, error) {
+
+	// send block length back, implement the logic in db
+	blockLength = 16
+
+	return &proto.DatabaseInfoResponse{BlockLength: blockLength}, nil
 }
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.Request) (
