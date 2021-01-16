@@ -17,6 +17,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VPIRClient interface {
+	DatabaseInfo(ctx context.Context, in *DatabaseInfoRequest, opts ...grpc.CallOption) (*DatabaseInfoResponse, error)
 	Query(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 }
 
@@ -26,6 +27,15 @@ type vPIRClient struct {
 
 func NewVPIRClient(cc grpc.ClientConnInterface) VPIRClient {
 	return &vPIRClient{cc}
+}
+
+func (c *vPIRClient) DatabaseInfo(ctx context.Context, in *DatabaseInfoRequest, opts ...grpc.CallOption) (*DatabaseInfoResponse, error) {
+	out := new(DatabaseInfoResponse)
+	err := c.cc.Invoke(ctx, "/proto.VPIR/DatabaseInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *vPIRClient) Query(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
@@ -41,6 +51,7 @@ func (c *vPIRClient) Query(ctx context.Context, in *Request, opts ...grpc.CallOp
 // All implementations must embed UnimplementedVPIRServer
 // for forward compatibility
 type VPIRServer interface {
+	DatabaseInfo(context.Context, *DatabaseInfoRequest) (*DatabaseInfoResponse, error)
 	Query(context.Context, *Request) (*Response, error)
 	mustEmbedUnimplementedVPIRServer()
 }
@@ -49,6 +60,9 @@ type VPIRServer interface {
 type UnimplementedVPIRServer struct {
 }
 
+func (UnimplementedVPIRServer) DatabaseInfo(context.Context, *DatabaseInfoRequest) (*DatabaseInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DatabaseInfo not implemented")
+}
 func (UnimplementedVPIRServer) Query(context.Context, *Request) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
@@ -63,6 +77,24 @@ type UnsafeVPIRServer interface {
 
 func RegisterVPIRServer(s grpc.ServiceRegistrar, srv VPIRServer) {
 	s.RegisterService(&_VPIR_serviceDesc, srv)
+}
+
+func _VPIR_DatabaseInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DatabaseInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VPIRServer).DatabaseInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.VPIR/DatabaseInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VPIRServer).DatabaseInfo(ctx, req.(*DatabaseInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _VPIR_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -87,6 +119,10 @@ var _VPIR_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.VPIR",
 	HandlerType: (*VPIRServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "DatabaseInfo",
+			Handler:    _VPIR_DatabaseInfo_Handler,
+		},
 		{
 			MethodName: "Query",
 			Handler:    _VPIR_Query_Handler,
