@@ -18,12 +18,11 @@ type DPF struct {
 	db *database.GF
 }
 
-func (s *DPF) Answer(q dpf.FssKeyVectorEq2P, prfKeys [][]byte, serverNum byte, blockSize int) []field.Element {
-	// initialize dpf server
-	fServer := dpf.ServerInitialize(prfKeys, uint(bits.Len(uint(constants.DBLength))))
-
+func (s *DPF) Answer(q dpf.DPFkey, serverNum byte, blockSize int) []field.Element {
 	// Doing simplified scheme if block consists of a single bit
 	if blockSize == cst.SingleBitBlockLength {
+    panic("Not implemented")
+    /*
 		a := make([]field.Element, 1)
 		a[0].SetZero()
 		for i := range s.db.Entries {
@@ -36,6 +35,7 @@ func (s *DPF) Answer(q dpf.FssKeyVectorEq2P, prfKeys [][]byte, serverNum byte, b
 		}
 
 		return a
+    */
 	}
 
 	// Part for the multi-bit scheme
@@ -46,22 +46,23 @@ func (s *DPF) Answer(q dpf.FssKeyVectorEq2P, prfKeys [][]byte, serverNum byte, b
 	m := make([]field.Element, blockSize)
 	tag := field.Zero()
 
-	var prod, prodTag field.Element
-	// we have to traverse column by column
-	for i := 0; i < blockSize; i++ {
-		sum := field.Zero()
-		sumTag := field.Zero()
-		for j := 0; j < cst.DBLength; j++ {
-			eval := fServer.EvaluatePFVector(serverNum, q, uint(j))
-			prod.Mul(&s.db.Entries[j][i], eval[0])
-			sum.Add(&sum, &prod)
+  dpfOut := make([][]field.Element, cst.DBLength)
+  for i := 0; i < len(dpfOut); i++ {
+    dpfOut[i] = make([]field.Element, blockSize+1)
+  }
 
-			prodTag.Mul(&s.db.Entries[j][i], eval[i+1])
-			sumTag.Add(&sumTag, &prodTag)
-		}
-		m[i] = sum
-		tag.Add(&tag, &sumTag)
-	}
+	dpf.EvalFull(q, uint64(bits.Len(uint(constants.DBLength))), dpfOut)
+
+  var tmp field.Element
+  for i := 0; i < len(dpfOut); i++ {
+    for j := 0; j < blockSize; j++ {
+      tmp.Mul(&s.db.Entries[i][j], &dpfOut[i][0])
+      m[j].Add(&m[j], &tmp)
+
+      tmp.Mul(&s.db.Entries[i][j], &dpfOut[i][j+1])
+      tag.Add(&tag, &tmp)
+    }
+  }
 
 	// add tag
 	m = append(m, tag)

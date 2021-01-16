@@ -29,7 +29,7 @@ func NewDPF(rnd io.Reader) *DPF {
 	}
 }
 
-func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, []dpf.FssKeyVectorEq2P) {
+func (c *DPF) Query(index, blockSize, numServers int) []dpf.DPFkey {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -59,12 +59,9 @@ func (c *DPF) Query(index, blockSize, numServers int) ([][]byte, []dpf.FssKeyVec
 	c.state = &dpfState{i: index, alpha: *alpha, a: a[1:]}
 
 	// client initialization is the same for both single- and multi-bit scheme
-	fClient := dpf.ClientInitialize(uint(bits.Len(uint(constants.DBLength))))
+	key0, key1 := dpf.Gen(uint64(index), a, uint64(bits.Len(uint(constants.DBLength))))
 
-	// compute dpf keys
-	fssKeys := fClient.GenerateTreePFVector(uint(index), a)
-	return fClient.PrfKeys, fssKeys
-
+	return []dpf.DPFkey{ key0, key1 }
 }
 
 func (c *DPF) Reconstruct(answers [][]field.Element, blockSize int) ([]field.Element, error) {

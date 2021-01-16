@@ -70,11 +70,11 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		hashKey := utils.HashToIndex(expectedID, constants.DBLength)
 
 		// query given hash key
-		prfKeys, fssKeys := c.Query(hashKey, blockLength, 2)
+		fssKeys := c.Query(hashKey, blockLength, 2)
 
 		// get servers answers
-		a0 := s0.Answer(fssKeys[0], prfKeys, 0, blockLength)
-		a1 := s1.Answer(fssKeys[1], prfKeys, 1, blockLength)
+		a0 := s0.Answer(fssKeys[0], 0, blockLength)
+		a1 := s1.Answer(fssKeys[1], 1, blockLength)
 		answers := [][]field.Element{a0, a1}
 
 		// reconstruct block
@@ -279,10 +279,10 @@ func TestDPFMulti(t *testing.T) {
 	fieldElements := 128 * 8
 
 	for i := 0; i < fieldElements/16; i++ {
-		prfKeys, fssKeys := c.Query(i, constants.BlockLength, 2)
+		fssKeys := c.Query(i, constants.BlockLength, 2)
 
-		a0 := s0.Answer(fssKeys[0], prfKeys, 0, constants.BlockLength)
-		a1 := s1.Answer(fssKeys[1], prfKeys, 1, constants.BlockLength)
+		a0 := s0.Answer(fssKeys[0], 0, constants.BlockLength)
+		a1 := s1.Answer(fssKeys[1], 1, constants.BlockLength)
 
 		answers := [][]field.Element{a0, a1}
 
@@ -294,6 +294,7 @@ func TestDPFMulti(t *testing.T) {
 	fmt.Printf("Total time dpf-based MultiBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
+/*
 func TestDPFSingle(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiVectorGF()
@@ -310,11 +311,10 @@ func TestDPFSingle(t *testing.T) {
 	s1 := server.NewDPF(db)
 
 	for i := 0; i < 136; i++ {
-		prfKeys, fssKeys := c.Query(i, blockLen, 2)
+		fssKeys := c.Query(i, blockLen, 2)
 
-		a0 := s0.Answer(fssKeys[0], prfKeys, 0, blockLen)
-
-		a1 := s1.Answer(fssKeys[1], prfKeys, 1, blockLen)
+		a0 := s0.Answer(fssKeys[0], 0, blockLen)
+		a1 := s1.Answer(fssKeys[1], 1, blockLen)
 
 		answers := [][]field.Element{a0, a1}
 
@@ -329,6 +329,7 @@ func TestDPFSingle(t *testing.T) {
 
 	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
 }
+*/
 
 func testBitResult(t *testing.T, result string) {
 	b, err := utils.BitStringToBytes(result)

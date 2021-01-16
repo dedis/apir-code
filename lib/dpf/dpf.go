@@ -245,6 +245,10 @@ func Eval(k DPFkey, x uint64, logN uint64, out []field.Element) {
 }
 
 func evalFullRecursive(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, out [][]field.Element) {
+  if *index >= uint64(len(out)) {
+    return
+  }
+
 	if lvl == stop {
 		ss := blockStack[lvl][0]
 		*ss = *s
@@ -288,10 +292,6 @@ func EvalFull(key DPFkey, logN uint64, out [][]field.Element) {
 	copy(s[:], key.Bytes[:16])
 	t := key.Bytes[16]
 	stop := logN
-
-  if len(out) != (1 << logN) {
-    panic("len(out) must equal 1<<logN")
-  }
 
   index := uint64(0)
 	evalFullRecursive(key, s, t, 0, stop, &index, out)
