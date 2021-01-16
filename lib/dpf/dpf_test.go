@@ -1,112 +1,114 @@
 package dpf
 
 import (
+//  "log"
 	"testing"
-
-	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/blake2b"
 
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-func TestAll(t *testing.T) {
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-	rand, err := new(field.Element).SetRandom(xof)
-	require.NoError(t, err)
+/*
+func BenchmarkEvalFull(bench *testing.B) {
+	logN := uint64(28)
+	a, _ := Gen(0, logN)
+	bench.ResetTimer()
+	//fmt.Println("Ka: ", a)
+	//fmt.Println("Kb: ", b)
+	//for i:= uint64(0); i < (uint64(1) << logN); i++ {
+	//	aa := dpf.Eval(a, i, logN)
+	//	bb := dpf.Eval(b, i, logN)
+	//	fmt.Println(i,"\t", aa,bb, aa^bb)
+	//}
+	for i := 0; i < bench.N; i++ {
+		EvalFull(a, logN)
+	}
+}
+*/
 
-	// Generate fss Keys on client
-	fClient := ClientInitialize(6)
-	// Test with if x = 10, evaluate to 2
-	fssKeys := fClient.GenerateTreePFVector(10, []field.Element{*rand})
-
-	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
-
-	// Test 2-party Equality Function
-	ans0 := fServer.EvaluatePFVector(0, fssKeys[0], 10)
-	ans1 := fServer.EvaluatePFVector(1, fssKeys[1], 10)
-	require.Equal(t, new(field.Element).Add(ans0[0], ans1[0]).String(), rand.String())
-
-	ans0 = fServer.EvaluatePFVector(0, fssKeys[0], 11)
-	ans1 = fServer.EvaluatePFVector(1, fssKeys[1], 11)
-	zero := new(field.Element).SetZero()
-	require.Equal(t,
-		new(field.Element).Add(ans0[0], ans1[0]).String(),
-		zero.String())
-
-	ans0 = fServer.EvaluatePFVector(0, fssKeys[0], 9)
-	ans1 = fServer.EvaluatePFVector(1, fssKeys[1], 9)
-	require.Equal(t,
-		new(field.Element).Add(ans0[0], ans1[0]).String(),
-		zero.String())
+func BenchmarkXor16(bench *testing.B) {
+	a := new(block)
+	b := new(block)
+	c := new(block)
+	for i := 0; i < bench.N; i++ {
+		xor16(&c[0], &b[0], &a[0])
+	}
 }
 
-func TestVector(t *testing.T) {
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-	rand, err := new(field.Element).SetRandom(xof)
-	require.NoError(t, err)
+func TestEval(test *testing.T) {
+	logN := uint64(8)
+	alpha := uint64(123)
+  var beta field.Element
+  beta.SetUint64(7613)
+	a, b := Gen(alpha, &beta, logN)
 
-	alpha := uint(129)
-	nBits := uint(20)
-	length := 5
+  var sum field.Element
+  var out0, out1 field.Element
+  zero := field.Zero()
+	for i := uint64(0); i < (uint64(1) << logN); i++ {
+		Eval(a, i, logN, &out0)
+		Eval(b, i, logN, &out1)
 
-	vector := field.PowerVectorWithOne(*rand, length)
+    sum.Add(&out0, &out1)
 
-	fClient := ClientInitialize(nBits)
-	fssKeysVector := fClient.GenerateTreePFVector(alpha, vector)
+    //log.Printf("%v %v %v %v", i, alpha, beta.String(), sum.String())
+    if i != alpha && !sum.Equal(&zero) {
+      test.Fail()
+    }
 
-	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
-
-	zero := field.Zero()
-	for i := uint(0); i < (1 << nBits); i++ {
-		// Test 2-party vector Equality Function
-
-		// generate vector of answers
-		ans0 := fServer.EvaluatePFVector(0, fssKeysVector[0], i)
-		ans1 := fServer.EvaluatePFVector(1, fssKeysVector[1], i)
-
-		// test all elments of vector
-		for j := range ans0 {
-			val := new(field.Element).Add(ans0[j], ans1[j]).String()
-			if i == alpha {
-				require.Equal(t, vector[j].String(), val)
-			} else {
-				require.Equal(t, zero.String(), val)
-			}
+    if i == alpha && !sum.Equal(&beta) {
+			test.Fail()
 		}
 	}
-
 }
 
-func TestEval(t *testing.T) {
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-	rand, err := new(field.Element).SetRandom(xof)
-	require.NoError(t, err)
+func TestEvalFull(test *testing.T) {
+	logN := uint64(9)
+	alpha := uint64(128)
+  var beta field.Element
+  beta.SetUint64(7613)
+  outA := make([]field.Element, 1 << logN)
+  outB := make([]field.Element, 1 << logN)
 
-	alpha := uint(129)
-	nBits := uint(20)
+	a, b := Gen(alpha, &beta, logN)
+	EvalFull(a, logN, outA)
+	EvalFull(b, logN, outB)
 
-	fClient := ClientInitialize(nBits)
-	fssKeys := fClient.GenerateTreePF(alpha, rand)
+  zero := field.Zero()
+  var sum field.Element
+	for i := uint64(0); i < (uint64(1) << logN); i++ {
+		sum.Add(&outA[i], &outB[i])
+    if i != alpha && !sum.Equal(&zero) {
+      test.Fail()
+    }
 
-	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
+    if i == alpha && !sum.Equal(&beta) {
+			test.Fail()
+		}
+	}
+}
 
-	zero := field.Zero()
-	for i := uint(0); i < (1 << nBits); i++ {
-		// Test 2-party Equality Function
-		var ans0, ans1 *field.Element
-		ans0 = fServer.EvaluatePF(0, fssKeys[0], i)
-		ans1 = fServer.EvaluatePF(1, fssKeys[1], i)
+func TestEvalFullShort(test *testing.T) {
+	logN := uint64(3)
+	alpha := uint64(2)
+  var beta field.Element
+  beta.SetUint64(7613)
+  outA := make([]field.Element, 1 << logN)
+  outB := make([]field.Element, 1 << logN)
 
-		if i == alpha {
-			require.Equal(t, new(field.Element).Add(ans0, ans1).String(), rand.String())
-		} else {
-			require.Equal(t, new(field.Element).Add(ans0, ans1).String(), zero.String())
+	a, b := Gen(alpha, &beta, logN)
+	EvalFull(a, logN, outA)
+	EvalFull(b, logN, outB)
+
+  zero := field.Zero()
+  var sum field.Element
+	for i := uint64(0); i < (uint64(1) << logN); i++ {
+		sum.Add(&outA[i], &outB[i])
+    if i != alpha && !sum.Equal(&zero) {
+      test.Fail()
+    }
+
+    if i == alpha && !sum.Equal(&beta) {
+			test.Fail()
 		}
 	}
 }
