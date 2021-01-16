@@ -9,7 +9,7 @@ import (
 type DPFkey struct {
   ServerIdx byte
   Bytes []byte
-  FinalCW field.Element
+  FinalCW []field.Element
 }
 type block [16]byte
 
@@ -57,10 +57,14 @@ func clr(in *byte) {
 	*in &^= 0x1
 }
 
-func convertBlock(out *field.Element, in []byte) {
-	//prfL.Encrypt(in, in)
-	aes128MMO(&keyL[0], &in[0], &in[0])
-  out.SetBytes(in[:])
+func convertBlock(out []field.Element, in []byte) {
+  var buf [16]byte
+  for i := 0; i < len(out); i++ {
+    //prfL.Encrypt(in, in)
+    aes128MMO(&keyL[0], &buf[0], &in[0])
+    out[i].SetBytes(buf[:])
+    in[0] += 1
+  }
 }
 
 func prg(seed, s0, s1 *byte) (byte, byte) {
@@ -75,10 +79,13 @@ func prg(seed, s0, s1 *byte) (byte, byte) {
 	return t0, t1
 }
 
-func Gen(alpha uint64, beta *field.Element, logN uint64) (DPFkey, DPFkey) {
+func Gen(alpha uint64, beta []field.Element, logN uint64) (DPFkey, DPFkey) {
 	if alpha >= (1<<logN) || logN > 63 {
 		panic("dpf: invalid parameters")
 	}
+  if len(beta) > 256 {
+    panic("dpf: maximum len(beta) is 256")
+  }
 	var ka, kb DPFkey
   ka.ServerIdx = 0
   kb.ServerIdx = 1
@@ -91,6 +98,8 @@ func Gen(alpha uint64, beta *field.Element, logN uint64) (DPFkey, DPFkey) {
 
 	t0 := getT(&s0[0])
 	t1 := t0 ^ 1
+
+  betaLen := len(beta)
 
 	clr(&s0[0])
 	clr(&s1[0])
@@ -163,25 +172,37 @@ func Gen(alpha uint64, beta *field.Element, logN uint64) (DPFkey, DPFkey) {
 		}
 	}
 
-  var tmp0, tmp1 field.Element
-	convertBlock(&tmp0, s0[:])
-	convertBlock(&tmp1, s1[:])
+  tmp0 := make([]field.Element, betaLen)
+  tmp1 := make([]field.Element, betaLen)
 
-  // FinalCW = (-1)^t . [\beta - Convert(s0) + Convert(s1)]
-  ka.FinalCW.Sub(beta, &tmp0)
-  ka.FinalCW.Add(&ka.FinalCW, &tmp1)
-  if t1 != 0 {
-    ka.FinalCW.Neg(&ka.FinalCW)
+	convertBlock(tmp0, s0[:])
+	convertBlock(tmp1, s1[:])
+
+  ka.FinalCW = make([]field.Element, betaLen)
+  kb.FinalCW = make([]field.Element, betaLen)
+
+  for i := 0; i < betaLen; i++ {
+    // FinalCW = (-1)^t . [\beta - Convert(s0) + Convert(s1)]
+    ka.FinalCW[i].Sub(&beta[i], &tmp0[i])
+    ka.FinalCW[i].Add(&ka.FinalCW[i], &tmp1[i])
+    if t1 != 0 {
+      ka.FinalCW[i].Neg(&ka.FinalCW[i])
+    }
+
+    kb.FinalCW[i].Set(&ka.FinalCW[i])
   }
-
-  kb.FinalCW.Set(&ka.FinalCW)
 
 	ka.Bytes = append(ka.Bytes, CW...)
 	kb.Bytes = append(kb.Bytes, CW...)
 	return ka, kb
 }
 
-func Eval(k DPFkey, x uint64, logN uint64, out *field.Element) {
+
+func Eval(k DPFkey, x uint64, logN uint64, out []field.Element) {
+  if len(out) != len(k.FinalCW) {
+    panic("dpf: len(out) != len(k.FinalCW)")
+  }
+
 	s := new(block)
 	sL := new(block)
 	sR := new(block)
@@ -212,26 +233,36 @@ func Eval(k DPFkey, x uint64, logN uint64, out *field.Element) {
 	//fmt.Println("Debug", s, t)
 
 	convertBlock(out, s[:])
-	if t != 0 {
-    out.Add(out, &k.FinalCW)
-	}
-  if k.ServerIdx != 0 {
-    out.Neg(out)
+
+  for i := 0; i < len(out); i++ {
+    if t != 0 {
+      out[i].Add(&out[i], &k.FinalCW[i])
+    }
+    if k.ServerIdx != 0 {
+      out[i].Neg(&out[i])
+    }
   }
 }
 
-func evalFullRecursive(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, out []field.Element) {
+func evalFullRecursive(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, out [][]field.Element) {
 	if lvl == stop {
 		ss := blockStack[lvl][0]
 		*ss = *s
 		//aes128MMO(&keyL[0], &ss[0], &ss[0])
-    convertBlock(&out[*index], ss[:])
-		if t != 0 {
-      out[*index].Add(&out[*index], &k.FinalCW)
-		}
-		if k.ServerIdx != 0 {
-      out[*index].Neg(&out[*index])
-		}
+    if len(out[*index]) != len(k.FinalCW) {
+      panic("dpf: len(out[*index]) != len(k.FinalCW)")
+    }
+
+    convertBlock(out[*index], ss[:])
+
+    for j := 0; j < len(k.FinalCW); j++ {
+      if t != 0 {
+        out[*index][j].Add(&out[*index][j], &k.FinalCW[j])
+      }
+      if k.ServerIdx != 0 {
+        out[*index][j].Neg(&out[*index][j])
+      }
+    }
 
     *index += 1
 		return
@@ -252,7 +283,7 @@ func evalFullRecursive(k DPFkey, s *block, t byte, lvl uint64, stop uint64, inde
 	evalFullRecursive(k, sR, tR, lvl+1, stop, index, out)
 }
 
-func EvalFull(key DPFkey, logN uint64, out []field.Element) {
+func EvalFull(key DPFkey, logN uint64, out [][]field.Element) {
 	s := new(block)
 	copy(s[:], key.Bytes[:16])
 	t := key.Bytes[16]

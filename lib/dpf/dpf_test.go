@@ -37,25 +37,30 @@ func BenchmarkXor16(bench *testing.B) {
 func TestEval(test *testing.T) {
 	logN := uint64(8)
 	alpha := uint64(123)
-  var beta field.Element
-  beta.SetUint64(7613)
-	a, b := Gen(alpha, &beta, logN)
+  beta := make([]field.Element, 2)
+  beta[0].SetUint64(7613)
+  beta[1].SetUint64(991)
 
-  var sum field.Element
-  var out0, out1 field.Element
+	a, b := Gen(alpha, beta, logN)
+
+  sum := make([]field.Element, 2)
+  out0 := make([]field.Element, 2)
+  out1 := make([]field.Element, 2)
   zero := field.Zero()
 	for i := uint64(0); i < (uint64(1) << logN); i++ {
-		Eval(a, i, logN, &out0)
-		Eval(b, i, logN, &out1)
+		Eval(a, i, logN, out0)
+		Eval(b, i, logN, out1)
 
-    sum.Add(&out0, &out1)
+    for j := 0; j < 2; j++ {
+      sum[j].Add(&out0[j], &out1[j])
+    }
 
     //log.Printf("%v %v %v %v", i, alpha, beta.String(), sum.String())
-    if i != alpha && !sum.Equal(&zero) {
+    if i != alpha && (!sum[0].Equal(&zero) || !sum[1].Equal(&zero)) {
       test.Fail()
     }
 
-    if i == alpha && !sum.Equal(&beta) {
+    if i == alpha && (!sum[0].Equal(&beta[0]) || !sum[1].Equal(&beta[1])) {
 			test.Fail()
 		}
 	}
@@ -63,51 +68,75 @@ func TestEval(test *testing.T) {
 
 func TestEvalFull(test *testing.T) {
 	logN := uint64(9)
-	alpha := uint64(128)
-  var beta field.Element
-  beta.SetUint64(7613)
-  outA := make([]field.Element, 1 << logN)
-  outB := make([]field.Element, 1 << logN)
+	alpha := uint64(123)
+  beta := make([]field.Element, 2)
+  beta[0].SetUint64(7613)
+  beta[1].SetUint64(991)
 
-	a, b := Gen(alpha, &beta, logN)
-	EvalFull(a, logN, outA)
-	EvalFull(b, logN, outB)
+	a, b := Gen(alpha, beta, logN)
+
+  sum := make([]field.Element, 2)
+  out0 := make([][]field.Element, 1 << logN)
+  out1 := make([][]field.Element, 1 << logN)
+
+  for i := 0; i < len(out0); i++ {
+    out0[i] = make([]field.Element, 2)
+    out1[i] = make([]field.Element, 2)
+  }
+
+	EvalFull(a, logN, out0)
+	EvalFull(b, logN, out1)
 
   zero := field.Zero()
-  var sum field.Element
 	for i := uint64(0); i < (uint64(1) << logN); i++ {
-		sum.Add(&outA[i], &outB[i])
-    if i != alpha && !sum.Equal(&zero) {
+    for j := 0; j < 2; j++ {
+      sum[j].Add(&out0[i][j], &out1[i][j])
+    }
+
+    //log.Printf("%v %v %v %v", i, alpha, beta.String(), sum.String())
+    if i != alpha && (!sum[0].Equal(&zero) || !sum[1].Equal(&zero)) {
       test.Fail()
     }
 
-    if i == alpha && !sum.Equal(&beta) {
+    if i == alpha && (!sum[0].Equal(&beta[0]) || !sum[1].Equal(&beta[1])) {
 			test.Fail()
 		}
 	}
 }
 
 func TestEvalFullShort(test *testing.T) {
-	logN := uint64(3)
+	logN := uint64(2)
 	alpha := uint64(2)
-  var beta field.Element
-  beta.SetUint64(7613)
-  outA := make([]field.Element, 1 << logN)
-  outB := make([]field.Element, 1 << logN)
+  beta := make([]field.Element, 2)
+  beta[0].SetUint64(7613)
+  beta[1].SetUint64(991)
 
-	a, b := Gen(alpha, &beta, logN)
-	EvalFull(a, logN, outA)
-	EvalFull(b, logN, outB)
+	a, b := Gen(alpha, beta, logN)
+
+  sum := make([]field.Element, 2)
+  out0 := make([][]field.Element, 1 << logN)
+  out1 := make([][]field.Element, 1 << logN)
+
+  for i := 0; i < len(out0); i++ {
+    out0[i] = make([]field.Element, 2)
+    out1[i] = make([]field.Element, 2)
+  }
+
+	EvalFull(a, logN, out0)
+	EvalFull(b, logN, out1)
 
   zero := field.Zero()
-  var sum field.Element
 	for i := uint64(0); i < (uint64(1) << logN); i++ {
-		sum.Add(&outA[i], &outB[i])
-    if i != alpha && !sum.Equal(&zero) {
+    for j := 0; j < 2; j++ {
+      sum[j].Add(&out0[i][j], &out1[i][j])
+    }
+
+    //log.Printf("%v %v %v %v", i, alpha, beta.String(), sum.String())
+    if i != alpha && (!sum[0].Equal(&zero) || !sum[1].Equal(&zero)) {
       test.Fail()
     }
 
-    if i == alpha && !sum.Equal(&beta) {
+    if i == alpha && (!sum[0].Equal(&beta[0]) || !sum[1].Equal(&beta[1])) {
 			test.Fail()
 		}
 	}
