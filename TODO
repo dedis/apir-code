@@ -2,4 +2,3 @@
 * Update gRPC logic and add TLS
 * Organize iccluster servers --> Simone
 * Improve config/constants
-* Add message from server to client to communicate db parameters and hash function
