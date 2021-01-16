@@ -109,6 +109,9 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 		require.Equal(t, idKey[expectedID], expectedKey)
 		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
+
+		// only retrieve one key
+		break
 	}
 
 }
