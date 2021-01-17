@@ -10,12 +10,12 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-func NewDPF(db *database.GF) *DPF {
+func NewDPF(db *database.DB) *DPF {
 	return &DPF{db: db}
 }
 
 type DPF struct {
-	db *database.GF
+	db *database.DB
 }
 
 func (s *DPF) Answer(q dpf.DPFkey, serverNum byte, blockSize int) []field.Element {
