@@ -41,7 +41,7 @@ func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 	// parse the query
 	qZeroBase := make([]field.Element, s.db.NumColumns)
 	qOne := make([][]field.Element, s.db.NumColumns)
-	for j := range q {
+	for j := 0; j < s.db.NumColumns; j++ {
 		qZeroBase[j] = q[j][0]
 		qOne[j] = q[j][1:]
 	}
@@ -50,7 +50,6 @@ func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 	// addition and multiplication of elements
 	// in DB(2^128)^b are executed component-wise
 	var prodTag field.Element
-	tags := field.ZeroVector(s.db.NumRows)
 	m := make([][]field.Element, s.db.NumRows)
 	prod := make([]field.Element, s.db.BlockSize)
 	// we have to traverse column by column
@@ -66,11 +65,10 @@ func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 				prodTag.Mul(&s.db.Entries[i][j][b], &qOne[j][b])
 				sumTag.Add(&sumTag, &prodTag)
 			}
-			tags[i].Add(&tags[i], &sumTag)
 		}
 		m[i] = sum
 		// add tag
-		m[i] = append(m[i], tags[i])
+		m[i] = append(m[i], sumTag)
 	}
 
 	return m

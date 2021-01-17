@@ -56,32 +56,33 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 		log.Fatal(err)
 	}
 
+	// Compute the position in the db (vector or matrix)
+	ix := index % c.dbInfo.NumColumns
+	// if db is a vector, iy always equals 0
+	iy := index / c.dbInfo.NumColumns
+	// set state
+	c.state = &itState{
+		ix:    ix,
+		iy:    iy,
+		alpha: alpha,
+	}
+
 	if c.dbInfo.BlockSize != cst.SingleBitBlockLength {
 		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
 		// multi-bit scheme
-		// +1 for recovering true value
-		c.dbInfo.BlockSize += 1
-		a = make([]field.Element, c.dbInfo.BlockSize)
+		// Temporarily +1 to BlockSize for recovering true value
+		a = make([]field.Element, c.dbInfo.BlockSize+1)
 		a[0] = field.One()
 		a[1] = alpha
 		for i := 2; i < len(a); i++ {
 			a[i].Mul(&a[i-1], &alpha)
 		}
+		c.state.a = a[1:]
 	} else {
 		// the single-bit scheme needs a single alpha
 		a = make([]field.Element, 1)
 		a[0] = alpha
-	}
-
-	// set state
-	ix := index % c.dbInfo.NumColumns
-	// if db is a vector, iy always equals 0
-	iy := index / c.dbInfo.NumColumns
-	c.state = &itState{
-		ix:       ix,
-		iy:       iy,
-		alpha:    alpha,
-		a:        a[1:],
+		c.state.a = a
 	}
 
 	vectors, err = c.secretShare(a, numServers)
@@ -93,11 +94,12 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 }
 
 func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
+
 	sum := make([][]field.Element, c.dbInfo.NumRows)
 	// sum answers as vectors in F(2^128)^(b+1)
 	for i := 0; i < c.dbInfo.NumRows; i++ {
-		sum[i] = make([]field.Element, c.dbInfo.BlockSize)
-		for b := 0; b < c.dbInfo.BlockSize; b++ {
+		sum[i] = make([]field.Element, c.dbInfo.BlockSize+1)
+		for b := 0; b < c.dbInfo.BlockSize+1; b++ {
 			for k := range answers {
 				sum[i][b].Add(&sum[i][b], &answers[k][i][b])
 			}
@@ -124,7 +126,7 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 	}
 
 	var tag, prod field.Element
-	messages := make([]field.Element, c.dbInfo.BlockSize-1)
+	messages := make([]field.Element, c.dbInfo.BlockSize)
 	for i := 0; i < c.dbInfo.NumRows; i++ {
 		copy(messages, sum[i][:len(sum[i])-1])
 		tag = sum[i][len(sum[i])-1]
@@ -146,27 +148,27 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 // secretShare the vector a among numServers non-colluding servers
 func (c *ITClient) secretShare(a []field.Element, numServers int) ([][][]field.Element, error) {
 	// get block length
-	blockSize := len(a)
+	alen := len(a)
 
-	// create query vectors for all the servers
+	// create query vectors for all the servers F^(1+b)
 	vectors := make([][][]field.Element, numServers)
 	for k := range vectors {
 		vectors[k] = make([][]field.Element, c.dbInfo.NumColumns)
 		for j := 0; j < c.dbInfo.NumColumns; j++ {
-			vectors[k][j] = make([]field.Element, blockSize)
+			vectors[k][j] = make([]field.Element, alen)
 		}
 	}
 
 	// Get random elements for all numServers-1 vectors
-	rand, err := field.RandomVectors(c.rnd, c.dbInfo.NumColumns*(numServers-1), blockSize)
+	rand, err := field.RandomVectors(c.rnd, c.dbInfo.NumColumns*(numServers-1), alen)
 	if err != nil {
 		return nil, err
 	}
 	// perform additive secret sharing
 	eia := make([][]field.Element, c.dbInfo.NumColumns)
 	for j := 0; j < c.dbInfo.NumColumns; j++ {
-		// create basic zero vector in F^(b)
-		eia[j] = field.ZeroVector(blockSize)
+		// create basic zero vector in F^(1+b)
+		eia[j] = field.ZeroVector(alen)
 
 		// set alpha at the index we want to retrieve
 		if j == c.state.ix {
@@ -174,13 +176,13 @@ func (c *ITClient) secretShare(a []field.Element, numServers int) ([][][]field.E
 		}
 
 		// Assign k - 1 random vectors of length dbLength containing
-		// elements in F^(b)
+		// elements in F^(1+b)
 		for k := 0; k < numServers-1; k++ {
 			vectors[k][j] = rand[k*c.dbInfo.NumColumns+j]
 		}
 
 		// we should perform component-wise additive secret sharing
-		for b := 0; b < blockSize; b++ {
+		for b := 0; b < alen; b++ {
 			sum := field.Zero()
 			for k := 0; k < numServers-1; k++ {
 				sum.Add(&sum, &vectors[k][j][b])

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"math"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -13,6 +14,11 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/blake2b"
+)
+
+const (
+	oneMB = 1048576 * 8
+	oneKB = 1024 * 8
 )
 
 /*
@@ -117,12 +123,12 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	}
 }*/
 
-func retrieveBlocks(t *testing.T, xof io.Reader, db *database.DB, num int) {
-	c := client.NewITClient(xof, db.Info)
+func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int) {
+	c := client.NewITClient(rnd, db.Info)
 	s0 := server.NewITServer(db)
 	s1 := server.NewITServer(db)
 
-	for i := 0; i < num; i++ {
+	for i := 0; i < numBlocks; i++ {
 		queries := c.Query(i, 2)
 
 		a0 := s0.Answer(queries[0])
@@ -132,24 +138,26 @@ func retrieveBlocks(t *testing.T, xof io.Reader, db *database.DB, num int) {
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.ElementsMatch(t, db.Entries[i], res)
+		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
 	}
 }
 
 func TestMultiBitVectorOneMb(t *testing.T) {
-	dbLenMB := 1048576 * 8
+	dbLen := oneMB
+	blockLen := constants.BlockLength
+	elemSize := 128
+	nRows := 1
+	nCols := dbLen / (elemSize * blockLen * nRows)
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomMultiBitVectorDB(xofDB, dbLenMB, constants.BlockLength)
+	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
-	numBlocks := dbLenMB / (128 * constants.BlockLength)
-
 	totalTimer := monitor.NewMonitor()
-	retrieveBlocks(t, xof, db, numBlocks)
-	fmt.Printf("Total time MultiBitOneKb: %.1fms\n", totalTimer.Record())
+	retrieveBlocks(t, xof, db, nRows*nCols)
+	fmt.Printf("Total time MultiBitVectorOneMb: %.1fms\n", totalTimer.Record())
 }
 
 func TestSingleBitVectorOneMb(t *testing.T) {
@@ -165,25 +173,44 @@ func TestSingleBitVectorOneMb(t *testing.T) {
 
 	totalTimer := monitor.NewMonitor()
 	retrieveBlocks(t, xof, db, numBlocks)
-	fmt.Printf("Total time SingleBitOneKb: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time SingleBitVectorOneMb: %.1fms\n", totalTimer.Record())
 }
 
 func TestMultiBitMatrixSmall(t *testing.T) {
 	blockLen := 2
 	nRows := 2
-	nCol := 2
+	nCols := 2
 	elemSize := 128
-	dbLen := elemSize * nRows * nCol * blockLen
+	dbLen := elemSize * nRows * nCols * blockLen
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomMultiBitMatrixDB(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
 	totalTimer := monitor.NewMonitor()
-	retrieveBlocks(t, xof, db, nRows*nCol)
+	retrieveBlocks(t, xof, db, nRows*nCols)
 	fmt.Printf("Total time MultiBitMatrixSmall: %.1fms\n", totalTimer.Record())
+}
+
+func TestMultiBitMatrixOneMb(t *testing.T) {
+	dbLen := oneMB
+	blockLen := constants.BlockLength
+	elemSize := 128
+	numBlocks := dbLen / (elemSize * blockLen)
+	nCols := int(math.Sqrt(float64(numBlocks)))
+	nRows := nCols
+	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
+	require.NoError(t, err)
+	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+
+	totalTimer := monitor.NewMonitor()
+	retrieveBlocks(t, xof, db, numBlocks)
+	fmt.Printf("Total time MultiBitMatrixOneMb: %.1fms\n", totalTimer.Record())
 }
 
 /*func TestMultiBitVectorGF(t *testing.T) {

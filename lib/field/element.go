@@ -198,24 +198,6 @@ func (z *Element) LexicographicallyLargest() bool {
 	return b == 0
 }
 
-func FitElement(bytes []byte) Element {
-	var z Element
-
-	z[0] = binary.BigEndian.Uint64(bytes[0:8])
-	z[1] = binary.BigEndian.Uint64(bytes[8:16])
-	z[1] %= 9223372036854775807
-
-	// if z > q --> z -= q
-	// note: this is NOT constant time
-	if !(z[1] < 9223372036854775807 || (z[1] == 9223372036854775807 && (z[0] < 18446744073709551615))) {
-		var b uint64
-		z[0], b = bits.Sub64(z[0], 18446744073709551615, 0)
-		z[1], _ = bits.Sub64(z[1], 9223372036854775807, b)
-	}
-
-	return z
-}
-
 // SetRandom sets z to a random element < q
 func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	var bytes [16]byte
@@ -239,30 +221,32 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 }
 
 func RandomVector(rnd io.Reader, length int) ([]Element, error) {
-	bytesLength := length*16 + 1
+	bytesLength := length*Bytes + 1
 	bytes := make([]byte, bytesLength)
 	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
 		return nil, err
 	}
 	zs := make([]Element, length)
 	for i := 0; i < length; i++ {
-		zs[i] = FitElement(bytes[i*8:(i+2)*8])
+		zs[i].SetBytes(bytes[i*Bytes : (i+1)*Bytes])
 	}
 
 	return zs, nil
 }
 
-func RandomVectors(rnd io.Reader, length, block int) ([][]Element, error) {
-	bytesLength := length*block*16 + 1
+func RandomVectors(rnd io.Reader, vectorLen, blockLen int) ([][]Element, error) {
+	bytesLength := (vectorLen*blockLen + 1) * Bytes
 	bytes := make([]byte, bytesLength)
 	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
 		return nil, err
 	}
-	zs := make([][]Element, length)
-	for i := 0; i < length; i++ {
-		zs[i] = make([]Element, block)
-		for j := 0; j < block; j++ {
-			zs[i][j] = FitElement(bytes[i*8:(i+2)*8])
+	zs := make([][]Element, vectorLen)
+	pos := 0
+	for i := 0; i < vectorLen; i++ {
+		zs[i] = make([]Element, blockLen)
+		for j := 0; j < blockLen; j++ {
+			zs[i][j].SetBytes(bytes[pos : pos+Bytes])
+			pos += Bytes
 		}
 	}
 	return zs, nil
@@ -629,6 +613,17 @@ func (z *Element) String() string {
 	vv := bigIntPool.Get().(*big.Int)
 	defer bigIntPool.Put(vv)
 	return z.ToBigIntRegular(vv).String()
+}
+
+func VectorStrings(zs [][]Element) [][]string {
+	out := make([][]string, len(zs))
+	for i := range zs {
+		out[i] = make([]string, len(zs[i]))
+		for j := range zs[i] {
+			out[i][j] = (&zs[i][j]).HexString()
+		}
+	}
+	return out
 }
 
 func (z *Element) HexString() string {
