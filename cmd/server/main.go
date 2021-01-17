@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
 	"math/big"
-	"net"
 	"os"
 
 	"github.com/si-co/vpir-code/lib/utils"
@@ -18,13 +18,13 @@ import (
 )
 
 func main() {
-	// set logs
-	log.SetOutput(os.Stdout)
-	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
-
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
 	flag.Parse()
+
+	// set logs
+	log.SetOutput(os.Stdout)
+	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
 
 	// configs
 	config, err := utils.LoadConfig("config.toml")
@@ -37,8 +37,12 @@ func main() {
 	}
 	addr := addresses[*sid]
 
-	// connect server
-	lis, err := net.Listen("tcp", addr)
+	// run server with TLS
+	cfg := &tls.Config{
+		Certificates: []tls.Certificate{utils.ServerCertificates[*sid]},
+		ClientAuth:   tls.NoClientCert,
+	}
+	lis, err := tls.Listen("tcp", addr, cfg)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

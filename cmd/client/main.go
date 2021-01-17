@@ -140,7 +140,7 @@ func runQueries(ctx context.Context, queries [][]*big.Int, addrs []string) []*bi
 }
 
 func query(ctx context.Context, address string, query []*big.Int) *big.Int {
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
