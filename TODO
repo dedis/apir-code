@@ -1,4 +1,3 @@
 * Continue with PoC app implementation (gpg, db, cli) --> Simone
-* Update gRPC logic and add TLS
 * Organize iccluster servers --> Simone
 * Improve config/constants
