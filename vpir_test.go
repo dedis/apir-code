@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/csv"
 	"fmt"
+	"github.com/si-co/vpir-code/lib/utils"
 	"io"
 	"math"
+	"os"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -23,104 +28,99 @@ const (
 
 
 func TestRetrieveRandomKeyBlock(t *testing.T) {
-	db, blockLength := database.GenerateRandomDB()
+	path := "data/random_id_key.csv"
 
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	// generate db from data
+	db, idLength, keyLength, blockLength, err := database.GenerateRandomDB(path)
 	require.NoError(t, err)
-	rebalanced := false
 
-	c := client.NewITClient(xof, rebalanced)
-	s0 := server.NewITClient(rebalanced, db)
-	s1 := server.NewITClient(rebalanced, db)
+	var key1 utils.PRGKey
+	copy(key1[:], []byte("my key"))
+	prg := utils.NewPRG(&key1)
 
-	for i := 0; i < 10; i++ {
-		queries := c.Query(i, blockLength, 2)
+	// client and servers
+	c := client.NewDPF(prg)
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
 
-		a0 := s0.Answer(queries[0], blockLength)
-		a1 := s1.Answer(queries[1], blockLength)
+	// open id->key file
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	defer f.Close()
 
+	// Parse the file
+	r := csv.NewReader(f)
+
+	// scheme variables
+	chunkLength := constants.ChunkBytesLength
+
+	// helping variables
+	zeroSlice := make([]byte, 45)
+
+	// Iterate through the records
+	for {
+		// Read each record from csv
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		require.NoError(t, err)
+
+		totalTimer := monitor.NewMonitor()
+
+		// for testing
+		expectedID := record[0]
+		expectedKey := record[1]
+
+		// compute hash key for id
+		hashKey := utils.HashToIndex(expectedID, constants.DBLength)
+
+		// query given hash key
+		fssKeys := c.Query(hashKey, blockLength, 2)
+
+		// get servers answers
+		a0 := s0.Answer(fssKeys[0], 0, blockLength)
+		a1 := s1.Answer(fssKeys[1], 1, blockLength)
 		answers := [][]field.Element{a0, a1}
 
+		// reconstruct block
 		result, err := c.Reconstruct(answers, blockLength)
 		require.NoError(t, err)
-		if !(&result[0]).IsZero() {
-			// we know that an (id, key) block is 300 bytes, i.e. 20 field elements
-			resultBytes := make([]byte, 0)
-			for i := 0; i < 20; i++ {
-				fieldBytes := result[i].Bytes()
-				resultBytes = append(resultBytes, fieldBytes[:]...)
+
+		// retrieve result bytes
+		resultBytes := field.VectorToBytes(result)
+
+		lastElementBytes := keyLength % chunkLength
+		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
+		totalLength := idLength + keyLengthWithPadding
+
+		// parse block entries
+		idKey := make(map[string]string)
+		for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
+			idBytes := resultBytes[i : i+idLength]
+			// test if we are in padding elements already
+			if bytes.Equal(idBytes, zeroSlice) {
+				break
+			}
+			idReconstructed := string(bytes.Trim(idBytes, "\x00"))
+
+			keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
+			// remove padding for last element
+			if lastElementBytes != 0 {
+				keyBytes = append(keyBytes[:len(keyBytes)-chunkLength], keyBytes[len(keyBytes)-(lastElementBytes):]...)
 			}
 
-			key := resultBytes
-			fmt.Println(len(key))
-			fmt.Println(key)
+			// encode key
+			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
 		}
+
+		require.Equal(t, expectedKey, idKey[expectedID])
+		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
+
+		// retrieve only one key
+		break
 	}
 }
-
-/*func TestRetrieveKey(t *testing.T) {
-	db, err := database.FromKeysFile()
-	require.NoError(t, err)
-	blockLength := 40
-
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-	rebalanced := false
-
-	c := client.NewITClient(xof, rebalanced)
-	s0 := server.NewITClient(rebalanced, db)
-	s1 := server.NewITClient(rebalanced, db)
-
-	for i := 0; i < 1; i++ {
-		queries := c.Query(i, blockLength, 2)
-
-		a0 := s0.Answer(queries[0], blockLength)
-		a1 := s1.Answer(queries[1], blockLength)
-
-		answers := [][]field.Element{a0, a1}
-
-		result, err := c.Reconstruct(answers, blockLength)
-		require.NoError(t, err)
-
-		// parse result
-		// TODO: logic for this should be in lib/gpg
-		//lengthBytes := result[0].Bytes()
-		//length, _ := binary.Varint(lengthBytes[len(lengthBytes)-1:])
-
-		resultBytes := make([]byte, 0)
-		for i := 0; i < len(result); i++ {
-			elementBytes := result[i].Bytes()
-			//fmt.Println("recon:", elementBytes)
-			resultBytes = append(resultBytes, elementBytes[:]...)
-		}
-		elementsLength, _ := binary.Varint([]byte{resultBytes[0]})
-		lastElementLength, _ := binary.Varint([]byte{resultBytes[1]})
-
-		fmt.Println("")
-		fmt.Println(elementsLength)
-		fmt.Println(lastElementLength)
-		fmt.Println(resultBytes[2 : 14+(elementsLength-2)*16+1])
-
-		pub, err := x509.ParsePKIXPublicKey(resultBytes)
-		if err != nil {
-			log.Printf("failed to parse DER encoded public key: %v", err)
-		} else {
-
-			switch pub := pub.(type) {
-			case *rsa.PublicKey:
-				fmt.Println("pub is of type RSA:", pub)
-			case *dsa.PublicKey:
-				fmt.Println("pub is of type DSA:", pub)
-			case *ecdsa.PublicKey:
-				fmt.Println("pub is of type ECDSA:", pub)
-			case ed25519.PublicKey:
-				fmt.Println("pub is of type Ed25519:", pub)
-			default:
-				panic("unknown type of public key")
-			}
-		}
-	}
-}*/
 
 func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int) {
 	c := client.NewITClient(rnd, db.Info)
@@ -211,29 +211,7 @@ func TestSingleBitMatrixOneKb(t *testing.T) {
 	fmt.Printf("Total time SingleBitMatrixOneKb: %.2fms\n", totalTimer.Record())
 }
 
-/*func TestMultiBitVectorGF(t *testing.T) {
-	db := database.CreateMultiBitGF()
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	rebalanced := false
-	c := client.NewITClient(xof, rebalanced)
-	s0 := server.NewITClient(rebalanced, db)
-	s1 := server.NewITClient(rebalanced, db)
-
-	i := 0
-	queries := c.Query(i, constants.BlockLength, 2)
-
-	a0 := s0.Answer(queries[0], constants.BlockLength)
-	a1 := s1.Answer(queries[1], constants.BlockLength)
-
-	answers := [][]field.Element{a0, a1}
-
-	_, err = c.Reconstruct(answers, constants.BlockLength)
-	require.NoError(t, err)
-}
-
-func TestMatrixOneKbByte(t *testing.T) {
+/*func TestMatrixOneKbByte(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiMatrixOneKbByte()
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
@@ -257,149 +235,6 @@ func TestMatrixOneKbByte(t *testing.T) {
 		require.NoError(t, err)
 	}
 	fmt.Printf("Total time MatrixOneKbByte: %.1fms\n", totalTimer.Record())
-}
-
-func TestMatrixOneKbGF(t *testing.T) {
-	totalTimer := monitor.NewMonitor()
-	db := database.CreateAsciiMatrixOneKb()
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
-	rebalanced := true
-	c := client.NewITSingleGF(xof, rebalanced)
-	s0 := server.NewITSingleGF(rebalanced, db)
-	s1 := server.NewITSingleGF(rebalanced, db)
-	s2 := server.NewITSingleGF(rebalanced, db)
-	for i := 0; i < 8191; i++ {
-		queries := c.Query(i, 3)
-
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
-		a2 := s2.Answer(queries[2])
-
-		answers := [][]field.Element{a0, a1, a2}
-
-		_, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-	}
-	fmt.Printf("Total time MatrixOneKbGF: %.1fms\n", totalTimer.Record())
-}
-
-func TestMatrixGF(t *testing.T) {
-	totalTimer := monitor.NewMonitor()
-	db := database.CreateAsciiMatrixGF()
-	result := ""
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
-	rebalanced := true
-	c := client.NewITSingleGF(xof, rebalanced)
-	s0 := server.NewITSingleGF(rebalanced, db)
-	s1 := server.NewITSingleGF(rebalanced, db)
-	s2 := server.NewITSingleGF(rebalanced, db)
-	m := monitor.NewMonitor()
-	for i := 0; i < 136; i++ {
-		m.Reset()
-		queries := c.Query(i, 3)
-		//fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
-
-		a0 := s0.Answer(queries[0])
-		//fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
-
-		a1 := s1.Answer(queries[1])
-		//fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
-
-		a2 := s2.Answer(queries[2])
-		//fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
-
-		answers := [][]field.Element{a0, a1, a2}
-
-		m.Reset()
-		x, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-		//fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
-		if x.String() == "0" {
-			result += "0"
-		} else {
-			result += "1"
-		}
-	}
-	fmt.Printf("\n\n")
-
-	b, err := utils.BitStringToBytes(result)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-
-	output := string(b)
-	fmt.Println(output)
-
-	const expected = "Playing with VPIR"
-	if expected != output {
-		t.Errorf("Expected '%v' but got '%v'", expected, output)
-	}
-
-	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
-}
-
-func TestVectorGF(t *testing.T) {
-	totalTimer := monitor.NewMonitor()
-	db := database.CreateAsciiVectorGF()
-	result := ""
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
-	rebalanced := false
-	c := client.NewITSingleGF(xof, rebalanced)
-	s0 := server.NewITSingleGF(rebalanced, db)
-	s1 := server.NewITSingleGF(rebalanced, db)
-	s2 := server.NewITSingleGF(rebalanced, db)
-	m := monitor.NewMonitor()
-	for i := 0; i < 136; i++ {
-		m.Reset()
-		queries := c.Query(i, 3)
-		//fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
-
-		a0 := s0.Answer(queries[0])
-		//fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
-
-		a1 := s1.Answer(queries[1])
-		//fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
-
-		a2 := s2.Answer(queries[2])
-		//fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
-
-		answers := [][]field.Element{a0, a1, a2}
-
-		m.Reset()
-		x, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-		//fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
-		if x.String() == "0" {
-			result += "0"
-		} else {
-			result += "1"
-		}
-	}
-	b, err := utils.BitStringToBytes(result)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-
-	output := string(b)
-	fmt.Println(output)
-
-	const expected = "Playing with VPIR"
-	if expected != output {
-		t.Errorf("Expected '%v' but got '%v'", expected, output)
-	}
-
-	fmt.Printf("Total time VectorGF: %.1fms\n", totalTimer.Record())
 }
 
 func TestVectorByte(t *testing.T) {
@@ -443,24 +278,47 @@ func TestVectorByte(t *testing.T) {
 			result += "1"
 		}
 	}
-	b, err := utils.BitStringToBytes(result)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
 
-	output := string(b)
-	fmt.Println(output)
-
-	const expected = "Playing with VPIR"
-	if expected != output {
-		t.Errorf("Expected '%v' but got '%v'", expected, output)
-	}
+	testBitResult(t, result)
 
 	fmt.Printf("Total time VectorByte: %.1fms\n", totalTimer.Record())
+}*/
+
+func TestDPFMulti(t *testing.T) {
+	dbLenMB := 1048576 * 8
+	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
+	require.NoError(t, err)
+	db := database.CreateRandomMultiBitOneMBGF(xofDB, dbLenMB, constants.BlockLength)
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+
+	totalTimer := monitor.NewMonitor()
+
+	c := client.NewDPF(xof)
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
+
+	fieldElements := 128 * 8
+
+	for i := 0; i < fieldElements/16; i++ {
+		fssKeys := c.Query(i, constants.BlockLength, 2)
+
+		a0 := s0.Answer(fssKeys[0], 0, constants.BlockLength)
+		a1 := s1.Answer(fssKeys[1], 1, constants.BlockLength)
+
+		answers := [][]field.Element{a0, a1}
+
+		res, err := c.Reconstruct(answers, constants.BlockLength)
+		require.NoError(t, err)
+		require.ElementsMatch(t, db.Entries[i], res)
+	}
+
+	fmt.Printf("Total time dpf-based MultiBitOneKb: %.1fms\n", totalTimer.Record())
 }
 
-func TestDPF(t *testing.T) {
+/*
+func TestDPFSingle(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
 	db := database.CreateAsciiVectorGF()
 	result := ""
@@ -468,50 +326,109 @@ func TestDPF(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+
+	blockLen := constants.SingleBitBlockLength
+
 	c := client.NewDPF(xof)
-	s0 := server.NewDPFServer(db)
-	s1 := server.NewDPFServer(db)
-	m := monitor.NewMonitor()
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
 
 	for i := 0; i < 136; i++ {
-		m.Reset()
-		prfKeys, fssKeys := c.Query(i, 2)
-		fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
+		fssKeys := c.Query(i, blockLen, 2)
 
-		a0 := s0.Answer(fssKeys[0], prfKeys, 0)
-		fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
-
-		a1 := s1.Answer(fssKeys[1], prfKeys, 1)
-		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
+		a0 := s0.Answer(fssKeys[0], 0, blockLen)
+		a1 := s1.Answer(fssKeys[1], 1, blockLen)
 
 		answers := [][]field.Element{a0, a1}
 
-		m.Reset()
-		x, err := c.Reconstruct(answers)
-		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
+		x, err := c.Reconstruct(answers, blockLen)
 		if err != nil {
 			panic(err)
 		}
-		if x[0].String() == "0" {
-			result += "0"
-		} else {
-			result += "1"
-		}
-
+		result += x[0].String()
 	}
+
+	testBitResult(t, result)
+
+	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
+}
+*/
+
+func testBitResult(t *testing.T, result string) {
 	b, err := utils.BitStringToBytes(result)
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
+	expected := "Playing with VPIR"
 	output := string(b)
-	fmt.Println(output)
-
-	const expected = "Playing with VPIR"
 	if expected != output {
 		t.Errorf("Expected '%v' but got '%v'", expected, output)
 	}
+}
 
-	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
+/*
+func TestRetrieveKey(t *testing.T) {
+	db, err := database.FromKeysFile()
+	require.NoError(t, err)
+	blockLength := 40
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+	rebalanced := false
+
+	c := client.NewITMulti(xof, rebalanced)
+	s0 := server.NewITMulti(rebalanced, db)
+	s1 := server.NewITMulti(rebalanced, db)
+
+	for i := 0; i < 1; i++ {
+		queries := c.Query(i, blockLength, 2)
+
+		a0 := s0.Answer(queries[0], blockLength)
+		a1 := s1.Answer(queries[1], blockLength)
+
+		answers := [][]field.Element{a0, a1}
+
+		result, err := c.Reconstruct(answers, blockLength)
+		require.NoError(t, err)
+
+		// parse result
+		// TODO: logic for this should be in lib/gpg
+		//lengthBytes := result[0].Bytes()
+		//length, _ := binary.Varint(lengthBytes[len(lengthBytes)-1:])
+
+		resultBytes := make([]byte, 0)
+		for i := 0; i < len(result); i++ {
+			elementBytes := result[i].Bytes()
+			//fmt.Println("recon:", elementBytes)
+			resultBytes = append(resultBytes, elementBytes[:]...)
+		}
+		elementsLength, _ := binary.Varint([]byte{resultBytes[0]})
+		lastElementLength, _ := binary.Varint([]byte{resultBytes[1]})
+
+		fmt.Println("")
+		fmt.Println(elementsLength)
+		fmt.Println(lastElementLength)
+		fmt.Println(resultBytes[2 : 14+(elementsLength-2)*16+1])
+
+		pub, err := x509.ParsePKIXPublicKey(resultBytes)
+		if err != nil {
+			log.Printf("failed to parse DER encoded public key: %v", err)
+		} else {
+
+			switch pub := pub.(type) {
+			case *rsa.PublicKey:
+				fmt.Println("pub is of type RSA:", pub)
+			case *dsa.PublicKey:
+				fmt.Println("pub is of type DSA:", pub)
+			case *ecdsa.PublicKey:
+				fmt.Println("pub is of type ECDSA:", pub)
+			case ed25519.PublicKey:
+				fmt.Println("pub is of type Ed25519:", pub)
+			default:
+				panic("unknown type of public key")
+			}
+		}
+	}
 }*/

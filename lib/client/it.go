@@ -131,7 +131,6 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 			}
 		}
 	}
-
 	var tag, prod field.Element
 	messages := make([]field.Element, c.dbInfo.BlockSize)
 	for i := 0; i < c.dbInfo.NumRows; i++ {
@@ -144,7 +143,6 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 			reconstructedTag.Add(&reconstructedTag, &prod)
 		}
 		if !tag.Equal(&reconstructedTag) {
-			//fmt.Printf("Actual: %s, Computed: %s", tag.String(), reconstructedTag.String())
 			return nil, errors.New("REJECT")
 		}
 	}

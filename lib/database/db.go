@@ -1,13 +1,10 @@
 package database
 
 import (
-	"encoding/binary"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/gpg"
 	"io"
 	"log"
-	"math"
 )
 
 var text = "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
@@ -28,7 +25,7 @@ type Bytes struct {
 	DBLengthSqrt int // unused for vector
 }
 
-func FromKeysFile() (*DB, error) {
+/*func FromKeysFile() (*DB, error) {
 	// read gpg keys from file
 	keys, err := gpg.ReadPublicKeysFromDisk()
 	if err != nil {
@@ -40,7 +37,6 @@ func FromKeysFile() (*DB, error) {
 
 	j := 0
 	for _, v := range keys {
-		fmt.Println(v)
 		elLength := int64(math.Ceil(float64(len(v)) / 16.0))
 		lastLength := int64(len(v) % 16)
 		elementsLength := make([]byte, 1)
@@ -78,7 +74,7 @@ func FromKeysFile() (*DB, error) {
 	}
 
 	return db, nil
-}
+}*/
 
 func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 	var err error

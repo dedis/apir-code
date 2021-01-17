@@ -220,6 +220,37 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	return z, nil
 }
 
+// PowerVectorWithOne returns vector (1, alpha, ..., alpha^(length))
+func PowerVectorWithOne(alpha Element, length int) []Element {
+	a := make([]Element, length+1)
+	a[0] = One()
+	a[1] = alpha
+	for i := 2; i < len(a); i++ {
+		a[i].Mul(&a[i-1], &alpha)
+	}
+
+	return a
+}
+
+// RandomVectorPointers returns a vector composed of length random pointers
+// to field elements
+func RandomVectorPointers(rnd io.Reader, length int) ([]*Element, error) {
+	var e Element
+	bytesLength := length*16 + 1
+	bytes := make([]byte, bytesLength)
+	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
+		return nil, err
+	}
+	zs := make([]*Element, length)
+	for i := 0; i < length; i++ {
+		e.SetBytes(bytes[i*Bytes : (i+1)*Bytes])
+		zs[i] = &e
+	}
+
+	return zs, nil
+}
+
+// RandomVector returns a vector composed of length random field elements
 func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	bytesLength := length*Bytes + 1
 	bytes := make([]byte, bytesLength)
@@ -260,6 +291,21 @@ func ZeroVector(length int) []Element {
 		zeroVector[i] = zero
 	}
 	return zeroVector
+}
+
+// VectorToBytes extracts bytes from a vector of field elements.  Assume that
+// only 15 bytes worth of data are embedded in each field element and therefore
+// strips the initial zero from each byte.
+func VectorToBytes(in []Element) []byte {
+	// TODO: preallocate array for efficiency
+	out := make([]byte, 0)
+	for _, e := range in {
+		fieldBytes := e.Bytes()
+		// strip first zero
+		out = append(out, fieldBytes[1:]...)
+	}
+
+	return out
 }
 
 // One returns 1 (in montgommery form)
