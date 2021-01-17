@@ -1,6 +1,6 @@
 package database
 
-/*import (
+import (
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -96,4 +96,4 @@ func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte
 	}
 
 	return db, nil
-}*/
+}
