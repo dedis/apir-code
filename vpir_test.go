@@ -139,7 +139,6 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int)
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
-		fmt.Printf("%d ", i)
 	}
 }
 
@@ -197,7 +196,7 @@ func TestMultiBitMatrixOneKb(t *testing.T) {
 }
 
 func TestSingleBitMatrixOneKb(t *testing.T) {
-	dbLen := oneKB
+	dbLen := oneKB - 92 // making the length a square
 	numBlocks := dbLen
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
