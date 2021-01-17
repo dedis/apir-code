@@ -90,7 +90,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 		// parse block entries
 		idKey := make(map[string]string)
-		for i := 0; i < len(resultBytes)-(totalLength); i += totalLength {
+		for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
 			idBytes := resultBytes[i : i+idLength]
 			// test if we are in padding elements already
 			if bytes.Equal(idBytes, zeroSlice) {
@@ -100,18 +100,18 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 			keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
 			// remove padding for last element
-			keyBytes = append(keyBytes[:len(keyBytes)-(16-lastElementBytes)],
-				keyBytes[len(keyBytes)-lastElementBytes])
+			if lastElementBytes != 0 {
+				keyBytes = append(keyBytes[:len(keyBytes)-chunkLength], keyBytes[len(keyBytes)-(lastElementBytes):]...)
+			}
 
 			// encode key
 			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
 		}
 
-		require.Equal(t, idKey[expectedID], expectedKey)
+		require.Equal(t, expectedKey, idKey[expectedID])
 		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 
-		// only retrieve one key
-		break
+		// retrieve only one key
 	}
 
 }

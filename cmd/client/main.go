@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"math/big"
+	"os"
 	"sync"
 	"time"
 
@@ -19,6 +20,8 @@ import (
 )
 
 func main() {
+	// set logs
+	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// flags
@@ -28,10 +31,12 @@ func main() {
 	// configs
 	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
-		log.Fatalf("Could not load the config file: %v", err)
+		log.Fatalf("could not load the config file: %v", err)
 	}
 	addresses, err := utils.ServerAddresses(config)
-	fmt.Println(addresses)
+	if err != nil {
+		log.Fatalf("could not parse servers addresses: %v", err)
+	}
 
 	// New random generator
 	var key utils.PRGKey
@@ -52,6 +57,9 @@ func main() {
 
 	// get id and compute corresponding hash
 	id := *idPtr
+	if id == "" {
+		log.Fatal("id not provided")
+	}
 	idHash := utils.HashToIndex(id, constants.DBLength)
 
 	// query for given idHash
@@ -76,7 +84,7 @@ func runDBInfoRequest(ctx context.Context, addresses []string) int {
 
 	// check if db info are all equal before returning
 	dbInfo := make([]int, 0)
-	for i := range ch {
+	for i := range resCh {
 		dbInfo = append(dbInfo, i)
 	}
 	for i := range dbInfo {
@@ -103,7 +111,7 @@ func dbInfo(ctx context.Context, address string) int {
 		log.Fatalf("could not send database info request: %v", err)
 	}
 
-	blockLength := answer.BlockLength
+	blockLength := answer.GetBlockLength()
 
 	return int(blockLength)
 }
@@ -145,7 +153,7 @@ func query(ctx context.Context, address string, query []*big.Int) *big.Int {
 		log.Fatalf("could not query: %v", err)
 	}
 
-	num, ok := big.NewInt(0).SetString(answer.Answer, 10)
+	num, ok := big.NewInt(0).SetString(answer.GetAnswer(), 10)
 	if !ok {
 		log.Fatal("Could not convert answer to big int")
 	}
