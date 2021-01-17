@@ -112,6 +112,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 
 		// retrieve only one key
+		break
 	}
 
 }
