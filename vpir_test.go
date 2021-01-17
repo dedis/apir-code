@@ -21,7 +21,7 @@ const (
 	oneKB = 1024 * 8
 )
 
-/*
+
 func TestRetrieveRandomKeyBlock(t *testing.T) {
 	db, blockLength := database.GenerateRandomDB()
 
@@ -57,7 +57,6 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		}
 	}
 }
-*/
 
 /*func TestRetrieveKey(t *testing.T) {
 	db, err := database.FromKeysFile()
