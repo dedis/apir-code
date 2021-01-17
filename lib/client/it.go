@@ -23,7 +23,7 @@ type ITClient struct {
 
 type itState struct {
 	ix    int
-	iy    int // unused if not rebalanced
+	iy    int
 	alpha field.Element
 	a     []field.Element
 }
@@ -94,19 +94,16 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 }
 
 func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
-
 	sum := make([][]field.Element, c.dbInfo.NumRows)
-	// sum answers as vectors in F(2^128)^(b+1)
-	for i := 0; i < c.dbInfo.NumRows; i++ {
-		sum[i] = make([]field.Element, c.dbInfo.BlockSize+1)
-		for b := 0; b < c.dbInfo.BlockSize+1; b++ {
-			for k := range answers {
-				sum[i][b].Add(&sum[i][b], &answers[k][i][b])
-			}
-		}
-	}
 
 	if c.dbInfo.BlockSize == cst.SingleBitBlockLength {
+		// sum answers as vectors in F^b
+		for i := 0; i < c.dbInfo.NumRows; i++ {
+			sum[i] = make([]field.Element, 1)
+			for k := range answers {
+				sum[i][0].Add(&sum[i][0], &answers[k][i][0])
+			}
+		}
 		for i := 0; i < c.dbInfo.NumRows; i++ {
 			if i == c.state.iy {
 				switch {
@@ -121,6 +118,16 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 				if !sum[i][0].Equal(&c.state.alpha) && !sum[i][0].Equal(&cst.Zero) {
 					return nil, errors.New("REJECT!")
 				}
+			}
+		}
+	}
+
+	// sum answers as vectors in F^(b+1)
+	for i := 0; i < c.dbInfo.NumRows; i++ {
+		sum[i] = make([]field.Element, c.dbInfo.BlockSize+1)
+		for b := 0; b < c.dbInfo.BlockSize+1; b++ {
+			for k := range answers {
+				sum[i][b].Add(&sum[i][b], &answers[k][i][b])
 			}
 		}
 	}

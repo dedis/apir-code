@@ -139,11 +139,12 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int)
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
+		fmt.Printf("%d ", i)
 	}
 }
 
-func TestMultiBitVectorOneMb(t *testing.T) {
-	dbLen := oneMB
+func TestMultiBitVectorOneKb(t *testing.T) {
+	dbLen := oneKB
 	blockLen := constants.BlockLength
 	elemSize := 128
 	nRows := 1
@@ -157,45 +158,27 @@ func TestMultiBitVectorOneMb(t *testing.T) {
 
 	totalTimer := monitor.NewMonitor()
 	retrieveBlocks(t, xof, db, nRows*nCols)
-	fmt.Printf("Total time MultiBitVectorOneMb: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time MultiBitVectorOneKb: %.2fms\n", totalTimer.Record())
 }
 
-func TestSingleBitVectorOneMb(t *testing.T) {
-	dbLenMB := 1048576 * 8
+func TestSingleBitVectorOneKb(t *testing.T) {
+	dbLen := oneKB
+	nRows := 1
+	nCols := dbLen
 	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
 	require.NoError(t, err)
-	db := database.CreateRandomSingleBitVectorDB(xofDB, dbLenMB)
-
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	numBlocks := dbLenMB / (128 * constants.BlockLength)
-
-	totalTimer := monitor.NewMonitor()
-	retrieveBlocks(t, xof, db, numBlocks)
-	fmt.Printf("Total time SingleBitVectorOneMb: %.1fms\n", totalTimer.Record())
-}
-
-func TestMultiBitMatrixSmall(t *testing.T) {
-	blockLen := 2
-	nRows := 2
-	nCols := 2
-	elemSize := 128
-	dbLen := elemSize * nRows * nCols * blockLen
-	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
-	require.NoError(t, err)
-	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
 	totalTimer := monitor.NewMonitor()
 	retrieveBlocks(t, xof, db, nRows*nCols)
-	fmt.Printf("Total time MultiBitMatrixSmall: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time SingleBitVectorOneKb: %.2fms\n", totalTimer.Record())
 }
 
-func TestMultiBitMatrixOneMb(t *testing.T) {
-	dbLen := oneMB
+func TestMultiBitMatrixOneKb(t *testing.T) {
+	dbLen := oneKB
 	blockLen := constants.BlockLength
 	elemSize := 128
 	numBlocks := dbLen / (elemSize * blockLen)
@@ -210,7 +193,24 @@ func TestMultiBitMatrixOneMb(t *testing.T) {
 
 	totalTimer := monitor.NewMonitor()
 	retrieveBlocks(t, xof, db, numBlocks)
-	fmt.Printf("Total time MultiBitMatrixOneMb: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time MultiBitMatrixOneKb: %.2fms\n", totalTimer.Record())
+}
+
+func TestSingleBitMatrixOneKb(t *testing.T) {
+	dbLen := oneKB
+	numBlocks := dbLen
+	nCols := int(math.Sqrt(float64(numBlocks)))
+	nRows := nCols
+	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
+	require.NoError(t, err)
+	db := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
+
+	xof, err := blake2b.NewXOF(0, []byte("my key"))
+	require.NoError(t, err)
+
+	totalTimer := monitor.NewMonitor()
+	retrieveBlocks(t, xof, db, numBlocks)
+	fmt.Printf("Total time SingleBitMatrixOneKb: %.2fms\n", totalTimer.Record())
 }
 
 /*func TestMultiBitVectorGF(t *testing.T) {
