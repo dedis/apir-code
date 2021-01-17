@@ -35,7 +35,6 @@ func GenerateRandomDB(path string) (*GF, int, int, int, error) {
 	blockLength := int(math.Ceil(float64(maxBytes) / float64(chunkLength)))
 
 	// create all zeros db
-	// TODO: useless to create an all zero db, better to build the db from scratch
 	db := CreateMultiBitGFLength(blockLength)
 
 	// embed data into field elements
@@ -55,13 +54,8 @@ func GenerateRandomDB(path string) (*GF, int, int, int, error) {
 			}
 		}
 
-		// pad to have a full block
-		for len(elements) < blockLength {
-			elements = append(elements, field.Zero())
-		}
-
-		// store in db
-		db.Entries[id] = elements
+		// store in db and automatically pad
+		copy(db.Entries[id], elements)
 	}
 
 	return db, idLength, keyLength, blockLength, nil
