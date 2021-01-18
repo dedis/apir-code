@@ -36,6 +36,7 @@ func (s *ITServer) AnswerBytes(q []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	// get answer
 	a := s.Answer(query)
 
 	// encode answer
