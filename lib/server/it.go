@@ -22,6 +22,11 @@ func NewITServer(db *database.DB) *ITServer {
 	return &ITServer{db: db}
 }
 
+// AnswerBytes decode the input, execute Answer and encodes the output
+func (s *ITServer) AnswerBytes(q []byte) []byte {
+	return nil
+}
+
 // Answer computes the answer for the given query
 func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 	// Doing simplified scheme if block consists of a single bit
@@ -71,5 +76,17 @@ func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 		m[i] = append(m[i], sumTag)
 	}
 
+	/*
+		// encode as bytes
+		var buf bytes.Buffer
+		enc := gob.NewEncoder(&buf)
+		err := enc.Encode(m)
+		if err != nil {
+			log.Fatal("encode error:", err)
+		}
+		fmt.Println(buf.Bytes())
+	*/
+
 	return m
+
 }
