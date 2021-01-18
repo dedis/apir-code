@@ -31,7 +31,7 @@ func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
 			a[i] = make([]field.Element, 1)
 			for j := 0; j < s.db.NumColumns; j++ {
 				if s.db.Entries[i][j][0].Equal(&cst.One) {
-					a[i][0].Add(&a[i][0], &q[i][j])
+					a[i][0].Add(&a[i][0], &q[j][0])
 				}
 			}
 		}
