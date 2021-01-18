@@ -9,9 +9,9 @@ import (
 	"math/big"
 	"os"
 
+	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/utils"
 
-	db "github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
@@ -37,6 +37,9 @@ func main() {
 	}
 	addr := addresses[*sid]
 
+	// generate db
+	db := database.GenerateKeyDB("../../data/random_id_key.csv")
+
 	// run server with TLS
 	cfg := &tls.Config{
 		Certificates: []tls.Certificate{utils.ServerCertificates[*sid]},
@@ -49,6 +52,7 @@ func main() {
 	rpcServer := grpc.NewServer()
 	vpirServer := &vpirServer{
 		Server: server.NewITServer(db.CreateAsciiVector()),
+		DBInfo: db.Info,
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
 	log.Printf("Server %d is listening at %s", *sid, addr)
@@ -61,16 +65,19 @@ func main() {
 // vpirServer is used to implement VPIR Server protocol.
 type vpirServer struct {
 	proto.UnimplementedVPIRServer
-	server.Server // TODO: create a general server
+	Server server.Server // TODO: create a general server
+	dbInfo database.Info
 }
 
 func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
 	*proto.DatabaseInfoResponse, error) {
+	resp := &proto.DatabaseInfoResponse{
+		NumRows:     s.dbInfo.NumRows,
+		NumColumns:  s.dbInfo.NumColumns,
+		BlockLength: s.dbInfo.BlockSize,
+	}
 
-	// send block length back, implement the logic in db
-	blockLength = 16
-
-	return &proto.DatabaseInfoResponse{BlockLength: blockLength}, nil
+	return resp, nil
 }
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.Request) (
