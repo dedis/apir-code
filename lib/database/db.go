@@ -16,14 +16,30 @@ type DB struct {
 }
 
 type Info struct {
-	NumColumns int
 	NumRows    int
+	NumColumns int
 	BlockSize  int
 }
 
 type Bytes struct {
 	Entries      [][]byte
 	DBLengthSqrt int // unused for vector
+}
+
+func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
+	entries := make([][][]field.Element, numRows)
+	for i := 0; i < numRows; i++ {
+		entries[i] = make([][]field.Element, numColumns)
+		for j := 0; j < numColumns; j++ {
+			entries[i][j] = field.ZeroVector(blockSize)
+		}
+	}
+	return &DB{Entries: entries,
+		Info: Info{NumColumns: numColumns,
+			NumRows:   numRows,
+			BlockSize: blockSize,
+		},
+	}
 }
 
 func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
