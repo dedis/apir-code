@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -52,10 +51,9 @@ func main() {
 
 	// get db info
 	dbInfo := runDBInfoRequest(ctx, addresses)
-	fmt.Println(dbInfo)
 
 	// start client and initialize top-level Context
-	c := client.NewDPF(prg)
+	c := client.NewDPF(prg, *dbInfo)
 	fmt.Println(c)
 
 	// get id and compute corresponding hash
@@ -63,7 +61,7 @@ func main() {
 	if id == "" {
 		log.Fatal("id not provided")
 	}
-	idHash := utils.HashToIndex(id, constants.DBLength)
+	idHash := utils.HashToIndex(id, dbInfo.NumRows)
 
 	// query for given idHash
 	fmt.Println(idHash)
@@ -91,7 +89,9 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 		dbInfo = append(dbInfo, i)
 	}
 	for i := range dbInfo {
-		if dbInfo[0] != dbInfo[i] {
+		if dbInfo[0].NumRows != dbInfo[i].NumRows ||
+			dbInfo[0].NumColumns != dbInfo[i].NumColumns ||
+			dbInfo[0].BlockSize != dbInfo[i].BlockSize {
 			log.Fatal("got different database info from servers")
 		}
 	}
@@ -100,7 +100,7 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 
 }
 
-func dbInfo(ctx context.Context, address string) int {
+func dbInfo(ctx context.Context, address string) *database.Info {
 	conn, err := grpc.Dial(address, grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -115,14 +115,12 @@ func dbInfo(ctx context.Context, address string) int {
 	}
 
 	dbInfo := &database.Info{
-		NumRows:     answers.GetNumRows(),
-		NumColumns:  answers.GetNumColumns(),
-		BlockLength: answers.GetBlockLength(),
+		NumRows:    int(answer.GetNumRows()),
+		NumColumns: int(answer.GetNumColumns()),
+		BlockSize:  int(answer.GetBlockLength()),
 	}
 
-	blockLength := answer.GetBlockLength()
-
-	return int(blockLength)
+	return dbInfo
 }
 
 func runQueries(ctx context.Context, queries [][]*big.Int, addrs []string) []*big.Int {
