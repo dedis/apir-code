@@ -20,5 +20,7 @@ message Response {
 message DatabaseInfoRequest {}
 
 message DatabaseInfoResponse {
-        uint32 blockLength = 1;
+        uint32 numRows = 1;
+        uint32 numColumns = 2;
+        uint32 blockLength = 3;
 }
