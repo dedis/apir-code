@@ -12,7 +12,7 @@ import (
 
 // ITServer is the server for the information theoretic multi-bit scheme
 type ITServer struct {
-	db         *database.DB
+	db *database.DB
 }
 
 // NewITServer return a server for the information theoretic multi-bit scheme,
