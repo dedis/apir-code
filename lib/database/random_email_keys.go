@@ -72,8 +72,6 @@ func GenerateKeyDB(path string) (*DB, error) {
 			}
 		}
 
-		fmt.Println("j:", j)
-
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
 		copy(db.Entries[id][j], elements)

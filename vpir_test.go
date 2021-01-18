@@ -58,7 +58,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	chunkLength := constants.ChunkBytesLength
 
 	// helping variables
-	zeroSlice := make([]byte, 45)
+	zeroSlice := make([]byte, idLength)
 
 	// Iterate through the records
 	for {
