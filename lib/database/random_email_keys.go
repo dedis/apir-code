@@ -8,7 +8,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateRandomDB(path string) (*GF, int, int, int, error) {
+func GenerateRandomDB(path string) (*DB, int, int, int, error) {
 	// parse id->key file
 	pairs, err := utils.ParseCSVRandomIDKeys(path)
 	if err != nil {

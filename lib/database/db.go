@@ -39,7 +39,12 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 			}
 		}
 	}
-	return &DB{Entries: entries, Info: Info{NumColumns: numColumns, NumRows: numRows, BlockSize: blockLen}}
+	return &DB{Entries: entries,
+		Info: Info{NumColumns: numColumns,
+			NumRows:   numRows,
+			BlockSize: blockLen,
+		},
+	}
 }
 
 func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) *DB {
