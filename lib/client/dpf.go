@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/si-co/vpir-code/lib/database"
 	"io"
 	"math/bits"
 
@@ -12,8 +13,9 @@ import (
 
 // DPF represent the client for the DPF-based single- and multi-bit schemes
 type DPF struct {
-	rnd   io.Reader
-	state *dpfState
+	rnd    io.Reader
+	dbInfo database.Info
+	state  *dpfState
 }
 
 type dpfState struct {
@@ -22,14 +24,15 @@ type dpfState struct {
 	a     []field.Element
 }
 
-func NewDPF(rnd io.Reader) *DPF {
+func NewDPF(rnd io.Reader, info database.Info) *DPF {
 	return &DPF{
-		rnd:   rnd,
-		state: nil,
+		rnd:    rnd,
+		dbInfo: info,
+		state:  nil,
 	}
 }
 
-func (c *DPF) Query(index, blockSize, numServers int) []dpf.DPFkey {
+func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	if index < 0 || index > cst.DBLength {
 		panic("query index out of bound")
 	}
@@ -47,8 +50,8 @@ func (c *DPF) Query(index, blockSize, numServers int) []dpf.DPFkey {
 	}
 
 	var a []field.Element
-	if blockSize != cst.SingleBitBlockLength {
-		a = field.PowerVectorWithOne(*alpha, blockSize)
+	if c.dbInfo.BlockSize != cst.SingleBitBlockLength {
+		a = field.PowerVectorWithOne(*alpha, c.dbInfo.BlockSize)
 	} else {
 		// the single-bit scheme needs a single alpha
 		a = make([]field.Element, 1)
@@ -61,10 +64,10 @@ func (c *DPF) Query(index, blockSize, numServers int) []dpf.DPFkey {
 	// client initialization is the same for both single- and multi-bit scheme
 	key0, key1 := dpf.Gen(uint64(index), a, uint64(bits.Len(uint(constants.DBLength))))
 
-	return []dpf.DPFkey{ key0, key1 }
+	return []dpf.DPFkey{key0, key1}
 }
 
-func (c *DPF) Reconstruct(answers [][]field.Element, blockSize int) ([]field.Element, error) {
+func (c *DPF) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 	index := 0
 
 	return reconstruct(answers, blockSize, index, c.state.alpha, c.state.a)

@@ -76,15 +76,15 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		hashKey := utils.HashToIndex(expectedID, constants.DBLength)
 
 		// query given hash key
-		fssKeys := c.Query(hashKey, blockLength, 2)
+		fssKeys := c.Query(hashKey, 2)
 
 		// get servers answers
-		a0 := s0.Answer(fssKeys[0], 0, blockLength)
-		a1 := s1.Answer(fssKeys[1], 1, blockLength)
-		answers := [][]field.Element{a0, a1}
+		a0 := s0.Answer(fssKeys[0], 0)
+		a1 := s1.Answer(fssKeys[1], 1)
+		answers := [][][]field.Element{a0, a1}
 
 		// reconstruct block
-		result, err := c.Reconstruct(answers, blockLength)
+		result, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 
 		// retrieve result bytes

@@ -18,8 +18,8 @@ import (
 // ITClient represents the client for the information theoretic multi-bit scheme
 type ITClient struct {
 	rnd    io.Reader
-	state  *itState
 	dbInfo database.Info
+	state  *itState
 }
 
 type itState struct {
