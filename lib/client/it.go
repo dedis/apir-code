@@ -2,11 +2,12 @@ package client
 
 import (
 	"errors"
+	"io"
+	"log"
+
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"io"
-	"log"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -28,7 +29,7 @@ type itState struct {
 	a     []field.Element
 }
 
-// NewITSingleGF return a client for the information theoretic multi-bit
+// NewITClient returns a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
 func NewITClient(rnd io.Reader, info database.Info) *ITClient {
