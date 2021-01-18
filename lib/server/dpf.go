@@ -17,9 +17,9 @@ type DPF struct {
 	db *database.DB
 }
 
-func (s *DPF) Answer(q dpf.DPFkey, serverNum byte, blockSize int) [][]field.Element {
+func (s *DPF) Answer(q dpf.DPFkey, serverNum byte) [][]field.Element {
 	// Doing simplified scheme if block consists of a single bit
-	if blockSize == cst.SingleBitBlockLength {
+	if s.db.BlockSize == cst.SingleBitBlockLength {
 		panic("Not implemented")
 		/*
 			a := make([]field.Element, 1)
@@ -58,7 +58,7 @@ func (s *DPF) Answer(q dpf.DPFkey, serverNum byte, blockSize int) [][]field.Elem
 		sum := field.ZeroVector(s.db.BlockSize)
 		m[i] = make([]field.Element, s.db.BlockSize)
 		for j := 0; j < s.db.NumColumns; j++ {
-			for b := 0; b < blockSize; b++ {
+			for b := 0; b < s.db.BlockSize; b++ {
 				prod[b].Mul(&s.db.Entries[i][j][b], &dpfOut[i][0])
 				sum[b].Add(&sum[b], &prod[b])
 

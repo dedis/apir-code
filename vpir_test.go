@@ -5,11 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/csv"
 	"fmt"
-	"github.com/si-co/vpir-code/lib/utils"
 	"io"
 	"math"
 	"os"
 	"testing"
+
+	"github.com/si-co/vpir-code/lib/utils"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
@@ -26,12 +27,11 @@ const (
 	oneKB = 1024 * 8
 )
 
-
 func TestRetrieveRandomKeyBlock(t *testing.T) {
 	path := "data/random_id_key.csv"
 
 	// generate db from data
-	db, idLength, keyLength, blockLength, err := database.GenerateRandomDB(path)
+	db, idLength, keyLength, err := database.GenerateRandomDB(path)
 	require.NoError(t, err)
 
 	var key1 utils.PRGKey
@@ -39,7 +39,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	prg := utils.NewPRG(&key1)
 
 	// client and servers
-	c := client.NewDPF(prg)
+	c := client.NewDPF(prg, db.Info)
 	s0 := server.NewDPF(db)
 	s1 := server.NewDPF(db)
 
@@ -161,7 +161,7 @@ func TestMultiBitVectorOneKb(t *testing.T) {
 
 	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocks(t, xof, db, nRows*nCols,"MultiBitVectorOneKb")
+	retrieveBlocks(t, xof, db, nRows*nCols, "MultiBitVectorOneKb")
 }
 
 func TestSingleBitVectorOneKb(t *testing.T) {
@@ -281,31 +281,36 @@ func TestVectorByte(t *testing.T) {
 }*/
 
 func TestDPFMulti(t *testing.T) {
-	dbLenMB := 1048576 * 8
-	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
-	require.NoError(t, err)
-	db := database.CreateRandomMultiBitOneMBGF(xofDB, dbLenMB, constants.BlockLength)
+	dbLen := oneMB
+	blockLen := constants.BlockLength
+	elemSize := field.Bits
+	numBlocks := dbLen / (elemSize * blockLen)
+	nCols := int(math.Sqrt(float64(numBlocks)))
+	nRows := nCols
+
+	xofDB := getXof(t, "db key")
+	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 
 	xof, err := blake2b.NewXOF(0, []byte("my key"))
 	require.NoError(t, err)
 
 	totalTimer := monitor.NewMonitor()
 
-	c := client.NewDPF(xof)
+	c := client.NewDPF(xof, db.Info)
 	s0 := server.NewDPF(db)
 	s1 := server.NewDPF(db)
 
 	fieldElements := 128 * 8
 
 	for i := 0; i < fieldElements/16; i++ {
-		fssKeys := c.Query(i, constants.BlockLength, 2)
+		fssKeys := c.Query(i, 2)
 
-		a0 := s0.Answer(fssKeys[0], 0, constants.BlockLength)
-		a1 := s1.Answer(fssKeys[1], 1, constants.BlockLength)
+		a0 := s0.Answer(fssKeys[0], 0)
+		a1 := s1.Answer(fssKeys[1], 1)
 
-		answers := [][]field.Element{a0, a1}
+		answers := [][][]field.Element{a0, a1}
 
-		res, err := c.Reconstruct(answers, constants.BlockLength)
+		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		require.ElementsMatch(t, db.Entries[i], res)
 	}
