@@ -284,7 +284,7 @@ func TestVectorByte(t *testing.T) {
 }*/
 
 func TestDPFMultiVector(t *testing.T) {
-	dbLen := oneKB
+	dbLen := oneMB
 	blockLen := constants.BlockLength
 	elemSize := 128
 	numBlocks := dbLen / (elemSize * blockLen)
@@ -294,7 +294,25 @@ func TestDPFMultiVector(t *testing.T) {
 	xof := getXof(t, "client key")
 	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 
-	c := client.NewDPF(xof, db.Info)
+	retrieveBlocksDPF(t, xof, db, numBlocks, "TestDPFMultiVector")
+}
+
+func TestDPFMultiMatrix(t *testing.T) {
+	dbLen := oneMB
+	blockLen := constants.BlockLength
+	elemSize := 128
+	numBlocks := dbLen / (elemSize * blockLen)
+	nCols := int(math.Sqrt(float64(numBlocks)))
+	nRows := nCols
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	retrieveBlocksDPF(t, xof, db, numBlocks, "TestDPFMultiMatrix")
+}
+
+func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
+	c := client.NewDPF(rnd, db.Info)
 	s0 := server.NewDPF(db)
 	s1 := server.NewDPF(db)
 
@@ -312,7 +330,7 @@ func TestDPFMultiVector(t *testing.T) {
 		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
 	}
 
-	fmt.Printf("Total time dpf-based MultiBitVectorOneKb: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time dpf-based %s: %.1fms\n", testName, totalTimer.Record())
 }
 
 /*
