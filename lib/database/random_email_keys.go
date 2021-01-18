@@ -60,7 +60,7 @@ func GenerateRandomDB(path string) (*DB, int, int, error) {
 				e := new(field.Element).SetBytes(entry[i:end])
 				elements = append(elements, *e)
 				if len(elements) == blockLength {
-					copy(db.Entries[id][j], elements)
+					db.Entries[id][j] = elements
 					elements = make([]field.Element, 0)
 					j++
 				}
