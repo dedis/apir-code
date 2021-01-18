@@ -1,10 +1,11 @@
 package database
 
 import (
-	"github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 	"io"
 	"log"
+
+	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 var text = "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
@@ -24,57 +25,6 @@ type Bytes struct {
 	Entries      [][]byte
 	DBLengthSqrt int // unused for vector
 }
-
-/*func FromKeysFile() (*DB, error) {
-	// read gpg keys from file
-	keys, err := gpg.ReadPublicKeysFromDisk()
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: find a way to automatize this
-	db := CreateMultiBitGFLength(40)
-
-	j := 0
-	for _, v := range keys {
-		elLength := int64(math.Ceil(float64(len(v)) / 16.0))
-		lastLength := int64(len(v) % 16)
-		elementsLength := make([]byte, 1)
-		lastElementLength := make([]byte, 1)
-		binary.PutVarint(elementsLength, elLength)
-		binary.PutVarint(lastElementLength, lastLength)
-
-		// append lengths to v
-		v = append(lastElementLength, v...)
-		v = append(elementsLength, v...)
-
-		elements := make([]field.Element, 0)
-
-		// embed the key into field elements
-		chunkLength := 16
-		for i := 0; i < len(v); i += 16 {
-			end := i + chunkLength
-			if end > len(v) {
-				end = len(v)
-			}
-			e := new(field.Element).SetBytes(v[i:end])
-			//fmt.Println("from key:", v[i:end])
-			elements = append(elements, *e)
-		}
-
-		// pad to have a full block
-		for len(elements) < 40 {
-			elements = append(elements, field.Zero())
-		}
-
-		// store in db
-		db.Entries[j] = elements
-		j++
-		break
-	}
-
-	return db, nil
-}*/
 
 func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 	var err error
