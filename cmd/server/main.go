@@ -38,7 +38,10 @@ func main() {
 	addr := addresses[*sid]
 
 	// generate db
-	db := database.GenerateKeyDB("../../data/random_id_key.csv")
+	db, err := database.GenerateKeyDB("../../data/random_id_key.csv")
+	if err != nil {
+		log.Fatalf("could not generate keys db: %v", err)
+	}
 
 	// run server with TLS
 	cfg := &tls.Config{
@@ -51,7 +54,7 @@ func main() {
 	}
 	rpcServer := grpc.NewServer()
 	vpirServer := &vpirServer{
-		Server: server.NewITServer(db.CreateAsciiVector()),
+		Server: server.NewDPF(db),
 		DBInfo: db.Info,
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
