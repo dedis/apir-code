@@ -122,11 +122,12 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	}
 }
 
-func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int) {
+func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
 	c := client.NewITClient(rnd, db.Info)
 	s0 := server.NewITServer(db)
 	s1 := server.NewITServer(db)
 
+	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
 		queries := c.Query(i, 2)
 
@@ -139,59 +140,57 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int)
 		require.NoError(t, err)
 		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
 	}
+	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
+}
+
+func getXof(t *testing.T, key string) io.Reader {
+	xof, err := blake2b.NewXOF(0, []byte(key))
+	require.NoError(t, err)
+	return xof
 }
 
 func TestMultiBitVectorOneKb(t *testing.T) {
 	dbLen := oneKB
 	blockLen := constants.BlockLength
-	elemSize := 128
+	elemSize := field.Bits
 	nRows := 1
 	nCols := dbLen / (elemSize * blockLen * nRows)
-	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
-	require.NoError(t, err)
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+
 	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	totalTimer := monitor.NewMonitor()
-	retrieveBlocks(t, xof, db, nRows*nCols)
-	fmt.Printf("Total time MultiBitVectorOneKb: %.2fms\n", totalTimer.Record())
+	retrieveBlocks(t, xof, db, nRows*nCols,"MultiBitVectorOneKb")
 }
 
 func TestSingleBitVectorOneKb(t *testing.T) {
 	dbLen := oneKB
 	nRows := 1
 	nCols := dbLen
-	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
-	require.NoError(t, err)
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+
 	db := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
 
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	totalTimer := monitor.NewMonitor()
-	retrieveBlocks(t, xof, db, nRows*nCols)
-	fmt.Printf("Total time SingleBitVectorOneKb: %.2fms\n", totalTimer.Record())
+	retrieveBlocks(t, xof, db, nRows*nCols, "SingleBitVectorOneKb")
 }
 
 func TestMultiBitMatrixOneKb(t *testing.T) {
 	dbLen := oneKB
 	blockLen := constants.BlockLength
-	elemSize := 128
+	elemSize := field.Bits
 	numBlocks := dbLen / (elemSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
-	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
-	require.NoError(t, err)
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+
 	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	totalTimer := monitor.NewMonitor()
-	retrieveBlocks(t, xof, db, numBlocks)
-	fmt.Printf("Total time MultiBitMatrixOneKb: %.2fms\n", totalTimer.Record())
+	retrieveBlocks(t, xof, db, numBlocks, "MultiBitMatrixOneKb")
 }
 
 func TestSingleBitMatrixOneKb(t *testing.T) {
@@ -199,16 +198,13 @@ func TestSingleBitMatrixOneKb(t *testing.T) {
 	numBlocks := dbLen
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
-	xofDB, err := blake2b.NewXOF(0, []byte("db key"))
-	require.NoError(t, err)
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+
 	db := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
 
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	totalTimer := monitor.NewMonitor()
-	retrieveBlocks(t, xof, db, numBlocks)
-	fmt.Printf("Total time SingleBitMatrixOneKb: %.2fms\n", totalTimer.Record())
+	retrieveBlocks(t, xof, db, numBlocks, "SingleBitMatrixOneKb")
 }
 
 /*func TestMatrixOneKbByte(t *testing.T) {
