@@ -1,14 +1,18 @@
 package client
 
+import "github.com/si-co/vpir-code/lib/field"
+
 // Client represents the client instance in both the IT and C models
 type Client interface {
 	Query()
 	Reconstruct()
 }
 
-// General containts the elements needed by the clients of all schemes
-type General struct {
-	DBLength int
+type itState struct {
+	ix    int
+	iy    int
+	alpha field.Element
+	a     []field.Element
 }
 
 // return true if the query inputs are invalid

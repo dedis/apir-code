@@ -280,29 +280,23 @@ func TestVectorByte(t *testing.T) {
 	fmt.Printf("Total time VectorByte: %.1fms\n", totalTimer.Record())
 }*/
 
-func TestDPFMulti(t *testing.T) {
-	dbLen := oneMB
+func TestDPFMultiVector(t *testing.T) {
+	dbLen := oneKB
 	blockLen := constants.BlockLength
-	elemSize := field.Bits
+	elemSize := 128
 	numBlocks := dbLen / (elemSize * blockLen)
-	nCols := int(math.Sqrt(float64(numBlocks)))
-	nRows := nCols
+	nRows := 1
 
 	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
 	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
-
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	totalTimer := monitor.NewMonitor()
 
 	c := client.NewDPF(xof, db.Info)
 	s0 := server.NewDPF(db)
 	s1 := server.NewDPF(db)
 
-	fieldElements := 128 * 8
-
-	for i := 0; i < fieldElements/16; i++ {
+	totalTimer := monitor.NewMonitor()
+	for i := 0; i < numBlocks; i++ {
 		fssKeys := c.Query(i, 2)
 
 		a0 := s0.Answer(fssKeys[0], 0)
@@ -312,10 +306,10 @@ func TestDPFMulti(t *testing.T) {
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.ElementsMatch(t, db.Entries[i], res)
+		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
 	}
 
-	fmt.Printf("Total time dpf-based MultiBitOneKb: %.1fms\n", totalTimer.Record())
+	fmt.Printf("Total time dpf-based MultiBitVectorOneKb: %.1fms\n", totalTimer.Record())
 }
 
 /*

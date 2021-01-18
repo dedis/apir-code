@@ -2,12 +2,10 @@ package client
 
 import (
 	"errors"
+	"github.com/si-co/vpir-code/lib/database"
 	"io"
 	"math/bits"
 
-	"github.com/si-co/vpir-code/lib/database"
-
-	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/dpf"
 	"github.com/si-co/vpir-code/lib/field"
@@ -17,13 +15,7 @@ import (
 type DPF struct {
 	rnd    io.Reader
 	dbInfo database.Info
-	state  *dpfState
-}
-
-type dpfState struct {
-	i     int
-	alpha field.Element
-	a     []field.Element
+	state  *itState
 }
 
 func NewDPF(rnd io.Reader, info database.Info) *DPF {
@@ -35,7 +27,7 @@ func NewDPF(rnd io.Reader, info database.Info) *DPF {
 }
 
 func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
-	if index < 0 || index > cst.DBLength {
+	if index < 0 {
 		panic("query index out of bound")
 	}
 	if numServers < 1 {
@@ -60,11 +52,21 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 		a[0] = *alpha
 	}
 
+	// Compute the position in the db (vector or matrix)
+	ix := index % c.dbInfo.NumColumns
+	// if db is a vector, iy always equals 0
+	iy := index / c.dbInfo.NumColumns
 	// set ITClient state
-	c.state = &dpfState{i: index, alpha: *alpha, a: a[1:]}
+	// set state
+	c.state = &itState{
+		ix:    ix,
+		iy:    iy,
+		alpha: *alpha,
+		a:     a[1:],
+	}
 
 	// client initialization is the same for both single- and multi-bit scheme
-	key0, key1 := dpf.Gen(uint64(index), a, uint64(bits.Len(uint(constants.DBLength))))
+	key0, key1 := dpf.Gen(uint64(ix), a, uint64(bits.Len(uint(c.dbInfo.NumColumns))))
 
 	return []dpf.DPFkey{key0, key1}
 }
@@ -81,7 +83,7 @@ func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) 
 			}
 		}
 		for i := 0; i < c.dbInfo.NumRows; i++ {
-			if i == c.state.i {
+			if i == c.state.iy {
 				switch {
 				case sum[i][0].Equal(&c.state.alpha):
 					return []field.Element{cst.One}, nil
@@ -123,5 +125,5 @@ func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) 
 		}
 	}
 
-	return sum[c.state.i][:len(sum[c.state.i])-1], nil
+	return sum[c.state.iy][:len(sum[c.state.iy])-1], nil
 }

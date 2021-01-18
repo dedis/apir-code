@@ -22,13 +22,6 @@ type ITClient struct {
 	state  *itState
 }
 
-type itState struct {
-	ix    int
-	iy    int
-	alpha field.Element
-	a     []field.Element
-}
-
 // NewITClient returns a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
