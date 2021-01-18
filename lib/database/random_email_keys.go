@@ -8,7 +8,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateRandomDB(path string) (*DB, error) {
+func GenerateKeyDB(path string) (*DB, error) {
 	// maximum numer of bytes embedded in a field elements
 	chunkLength := constants.ChunkBytesLength
 
