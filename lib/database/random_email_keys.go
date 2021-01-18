@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -37,9 +38,9 @@ func GenerateKeyDB(path string) (*DB, error) {
 	maxBytes := utils.MaxBytesLength(hashTable)
 
 	// compute field elements necessary to encode the maximum length
-	numColumns := int(math.Ceil(float64(maxBytes) / float64(chunkLength) *
-		float64(blockLength)))
+	numColumns := int(math.Ceil(float64(maxBytes) / (float64(chunkLength) * float64(blockLength))))
 
+	fmt.Println("numRows:", numRows, "numColumns:", numColumns, "blockLength:", blockLength)
 	// create all zeros db
 	db := CreateZeroMultiBitDB(numRows, numColumns, blockLength)
 
@@ -70,6 +71,8 @@ func GenerateKeyDB(path string) (*DB, error) {
 				}
 			}
 		}
+
+		fmt.Println("j:", j)
 
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
