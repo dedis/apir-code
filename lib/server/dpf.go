@@ -15,7 +15,8 @@ func NewDPF(db *database.DB) *DPF {
 }
 
 type DPF struct {
-	db *database.DB
+	db        *database.DB
+	serverNum byte
 }
 
 func (s *DPF) Answer(q dpf.DPFkey, serverNum byte) [][]field.Element {
