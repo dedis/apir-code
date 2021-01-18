@@ -19,6 +19,9 @@ type Info struct {
 	NumRows    int
 	NumColumns int
 	BlockSize  int
+	// embedding info
+	IDLength  int
+	KeyLength int
 }
 
 type Bytes struct {

@@ -31,8 +31,11 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	path := "data/random_id_key.csv"
 
 	// generate db from data
-	db, idLength, keyLength, err := database.GenerateRandomDB(path)
+	db, err := database.GenerateKeyDB(path)
 	require.NoError(t, err)
+
+	idLength := db.IDLength
+	keyLength := db.KeyLength
 
 	var key1 utils.PRGKey
 	copy(key1[:], []byte("my key"))

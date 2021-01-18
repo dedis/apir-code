@@ -8,14 +8,14 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateRandomDB(path string) (*DB, int, int, error) {
+func GenerateKeyDB(path string) (*DB, error) {
 	// maximum numer of bytes embedded in a field elements
 	chunkLength := constants.ChunkBytesLength
 
 	// parse id->key file
 	pairs, err := utils.ParseCSVRandomIDKeys(path)
 	if err != nil {
-		return nil, 0, 0, err
+		return nil, err
 	}
 
 	// analyze keys
@@ -30,7 +30,7 @@ func GenerateRandomDB(path string) (*DB, int, int, error) {
 	// generate hash table
 	hashTable, err := generateHashTable(pairs, numRows, idLength)
 	if err != nil {
-		return nil, 0, 0, err
+		return nil, err
 	}
 
 	// get maximal []byte length in hashTable
@@ -42,6 +42,10 @@ func GenerateRandomDB(path string) (*DB, int, int, error) {
 
 	// create all zeros db
 	db := CreateZeroMultiBitDB(numRows, numColumns, blockLength)
+
+	// add embedding informations to db
+	db.IDLength = idLength
+	db.KeyLength = keyLength
 
 	// embed data into field elements
 	for id, v := range hashTable {
@@ -72,7 +76,7 @@ func GenerateRandomDB(path string) (*DB, int, int, error) {
 		copy(db.Entries[id][j], elements)
 	}
 
-	return db, idLength, keyLength, nil
+	return db, nil
 }
 
 func generateHashTable(pairs map[string][]byte, numRows, idLength int) (map[int][]byte, error) {
