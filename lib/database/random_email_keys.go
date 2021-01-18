@@ -15,13 +15,16 @@ func GenerateRandomDB(path string) (*DB, int, int, int, error) {
 		return nil, 0, 0, 0, err
 	}
 
-	// analyze pairs
+	// analyze keys
 	idLength, keyLength := utils.AnalyzeIDKeys(pairs)
-	idLength = 45 // TODO: should this be a constant?
+	idLength = constants.IDLengthBytes
 	entryLength := idLength + keyLength
 
+	// TODO: numRows should be picked algorithmically
+	numRows := constants.DBLength
+
 	// generate hash table
-	hashTable, err := generateHashTable(pairs, idLength)
+	hashTable, err := generateHashTable(pairs, numRows, idLength)
 	if err != nil {
 		return nil, 0, 0, 0, err
 	}
@@ -61,17 +64,17 @@ func GenerateRandomDB(path string) (*DB, int, int, int, error) {
 	return db, idLength, keyLength, blockLength, nil
 }
 
-func generateHashTable(pairs map[string][]byte, maxIDLength int) (map[int][]byte, error) {
+func generateHashTable(pairs map[string][]byte, numRows, idLength int) (map[int][]byte, error) {
 
 	// prepare db
 	db := make(map[int][]byte)
 
 	// range over all id,key pairs and assign every pair to a given bucket
 	for id, k := range pairs {
-		hashKey := utils.HashToIndex(id, constants.DBLength)
+		hashKey := utils.HashToIndex(id, numRows)
 
 		// prepare entry
-		idBytes := make([]byte, maxIDLength)
+		idBytes := make([]byte, idLength)
 		copy(idBytes, id)
 		entry := append(idBytes, k...)
 
