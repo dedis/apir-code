@@ -88,10 +88,11 @@ type vpirServer struct {
 
 func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
 	*proto.DatabaseInfoResponse, error) {
+	dbInfo := s.Server.DBInfo()
 	resp := &proto.DatabaseInfoResponse{
-		NumRows:     uint32(s.Server.db.NumRows),
-		NumColumns:  uint32(s.Server.db.NumColumns),
-		BlockLength: uint32(s.dbInfo.BlockSize),
+		NumRows:     uint32(dbInfo.NumRows),
+		NumColumns:  uint32(dbInfo.NumColumns),
+		BlockLength: uint32(dbInfo.BlockSize),
 	}
 
 	return resp, nil
@@ -100,6 +101,9 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
 
-	a := s.AnswerBytes(qr.GetQuery())
-	return &proto.Response{Answer: a.String()}, nil
+	a, err := s.Server.AnswerBytes(qr.GetQuery())
+	if err != nil {
+		return nil, err
+	}
+	return &proto.QueryResponse{Answer: a}, nil
 }
