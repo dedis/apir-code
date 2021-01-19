@@ -298,7 +298,7 @@ func ZeroVector(length int) []Element {
 // strips the initial zero from each byte.
 func VectorToBytes(in []Element) []byte {
 	// TODO: preallocate array for efficiency
-	out := make([]byte, 0)
+	out := make([]byte, 0, len(in)*(Bytes-1))
 	for _, e := range in {
 		fieldBytes := e.Bytes()
 		// strip first zero
