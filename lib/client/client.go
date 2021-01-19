@@ -2,20 +2,25 @@ package client
 
 import "github.com/si-co/vpir-code/lib/field"
 
-// Client represents the client instance in both the IT and C models
+// Client represents the client instance in both the IT and DPF-based schemes
 type Client interface {
-	Query()
-	Reconstruct()
+	QueryBytes([]byte) ([]byte, error)
+	ReconstructBytes([]byte) ([]byte, error)
 }
 
-type itState struct {
+type state struct {
 	ix    int
 	iy    int
 	alpha field.Element
 	a     []field.Element
 }
 
-// return true if the query inputs are invalid
-func invalidQueryInputs(index, numServers int) bool {
-	return index < 0 && numServers < 1
+// return true if the query inputs are invalid for IT schemes
+func invalidQueryInputsIT(index, numServers int) bool {
+	return index < 0 && numServers < 2
+}
+
+// return true if the query inputs are invalid for DPF-based schemes
+func invalidQueryInputsDPF(index, numServers int) bool {
+	return index < 0 && numServers != 2
 }

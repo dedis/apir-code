@@ -1,10 +1,14 @@
 package client
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
-	"github.com/si-co/vpir-code/lib/database"
 	"io"
+	"log"
 	"math/bits"
+
+	"github.com/si-co/vpir-code/lib/database"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/dpf"
@@ -15,7 +19,7 @@ import (
 type DPF struct {
 	rnd    io.Reader
 	dbInfo database.Info
-	state  *itState
+	state  *state
 }
 
 func NewDPF(rnd io.Reader, info database.Info) *DPF {
@@ -26,15 +30,13 @@ func NewDPF(rnd io.Reader, info database.Info) *DPF {
 	}
 }
 
+func (c *DPF) QueryBytes([]byte) ([]byte, error) {
+	return nil, nil
+}
+
 func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
-	if index < 0 {
-		panic("query index out of bound")
-	}
-	if numServers < 1 {
-		panic("need at least 1 server")
-	}
-	if numServers != 2 {
-		panic("DPF implementation only works with 2 servers")
+	if invalidQueryInputsDPF(index, numServers) {
+		log.Fatal("invalid query inputs")
 	}
 
 	// sample random alpha
@@ -58,7 +60,7 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	iy := index / c.dbInfo.NumColumns
 	// set ITClient state
 	// set state
-	c.state = &itState{
+	c.state = &state{
 		ix:    ix,
 		iy:    iy,
 		alpha: *alpha,
@@ -69,6 +71,31 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	key0, key1 := dpf.Gen(uint64(ix), a, uint64(bits.Len(uint(c.dbInfo.NumColumns))))
 
 	return []dpf.DPFkey{key0, key1}
+}
+
+func (c *DPF) ReconstructBytes([]byte) ([]byte, error) {
+	// decode answer
+	var buf bytes.Buffer
+	dec := gob.NewDecoder(&buf)
+	var answer [][][]field.Element
+	if err := dec.Decode(&answer); err != nil {
+		return nil, err
+	}
+
+	// get reconstruction
+	r, err := c.Reconstruct(answer)
+	if err != nil {
+		return nil, err
+	}
+
+	// encode reconstruction
+	buf.Reset()
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(r); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {

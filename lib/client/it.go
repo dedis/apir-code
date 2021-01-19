@@ -19,7 +19,7 @@ import (
 type ITClient struct {
 	rnd    io.Reader
 	dbInfo database.Info
-	state  *itState
+	state  *state
 }
 
 // NewITClient returns a client for the information theoretic multi-bit
@@ -37,7 +37,7 @@ func NewITClient(rnd io.Reader, info database.Info) *ITClient {
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
 func (c *ITClient) Query(index, numServers int) [][][]field.Element {
-	if invalidQueryInputs(index, numServers) {
+	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
 	var alpha field.Element
@@ -55,7 +55,7 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 	// if db is a vector, iy always equals 0
 	iy := index / c.dbInfo.NumColumns
 	// set state
-	c.state = &itState{
+	c.state = &state{
 		ix:    ix,
 		iy:    iy,
 		alpha: alpha,
