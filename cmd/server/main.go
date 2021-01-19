@@ -54,7 +54,7 @@ func main() {
 	}
 	rpcServer := grpc.NewServer()
 	vpirServer := &vpirServer{
-		Server: server.NewDPF(db),
+		Server: server.NewDPF(db, byte(*sid)),
 		DBInfo: db.Info,
 	}
 	proto.RegisterVPIRServer(rpcServer, vpirServer)
@@ -75,9 +75,9 @@ type vpirServer struct {
 func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
 	*proto.DatabaseInfoResponse, error) {
 	resp := &proto.DatabaseInfoResponse{
-		NumRows:     s.dbInfo.NumRows,
-		NumColumns:  s.dbInfo.NumColumns,
-		BlockLength: s.dbInfo.BlockSize,
+		NumRows:     uint32(s.dbInfo.NumRows),
+		NumColumns:  uint32(s.dbInfo.NumColumns),
+		BlockLength: uint32(s.dbInfo.BlockSize),
 	}
 
 	return resp, nil
