@@ -4,7 +4,7 @@ run_server: $(PROTO_PB)
 	go run cmd/server/main.go -id=$(id) -scheme=$(scheme)
 
 run_client: $(PROTO_PB)
-	go run cmd/client/main.go
+	go run cmd/client/main.go -scheme=$(scheme)
 
 test: $(PROTO_PB)
 	go test

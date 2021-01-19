@@ -51,6 +51,7 @@ func main() {
 
 	// get db info
 	dbInfo := runDBInfoRequest(ctx, addresses)
+	fmt.Println(dbInfo)
 
 	// start correct client
 	var c client.Client
@@ -80,6 +81,16 @@ func main() {
 	// send queries to servers
 	answers := runQueries(ctx, addresses, queries)
 	fmt.Println(answers)
+}
+
+func connectToServer(addr string, sid int) proto.VPIRClient {
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	return proto.NewVPIRClient(conn)
 }
 
 func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
@@ -116,7 +127,7 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 }
 
 func dbInfo(ctx context.Context, address string) *database.Info {
-	conn, err := grpc.Dial(address, grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -167,7 +178,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 }
 
 func query(ctx context.Context, address string, query []byte) []byte {
-	conn, err := grpc.Dial(address, grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
