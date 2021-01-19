@@ -23,6 +23,10 @@ func NewDPF(db *database.DB, serverNum byte) *DPF {
 	}
 }
 
+func (s *DPF) DBInfo() *database.Info {
+	return &s.db.Info
+}
+
 func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query
 	buf := bytes.NewBuffer(q)

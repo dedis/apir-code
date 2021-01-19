@@ -25,6 +25,10 @@ func NewITServer(db *database.DB) *ITServer {
 	return &ITServer{db: db}
 }
 
+func (s *ITServer) DBInfo() *database.Info {
+	return &s.db.Info
+}
+
 // AnswerBytes decode the input, execute Answer and encodes the output
 func (s *ITServer) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query

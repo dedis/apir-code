@@ -6,9 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math/big"
 	"os"
 
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/utils"
 
@@ -20,6 +20,7 @@ import (
 func main() {
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
+	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
 	flag.Parse()
 
 	// set logs
@@ -38,7 +39,12 @@ func main() {
 	addr := addresses[*sid]
 
 	// generate db
-	db, err := database.GenerateKeyDB("../../data/random_id_key.csv")
+	// TODO: How do we choose dbLen (hence, nCols) ?
+	dbLen := 40 * 1024 * 8
+	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
+	nRows := 1
+	nCols := dbLen / (nRows * chunkLength)
+	db, err := database.GenerateKeyDB("../../data/random_id_key.csv", chunkLength, nRows, nCols)
 	if err != nil {
 		log.Fatalf("could not generate keys db: %v", err)
 	}
@@ -53,11 +59,20 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	rpcServer := grpc.NewServer()
-	vpirServer := &vpirServer{
-		Server: server.NewDPF(db, byte(*sid)),
-		DBInfo: db.Info,
+
+	// select correct server
+	var s server.Server
+	switch *schemePtr {
+	case "dpf":
+		s = server.NewDPF(db, byte(*sid))
+	case "it":
+		s = server.NewITServer(db)
+	default:
+		log.Fatal("undefined scheme type")
 	}
-	proto.RegisterVPIRServer(rpcServer, vpirServer)
+
+	// start server
+	proto.RegisterVPIRServer(rpcServer, &vpirServer{Server: s})
 	log.Printf("Server %d is listening at %s", *sid, addr)
 
 	if err := rpcServer.Serve(lis); err != nil {
@@ -68,33 +83,23 @@ func main() {
 // vpirServer is used to implement VPIR Server protocol.
 type vpirServer struct {
 	proto.UnimplementedVPIRServer
-	Server server.Server // TODO: create a general server
-	dbInfo database.Info
+	Server server.Server // both IT and DPF-based server
 }
 
 func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
 	*proto.DatabaseInfoResponse, error) {
 	resp := &proto.DatabaseInfoResponse{
-		NumRows:     uint32(s.dbInfo.NumRows),
-		NumColumns:  uint32(s.dbInfo.NumColumns),
+		NumRows:     uint32(s.Server.db.NumRows),
+		NumColumns:  uint32(s.Server.db.NumColumns),
 		BlockLength: uint32(s.dbInfo.BlockSize),
 	}
 
 	return resp, nil
 }
 
-func (s *vpirServer) Query(ctx context.Context, qr *proto.Request) (
-	*proto.Response, error) {
+func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
+	*proto.QueryResponse, error) {
 
-	query := make([]*big.Int, len(qr.Query))
-	for i, v := range qr.Query {
-		var ok bool
-		query[i], ok = big.NewInt(0).SetString(v, 10)
-		if !ok {
-			log.Fatalf("Could not convert string %v to big int", v)
-		}
-	}
-
-	a := s.Answer(query)
+	a := s.AnswerBytes(qr.GetQuery())
 	return &proto.Response{Answer: a.String()}, nil
 }
