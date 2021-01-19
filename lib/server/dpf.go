@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"encoding/gob"
 	"log"
 	"math/bits"
 
@@ -19,6 +21,28 @@ func NewDPF(db *database.DB, serverNum byte) *DPF {
 	return &DPF{db: db,
 		serverNum: serverNum,
 	}
+}
+
+func (s *DPF) AnswerBytes([]byte) ([]byte, error) {
+	// decode query
+	var buf bytes.Buffer
+	dec := gob.NewDecoder(&buf)
+	var query dpf.DPFkey
+	if err := dec.Decode(&query); err != nil {
+		return nil, err
+	}
+
+	// get answer
+	a := s.Answer(query)
+
+	// encode answer
+	buf.Reset()
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(a); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func (s *DPF) Answer(q dpf.DPFkey) [][]field.Element {

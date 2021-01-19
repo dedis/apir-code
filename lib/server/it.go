@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/gob"
-	"log"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
@@ -43,7 +42,7 @@ func (s *ITServer) AnswerBytes(q []byte) ([]byte, error) {
 	buf.Reset()
 	enc := gob.NewEncoder(&buf)
 	if err := enc.Encode(a); err != nil {
-		log.Fatal("encode error:", err)
+		return nil, err
 	}
 
 	return buf.Bytes(), nil
