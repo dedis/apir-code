@@ -10,7 +10,7 @@ import (
 // Client represents the client instance in both the IT and DPF-based schemes
 type Client interface {
 	QueryBytes(int, int) ([][]byte, error)
-	ReconstructBytes([]byte) ([]byte, error)
+	ReconstructBytes([]byte) ([]field.Element, error)
 }
 
 type state struct {

@@ -87,16 +87,13 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
-func (c *DPF) ReconstructBytes(a []byte) ([]byte, error) {
+func (c *DPF) ReconstructBytes(a []byte) ([]field.Element, error) {
 	answer, err := decodeAnswer(a)
 	if err != nil {
 		return nil, err
 	}
-	r, err := c.Reconstruct(answer)
-	if err != nil {
-		return nil, err
-	}
-	return encodeReconstruct(r)
+
+	return c.Reconstruct(answer)
 }
 
 func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {

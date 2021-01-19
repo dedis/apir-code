@@ -108,16 +108,13 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 	return vectors
 }
 
-func (c *ITClient) ReconstructBytes(a []byte) ([]byte, error) {
+func (c *ITClient) ReconstructBytes(a []byte) ([]field.Element, error) {
 	answer, err := decodeAnswer(a)
 	if err != nil {
 		return nil, err
 	}
-	r, err := c.Reconstruct(answer)
-	if err != nil {
-		return nil, err
-	}
-	return encodeReconstruct(r)
+
+	return c.Reconstruct(answer)
 }
 
 func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
