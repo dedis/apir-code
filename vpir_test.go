@@ -77,7 +77,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		expectedKey := record[1]
 
 		// compute hash key for id
-		hashKey := database.HashToIndex(expectedID, constants.DBLength)
+		hashKey := database.HashToIndex(expectedID, nCols*nRows)
 
 		// query given hash key
 		fssKeys := c.Query(hashKey, 2)
@@ -118,6 +118,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
 		}
 
+		fmt.Println(idKey[expectedID])
 		require.Equal(t, expectedKey, idKey[expectedID])
 		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 

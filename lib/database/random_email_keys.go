@@ -53,12 +53,12 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 		for i := 0; i < len(v); i += entryLength {
 			entry := v[i : i+entryLength]
 			// embed all bytes
-			for i := 0; i < len(entry); i += chunkLength {
-				end := i + chunkLength
+			for j := 0; j < len(entry); j += chunkLength {
+				end := j + chunkLength
 				if end > len(entry) {
 					end = len(entry)
 				}
-				e := new(field.Element).SetBytes(entry[i:end])
+				e := new(field.Element).SetBytes(entry[j:end])
 				elements = append(elements, *e)
 			}
 		}
@@ -70,19 +70,19 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 	return db, nil
 }
 
-func generateHashTable(pairs map[string][]byte, numMapKeys, idLength int) (map[int][]byte, error) {
+func generateHashTable(pairs map[string][]byte, maxNumHashKeys, idLength int) (map[int][]byte, error) {
 
 	// prepare db
 	db := make(map[int][]byte)
 
-	// range over all id,key pairs and assign every pair to a given bucket
-	for id, k := range pairs {
-		hashKey := HashToIndex(id, numMapKeys)
+	// range over all id,v pairs and assign every pair to a given bucket
+	for id, v := range pairs {
+		hashKey := HashToIndex(id, maxNumHashKeys)
 
 		// prepare entry
 		idBytes := make([]byte, idLength)
 		copy(idBytes, id)
-		entry := append(idBytes, k...)
+		entry := append(idBytes, v...)
 
 		if _, ok := db[hashKey]; !ok {
 			db[hashKey] = entry
