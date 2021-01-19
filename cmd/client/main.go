@@ -26,6 +26,7 @@ func main() {
 
 	// flags
 	idPtr := flag.String("id", "", "id for which key should be retrieved")
+	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
 	flag.Parse()
 
 	// configs
@@ -53,7 +54,15 @@ func main() {
 	dbInfo := runDBInfoRequest(ctx, addresses)
 
 	// start client and initialize top-level Context
-	c := client.NewDPF(prg, *dbInfo)
+	var c client.Client
+	switch *schemePtr {
+	case "dpf":
+		c = client.NewDPF(prg, *dbInfo)
+	case "it":
+		c = client.NewITClient(prg, *dbInfo)
+	default:
+		log.Fatal("undefined scheme type")
+	}
 	fmt.Println(c)
 
 	// get id and compute corresponding hash
