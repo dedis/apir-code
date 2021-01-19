@@ -26,15 +26,30 @@ const (
 	oneKB = 1024 * 8
 )
 
-func TestRetrieveRandomKeyBlock(t *testing.T) {
-	path := "data/random_id_key.csv"
+func TestRetrieveRandomKeyBlockVector(t *testing.T) {
+	// TODO: How do we choose dbLen (hence, nCols) ?
+	dbLen := 40 * oneKB
 	// maximum numer of bytes embedded in a field elements
 	chunkLength := constants.ChunkBytesLength
+	nRows := 1
+	nCols := dbLen / (nRows * chunkLength)
+	retrieveRandomKeyBlock(t, chunkLength, nRows, nCols)
+}
+
+func TestRetrieveRandomKeyBlockMatrix(t *testing.T) {
+	// TODO: How do we choose dbLen (hence, nCols) ?
+	dbLen := 40 * oneKB
+	// maximum numer of bytes embedded in a field elements
+	chunkLength := constants.ChunkBytesLength
+	nRows := int(math.Sqrt(float64(dbLen / chunkLength)))
+	nCols := nRows
+	retrieveRandomKeyBlock(t, chunkLength, nRows, nCols)
+}
+
+func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
+	path := "data/random_id_key.csv"
 
 	// generate db from data
-	nRows := 1
-	// TODO: How do we choose nCols?
-	nCols := constants.DBLength
 	db, err := database.GenerateKeyDB(path, chunkLength, nRows, nCols)
 	require.NoError(t, err)
 
@@ -118,7 +133,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
 		}
 
-		fmt.Println(idKey[expectedID])
+		//fmt.Println(idKey[expectedID])
 		require.Equal(t, expectedKey, idKey[expectedID])
 		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 
