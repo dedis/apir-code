@@ -10,16 +10,18 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 )
 
-func NewDPF(db *database.DB) *DPF {
-	return &DPF{db: db}
-}
-
 type DPF struct {
 	db        *database.DB
 	serverNum byte
 }
 
-func (s *DPF) Answer(q dpf.DPFkey, serverNum byte) [][]field.Element {
+func NewDPF(db *database.DB, serverNum byte) *DPF {
+	return &DPF{db: db,
+		serverNum: serverNum,
+	}
+}
+
+func (s *DPF) Answer(q dpf.DPFkey) [][]field.Element {
 	// Doing simplified scheme if block consists of a single bit
 	if s.db.BlockSize == cst.SingleBitBlockLength {
 		log.Fatal("Not implemented")

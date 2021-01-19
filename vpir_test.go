@@ -43,8 +43,8 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 
 	// client and servers
 	c := client.NewDPF(prg, db.Info)
-	s0 := server.NewDPF(db)
-	s1 := server.NewDPF(db)
+	s0 := server.NewDPF(db, 0)
+	s1 := server.NewDPF(db, 1)
 
 	// open id->key file
 	f, err := os.Open(path)
@@ -82,8 +82,8 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		fssKeys := c.Query(hashKey, 2)
 
 		// get servers answers
-		a0 := s0.Answer(fssKeys[0], 0)
-		a1 := s1.Answer(fssKeys[1], 1)
+		a0 := s0.Answer(fssKeys[0])
+		a1 := s1.Answer(fssKeys[1])
 		answers := [][][]field.Element{a0, a1}
 
 		// reconstruct block
@@ -313,15 +313,15 @@ func TestDPFMultiMatrix(t *testing.T) {
 
 func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
 	c := client.NewDPF(rnd, db.Info)
-	s0 := server.NewDPF(db)
-	s1 := server.NewDPF(db)
+	s0 := server.NewDPF(db, 0)
+	s1 := server.NewDPF(db, 1)
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
 		fssKeys := c.Query(i, 2)
 
-		a0 := s0.Answer(fssKeys[0], 0)
-		a1 := s1.Answer(fssKeys[1], 1)
+		a0 := s0.Answer(fssKeys[0])
+		a1 := s1.Answer(fssKeys[1])
 
 		answers := [][][]field.Element{a0, a1}
 
