@@ -72,9 +72,9 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 	}
 
 	// Compute the position in the db (vector or matrix)
-	ix := index % c.dbInfo.NumColumns
-	// if db is a vector, iy always equals 0
-	iy := index / c.dbInfo.NumColumns
+	// if db is a vector, ix always equals 0
+	ix := index / c.dbInfo.NumColumns
+	iy := index % c.dbInfo.NumColumns
 	// set state
 	c.state = &state{
 		ix:    ix,
@@ -132,7 +132,7 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 			}
 		}
 		for i := 0; i < c.dbInfo.NumRows; i++ {
-			if i == c.state.iy {
+			if i == c.state.ix {
 				switch {
 				case sum[i][0].Equal(&c.state.alpha):
 					return []field.Element{cst.One}, nil
@@ -174,7 +174,7 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 		}
 	}
 
-	return sum[c.state.iy][:len(sum[c.state.iy])-1], nil
+	return sum[c.state.ix][:len(sum[c.state.ix])-1], nil
 }
 
 // secretShare the vector a among numServers non-colluding servers
@@ -203,7 +203,7 @@ func (c *ITClient) secretShare(a []field.Element, numServers int) ([][][]field.E
 		eia[j] = field.ZeroVector(alen)
 
 		// set alpha at the index we want to retrieve
-		if j == c.state.ix {
+		if j == c.state.iy {
 			copy(eia[j], a)
 		}
 

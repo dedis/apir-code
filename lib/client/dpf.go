@@ -69,9 +69,9 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	}
 
 	// Compute the position in the db (vector or matrix)
-	ix := index % c.dbInfo.NumColumns
+	ix := index / c.dbInfo.NumColumns
 	// if db is a vector, iy always equals 0
-	iy := index / c.dbInfo.NumColumns
+	iy := index % c.dbInfo.NumColumns
 	// set ITClient state
 	// set state
 	c.state = &state{
@@ -82,7 +82,7 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	}
 
 	// client initialization is the same for both single- and multi-bit scheme
-	key0, key1 := dpf.Gen(uint64(ix), a, uint64(bits.Len(uint(c.dbInfo.NumColumns))))
+	key0, key1 := dpf.Gen(uint64(iy), a, uint64(bits.Len(uint(c.dbInfo.NumColumns))))
 
 	return []dpf.DPFkey{key0, key1}
 }
@@ -111,7 +111,7 @@ func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) 
 			}
 		}
 		for i := 0; i < c.dbInfo.NumRows; i++ {
-			if i == c.state.iy {
+			if i == c.state.ix {
 				switch {
 				case sum[i][0].Equal(&c.state.alpha):
 					return []field.Element{cst.One}, nil
@@ -153,5 +153,5 @@ func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) 
 		}
 	}
 
-	return sum[c.state.iy][:len(sum[c.state.iy])-1], nil
+	return sum[c.state.ix][:len(sum[c.state.ix])-1], nil
 }
