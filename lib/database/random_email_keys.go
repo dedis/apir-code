@@ -2,8 +2,8 @@ package database
 
 import (
 	"encoding/binary"
-	"fmt"
 	"golang.org/x/crypto/blake2b"
+	"log"
 	"math"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -38,7 +38,7 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 	// all the other HT values will be padded to the blockLen size
 	blockLen := int(math.Ceil(float64(maxBytes) / float64(chunkLength)))
 
-	fmt.Println("numRows:", numRows, "numColumns:", numColumns, "blockLen:", blockLen)
+	log.Printf("numRows: %d, numColumns: %d, blockLen: %d\n", numRows, numColumns, blockLen)
 	// create all zeros db
 	db := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
 
