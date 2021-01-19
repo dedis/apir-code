@@ -31,7 +31,25 @@ func NewDPF(rnd io.Reader, info database.Info) *DPF {
 }
 
 func (c *DPF) QueryBytes([]byte) ([]byte, error) {
-	return nil, nil
+	// decode answer
+	var buf bytes.Buffer
+	dec := gob.NewDecoder(&buf)
+	var qi queryInputs
+	if err := dec.Decode(&qi); err != nil {
+		return nil, err
+	}
+
+	// get reconstruction
+	q := c.Query(qi.index, qi.numServers)
+
+	// encode reconstruction
+	buf.Reset()
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(q); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func (c *DPF) Query(index, numServers int) []dpf.DPFkey {

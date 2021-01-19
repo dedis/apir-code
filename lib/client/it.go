@@ -1,6 +1,8 @@
 package client
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
 	"io"
 	"log"
@@ -31,6 +33,28 @@ func NewITClient(rnd io.Reader, info database.Info) *ITClient {
 		dbInfo: info,
 		state:  nil,
 	}
+}
+
+func (c *ITClient) QueryBytes([]byte) ([]byte, error) {
+	// decode answer
+	var buf bytes.Buffer
+	dec := gob.NewDecoder(&buf)
+	var qi queryInputs
+	if err := dec.Decode(&qi); err != nil {
+		return nil, err
+	}
+
+	// get reconstruction
+	q := c.Query(qi.index, qi.numServers)
+
+	// encode reconstruction
+	buf.Reset()
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(q); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 // Query performs a client query for the given database index to numServers

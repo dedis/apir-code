@@ -15,6 +15,11 @@ type state struct {
 	a     []field.Element
 }
 
+type queryInputs struct {
+	index      int
+	numServers int
+}
+
 // return true if the query inputs are invalid for IT schemes
 func invalidQueryInputsIT(index, numServers int) bool {
 	return index < 0 && numServers < 2
