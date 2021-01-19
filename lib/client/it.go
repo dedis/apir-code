@@ -61,50 +61,15 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
-	var alpha field.Element
-	var a []field.Element
-	var vectors [][][]field.Element
 	var err error
-
-	// sample random alpha using blake2b
-	if _, err = alpha.SetRandom(c.rnd); err != nil {
-		log.Fatal(err)
-	}
-
-	// Compute the position in the db (vector or matrix)
-	// if db is a vector, ix always equals 0
-	ix := index / c.dbInfo.NumColumns
-	iy := index % c.dbInfo.NumColumns
-	// set state
-	c.state = &state{
-		ix:    ix,
-		iy:    iy,
-		alpha: alpha,
-	}
-
-	if c.dbInfo.BlockSize != cst.SingleBitBlockLength {
-		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
-		// multi-bit scheme
-		// Temporarily +1 to BlockSize for recovering true value
-		a = make([]field.Element, c.dbInfo.BlockSize+1)
-		a[0] = field.One()
-		a[1] = alpha
-		for i := 2; i < len(a); i++ {
-			a[i].Mul(&a[i-1], &alpha)
-		}
-		c.state.a = a[1:]
-	} else {
-		// the single-bit scheme needs a single alpha
-		a = make([]field.Element, 1)
-		a[0] = alpha
-		c.state.a = a
-	}
-
-	vectors, err = c.secretShare(a, numServers)
+	c.state, err = generateClientState(index, c.rnd, &c.dbInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	vectors, err := c.secretShare(numServers)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return vectors
 }
 
@@ -163,7 +128,7 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 		// compute reconstructed tag
 		reconstructedTag := field.Zero()
 		for b := 0; b < len(messages); b++ {
-			prod.Mul(&c.state.a[b], &messages[b])
+			prod.Mul(&c.state.a[b+1], &messages[b])
 			reconstructedTag.Add(&reconstructedTag, &prod)
 		}
 		if !tag.Equal(&reconstructedTag) {
@@ -175,9 +140,9 @@ func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, er
 }
 
 // secretShare the vector a among numServers non-colluding servers
-func (c *ITClient) secretShare(a []field.Element, numServers int) ([][][]field.Element, error) {
+func (c *ITClient) secretShare(numServers int) ([][][]field.Element, error) {
 	// get block length
-	alen := len(a)
+	alen := len(c.state.a)
 
 	// create query vectors for all the servers F^(1+b)
 	vectors := make([][][]field.Element, numServers)
@@ -201,7 +166,7 @@ func (c *ITClient) secretShare(a []field.Element, numServers int) ([][][]field.E
 
 		// set alpha at the index we want to retrieve
 		if j == c.state.iy {
-			copy(eia[j], a)
+			copy(eia[j], c.state.a)
 		}
 
 		// Assign k - 1 random vectors of length dbLength containing

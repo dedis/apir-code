@@ -52,37 +52,13 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
-
-	// sample random alpha
-	alpha, err := new(field.Element).SetRandom(c.rnd)
+	var err error
+	c.state, err = generateClientState(index, c.rnd, &c.dbInfo)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	var a []field.Element
-	if c.dbInfo.BlockSize != cst.SingleBitBlockLength {
-		a = field.PowerVectorWithOne(*alpha, c.dbInfo.BlockSize)
-	} else {
-		// the single-bit scheme needs a single alpha
-		a = make([]field.Element, 1)
-		a[0] = *alpha
-	}
-
-	// Compute the position in the db (vector or matrix)
-	ix := index / c.dbInfo.NumColumns
-	// if db is a vector, iy always equals 0
-	iy := index % c.dbInfo.NumColumns
-	// set ITClient state
-	// set state
-	c.state = &state{
-		ix:    ix,
-		iy:    iy,
-		alpha: *alpha,
-		a:     a[1:],
-	}
-
 	// client initialization is the same for both single- and multi-bit scheme
-	key0, key1 := dpf.Gen(uint64(iy), a, uint64(bits.Len(uint(c.dbInfo.NumColumns))))
+	key0, key1 := dpf.Gen(uint64(c.state.iy), c.state.a, uint64(bits.Len(uint(c.dbInfo.NumColumns))))
 
 	return []dpf.DPFkey{key0, key1}
 }
@@ -142,7 +118,7 @@ func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) 
 		// compute reconstructed tag
 		reconstructedTag := field.Zero()
 		for b := 0; b < len(messages); b++ {
-			prod.Mul(&c.state.a[b], &messages[b])
+			prod.Mul(&c.state.a[b+1], &messages[b])
 			reconstructedTag.Add(&reconstructedTag, &prod)
 		}
 		if !tag.Equal(&reconstructedTag) {
