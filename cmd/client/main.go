@@ -53,7 +53,7 @@ func main() {
 	// get db info
 	dbInfo := runDBInfoRequest(ctx, addresses)
 
-	// start client and initialize top-level Context
+	// start correct client
 	var c client.Client
 	switch *schemePtr {
 	case "dpf":
@@ -73,7 +73,12 @@ func main() {
 	idHash := utils.HashToIndex(id, dbInfo.NumRows)
 
 	// query for given idHash
-	fmt.Println(idHash)
+	queries, err := c.QueryBytes(idHash, len(addresses))
+	if err != nil {
+		log.Fatal("error when executing query")
+	}
+
+	// send queries to servers
 }
 
 func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
@@ -132,7 +137,7 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 	return dbInfo
 }
 
-func runQueries(ctx context.Context, queries [][]*big.Int, addrs []string) []*big.Int {
+func runQueries(ctx context.Context, addrs []string, queries [][]byte) []*big.Int {
 	if len(addrs) != len(queries) {
 		log.Fatal("Queries and server addresses length mismatch")
 	}
@@ -155,7 +160,7 @@ func runQueries(ctx context.Context, queries [][]*big.Int, addrs []string) []*bi
 	return aggregateResults(resCh)
 }
 
-func query(ctx context.Context, address string, query []*big.Int) *big.Int {
+func query(ctx context.Context, address string, query []byte) *big.Int {
 	conn, err := grpc.Dial(address, grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)

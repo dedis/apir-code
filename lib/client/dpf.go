@@ -30,21 +30,22 @@ func NewDPF(rnd io.Reader, info database.Info) *DPF {
 	}
 }
 
-func (c *DPF) QueryBytes(qi []byte) ([]byte, error) {
-	queryInputs, err := decodeQueryInputs(qi)
-	if err != nil {
-		return nil, err
-	}
-	q := c.Query(queryInputs.index, queryInputs.numServers)
+func (c *DPF) QueryBytes(index, numServers int) ([][]byte, error) {
+	queries := c.Query(index, numServers)
 
-	// encode query
+	// encode all the queries in bytes
+	out := make([][]byte, len(queries))
 	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(q); err != nil {
-		return nil, err
+	for i, q := range queries {
+		buf.Reset()
+		enc := gob.NewEncoder(&buf)
+		if err := enc.Encode(q); err != nil {
+			return nil, err
+		}
+		out[i] = buf.Bytes()
 	}
 
-	return buf.Bytes(), nil
+	return out, nil
 }
 
 func (c *DPF) Query(index, numServers int) []dpf.DPFkey {

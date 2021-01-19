@@ -35,23 +35,23 @@ func NewITClient(rnd io.Reader, info database.Info) *ITClient {
 	}
 }
 
-func (c *ITClient) QueryBytes(qi []byte) ([]byte, error) {
-	queryInputs, err := decodeQueryInputs(qi)
-	if err != nil {
-		return nil, err
-	}
-
+func (c *ITClient) QueryBytes(index, numServers int) ([][]byte, error) {
 	// get reconstruction
-	q := c.Query(queryInputs.index, queryInputs.numServers)
+	queries := c.Query(index, numServers)
 
-	// encode reconstruction
+	// encode all the queries in bytes
+	out := make([][]byte, len(queries))
 	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(q); err != nil {
-		return nil, err
+	for i, q := range queries {
+		buf.Reset()
+		enc := gob.NewEncoder(&buf)
+		if err := enc.Encode(q); err != nil {
+			return nil, err
+		}
+		out[i] = buf.Bytes()
 	}
 
-	return buf.Bytes(), nil
+	return out, nil
 }
 
 // Query performs a client query for the given database index to numServers

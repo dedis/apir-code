@@ -9,7 +9,7 @@ import (
 
 // Client represents the client instance in both the IT and DPF-based schemes
 type Client interface {
-	QueryBytes([]byte) ([]byte, error)
+	QueryBytes(int, int) ([][]byte, error)
 	ReconstructBytes([]byte) ([]byte, error)
 }
 
@@ -20,23 +20,7 @@ type state struct {
 	a     []field.Element
 }
 
-type queryInputs struct {
-	index      int
-	numServers int
-}
-
 // general functions for both IT and DPF-based clients
-func decodeQueryInputs(qi []byte) (*queryInputs, error) {
-	buf := bytes.NewBuffer(qi)
-	dec := gob.NewDecoder(buf)
-	var queryInputs queryInputs
-	if err := dec.Decode(&queryInputs); err != nil {
-		return nil, err
-	}
-
-	return &queryInputs, nil
-}
-
 func decodeAnswer(a []byte) ([][][]field.Element, error) {
 	// decode answer
 	buf := bytes.NewBuffer(a)
