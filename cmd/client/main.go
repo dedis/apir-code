@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/big"
 	"os"
 	"sync"
 	"time"
@@ -70,7 +69,7 @@ func main() {
 	if id == "" {
 		log.Fatal("id not provided")
 	}
-	idHash := utils.HashToIndex(id, dbInfo.NumRows)
+	idHash := database.HashToIndex(id, dbInfo.NumRows)
 
 	// query for given idHash
 	queries, err := c.QueryBytes(idHash, len(addresses))
@@ -79,6 +78,8 @@ func main() {
 	}
 
 	// send queries to servers
+	answers := runQueries(ctx, addresses, queries)
+	fmt.Println(answers)
 }
 
 func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
@@ -137,7 +138,7 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 	return dbInfo
 }
 
-func runQueries(ctx context.Context, addrs []string, queries [][]byte) []*big.Int {
+func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte {
 	if len(addrs) != len(queries) {
 		log.Fatal("Queries and server addresses length mismatch")
 	}
@@ -146,7 +147,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) []*big.In
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan *big.Int, len(queries))
+	resCh := make(chan []byte, len(queries))
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
@@ -157,10 +158,15 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) []*big.In
 	wg.Wait()
 	close(resCh)
 
-	return aggregateResults(resCh)
+	// combinate answes of all the servers
+	q := make([][]byte, 0, len(addrs))
+	for v := range resCh {
+		q = append(q, v)
+	}
+	return q
 }
 
-func query(ctx context.Context, address string, query []byte) *big.Int {
+func query(ctx context.Context, address string, query []byte) []byte {
 	conn, err := grpc.Dial(address, grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -168,32 +174,11 @@ func query(ctx context.Context, address string, query []byte) *big.Int {
 	defer conn.Close()
 
 	c := proto.NewVPIRClient(conn)
-	q := &proto.Request{Query: convertToString(query)}
+	q := &proto.QueryRequest{Query: query}
 	answer, err := c.Query(ctx, q)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)
 	}
 
-	num, ok := big.NewInt(0).SetString(answer.GetAnswer(), 10)
-	if !ok {
-		log.Fatal("Could not convert answer to big int")
-	}
-
-	return num
-}
-
-func convertToString(query []*big.Int) []string {
-	q := make([]string, len(query))
-	for i, v := range query {
-		q[i] = v.String()
-	}
-	return q
-}
-
-func aggregateResults(ch <-chan *big.Int) []*big.Int {
-	q := make([]*big.Int, 0)
-	for v := range ch {
-		q = append(q, v)
-	}
-	return q
+	return answer.GetAnswer()
 }
