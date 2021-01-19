@@ -30,10 +30,10 @@ func NewDPF(rnd io.Reader, info database.Info) *DPF {
 	}
 }
 
-func (c *DPF) QueryBytes([]byte) ([]byte, error) {
+func (c *DPF) QueryBytes(qi []byte) ([]byte, error) {
 	// decode answer
-	var buf bytes.Buffer
-	dec := gob.NewDecoder(&buf)
+	buf := bytes.NewBuffer(qi)
+	dec := gob.NewDecoder(buf)
 	var qi queryInputs
 	if err := dec.Decode(&qi); err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (c *DPF) QueryBytes([]byte) ([]byte, error) {
 
 	// encode reconstruction
 	buf.Reset()
-	enc := gob.NewEncoder(&buf)
+	enc := gob.NewEncoder(buf)
 	if err := enc.Encode(q); err != nil {
 		return nil, err
 	}
@@ -91,29 +91,8 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
-func (c *DPF) ReconstructBytes([]byte) ([]byte, error) {
-	// decode answer
-	var buf bytes.Buffer
-	dec := gob.NewDecoder(&buf)
-	var answer [][][]field.Element
-	if err := dec.Decode(&answer); err != nil {
-		return nil, err
-	}
-
-	// get reconstruction
-	r, err := c.Reconstruct(answer)
-	if err != nil {
-		return nil, err
-	}
-
-	// encode reconstruction
-	buf.Reset()
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(r); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
+func (c *DPF) ReconstructBytes(a []byte) ([]byte, error) {
+	return reconstrucBytes(a)
 }
 
 func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {

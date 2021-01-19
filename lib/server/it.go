@@ -28,8 +28,8 @@ func NewITServer(db *database.DB) *ITServer {
 // AnswerBytes decode the input, execute Answer and encodes the output
 func (s *ITServer) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query
-	var buf bytes.Buffer
-	dec := gob.NewDecoder(&buf)
+	buf := bytes.NewBuffer(q)
+	dec := gob.NewDecoder(buf)
 	var query [][]field.Element
 	if err := dec.Decode(&query); err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (s *ITServer) AnswerBytes(q []byte) ([]byte, error) {
 
 	// encode answer
 	buf.Reset()
-	enc := gob.NewEncoder(&buf)
+	enc := gob.NewEncoder(buf)
 	if err := enc.Encode(a); err != nil {
 		return nil, err
 	}

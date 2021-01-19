@@ -23,10 +23,10 @@ func NewDPF(db *database.DB, serverNum byte) *DPF {
 	}
 }
 
-func (s *DPF) AnswerBytes([]byte) ([]byte, error) {
+func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query
-	var buf bytes.Buffer
-	dec := gob.NewDecoder(&buf)
+	buf := bytes.NewBuffer(q)
+	dec := gob.NewDecoder(buf)
 	var query dpf.DPFkey
 	if err := dec.Decode(&query); err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (s *DPF) AnswerBytes([]byte) ([]byte, error) {
 
 	// encode answer
 	buf.Reset()
-	enc := gob.NewEncoder(&buf)
+	enc := gob.NewEncoder(buf)
 	if err := enc.Encode(a); err != nil {
 		return nil, err
 	}
