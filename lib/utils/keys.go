@@ -2,21 +2,10 @@ package utils
 
 import (
 	"encoding/base64"
-	"encoding/binary"
 	"encoding/csv"
 	"io"
 	"os"
-
-	"golang.org/x/crypto/blake2b"
 )
-
-// HashToIndex hashes the given id to an index for a database of the given
-// length
-func HashToIndex(id string, length int) int {
-	hash := blake2b.Sum256([]byte(id))
-
-	return int(binary.BigEndian.Uint64(hash[:]) % uint64(length))
-}
 
 // AnalyzeIDKeys analyzes the given id->key samples and returns the maximal id
 // bytes length and the maximal key bytes length, both expressed in byte

@@ -10,14 +10,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/si-co/vpir-code/lib/utils"
-
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/blake2b"
 )
@@ -29,9 +28,14 @@ const (
 
 func TestRetrieveRandomKeyBlock(t *testing.T) {
 	path := "data/random_id_key.csv"
+	// maximum numer of bytes embedded in a field elements
+	chunkLength := constants.ChunkBytesLength
 
 	// generate db from data
-	db, err := database.GenerateKeyDB(path)
+	nRows := 1
+	// TODO: How do we choose nCols?
+	nCols := constants.DBLength
+	db, err := database.GenerateKeyDB(path, chunkLength, nRows, nCols)
 	require.NoError(t, err)
 
 	idLength := db.IDLength
@@ -54,9 +58,6 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 	// Parse the file
 	r := csv.NewReader(f)
 
-	// scheme variables
-	chunkLength := constants.ChunkBytesLength
-
 	// helping variables
 	zeroSlice := make([]byte, idLength)
 
@@ -76,7 +77,7 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		expectedKey := record[1]
 
 		// compute hash key for id
-		hashKey := utils.HashToIndex(expectedID, constants.DBLength)
+		hashKey := database.HashToIndex(expectedID, constants.DBLength)
 
 		// query given hash key
 		fssKeys := c.Query(hashKey, 2)
@@ -123,33 +124,6 @@ func TestRetrieveRandomKeyBlock(t *testing.T) {
 		// retrieve only one key
 		break
 	}
-}
-
-func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
-	c := client.NewITClient(rnd, db.Info)
-	s0 := server.NewITServer(db)
-	s1 := server.NewITServer(db)
-
-	totalTimer := monitor.NewMonitor()
-	for i := 0; i < numBlocks; i++ {
-		queries := c.Query(i, 2)
-
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
-
-		answers := [][][]field.Element{a0, a1}
-
-		res, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
-	}
-	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
-}
-
-func getXof(t *testing.T, key string) io.Reader {
-	xof, err := blake2b.NewXOF(0, []byte(key))
-	require.NoError(t, err)
-	return xof
 }
 
 func TestMultiBitVectorOneKb(t *testing.T) {
@@ -210,79 +184,6 @@ func TestSingleBitMatrixOneKb(t *testing.T) {
 	retrieveBlocks(t, xof, db, numBlocks, "SingleBitMatrixOneKb")
 }
 
-/*func TestMatrixOneKbByte(t *testing.T) {
-	totalTimer := monitor.NewMonitor()
-	db := database.CreateAsciiMatrixOneKbByte()
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	require.NoError(t, err)
-
-	rebalanced := true
-	c := client.NewITSingleByte(xof, rebalanced)
-	s0 := server.NewITSingleByte(rebalanced, db)
-	s1 := server.NewITSingleByte(rebalanced, db)
-	s2 := server.NewITSingleByte(rebalanced, db)
-	for i := 0; i < 8191; i++ {
-		queries := c.Query(i, 3)
-
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
-		a2 := s2.Answer(queries[2])
-
-		answers := [][]byte{a0, a1, a2}
-
-		_, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-	}
-	fmt.Printf("Total time MatrixOneKbByte: %.1fms\n", totalTimer.Record())
-}
-
-func TestVectorByte(t *testing.T) {
-	totalTimer := monitor.NewMonitor()
-	db := database.CreateAsciiVectorByte()
-	result := ""
-	xof, err := blake2b.NewXOF(0, []byte("my key"))
-	if err != nil {
-		panic(err)
-	}
-	rebalanced := false
-	c := client.NewITSingleByte(xof, rebalanced)
-	s0 := server.NewITSingleByte(rebalanced, db)
-	s1 := server.NewITSingleByte(rebalanced, db)
-	s2 := server.NewITSingleByte(rebalanced, db)
-	m := monitor.NewMonitor()
-	for i := 0; i < 136; i++ {
-		m.Reset()
-		queries := c.Query(i, 3)
-		fmt.Printf("Query: %.3fms\t", m.RecordAndReset())
-
-		a0 := s0.Answer(queries[0])
-		fmt.Printf("Answer 1: %.3fms\t", m.RecordAndReset())
-
-		a1 := s1.Answer(queries[1])
-		fmt.Printf("Answer 2: %.3fms\t", m.RecordAndReset())
-
-		a2 := s2.Answer(queries[2])
-		fmt.Printf("Answer 3: %.3fms\t", m.RecordAndReset())
-
-		answers := [][]byte{a0, a1, a2}
-
-		m.Reset()
-		x, err := c.Reconstruct(answers)
-		fmt.Println(x)
-		require.NoError(t, err)
-		fmt.Printf("Reconstruct: %.3fms\n", m.RecordAndReset())
-		if x == byte(0) {
-			result += "0"
-		} else {
-			result += "1"
-		}
-	}
-
-	testBitResult(t, result)
-
-	fmt.Printf("Total time VectorByte: %.1fms\n", totalTimer.Record())
-}*/
-
 func TestDPFMultiVector(t *testing.T) {
 	dbLen := oneMB
 	blockLen := constants.BlockLength
@@ -309,6 +210,33 @@ func TestDPFMultiMatrix(t *testing.T) {
 	xof := getXof(t, "client key")
 	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 	retrieveBlocksDPF(t, xof, db, numBlocks, "TestDPFMultiMatrix")
+}
+
+func getXof(t *testing.T, key string) io.Reader {
+	xof, err := blake2b.NewXOF(0, []byte(key))
+	require.NoError(t, err)
+	return xof
+}
+
+func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
+	c := client.NewITClient(rnd, db.Info)
+	s0 := server.NewITServer(db)
+	s1 := server.NewITServer(db)
+
+	totalTimer := monitor.NewMonitor()
+	for i := 0; i < numBlocks; i++ {
+		queries := c.Query(i, 2)
+
+		a0 := s0.Answer(queries[0])
+		a1 := s1.Answer(queries[1])
+
+		answers := [][][]field.Element{a0, a1}
+
+		res, err := c.Reconstruct(answers)
+		require.NoError(t, err)
+		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
+	}
+	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
 }
 
 func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
@@ -368,23 +296,7 @@ func TestDPFSingle(t *testing.T) {
 
 	fmt.Printf("Total time: %.1fms\n", totalTimer.Record())
 }
-*/
 
-func testBitResult(t *testing.T, result string) {
-	b, err := utils.BitStringToBytes(result)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-
-	expected := "Playing with VPIR"
-	output := string(b)
-	if expected != output {
-		t.Errorf("Expected '%v' but got '%v'", expected, output)
-	}
-}
-
-/*
 func TestRetrieveKey(t *testing.T) {
 	db, err := database.FromKeysFile()
 	require.NoError(t, err)
