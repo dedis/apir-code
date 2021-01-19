@@ -26,7 +26,18 @@ type queryInputs struct {
 }
 
 // general functions for both IT and DPF-based clients
-func reconstrucBytes(a []byte) ([]byte, error) {
+func decodeQueryInputs(qi []byte) (*queryInputs, error) {
+	buf := bytes.NewBuffer(qi)
+	dec := gob.NewDecoder(buf)
+	var queryInputs queryInputs
+	if err := dec.Decode(&queryInputs); err != nil {
+		return nil, err
+	}
+
+	return &queryInputs, nil
+}
+
+func decodeAnswer(a []byte) ([][][]field.Element, error) {
 	// decode answer
 	buf := bytes.NewBuffer(a)
 	dec := gob.NewDecoder(buf)
@@ -35,15 +46,12 @@ func reconstrucBytes(a []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	// get reconstruction
-	r, err := c.Reconstruct(answer)
-	if err != nil {
-		return nil, err
-	}
+	return answer, nil
+}
 
-	// encode reconstruction
-	buf.Reset()
-	enc := gob.NewEncoder(buf)
+func encodeReconstruct(r []field.Element) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
 	if err := enc.Encode(r); err != nil {
 		return nil, err
 	}

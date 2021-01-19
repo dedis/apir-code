@@ -36,20 +36,17 @@ func NewITClient(rnd io.Reader, info database.Info) *ITClient {
 }
 
 func (c *ITClient) QueryBytes(qi []byte) ([]byte, error) {
-	// decode answer
-	buf := bytes.NewBuffer(qi)
-	dec := gob.NewDecoder(buf)
-	var qi queryInputs
-	if err := dec.Decode(&qi); err != nil {
+	queryInputs, err := decodeQueryInputs(qi)
+	if err != nil {
 		return nil, err
 	}
 
 	// get reconstruction
-	q := c.Query(qi.index, qi.numServers)
+	q := c.Query(queryInputs.index, queryInputs.numServers)
 
 	// encode reconstruction
-	buf.Reset()
-	enc := gob.NewEncoder(buf)
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
 	if err := enc.Encode(q); err != nil {
 		return nil, err
 	}
@@ -112,8 +109,15 @@ func (c *ITClient) Query(index, numServers int) [][][]field.Element {
 }
 
 func (c *ITClient) ReconstructBytes(a []byte) ([]byte, error) {
-	return reconstructBytes(a)
-
+	answer, err := decodeAnswer(a)
+	if err != nil {
+		return nil, err
+	}
+	r, err := c.Reconstruct(answer)
+	if err != nil {
+		return nil, err
+	}
+	return encodeReconstruct(r)
 }
 
 func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
