@@ -55,7 +55,7 @@ func (c *ITClient) QueryBytes(index, numServers int) ([][]byte, error) {
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITClient) Query(index, numServers int) [][][]field.Element {
+func (c *ITClient) Query(index, numServers int) [][]field.Element {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -80,55 +80,57 @@ func (c *ITClient) ReconstructBytes(a []byte) ([]field.Element, error) {
 	return c.Reconstruct(answer)
 }
 
-func (c *ITClient) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
+func (c *ITClient) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 	return reconstruct(answers, c.dbInfo, c.state)
 }
 
 // secretShare the vector a among numServers non-colluding servers
-func (c *ITClient) secretShare(numServers int) ([][][]field.Element, error) {
+func (c *ITClient) secretShare(numServers int) ([][]field.Element, error) {
 	// get block length
-	alen := len(c.state.a)
+	blockLen := len(c.state.a)
+	// Number of field elements in the whole vector
+	vectorLen := c.dbInfo.NumColumns * blockLen
 
 	// create query vectors for all the servers F^(1+b)
-	vectors := make([][][]field.Element, numServers)
+	vectors := make([][]field.Element, numServers)
 	for k := range vectors {
-		vectors[k] = make([][]field.Element, c.dbInfo.NumColumns)
-		for j := 0; j < c.dbInfo.NumColumns; j++ {
-			vectors[k][j] = make([]field.Element, alen)
-		}
+		vectors[k] = make([]field.Element, vectorLen)
 	}
 
 	// Get random elements for all numServers-1 vectors
-	rand, err := field.RandomVectors(c.rnd, c.dbInfo.NumColumns*(numServers-1), alen)
+	rand, err := field.RandomVector(c.rnd, (numServers-1)*vectorLen)
 	if err != nil {
 		return nil, err
 	}
 	// perform additive secret sharing
-	eia := make([][]field.Element, c.dbInfo.NumColumns)
+	eia := make([]field.Element, vectorLen)
+	var colStart, colEnd int
 	for j := 0; j < c.dbInfo.NumColumns; j++ {
-		// create basic zero vector in F^(1+b)
-		eia[j] = field.ZeroVector(alen)
-
-		// set alpha at the index we want to retrieve
+		colStart = j * blockLen
+		colEnd = (j + 1) * blockLen
 		if j == c.state.iy {
-			copy(eia[j], c.state.a)
+			// set alpha vector at the block we want to retrieve
+			copy(eia[colStart:colEnd], c.state.a)
+		} else {
+			// copy a zero vector into a F^(1+b) block
+			copy(eia[colStart:colEnd], field.ZeroVector(blockLen))
 		}
 
 		// Assign k - 1 random vectors of length dbLength containing
 		// elements in F^(1+b)
 		for k := 0; k < numServers-1; k++ {
-			vectors[k][j] = rand[k*c.dbInfo.NumColumns+j]
+			copy(vectors[k][colStart:colEnd], rand[k*vectorLen+colStart:k*vectorLen+colEnd])
 		}
 
 		// we should perform component-wise additive secret sharing
-		for b := 0; b < alen; b++ {
+		for b := colStart; b < colEnd; b++ {
 			sum := field.Zero()
 			for k := 0; k < numServers-1; k++ {
-				sum.Add(&sum, &vectors[k][j][b])
+				sum.Add(&sum, &vectors[k][b])
 			}
-			vectors[numServers-1][j][b].Set(&sum)
-			vectors[numServers-1][j][b].Neg(&vectors[numServers-1][j][b])
-			vectors[numServers-1][j][b].Add(&vectors[numServers-1][j][b], &eia[j][b])
+			vectors[numServers-1][b].Set(&sum)
+			vectors[numServers-1][b].Neg(&vectors[numServers-1][b])
+			vectors[numServers-1][b].Add(&vectors[numServers-1][b], &eia[b])
 		}
 	}
 

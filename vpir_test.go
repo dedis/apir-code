@@ -100,7 +100,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		// get servers answers
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
-		answers := [][][]field.Element{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
 		// reconstruct block
 		result, err := c.Reconstruct(answers)
@@ -246,7 +246,7 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 		a0 := s0.Answer(queries[0])
 		a1 := s1.Answer(queries[1])
 
-		answers := [][][]field.Element{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
@@ -267,7 +267,7 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
 
-		answers := [][][]field.Element{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)

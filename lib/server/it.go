@@ -33,7 +33,7 @@ func (s *ITServer) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query
 	buf := bytes.NewBuffer(q)
 	dec := gob.NewDecoder(buf)
-	var query [][]field.Element
+	var query []field.Element
 	if err := dec.Decode(&query); err != nil {
 		return nil, err
 	}
@@ -52,6 +52,6 @@ func (s *ITServer) AnswerBytes(q []byte) ([]byte, error) {
 }
 
 // Answer computes the answer for the given query
-func (s *ITServer) Answer(q [][]field.Element) [][]field.Element {
+func (s *ITServer) Answer(q []field.Element) []field.Element {
 	return answer(q, s.db)
 }

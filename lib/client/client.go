@@ -25,11 +25,11 @@ type state struct {
 }
 
 // general functions for both IT and DPF-based clients
-func decodeAnswer(a []byte) ([][][]field.Element, error) {
+func decodeAnswer(a []byte) ([][]field.Element, error) {
 	// decode answer
 	buf := bytes.NewBuffer(a)
 	dec := gob.NewDecoder(buf)
-	var answer [][][]field.Element
+	var answer [][]field.Element
 	if err := dec.Decode(&answer); err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	return st, nil
 }
 
-func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
+func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
 	sum := make([][]field.Element, dbInfo.NumRows)
 
 	if dbInfo.BlockSize == cst.SingleBitBlockLength {
@@ -88,7 +88,7 @@ func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) 
 		for i := 0; i < dbInfo.NumRows; i++ {
 			sum[i] = make([]field.Element, 1)
 			for k := range answers {
-				sum[i][0].Add(&sum[i][0], &answers[k][i][0])
+				sum[i][0].Add(&sum[i][0], &answers[k][i])
 			}
 		}
 		for i := 0; i < dbInfo.NumRows; i++ {
@@ -114,7 +114,7 @@ func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) 
 		sum[i] = make([]field.Element, dbInfo.BlockSize+1)
 		for b := 0; b < dbInfo.BlockSize+1; b++ {
 			for k := range answers {
-				sum[i][b].Add(&sum[i][b], &answers[k][i][b])
+				sum[i][b].Add(&sum[i][b], &answers[k][i*(dbInfo.BlockSize+1)+b])
 			}
 		}
 	}
