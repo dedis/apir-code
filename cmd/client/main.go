@@ -32,7 +32,10 @@ func init() {
 			log.Fatalf("credentials: failed to append certificates")
 		}
 	}
-	creds = credentials.NewTLS(&tls.Config{RootCAs: cp})
+	cfg := &tls.Config{RootCAs: cp}
+	// TODO: remove
+	cfg.InsecureSkipVerify = true
+	creds = credentials.NewTLS(cfg)
 }
 
 func main() {
