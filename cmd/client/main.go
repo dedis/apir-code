@@ -92,7 +92,7 @@ func main() {
 	if id == "" {
 		log.Fatal("id not provided")
 	}
-	idHash := database.HashToIndex(id, dbInfo.NumRows)
+	idHash := database.HashToIndex(id, dbInfo.NumColumns*dbInfo.NumRows)
 	log.Printf("id: %s, hash key: %d", id, idHash)
 
 	// query for given idHash
