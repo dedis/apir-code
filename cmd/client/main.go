@@ -19,6 +19,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/encoding/gzip"
 )
 
 var creds credentials.TransportCredentials
@@ -103,8 +104,10 @@ func main() {
 	// send queries to servers
 	answers := runQueries(ctx, addresses, queries)
 
-	// reconstruct
 	res, err := c.ReconstructBytes(answers)
+	if err != nil {
+		log.Fatalf("error during reconstruction: %v", err)
+	}
 	fmt.Println(res)
 
 	// find correct key
@@ -172,11 +175,11 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 		log.Fatal("Queries and server addresses length mismatch")
 	}
 
-	subCtx, cancel := context.WithTimeout(ctx, time.Second)
+	subCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(queries))
+	resCh := make(chan []byte, len(addrs))
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
@@ -188,10 +191,11 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	close(resCh)
 
 	// combinate ansers of all the servers
-	q := make([][]byte, 0, len(addrs))
+	q := make([][]byte, 0)
 	for v := range resCh {
 		q = append(q, v)
 	}
+
 	return q
 }
 
@@ -204,7 +208,9 @@ func query(ctx context.Context, address string, query []byte) []byte {
 
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
-	answer, err := c.Query(ctx, q)
+	var opts []grpc.CallOption
+	opts = append(opts, grpc.UseCompressor(gzip.Name))
+	answer, err := c.Query(ctx, q, opts...)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)
 	}

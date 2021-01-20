@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -44,7 +43,6 @@ func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 	if err := enc.Encode(a); err != nil {
 		return nil, err
 	}
-	fmt.Println(buf.Bytes())
 
 	return buf.Bytes(), nil
 }

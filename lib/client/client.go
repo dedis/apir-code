@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"io"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
@@ -134,6 +135,8 @@ func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) 
 			reconstructedTag.Add(&reconstructedTag, &prod)
 		}
 		if !tag.Equal(&reconstructedTag) {
+			fmt.Println("tag:", tag)
+			fmt.Println("rec:", reconstructedTag)
 			return nil, errors.New("REJECT")
 		}
 	}

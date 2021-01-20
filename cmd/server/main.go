@@ -17,6 +17,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
@@ -72,6 +73,7 @@ func main() {
 	default:
 		log.Fatal("undefined scheme type")
 	}
+	log.Printf("scheme: %s", *schemePtr)
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{Server: s})
