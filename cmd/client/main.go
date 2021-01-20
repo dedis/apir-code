@@ -187,7 +187,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	wg.Wait()
 	close(resCh)
 
-	// combinate answes of all the servers
+	// combinate ansers of all the servers
 	q := make([][]byte, 0, len(addrs))
 	for v := range resCh {
 		q = append(q, v)

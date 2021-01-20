@@ -104,6 +104,7 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
+	log.Print("got query request")
 
 	a, err := s.Server.AnswerBytes(qr.GetQuery())
 	if err != nil {
