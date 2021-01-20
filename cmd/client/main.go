@@ -76,6 +76,7 @@ func main() {
 
 	// start correct client
 	var c client.Client
+	log.Printf("scheme: %s", *schemePtr)
 	switch *schemePtr {
 	case "dpf":
 		c = client.NewDPF(prg, *dbInfo)
@@ -90,6 +91,7 @@ func main() {
 	if id == "" {
 		log.Fatal("id not provided")
 	}
+	log.Printf("id: %s", id)
 	idHash := database.HashToIndex(id, dbInfo.NumRows)
 
 	// query for given idHash
