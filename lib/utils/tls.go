@@ -7,7 +7,7 @@ import (
 
 // WARNING: DO NOT USE THESE KEYS IN A REAL DEPLOYMENT!
 
-var serverPublicKeys = [...]string{
+var ServerPublicKeys = [...]string{
 	`-----BEGIN CERTIFICATE-----
 MIICEjCCAbmgAwIBAgIRAJs6juwqbfnuK5O3cihkxp8wCgYIKoZIzj0EAwIwYzEe
 MBwGA1UEChMVbWtjZXJ0IGRldmVsb3BtZW50IENBMRwwGgYDVQQLDBN5YWJhc3Rh
@@ -83,7 +83,7 @@ func init() {
 	var err error
 	for i := range ServerCertificates {
 		ServerCertificates[i], err = tls.X509KeyPair(
-			[]byte(serverPublicKeys[i]),
+			[]byte(ServerPublicKeys[i]),
 			[]byte(serverSecretKeys[i]))
 		if err != nil {
 			log.Fatalf("could not load certficate #%v %v", i, err)

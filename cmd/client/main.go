@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
 	"io"
@@ -16,9 +18,25 @@ import (
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
+var creds credentials.TransportCredentials
+
+func init() {
+
+	// load servers certificates
+	cp := x509.NewCertPool()
+	for _, cert := range utils.ServerPublicKeys {
+		if !cp.AppendCertsFromPEM([]byte(cert)) {
+			log.Fatalf("credentials: failed to append certificates")
+		}
+	}
+	creds = credentials.NewTLS(&tls.Config{RootCAs: cp})
+}
+
 func main() {
+
 	// set logs
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
@@ -83,8 +101,8 @@ func main() {
 	fmt.Println(answers)
 }
 
-func connectToServer(addr string, sid int) proto.VPIRClient {
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+func connectToServer(addr string, creds credentials.TransportCredentials) proto.VPIRClient {
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -127,13 +145,7 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 }
 
 func dbInfo(ctx context.Context, address string) *database.Info {
-	conn, err := grpc.Dial(address, grpc.WithBlock(), grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	c := proto.NewVPIRClient(conn)
+	c := connectToServer(address, creds)
 	q := &proto.DatabaseInfoRequest{}
 	answer, err := c.DatabaseInfo(ctx, q)
 	if err != nil {
@@ -178,13 +190,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 }
 
 func query(ctx context.Context, address string, query []byte) []byte {
-	conn, err := grpc.Dial(address, grpc.WithBlock(), grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	c := proto.NewVPIRClient(conn)
+	c := connectToServer(address, creds)
 	q := &proto.QueryRequest{Query: query}
 	answer, err := c.Query(ctx, q)
 	if err != nil {
