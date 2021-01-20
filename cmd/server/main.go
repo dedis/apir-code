@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"os"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -15,6 +16,7 @@ import (
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 func main() {
@@ -54,11 +56,11 @@ func main() {
 		Certificates: []tls.Certificate{utils.ServerCertificates[*sid]},
 		ClientAuth:   tls.NoClientCert,
 	}
-	lis, err := tls.Listen("tcp", addr, cfg)
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	rpcServer := grpc.NewServer()
+	rpcServer := grpc.NewServer(grpc.Creds(credentials.NewTLS(cfg)))
 
 	// select correct server
 	var s server.Server
@@ -88,6 +90,8 @@ type vpirServer struct {
 
 func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
 	*proto.DatabaseInfoResponse, error) {
+	log.Print("got databaseInfo request")
+
 	dbInfo := s.Server.DBInfo()
 	resp := &proto.DatabaseInfoResponse{
 		NumRows:     uint32(dbInfo.NumRows),

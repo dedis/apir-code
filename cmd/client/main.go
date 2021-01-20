@@ -101,16 +101,6 @@ func main() {
 	fmt.Println(answers)
 }
 
-func connectToServer(addr string, creds credentials.TransportCredentials) proto.VPIRClient {
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	return proto.NewVPIRClient(conn)
-}
-
 func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 	subCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
@@ -145,12 +135,23 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 }
 
 func dbInfo(ctx context.Context, address string) *database.Info {
-	c := connectToServer(address, creds)
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	fmt.Println("qui")
+
+	c := proto.NewVPIRClient(conn)
+	fmt.Println("conn:", conn)
+	fmt.Println("c:", c)
+
 	q := &proto.DatabaseInfoRequest{}
 	answer, err := c.DatabaseInfo(ctx, q)
 	if err != nil {
 		log.Fatalf("could not send database info request: %v", err)
 	}
+	log.Print("sent database info request")
 
 	dbInfo := &database.Info{
 		NumRows:    int(answer.GetNumRows()),
@@ -190,7 +191,13 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 }
 
 func query(ctx context.Context, address string, query []byte) []byte {
-	c := connectToServer(address, creds)
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
 	answer, err := c.Query(ctx, q)
 	if err != nil {
