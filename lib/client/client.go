@@ -14,7 +14,7 @@ import (
 // Client represents the client instance in both the IT and DPF-based schemes
 type Client interface {
 	QueryBytes(int, int) ([][]byte, error)
-	ReconstructBytes([]byte) ([]field.Element, error)
+	ReconstructBytes([][]byte) ([]field.Element, error)
 }
 
 type state struct {
@@ -25,13 +25,17 @@ type state struct {
 }
 
 // general functions for both IT and DPF-based clients
-func decodeAnswer(a []byte) ([][][]field.Element, error) {
-	// decode answer
-	buf := bytes.NewBuffer(a)
-	dec := gob.NewDecoder(buf)
-	var answer [][][]field.Element
-	if err := dec.Decode(&answer); err != nil {
-		return nil, err
+func decodeAnswer(a [][]byte) ([][][]field.Element, error) {
+	// servers answers
+	answer := make([][][]field.Element, len(a))
+	for i, ans := range a {
+		buf := bytes.NewBuffer(ans)
+		dec := gob.NewDecoder(buf)
+		var serverAnswer [][]field.Element
+		if err := dec.Decode(&serverAnswer); err != nil {
+			return nil, err
+		}
+		answer[i] = serverAnswer
 	}
 
 	return answer, nil

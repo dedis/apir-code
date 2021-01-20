@@ -76,7 +76,6 @@ func main() {
 
 	// start correct client
 	var c client.Client
-	log.Printf("scheme: %s", *schemePtr)
 	switch *schemePtr {
 	case "dpf":
 		c = client.NewDPF(prg, *dbInfo)
@@ -85,14 +84,15 @@ func main() {
 	default:
 		log.Fatal("undefined scheme type")
 	}
+	log.Printf("scheme: %s", *schemePtr)
 
 	// get id and compute corresponding hash
 	id := *idPtr
 	if id == "" {
 		log.Fatal("id not provided")
 	}
-	log.Printf("id: %s", id)
 	idHash := database.HashToIndex(id, dbInfo.NumRows)
+	log.Printf("id: %s, hash key: %d", id, idHash)
 
 	// query for given idHash
 	queries, err := c.QueryBytes(idHash, len(addresses))
@@ -102,7 +102,12 @@ func main() {
 
 	// send queries to servers
 	answers := runQueries(ctx, addresses, queries)
-	fmt.Println(answers)
+
+	// reconstruct
+	res, err := c.ReconstructBytes(answers)
+	fmt.Println(res)
+
+	// find correct key
 }
 
 func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
@@ -146,7 +151,6 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 	defer conn.Close()
 
 	c := proto.NewVPIRClient(conn)
-
 	q := &proto.DatabaseInfoRequest{}
 	answer, err := c.DatabaseInfo(ctx, q)
 	if err != nil {
