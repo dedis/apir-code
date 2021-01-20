@@ -72,7 +72,7 @@ func main() {
 
 	// get db info
 	dbInfo := runDBInfoRequest(ctx, addresses)
-	fmt.Println(dbInfo)
+	log.Printf("databaseInfo: %#v", dbInfo)
 
 	// start correct client
 	var c client.Client
@@ -84,7 +84,6 @@ func main() {
 	default:
 		log.Fatal("undefined scheme type")
 	}
-	fmt.Println(c)
 
 	// get id and compute corresponding hash
 	id := *idPtr
@@ -143,18 +142,15 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	fmt.Println("qui")
 
 	c := proto.NewVPIRClient(conn)
-	fmt.Println("conn:", conn)
-	fmt.Println("c:", c)
 
 	q := &proto.DatabaseInfoRequest{}
 	answer, err := c.DatabaseInfo(ctx, q)
 	if err != nil {
 		log.Fatalf("could not send database info request: %v", err)
 	}
-	log.Print("sent database info request")
+	log.Printf("sent databaseInfo request to %s", address)
 
 	dbInfo := &database.Info{
 		NumRows:    int(answer.GetNumRows()),
