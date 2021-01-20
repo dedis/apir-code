@@ -54,7 +54,7 @@ func (s *DPF) Answer(key dpf.DPFkey) []field.Element {
 	for j := 0; j < len(tmp); j++ {
 		tmp[j] = make([]field.Element, s.db.BlockSize+1)
 	}
-	dpf.EvalFull(key, uint64(bits.Len(uint(s.db.NumColumns*(s.db.BlockSize+1)))), tmp)
+	dpf.EvalFull(key, uint64(bits.Len(uint(s.db.NumColumns))), tmp)
 
 	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
 	for i:=0; i< s.db.NumColumns; i++ {

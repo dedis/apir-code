@@ -103,19 +103,16 @@ func (c *ITClient) secretShare(numServers int) ([][]field.Element, error) {
 		return nil, err
 	}
 	// perform additive secret sharing
-	eia := make([]field.Element, vectorLen)
 	var colStart, colEnd int
+	var eia []field.Element
 	for j := 0; j < c.dbInfo.NumColumns; j++ {
 		colStart = j * blockLen
 		colEnd = (j + 1) * blockLen
+		eia = field.ZeroVector(blockLen)
 		if j == c.state.iy {
 			// set alpha vector at the block we want to retrieve
-			copy(eia[colStart:colEnd], c.state.a)
-		} else {
-			// copy a zero vector into a F^(1+b) block
-			copy(eia[colStart:colEnd], field.ZeroVector(blockLen))
+			copy(eia, c.state.a)
 		}
-
 		// Assign k - 1 random vectors of length dbLength containing
 		// elements in F^(1+b)
 		for k := 0; k < numServers-1; k++ {
@@ -130,7 +127,7 @@ func (c *ITClient) secretShare(numServers int) ([][]field.Element, error) {
 			}
 			vectors[numServers-1][b].Set(&sum)
 			vectors[numServers-1][b].Neg(&vectors[numServers-1][b])
-			vectors[numServers-1][b].Add(&vectors[numServers-1][b], &eia[b])
+			vectors[numServers-1][b].Add(&vectors[numServers-1][b], &eia[b-j*blockLen])
 		}
 	}
 

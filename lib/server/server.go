@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -33,7 +32,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	qZeroBase := make([]field.Element, db.NumColumns)
 	qOne := make([]field.Element, db.NumColumns*db.BlockSize)
 	for j := 0; j < db.NumColumns; j++ {
-		qZeroBase[j] = q[j*db.BlockSize]
+		qZeroBase[j] = q[j*(db.BlockSize+1)]
 		copy(qOne[j*db.BlockSize:(j+1)*db.BlockSize], q[j*(db.BlockSize+1)+1:(j+1)*(db.BlockSize+1)])
 	}
 
@@ -59,7 +58,6 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		// add tag
 		m[(i+1)*(db.BlockSize+1)-1].Set(&sumTag)
 	}
-	fmt.Println(m)
 
 	return m
 }
