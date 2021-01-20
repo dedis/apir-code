@@ -277,6 +277,39 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 	fmt.Printf("Total time dpf-based %s: %.1fms\n", testName, totalTimer.Record())
 }
 
+func TestBytesDPF(t *testing.T) {
+	dbLen := oneMB
+	blockLen := constants.BlockLength
+	elemSize := 128
+	numBlocks := dbLen / (elemSize * blockLen)
+	nCols := int(math.Sqrt(float64(numBlocks)))
+	nRows := nCols
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+
+	c := client.NewDPF(xof, db.Info)
+	s0 := server.NewDPF(db, 0)
+	s1 := server.NewDPF(db, 1)
+
+	for i := 0; i < numBlocks; i++ {
+		fssKeys, err := c.QueryBytes(i, 2)
+		require.NoError(t, err)
+
+		a0, err := s0.AnswerBytes(fssKeys[0])
+		require.NoError(t, err)
+		a1, err := s1.AnswerBytes(fssKeys[1])
+		require.NoError(t, err)
+
+		answers := [][]byte{a0, a1}
+
+		res, err := c.ReconstructBytes(answers)
+		require.NoError(t, err)
+		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
+	}
+}
+
 /*
 func TestDPFSingle(t *testing.T) {
 	totalTimer := monitor.NewMonitor()
