@@ -1,17 +1,15 @@
 package database
 
 import (
+	"github.com/si-co/vpir-code/lib/field"
 	"io"
 	"log"
-
-	"github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 )
 
 var text = "0101000001101100011000010111100101101001011011100110011100100000011101110110100101110100011010000010000001010110010100000100100101010010"
 
 type DB struct {
-	Entries [][][]field.Element
+	Entries [][]field.Element
 	Info
 }
 
@@ -30,12 +28,9 @@ type Bytes struct {
 }
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
-	entries := make([][][]field.Element, numRows)
+	entries := make([][]field.Element, numRows)
 	for i := 0; i < numRows; i++ {
-		entries[i] = make([][]field.Element, numColumns)
-		for j := 0; j < numColumns; j++ {
-			entries[i][j] = field.ZeroVector(blockSize)
-		}
+		entries[i] = field.ZeroVector(numColumns*blockSize)
 	}
 	return &DB{Entries: entries,
 		Info: Info{NumColumns: numColumns,
@@ -47,15 +42,12 @@ func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
 
 func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 	var err error
-	entries := make([][][]field.Element, numRows)
+	entries := make([][]field.Element, numRows)
 	numColumns := dbLen / (128 * numRows * blockLen)
 	for i := 0; i < numRows; i++ {
-		entries[i] = make([][]field.Element, numColumns)
-		for j := 0; j < numColumns; j++ {
-			entries[i][j], err = field.RandomVector(rnd, blockLen)
-			if err != nil {
-				log.Fatal(err)
-			}
+		entries[i], err = field.RandomVector(rnd, numColumns*blockLen)
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 	return &DB{Entries: entries,
@@ -69,18 +61,17 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) *DB {
 	var tmp field.Element
 	var tmpb byte
-	entries := make([][][]field.Element, numRows)
+	entries := make([][]field.Element, numRows)
 	numColumns := dbLen / numRows
 	for i := 0; i < numRows; i++ {
-		entries[i] = make([][]field.Element, numColumns)
+		entries[i] = make([]field.Element, numColumns)
 		for j := 0; j < numColumns; j++ {
-			entries[i][j] = make([]field.Element, 1)
 			tmp.SetRandom(rnd)
 			tmpb = tmp.Bytes()[len(tmp.Bytes())-1]
 			if tmpb>>7 == 1 {
-				entries[i][j][0].SetOne()
+				entries[i][j].SetOne()
 			} else {
-				entries[i][j][0].SetZero()
+				entries[i][j].SetZero()
 			}
 		}
 	}
@@ -111,7 +102,7 @@ func CreateRandomMultiBitMatrix(rnd io.Reader, dbLen, blockLen int) *DB {
 
 	return &DB{Entries: entries, NumColumns: dbLengthSqrtInt}
 }
-*/
+
 func CreateMultiBitGFLength(length int) *DB {
 	entries := make([][][]field.Element, constants.DBLength)
 	for i := range entries {
@@ -124,7 +115,6 @@ func CreateMultiBitGFLength(length int) *DB {
 	return &DB{Entries: entries}
 }
 
-/*
 func CreateMultiBitGF() *DB {
 	entries := make([][]field.Element, constants.DBLength)
 	one := field.One()

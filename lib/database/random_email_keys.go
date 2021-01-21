@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/binary"
+	"fmt"
 	"golang.org/x/crypto/blake2b"
 	"log"
 	"math"
@@ -48,8 +49,9 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 
 	// embed data into field elements
 	for k, v := range hashTable {
-		elements := make([]field.Element, 0)
+		elements := field.ZeroVector(blockLen)
 		// loop over all entries in v to avoid mixing bytes in element
+		index := 0
 		for i := 0; i < len(v); i += entryLength {
 			entry := v[i : i+entryLength]
 			// embed all bytes
@@ -59,12 +61,14 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 					end = len(entry)
 				}
 				e := new(field.Element).SetBytes(entry[j:end])
-				elements = append(elements, *e)
+				elements[index] = *e
+				fmt.Printf("%d ", index)
+				index += 1
 			}
 		}
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
-		copy(db.Entries[k / numColumns][k % numColumns], elements)
+		copy(db.Entries[k/numColumns][(k%numColumns)*blockLen:(k%numColumns+1)*blockLen], elements)
 	}
 
 	return db, nil

@@ -20,7 +20,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		a := make([]field.Element, db.NumRows)
 		for i := 0; i < db.NumRows; i++ {
 			for j := 0; j < db.NumColumns; j++ {
-				if db.Entries[i][j][0].Equal(&cst.One) {
+				if db.Entries[i][j].Equal(&cst.One) {
 					a[i].Add(&a[i], &q[j])
 				}
 			}
@@ -47,10 +47,10 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		sum := field.ZeroVector(db.BlockSize)
 		for j := 0; j < db.NumColumns; j++ {
 			for b := 0; b < db.BlockSize; b++ {
-				prod.Mul(&db.Entries[i][j][b], &qZeroBase[j])
+				prod.Mul(&db.Entries[i][j*db.BlockSize+b], &qZeroBase[j])
 				sum[b].Add(&sum[b], &prod)
 
-				prodTag.Mul(&db.Entries[i][j][b], &qOne[j*db.BlockSize+b])
+				prodTag.Mul(&db.Entries[i][j*db.BlockSize+b], &qOne[j*db.BlockSize+b])
 				sumTag.Add(&sumTag, &prodTag)
 			}
 		}
