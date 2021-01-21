@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/proto"
@@ -116,11 +117,12 @@ func main() {
 
 	// find correct key
 	resultBytes := field.VectorToBytes(res)
-	keyLength := 258
-	idLength := 45
-	chunkLength := 15
+	keyLength := dbInfo.KeyLength
+	idLength := dbInfo.IDLength
+	chunkLength := constants.ChunkBytesLength
 	zeroSlice := make([]byte, idLength)
 
+	// determine (id, key) length in bytes
 	lastElementBytes := keyLength % chunkLength
 	keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
 	totalLength := idLength + keyLengthWithPadding
@@ -200,6 +202,8 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 		NumRows:    int(answer.GetNumRows()),
 		NumColumns: int(answer.GetNumColumns()),
 		BlockSize:  int(answer.GetBlockLength()),
+		IDLength:   int(answer.GetIdLength()),
+		KeyLength:  int(answer.GetKeyLength()),
 	}
 
 	return dbInfo

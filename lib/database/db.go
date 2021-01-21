@@ -22,6 +22,7 @@ type Info struct {
 	// embedding info
 	IDLength  int
 	KeyLength int
+	// TODO: add chunk length
 }
 
 type Bytes struct {
