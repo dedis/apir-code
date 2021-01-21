@@ -17,6 +17,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
@@ -46,7 +47,7 @@ func main() {
 	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
 	nRows := 1
 	nCols := dbLen / (nRows * chunkLength)
-	db, err := database.GenerateKeyDB("data/random_id_key.csv", chunkLength, nRows, nCols)
+	db, err := database.GenerateKeyDB("data/random_id_key_test.csv", chunkLength, nRows, nCols)
 	if err != nil {
 		log.Fatalf("could not generate keys db: %v", err)
 	}
@@ -72,6 +73,7 @@ func main() {
 	default:
 		log.Fatal("undefined scheme type")
 	}
+	log.Printf("scheme: %s", *schemePtr)
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{Server: s})
@@ -104,6 +106,7 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
+	log.Print("got query request")
 
 	a, err := s.Server.AnswerBytes(qr.GetQuery())
 	if err != nil {

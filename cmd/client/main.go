@@ -1,24 +1,29 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/encoding/gzip"
 )
 
 var creds credentials.TransportCredentials
@@ -76,7 +81,6 @@ func main() {
 
 	// start correct client
 	var c client.Client
-	log.Printf("scheme: %s", *schemePtr)
 	switch *schemePtr {
 	case "dpf":
 		c = client.NewDPF(prg, *dbInfo)
@@ -85,14 +89,15 @@ func main() {
 	default:
 		log.Fatal("undefined scheme type")
 	}
+	log.Printf("scheme: %s", *schemePtr)
 
 	// get id and compute corresponding hash
 	id := *idPtr
 	if id == "" {
 		log.Fatal("id not provided")
 	}
-	log.Printf("id: %s", id)
-	idHash := database.HashToIndex(id, dbInfo.NumRows)
+	idHash := database.HashToIndex(id, dbInfo.NumColumns*dbInfo.NumRows)
+	log.Printf("id: %s, hashKey: %d", id, idHash)
 
 	// query for given idHash
 	queries, err := c.QueryBytes(idHash, len(addresses))
@@ -102,7 +107,45 @@ func main() {
 
 	// send queries to servers
 	answers := runQueries(ctx, addresses, queries)
-	fmt.Println(answers)
+
+	res, err := c.ReconstructBytes(answers)
+	if err != nil {
+		log.Fatalf("error during reconstruction: %v", err)
+	}
+	fmt.Println("res:", res)
+
+	// find correct key
+	resultBytes := field.VectorToBytes(res)
+	keyLength := 258
+	idLength := 45
+	chunkLength := 15
+	zeroSlice := make([]byte, idLength)
+
+	lastElementBytes := keyLength % chunkLength
+	keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
+	totalLength := idLength + keyLengthWithPadding
+
+	// parse block entries
+	idKey := make(map[string]string)
+	for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
+		idBytes := resultBytes[i : i+idLength]
+		// test if we are in padding elements already
+		if bytes.Equal(idBytes, zeroSlice) {
+			break
+		}
+		idReconstructed := string(bytes.Trim(idBytes, "\x00"))
+
+		keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
+		// remove padding for last element
+		if lastElementBytes != 0 {
+			keyBytes = append(keyBytes[:len(keyBytes)-chunkLength], keyBytes[len(keyBytes)-(lastElementBytes):]...)
+		}
+
+		// encode key
+		idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
+		fmt.Println(base64.StdEncoding.EncodeToString(keyBytes))
+	}
+	log.Printf("key: %s", idKey[id])
 }
 
 func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
@@ -146,7 +189,6 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 	defer conn.Close()
 
 	c := proto.NewVPIRClient(conn)
-
 	q := &proto.DatabaseInfoRequest{}
 	answer, err := c.DatabaseInfo(ctx, q)
 	if err != nil {
@@ -168,11 +210,11 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 		log.Fatal("Queries and server addresses length mismatch")
 	}
 
-	subCtx, cancel := context.WithTimeout(ctx, time.Second)
+	subCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(queries))
+	resCh := make(chan []byte, len(addrs))
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
@@ -183,11 +225,12 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	wg.Wait()
 	close(resCh)
 
-	// combinate answes of all the servers
-	q := make([][]byte, 0, len(addrs))
+	// combinate ansers of all the servers
+	q := make([][]byte, 0)
 	for v := range resCh {
 		q = append(q, v)
 	}
+
 	return q
 }
 
@@ -200,7 +243,9 @@ func query(ctx context.Context, address string, query []byte) []byte {
 
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
-	answer, err := c.Query(ctx, q)
+	var opts []grpc.CallOption
+	opts = append(opts, grpc.UseCompressor(gzip.Name))
+	answer, err := c.Query(ctx, q, opts...)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)
 	}

@@ -71,7 +71,7 @@ func (c *ITClient) Query(index, numServers int) [][]field.Element {
 	return vectors
 }
 
-func (c *ITClient) ReconstructBytes(a []byte) ([]field.Element, error) {
+func (c *ITClient) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	answer, err := decodeAnswer(a)
 	if err != nil {
 		return nil, err

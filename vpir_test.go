@@ -47,7 +47,7 @@ func TestRetrieveRandomKeyBlockMatrix(t *testing.T) {
 }
 
 func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
-	path := "data/random_id_key.csv"
+	path := "data/random_id_key_test.csv"
 
 	// generate db from data
 	db, err := database.GenerateKeyDB(path, chunkLength, nRows, nCols)
@@ -97,10 +97,16 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		// query given hash key
 		fssKeys := c.Query(hashKey, 2)
 
+		//fmt.Println("client 0", "query:", fssKeys[0])
+		//fmt.Println("client 1", "query:", fssKeys[1])
+
 		// get servers answers
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
 		answers := [][]field.Element{a0, a1}
+
+		//fmt.Println("client 0", "answer:", answers[0])
+		//fmt.Println("client 1", "answer:", answers[1])
 
 		// reconstruct block
 		result, err := c.Reconstruct(answers)
@@ -275,6 +281,37 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 	}
 
 	fmt.Printf("Total time dpf-based %s: %.1fms\n", testName, totalTimer.Record())
+}
+
+func TestBytesDPF(t *testing.T) {
+
+	dbLen := 40 * 1024 * 8
+	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
+	nRows := 1
+	nCols := dbLen / (nRows * chunkLength)
+	db, err := database.GenerateKeyDB("data/random_id_key_test.csv", chunkLength, nRows, nCols)
+	require.NoError(t, err)
+
+	xof := getXof(t, "client key")
+	c := client.NewDPF(xof, db.Info)
+	s0 := server.NewDPF(db, 0)
+	s1 := server.NewDPF(db, 1)
+
+	idHash := database.HashToIndex("yqDnuPBdgGIe_nCZVDZiYTWbiPoyYuwA", nRows*nCols)
+
+	fssKeys, err := c.QueryBytes(idHash, 2)
+	require.NoError(t, err)
+
+	a0, err := s0.AnswerBytes(fssKeys[0])
+	require.NoError(t, err)
+	a1, err := s1.AnswerBytes(fssKeys[1])
+	require.NoError(t, err)
+
+	answers := [][]byte{a0, a1}
+
+	res, err := c.ReconstructBytes(answers)
+	require.NoError(t, err)
+	require.ElementsMatch(t, db.Entries[idHash/db.NumColumns][idHash%db.NumColumns], res)
 }
 
 /*

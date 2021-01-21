@@ -33,9 +33,8 @@ func (c *DPF) QueryBytes(index, numServers int) ([][]byte, error) {
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
-	var buf bytes.Buffer
 	for i, q := range queries {
-		buf.Reset()
+		var buf bytes.Buffer
 		enc := gob.NewEncoder(&buf)
 		if err := enc.Encode(q); err != nil {
 			return nil, err
@@ -61,8 +60,9 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
-func (c *DPF) ReconstructBytes(a []byte) ([]field.Element, error) {
+func (c *DPF) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	answer, err := decodeAnswer(a)
+
 	if err != nil {
 		return nil, err
 	}
