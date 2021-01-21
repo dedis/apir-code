@@ -47,7 +47,7 @@ func main() {
 	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
 	nRows := 1
 	nCols := dbLen / (nRows * chunkLength)
-	db, err := database.GenerateKeyDB("data/random_id_key.csv", chunkLength, nRows, nCols)
+	db, err := database.GenerateKeyDB("data/random_id_key_test.csv", chunkLength, nRows, nCols)
 	if err != nil {
 		log.Fatalf("could not generate keys db: %v", err)
 	}

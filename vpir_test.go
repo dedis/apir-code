@@ -47,7 +47,7 @@ func TestRetrieveRandomKeyBlockMatrix(t *testing.T) {
 }
 
 func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
-	path := "data/random_id_key.csv"
+	path := "data/random_id_key_test.csv"
 
 	// generate db from data
 	db, err := database.GenerateKeyDB(path, chunkLength, nRows, nCols)
@@ -97,10 +97,16 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		// query given hash key
 		fssKeys := c.Query(hashKey, 2)
 
+		//fmt.Println("client 0", "query:", fssKeys[0])
+		//fmt.Println("client 1", "query:", fssKeys[1])
+
 		// get servers answers
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
 		answers := [][][]field.Element{a0, a1}
+
+		//fmt.Println("client 0", "answer:", answers[0])
+		//fmt.Println("client 1", "answer:", answers[1])
 
 		// reconstruct block
 		result, err := c.Reconstruct(answers)

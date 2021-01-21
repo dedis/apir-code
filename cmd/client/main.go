@@ -1,20 +1,24 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
@@ -93,7 +97,7 @@ func main() {
 		log.Fatal("id not provided")
 	}
 	idHash := database.HashToIndex(id, dbInfo.NumColumns*dbInfo.NumRows)
-	log.Printf("id: %s, hash key: %d", id, idHash)
+	log.Printf("id: %s, hashKey: %d", id, idHash)
 
 	// query for given idHash
 	queries, err := c.QueryBytes(idHash, len(addresses))
@@ -108,9 +112,38 @@ func main() {
 	if err != nil {
 		log.Fatalf("error during reconstruction: %v", err)
 	}
-	fmt.Println(res)
 
 	// find correct key
+	resultBytes := field.VectorToBytes(res)
+	keyLength := 258
+	idLength := 45
+	chunkLength := 15
+	zeroSlice := make([]byte, idLength)
+
+	lastElementBytes := keyLength % chunkLength
+	keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
+	totalLength := idLength + keyLengthWithPadding
+
+	// parse block entries
+	idKey := make(map[string]string)
+	for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
+		idBytes := resultBytes[i : i+idLength]
+		// test if we are in padding elements already
+		if bytes.Equal(idBytes, zeroSlice) {
+			break
+		}
+		idReconstructed := string(bytes.Trim(idBytes, "\x00"))
+
+		keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
+		// remove padding for last element
+		if lastElementBytes != 0 {
+			keyBytes = append(keyBytes[:len(keyBytes)-chunkLength], keyBytes[len(keyBytes)-(lastElementBytes):]...)
+		}
+
+		// encode key
+		idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
+	}
+	log.Printf("key: %s", idKey[id])
 }
 
 func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
