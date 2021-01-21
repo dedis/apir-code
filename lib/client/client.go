@@ -24,13 +24,13 @@ type state struct {
 }
 
 // general functions for both IT and DPF-based clients
-func decodeAnswer(a [][]byte) ([][][]field.Element, error) {
+func decodeAnswer(a [][]byte) ([][]field.Element, error) {
 	// servers answers
-	answer := make([][][]field.Element, len(a))
+	answer := make([][]field.Element, len(a))
 	for i, ans := range a {
 		buf := bytes.NewBuffer(ans)
 		dec := gob.NewDecoder(buf)
-		var serverAnswer [][]field.Element
+		var serverAnswer []field.Element
 		if err := dec.Decode(&serverAnswer); err != nil {
 			return nil, err
 		}

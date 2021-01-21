@@ -2,8 +2,6 @@ package database
 
 import (
 	"encoding/binary"
-	"fmt"
-	"log"
 	"math"
 
 	"golang.org/x/crypto/blake2b"
@@ -41,7 +39,6 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 	maxEntries := maxBytes / entryLength
 	blockLen := int(math.Ceil(float64(entryLength)/float64(chunkLength))) * maxEntries
 
-	log.Printf("numRows: %d, numColumns: %d, blockLen: %d\n", numRows, numColumns, blockLen)
 	// create all zeros db
 	db := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
 
@@ -64,7 +61,6 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 				}
 				e := new(field.Element).SetBytes(entry[j:end])
 				elements[index] = *e
-				fmt.Printf("%d ", index)
 				index += 1
 			}
 		}
