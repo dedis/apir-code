@@ -24,13 +24,11 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/encoding/gzip"
 )
 
 var creds credentials.TransportCredentials
 
 func init() {
-
 	// load servers certificates
 	cp := x509.NewCertPool()
 	for _, cert := range utils.ServerPublicKeys {
@@ -45,7 +43,6 @@ func init() {
 }
 
 func main() {
-
 	// set logs
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
@@ -108,6 +105,8 @@ func main() {
 
 	// send queries to servers
 	answers := runQueries(ctx, addresses, queries)
+	//log.Printf("recv answer: %#v", answers[0])
+	//log.Printf("recv answer: %#v", answers[1])
 
 	res, err := c.ReconstructBytes(answers)
 	if err != nil {
@@ -175,6 +174,7 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 		if dbInfo[0].NumRows != dbInfo[i].NumRows ||
 			dbInfo[0].NumColumns != dbInfo[i].NumColumns ||
 			dbInfo[0].BlockSize != dbInfo[i].BlockSize {
+			// TODO: add keyLength ad idLength
 			log.Fatal("got different database info from servers")
 		}
 	}
@@ -224,6 +224,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 		go func(j int) {
 			resCh <- query(subCtx, addrs[j], queries[j])
 			wg.Done()
+			//log.Printf("sent query: %#v", queries[j])
 		}(i)
 	}
 	wg.Wait()
@@ -247,9 +248,10 @@ func query(ctx context.Context, address string, query []byte) []byte {
 
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
-	var opts []grpc.CallOption
-	opts = append(opts, grpc.UseCompressor(gzip.Name))
-	answer, err := c.Query(ctx, q, opts...)
+	//var opts []grpc.CallOption
+	//opts = append(opts, grpc.UseCompressor(gzip.Name))
+	//answer, err := c.Query(ctx, q, opts...)
+	answer, err := c.Query(ctx, q)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)
 	}

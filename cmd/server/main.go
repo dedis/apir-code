@@ -17,7 +17,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	_ "google.golang.org/grpc/encoding/gzip"
+	//_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
@@ -109,10 +109,12 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
 	log.Print("got query request")
+	//log.Printf("recv query: %#v", qr.GetQuery())
 
 	a, err := s.Server.AnswerBytes(qr.GetQuery())
 	if err != nil {
 		return nil, err
 	}
+	//log.Printf("sent answer: %#v", a)
 	return &proto.QueryResponse{Answer: a}, nil
 }

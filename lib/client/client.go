@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"io"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
@@ -31,7 +32,7 @@ func decodeAnswer(a [][]byte) ([][][]field.Element, error) {
 	for i, ans := range a {
 		buf := bytes.NewBuffer(ans)
 		dec := gob.NewDecoder(buf)
-		var serverAnswer [][]field.Element
+		serverAnswer := make([][]field.Element, 0)
 		if err := dec.Decode(&serverAnswer); err != nil {
 			return nil, err
 		}
@@ -85,6 +86,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 }
 
 func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
+	fmt.Println(answers)
 	sum := make([][]field.Element, dbInfo.NumRows)
 
 	if dbInfo.BlockSize == cst.SingleBitBlockLength {
