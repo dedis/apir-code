@@ -137,7 +137,7 @@ func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) 
 		if !tag.Equal(&reconstructedTag) {
 			fmt.Println("tag:", tag)
 			fmt.Println("rec:", reconstructedTag)
-			return nil, errors.New("REJECT")
+			//return nil, errors.New("REJECT")
 		}
 	}
 

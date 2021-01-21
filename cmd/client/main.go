@@ -112,6 +112,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error during reconstruction: %v", err)
 	}
+	fmt.Println("res:", res)
 
 	// find correct key
 	resultBytes := field.VectorToBytes(res)
@@ -142,6 +143,7 @@ func main() {
 
 		// encode key
 		idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
+		fmt.Println(base64.StdEncoding.EncodeToString(keyBytes))
 	}
 	log.Printf("key: %s", idKey[id])
 }

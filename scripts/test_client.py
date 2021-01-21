@@ -21,5 +21,3 @@ for row in csv_f:
     retrievedKey = (outputString.split("key: ",1)[1]).strip()
     if (retrievedKey != keyUser):
         print("ERROR")
-
-
