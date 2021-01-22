@@ -142,7 +142,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		require.Equal(t, expectedKey, idKey[expectedID])
 
 		// retrieve only one key
-		break
+		//break
 	}
 	fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 }
