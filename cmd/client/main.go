@@ -222,7 +222,8 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
-			resCh <- query(subCtx, addrs[j], queries[j])
+			log.Printf("sent query %s", base64.StdEncoding.EncodeToString(queries[j]))
+			resCh <- query(subCtx, addrs[j], base64.StdEncoding.EncodeToString(queries[j]))
 			wg.Done()
 			//log.Printf("sent query: %#v", queries[j])
 		}(i)
@@ -239,7 +240,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	return q
 }
 
-func query(ctx context.Context, address string, query []byte) []byte {
+func query(ctx context.Context, address string, query string) []byte {
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -256,5 +257,12 @@ func query(ctx context.Context, address string, query []byte) []byte {
 		log.Fatalf("could not query: %v", err)
 	}
 
-	return answer.GetAnswer()
+	//return answer.GetAnswer()
+	log.Printf("received answer %s", answer.GetAnswer())
+	data, err := base64.StdEncoding.DecodeString(answer.GetAnswer())
+	if err != nil {
+		panic(err)
+	}
+
+	return data
 }

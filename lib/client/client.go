@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"io"
 
 	cst "github.com/si-co/vpir-code/lib/constants"
@@ -86,7 +85,6 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 }
 
 func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
-	fmt.Println(answers)
 	sum := make([][]field.Element, dbInfo.NumRows)
 
 	if dbInfo.BlockSize == cst.SingleBitBlockLength {
