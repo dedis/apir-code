@@ -76,6 +76,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 	// helping variables
 	zeroSlice := make([]byte, idLength)
 
+	totalTimer := monitor.NewMonitor()
 	// Iterate through the records
 	for {
 		// Read each record from csv
@@ -84,8 +85,6 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 			break
 		}
 		require.NoError(t, err)
-
-		totalTimer := monitor.NewMonitor()
 
 		// for testing
 		expectedID := record[0]
@@ -141,11 +140,11 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 
 		//fmt.Println(idKey[expectedID])
 		require.Equal(t, expectedKey, idKey[expectedID])
-		fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 
 		// retrieve only one key
 		break
 	}
+	fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 }
 
 func TestMultiBitVectorOneKb(t *testing.T) {
