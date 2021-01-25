@@ -10,11 +10,11 @@ service VPIR {
 }
 
 message QueryRequest {
-	bytes query = 1;
+	string query = 1;
 }
 
 message QueryResponse {
-	bytes answer = 1;
+	string answer = 1;
 }
 
 message DatabaseInfoRequest {}
@@ -23,4 +23,6 @@ message DatabaseInfoResponse {
         uint32 numRows = 1;
         uint32 numColumns = 2;
         uint32 blockLength = 3;
+        uint32 idLength = 4;
+        uint32 keyLength = 5;
 }

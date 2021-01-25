@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -17,7 +18,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	_ "google.golang.org/grpc/encoding/gzip"
+	//_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 
 	// generate db
 	// TODO: How do we choose dbLen (hence, nCols) ?
-	dbLen := 40 * 1024 * 8
+	dbLen := 5024 * 8
 	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
 	nRows := 1
 	nCols := dbLen / (nRows * chunkLength)
@@ -99,6 +100,8 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 		NumRows:     uint32(dbInfo.NumRows),
 		NumColumns:  uint32(dbInfo.NumColumns),
 		BlockLength: uint32(dbInfo.BlockSize),
+		IdLength:    uint32(dbInfo.IDLength),
+		KeyLength:   uint32(dbInfo.KeyLength),
 	}
 
 	return resp, nil
@@ -107,10 +110,16 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
 	log.Print("got query request")
+	log.Printf("recv query: %#v", qr.GetQuery())
 
-	a, err := s.Server.AnswerBytes(qr.GetQuery())
+	data, err := base64.StdEncoding.DecodeString(qr.GetQuery())
+	if err != nil {
+		panic(err)
+	}
+	a, err := s.Server.AnswerBytes(data)
 	if err != nil {
 		return nil, err
 	}
-	return &proto.QueryResponse{Answer: a}, nil
+	log.Printf("sent answer: %#v", base64.StdEncoding.EncodeToString(a))
+	return &proto.QueryResponse{Answer: base64.StdEncoding.EncodeToString(a)}, nil
 }

@@ -17,19 +17,18 @@ import (
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/encoding/gzip"
 )
 
 var creds credentials.TransportCredentials
 
 func init() {
-
 	// load servers certificates
 	cp := x509.NewCertPool()
 	for _, cert := range utils.ServerPublicKeys {
@@ -44,7 +43,6 @@ func init() {
 }
 
 func main() {
-
 	// set logs
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
@@ -107,6 +105,8 @@ func main() {
 
 	// send queries to servers
 	answers := runQueries(ctx, addresses, queries)
+	//log.Printf("recv answer: %#v", answers[0])
+	//log.Printf("recv answer: %#v", answers[1])
 
 	res, err := c.ReconstructBytes(answers)
 	if err != nil {
@@ -116,11 +116,12 @@ func main() {
 
 	// find correct key
 	resultBytes := field.VectorToBytes(res)
-	keyLength := 258
-	idLength := 45
-	chunkLength := 15
+	keyLength := dbInfo.KeyLength
+	idLength := dbInfo.IDLength
+	chunkLength := constants.ChunkBytesLength
 	zeroSlice := make([]byte, idLength)
 
+	// determine (id, key) length in bytes
 	lastElementBytes := keyLength % chunkLength
 	keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
 	totalLength := idLength + keyLengthWithPadding
@@ -173,6 +174,7 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 		if dbInfo[0].NumRows != dbInfo[i].NumRows ||
 			dbInfo[0].NumColumns != dbInfo[i].NumColumns ||
 			dbInfo[0].BlockSize != dbInfo[i].BlockSize {
+			// TODO: add keyLength ad idLength
 			log.Fatal("got different database info from servers")
 		}
 	}
@@ -200,6 +202,8 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 		NumRows:    int(answer.GetNumRows()),
 		NumColumns: int(answer.GetNumColumns()),
 		BlockSize:  int(answer.GetBlockLength()),
+		IDLength:   int(answer.GetIdLength()),
+		KeyLength:  int(answer.GetKeyLength()),
 	}
 
 	return dbInfo
@@ -218,8 +222,10 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
-			resCh <- query(subCtx, addrs[j], queries[j])
+			log.Printf("sent query %s", base64.StdEncoding.EncodeToString(queries[j]))
+			resCh <- query(subCtx, addrs[j], base64.StdEncoding.EncodeToString(queries[j]))
 			wg.Done()
+			//log.Printf("sent query: %#v", queries[j])
 		}(i)
 	}
 	wg.Wait()
@@ -234,7 +240,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	return q
 }
 
-func query(ctx context.Context, address string, query []byte) []byte {
+func query(ctx context.Context, address string, query string) []byte {
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -243,12 +249,20 @@ func query(ctx context.Context, address string, query []byte) []byte {
 
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
-	var opts []grpc.CallOption
-	opts = append(opts, grpc.UseCompressor(gzip.Name))
-	answer, err := c.Query(ctx, q, opts...)
+	//var opts []grpc.CallOption
+	//opts = append(opts, grpc.UseCompressor(gzip.Name))
+	//answer, err := c.Query(ctx, q, opts...)
+	answer, err := c.Query(ctx, q)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)
 	}
 
-	return answer.GetAnswer()
+	//return answer.GetAnswer()
+	log.Printf("received answer %s", answer.GetAnswer())
+	data, err := base64.StdEncoding.DecodeString(answer.GetAnswer())
+	if err != nil {
+		panic(err)
+	}
+
+	return data
 }
