@@ -718,6 +718,23 @@ func (z *Element) SetBytes(e []byte) *Element {
 	return z
 }
 
+
+func (z *Element) SetFixedLengthBytes(e [16]byte) *Element {
+	z[0] = binary.BigEndian.Uint64(e[0:8])
+	z[1] = binary.BigEndian.Uint64(e[8:16])
+	z[1] %= 9223372036854775807
+
+	// if z > q --> z -= q
+	// note: this is NOT constant time
+	if !(z[1] < 9223372036854775807 || (z[1] == 9223372036854775807 && (z[0] < 18446744073709551615))) {
+		var b uint64
+		z[0], b = bits.Sub64(z[0], 18446744073709551615, 0)
+		z[1], _ = bits.Sub64(z[1], 9223372036854775807, b)
+	}
+
+	return z
+}
+
 // SetBigInt sets z to v (regular form) and returns z in Montgomery form
 func (z *Element) SetBigInt(v *big.Int) *Element {
 	z.SetZero()

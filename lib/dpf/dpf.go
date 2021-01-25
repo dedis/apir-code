@@ -62,7 +62,8 @@ func convertBlock(out []field.Element, in []byte) {
   for i := 0; i < len(out); i++ {
     //prfL.Encrypt(in, in)
     aes128MMO(&keyL[0], &buf[0], &in[0])
-    out[i].SetBytes(buf[:])
+    //out[i].SetBytes(buf[:])
+    out[i].SetFixedLengthBytes(buf)
     in[0] += 1
   }
 }
