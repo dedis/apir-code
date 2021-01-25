@@ -7,9 +7,9 @@ import (
 )
 
 type DPFkey struct {
-  ServerIdx byte
-  Bytes []byte
-  FinalCW []field.Element
+	ServerIdx byte
+	Bytes     []byte
+	FinalCW   []field.Element
 }
 type block [16]byte
 
@@ -58,14 +58,14 @@ func clr(in *byte) {
 }
 
 func convertBlock(out []field.Element, in []byte) {
-  var buf [16]byte
-  for i := 0; i < len(out); i++ {
-    //prfL.Encrypt(in, in)
-    aes128MMO(&keyL[0], &buf[0], &in[0])
-    //out[i].SetBytes(buf[:])
-    out[i].SetFixedLengthBytes(buf)
-    in[0] += 1
-  }
+	var buf [16]byte
+	for i := 0; i < len(out); i++ {
+		//prfL.Encrypt(in, in)
+		aes128MMO(&keyL[0], &buf[0], &in[0])
+		//out[i].SetBytes(buf[:])
+		out[i].SetFixedLengthBytes(buf)
+		in[0] += 1
+	}
 }
 
 func prg(seed, s0, s1 *byte) (byte, byte) {
@@ -84,12 +84,12 @@ func Gen(alpha uint64, beta []field.Element, logN uint64) (DPFkey, DPFkey) {
 	if alpha >= (1<<logN) || logN > 63 {
 		panic("dpf: invalid parameters")
 	}
-  if len(beta) > 256 {
-    panic("dpf: maximum len(beta) is 256")
-  }
+	if len(beta) > 256 {
+		panic("dpf: maximum len(beta) is 256")
+	}
 	var ka, kb DPFkey
-  ka.ServerIdx = 0
-  kb.ServerIdx = 1
+	ka.ServerIdx = 0
+	kb.ServerIdx = 1
 	var CW []byte
 	s0 := new(block)
 	s1 := new(block)
@@ -100,7 +100,7 @@ func Gen(alpha uint64, beta []field.Element, logN uint64) (DPFkey, DPFkey) {
 	t0 := getT(&s0[0])
 	t1 := t0 ^ 1
 
-  betaLen := len(beta)
+	betaLen := len(beta)
 
 	clr(&s0[0])
 	clr(&s1[0])
@@ -173,36 +173,35 @@ func Gen(alpha uint64, beta []field.Element, logN uint64) (DPFkey, DPFkey) {
 		}
 	}
 
-  tmp0 := make([]field.Element, betaLen)
-  tmp1 := make([]field.Element, betaLen)
+	tmp0 := make([]field.Element, betaLen)
+	tmp1 := make([]field.Element, betaLen)
 
 	convertBlock(tmp0, s0[:])
 	convertBlock(tmp1, s1[:])
 
-  ka.FinalCW = make([]field.Element, betaLen)
-  kb.FinalCW = make([]field.Element, betaLen)
+	ka.FinalCW = make([]field.Element, betaLen)
+	kb.FinalCW = make([]field.Element, betaLen)
 
-  for i := 0; i < betaLen; i++ {
-    // FinalCW = (-1)^t . [\beta - Convert(s0) + Convert(s1)]
-    ka.FinalCW[i].Sub(&beta[i], &tmp0[i])
-    ka.FinalCW[i].Add(&ka.FinalCW[i], &tmp1[i])
-    if t1 != 0 {
-      ka.FinalCW[i].Neg(&ka.FinalCW[i])
-    }
+	for i := 0; i < betaLen; i++ {
+		// FinalCW = (-1)^t . [\beta - Convert(s0) + Convert(s1)]
+		ka.FinalCW[i].Sub(&beta[i], &tmp0[i])
+		ka.FinalCW[i].Add(&ka.FinalCW[i], &tmp1[i])
+		if t1 != 0 {
+			ka.FinalCW[i].Neg(&ka.FinalCW[i])
+		}
 
-    kb.FinalCW[i].Set(&ka.FinalCW[i])
-  }
+		kb.FinalCW[i].Set(&ka.FinalCW[i])
+	}
 
 	ka.Bytes = append(ka.Bytes, CW...)
 	kb.Bytes = append(kb.Bytes, CW...)
 	return ka, kb
 }
 
-
 func Eval(k DPFkey, x uint64, logN uint64, out []field.Element) {
-  if len(out) != len(k.FinalCW) {
-    panic("dpf: len(out) != len(k.FinalCW)")
-  }
+	if len(out) != len(k.FinalCW) {
+		panic("dpf: len(out) != len(k.FinalCW)")
+	}
 
 	s := new(block)
 	sL := new(block)
@@ -235,41 +234,41 @@ func Eval(k DPFkey, x uint64, logN uint64, out []field.Element) {
 
 	convertBlock(out, s[:])
 
-  for i := 0; i < len(out); i++ {
-    if t != 0 {
-      out[i].Add(&out[i], &k.FinalCW[i])
-    }
-    if k.ServerIdx != 0 {
-      out[i].Neg(&out[i])
-    }
-  }
+	for i := 0; i < len(out); i++ {
+		if t != 0 {
+			out[i].Add(&out[i], &k.FinalCW[i])
+		}
+		if k.ServerIdx != 0 {
+			out[i].Neg(&out[i])
+		}
+	}
 }
 
 func evalFullRecursive(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, out [][]field.Element) {
-  if *index >= uint64(len(out)) {
-    return
-  }
+	if *index >= uint64(len(out)) {
+		return
+	}
 
 	if lvl == stop {
 		ss := blockStack[lvl][0]
 		*ss = *s
 		//aes128MMO(&keyL[0], &ss[0], &ss[0])
-    if len(out[*index]) != len(k.FinalCW) {
-      panic("dpf: len(out[*index]) != len(k.FinalCW)")
-    }
+		if len(out[*index]) != len(k.FinalCW) {
+			panic("dpf: len(out[*index]) != len(k.FinalCW)")
+		}
 
-    convertBlock(out[*index], ss[:])
+		convertBlock(out[*index], ss[:])
 
-    for j := 0; j < len(k.FinalCW); j++ {
-      if t != 0 {
-        out[*index][j].Add(&out[*index][j], &k.FinalCW[j])
-      }
-      if k.ServerIdx != 0 {
-        out[*index][j].Neg(&out[*index][j])
-      }
-    }
+		for j := 0; j < len(k.FinalCW); j++ {
+			if t != 0 {
+				out[*index][j].Add(&out[*index][j], &k.FinalCW[j])
+			}
+			if k.ServerIdx != 0 {
+				out[*index][j].Neg(&out[*index][j])
+			}
+		}
 
-    *index += 1
+		*index += 1
 		return
 	}
 	sL := blockStack[lvl][0]
@@ -294,6 +293,62 @@ func EvalFull(key DPFkey, logN uint64, out [][]field.Element) {
 	t := key.Bytes[16]
 	stop := logN
 
-  index := uint64(0)
+	index := uint64(0)
 	evalFullRecursive(key, s, t, 0, stop, &index, out)
+}
+
+func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, blockLength int, out []field.Element) {
+	blockLengthUint := uint64(blockLength)
+	if *index >= uint64(len(out)/blockLength) {
+		return
+	}
+
+	if lvl == stop {
+		ss := blockStack[lvl][0]
+		*ss = *s
+		//aes128MMO(&keyL[0], &ss[0], &ss[0])
+		//if len(out[*index])/blockLength != len(k.FinalCW) {
+		//panic("dpf: len(out[*index]) != len(k.FinalCW)")
+		//}
+
+		startBlock := *index * blockLengthUint
+		endBlock := (*index + 1) * blockLengthUint
+		convertBlock(out[startBlock:endBlock], ss[:])
+
+		for j := uint64(0); j < uint64(len(k.FinalCW)); j++ {
+			if t != 0 {
+				out[startBlock+j].Add(&out[startBlock+j], &k.FinalCW[j])
+			}
+			if k.ServerIdx != 0 {
+				out[startBlock+j].Neg(&out[startBlock+j])
+			}
+		}
+
+		*index++
+		return
+	}
+	sL := blockStack[lvl][0]
+	sR := blockStack[lvl][1]
+	tL, tR := prg(&s[0], &sL[0], &sR[0])
+	if t != 0 {
+		sCW := k.Bytes[17+lvl*18 : 17+lvl*18+16]
+		tLCW := k.Bytes[17+lvl*18+16]
+		tRCW := k.Bytes[17+lvl*18+17]
+		xor16(&sL[0], &sL[0], &sCW[0])
+		xor16(&sR[0], &sR[0], &sCW[0])
+		tL ^= tLCW
+		tR ^= tRCW
+	}
+	evalFullRecursiveFlatten(k, sL, tL, lvl+1, stop, index, blockLength, out)
+	evalFullRecursiveFlatten(k, sR, tR, lvl+1, stop, index, blockLength, out)
+}
+
+func EvalFullFlatten(key DPFkey, logN uint64, blockLength int, out []field.Element) {
+	s := new(block)
+	copy(s[:], key.Bytes[:16])
+	t := key.Bytes[16]
+	stop := logN
+
+	index := uint64(0)
+	evalFullRecursiveFlatten(key, s, t, 0, stop, &index, blockLength, out)
 }
