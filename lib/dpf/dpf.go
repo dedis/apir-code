@@ -312,8 +312,17 @@ func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint6
 		//}
 
 		startBlock := *index * blockLengthUint
-		endBlock := (*index + 1) * blockLengthUint
-		convertBlock(out[startBlock:endBlock], ss[:])
+		//endBlock := (*index + 1) * blockLengthUint
+
+		var buf [16]byte
+		for i := 0; i < blockLength; i++ {
+			//prfL.Encrypt(in, in)
+			aes128MMO(&keyL[0], &buf[0], &ss[0])
+			//out[i].SetBytes(buf[:])
+			out[int(startBlock)+i].SetFixedLengthBytes(buf)
+			ss[0]++
+			//convertBlock(out[startBlock:endBlock], ss[:])
+		}
 
 		for j := uint64(0); j < uint64(len(k.FinalCW)); j++ {
 			if t != 0 {
