@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"math/bits"
+	"sync"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/dpf"
@@ -13,6 +14,7 @@ import (
 type DPF struct {
 	db        *database.DB
 	serverNum byte
+	mu        sync.Mutex
 }
 
 func NewDPF(db *database.DB, serverNum byte) *DPF {
@@ -48,18 +50,10 @@ func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 }
 
 func (s *DPF) Answer(key dpf.DPFkey) []field.Element {
-	// evaluate dpf to recover the full client query
-	// TODO: make DPF work on 1d array
-	//tmp := make([][]field.Element, s.db.NumColumns)
-	//for j := 0; j < len(tmp); j++ {
-	//tmp[j] = make([]field.Element, s.db.BlockSize+1)
-	//}
-	//dpf.EvalFull(key, uint64(bits.Len(uint(s.db.NumColumns))), tmp)
-
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
 	dpf.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns))), s.db.BlockSize+1, q)
-	//for i := 0; i < s.db.NumColumns; i++ {
-	//copy(q[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp[i])
-	//}
+
 	return answer(q, s.db)
 }

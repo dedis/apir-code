@@ -111,7 +111,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("error during reconstruction: %v", err)
 	}
-	fmt.Println("res:", res)
 
 	// find correct key
 	resultBytes := field.VectorToBytes(res)
