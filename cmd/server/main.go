@@ -18,7 +18,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	//_ "google.golang.org/grpc/encoding/gzip"
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
@@ -44,11 +44,11 @@ func main() {
 
 	// generate db
 	// TODO: How do we choose dbLen (hence, nCols) ?
-	dbLen := 5024 * 8
+	dbLen := 40 * 1024 * 8
 	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
 	nRows := 1
 	nCols := dbLen / (nRows * chunkLength)
-	db, err := database.GenerateKeyDB("data/random_id_key_test.csv", chunkLength, nRows, nCols)
+	db, err := database.GenerateKeyDB("data/random_id_key.csv", chunkLength, nRows, nCols)
 	if err != nil {
 		log.Fatalf("could not generate keys db: %v", err)
 	}

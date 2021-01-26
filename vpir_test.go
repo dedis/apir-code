@@ -47,7 +47,7 @@ func TestRetrieveRandomKeyBlockMatrix(t *testing.T) {
 }
 
 func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
-	path := "data/random_id_key_test.csv"
+	path := "data/random_id_key.csv"
 
 	// generate db from data
 	db, err := database.GenerateKeyDB(path, chunkLength, nRows, nCols)

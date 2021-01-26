@@ -6,7 +6,7 @@ import os
 os.chdir("..")
 
 # open test file
-f = open('data/random_id_key_test.csv')
+f = open('data/random_id_key.csv')
 csv_f = csv.reader(f)
 
 for row in csv_f:

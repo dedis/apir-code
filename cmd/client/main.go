@@ -24,6 +24,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/encoding/gzip"
 )
 
 var creds credentials.TransportCredentials
@@ -105,8 +106,6 @@ func main() {
 
 	// send queries to servers
 	answers := runQueries(ctx, addresses, queries)
-	//log.Printf("recv answer: %#v", answers[0])
-	//log.Printf("recv answer: %#v", answers[1])
 
 	res, err := c.ReconstructBytes(answers)
 	if err != nil {
@@ -173,8 +172,9 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 	for i := range dbInfo {
 		if dbInfo[0].NumRows != dbInfo[i].NumRows ||
 			dbInfo[0].NumColumns != dbInfo[i].NumColumns ||
-			dbInfo[0].BlockSize != dbInfo[i].BlockSize {
-			// TODO: add keyLength ad idLength
+			dbInfo[0].BlockSize != dbInfo[i].BlockSize ||
+			dbInfo[0].IDLength != dbInfo[i].IDLength ||
+			dbInfo[0].KeyLength != dbInfo[i].KeyLength {
 			log.Fatal("got different database info from servers")
 		}
 	}
@@ -222,10 +222,8 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	for i := 0; i < len(queries); i++ {
 		wg.Add(1)
 		go func(j int) {
-			log.Printf("sent query %s", base64.StdEncoding.EncodeToString(queries[j]))
 			resCh <- query(subCtx, addrs[j], base64.StdEncoding.EncodeToString(queries[j]))
 			wg.Done()
-			//log.Printf("sent query: %#v", queries[j])
 		}(i)
 	}
 	wg.Wait()
@@ -249,10 +247,10 @@ func query(ctx context.Context, address string, query string) []byte {
 
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
-	//var opts []grpc.CallOption
-	//opts = append(opts, grpc.UseCompressor(gzip.Name))
-	//answer, err := c.Query(ctx, q, opts...)
-	answer, err := c.Query(ctx, q)
+	var opts []grpc.CallOption
+	opts = append(opts, grpc.UseCompressor(gzip.Name))
+	answer, err := c.Query(ctx, q, opts...)
+	//answer, err := c.Query(ctx, q)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)
 	}
