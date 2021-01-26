@@ -77,7 +77,7 @@ func main() {
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{Server: s})
-	log.Printf("Server %d is listening at %s", *sid, addr)
+	log.Printf("is listening at %s", addr)
 
 	if err := rpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
