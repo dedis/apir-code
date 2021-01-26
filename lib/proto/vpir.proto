@@ -10,11 +10,11 @@ service VPIR {
 }
 
 message QueryRequest {
-	string query = 1;
+	bytes query = 1;
 }
 
 message QueryResponse {
-	string answer = 1;
+	bytes answer = 1;
 }
 
 message DatabaseInfoRequest {}

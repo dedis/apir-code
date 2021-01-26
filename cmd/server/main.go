@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -110,16 +109,11 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
 	log.Print("got query request")
-	log.Printf("recv query: %#v", qr.GetQuery())
 
-	data, err := base64.StdEncoding.DecodeString(qr.GetQuery())
-	if err != nil {
-		panic(err)
-	}
-	a, err := s.Server.AnswerBytes(data)
+	a, err := s.Server.AnswerBytes(qr.GetQuery())
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("sent answer: %#v", base64.StdEncoding.EncodeToString(a))
-	return &proto.QueryResponse{Answer: base64.StdEncoding.EncodeToString(a)}, nil
+
+	return &proto.QueryResponse{Answer: a}, nil
 }
