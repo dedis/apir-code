@@ -163,19 +163,14 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 	wg.Wait()
 	close(resCh)
 
-	// check if db info are all equal before returning
 	dbInfo := make([]*database.Info, 0)
 	for i := range resCh {
 		dbInfo = append(dbInfo, i)
 	}
-	for i := range dbInfo {
-		if dbInfo[0].NumRows != dbInfo[i].NumRows ||
-			dbInfo[0].NumColumns != dbInfo[i].NumColumns ||
-			dbInfo[0].BlockSize != dbInfo[i].BlockSize ||
-			dbInfo[0].IDLength != dbInfo[i].IDLength ||
-			dbInfo[0].KeyLength != dbInfo[i].KeyLength {
-			log.Fatal("got different database info from servers")
-		}
+
+	// check if db info are all equal before returning
+	if !equalDBInfo(dbInfo) {
+		log.Fatal("got different database info from servers")
 	}
 
 	return dbInfo[0]
@@ -255,4 +250,18 @@ func query(ctx context.Context, address string, query []byte) []byte {
 	}
 
 	return answer.GetAnswer()
+}
+
+func equalDBInfo(info []*database.Info) bool {
+	for i := range info {
+		if info[0].NumRows != info[i].NumRows ||
+			info[0].NumColumns != info[i].NumColumns ||
+			info[0].BlockSize != info[i].BlockSize ||
+			info[0].IDLength != info[i].IDLength ||
+			info[0].KeyLength != info[i].KeyLength {
+			return false
+		}
+	}
+
+	return true
 }
