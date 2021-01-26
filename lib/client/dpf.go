@@ -70,6 +70,6 @@ func (c *DPF) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	return c.Reconstruct(answer)
 }
 
-func (c *DPF) Reconstruct(answers [][][]field.Element) ([]field.Element, error) {
+func (c *DPF) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 	return reconstruct(answers, c.dbInfo, c.state)
 }

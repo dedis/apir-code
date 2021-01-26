@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"io"
-
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"io"
 )
 
 // Client represents the client instance in both the IT and DPF-based schemes
@@ -25,13 +24,13 @@ type state struct {
 }
 
 // general functions for both IT and DPF-based clients
-func decodeAnswer(a [][]byte) ([][][]field.Element, error) {
+func decodeAnswer(a [][]byte) ([][]field.Element, error) {
 	// servers answers
-	answer := make([][][]field.Element, len(a))
+	answer := make([][]field.Element, len(a))
 	for i, ans := range a {
 		buf := bytes.NewBuffer(ans)
 		dec := gob.NewDecoder(buf)
-		serverAnswer := make([][]field.Element, 0)
+		var serverAnswer []field.Element
 		if err := dec.Decode(&serverAnswer); err != nil {
 			return nil, err
 		}
@@ -83,7 +82,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	return st, nil
 }
 
-func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
+func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
 	sum := make([][]field.Element, dbInfo.NumRows)
 
 	if dbInfo.BlockSize == cst.SingleBitBlockLength {
@@ -91,7 +90,7 @@ func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) 
 		for i := 0; i < dbInfo.NumRows; i++ {
 			sum[i] = make([]field.Element, 1)
 			for k := range answers {
-				sum[i][0].Add(&sum[i][0], &answers[k][i][0])
+				sum[i][0].Add(&sum[i][0], &answers[k][i])
 			}
 		}
 		for i := 0; i < dbInfo.NumRows; i++ {
@@ -117,7 +116,7 @@ func reconstruct(answers [][][]field.Element, dbInfo *database.Info, st *state) 
 		sum[i] = make([]field.Element, dbInfo.BlockSize+1)
 		for b := 0; b < dbInfo.BlockSize+1; b++ {
 			for k := range answers {
-				sum[i][b].Add(&sum[i][b], &answers[k][i][b])
+				sum[i][b].Add(&sum[i][b], &answers[k][i*(dbInfo.BlockSize+1)+b])
 			}
 		}
 	}

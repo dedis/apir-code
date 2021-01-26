@@ -86,7 +86,6 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		}
 		require.NoError(t, err)
 
-
 		// for testing
 		expectedID := record[0]
 		expectedKey := record[1]
@@ -103,7 +102,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		// get servers answers
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
-		answers := [][][]field.Element{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
 		//fmt.Println("client 0", "answer:", answers[0])
 		//fmt.Println("client 1", "answer:", answers[1])
@@ -252,11 +251,16 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 		a0 := s0.Answer(queries[0])
 		a1 := s1.Answer(queries[1])
 
-		answers := [][][]field.Element{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
+		if db.BlockSize == constants.SingleBitBlockLength {
+			require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns:i%db.NumColumns+1], res)
+		} else {
+			require.ElementsMatch(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
+		}
+
 	}
 	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
 }
@@ -273,11 +277,11 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
 
-		answers := [][][]field.Element{a0, a1}
+		answers := [][]field.Element{a0, a1}
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns], res)
+		require.ElementsMatch(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
 	}
 
 	fmt.Printf("Total time dpf-based %s: %.1fms\n", testName, totalTimer.Record())
@@ -311,7 +315,7 @@ func TestBytesDPF(t *testing.T) {
 
 	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
-	require.ElementsMatch(t, db.Entries[idHash/db.NumColumns][idHash%db.NumColumns], res)
+	require.ElementsMatch(t, db.Entries[idHash/db.NumColumns][(idHash%db.NumColumns)*db.BlockSize:(idHash%db.NumColumns+1)*db.BlockSize], res)
 }
 
 /*

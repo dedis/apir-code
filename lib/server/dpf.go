@@ -47,13 +47,19 @@ func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (s *DPF) Answer(key dpf.DPFkey) [][]field.Element {
+func (s *DPF) Answer(key dpf.DPFkey) []field.Element {
 	// evaluate dpf to recover the full client query
-	q := make([][]field.Element, s.db.NumColumns)
-	for j := 0; j < len(q); j++ {
-		q[j] = make([]field.Element, s.db.BlockSize+1)
-	}
-	dpf.EvalFull(key, uint64(bits.Len(uint(s.db.NumColumns))), q)
+	// TODO: make DPF work on 1d array
+	//tmp := make([][]field.Element, s.db.NumColumns)
+	//for j := 0; j < len(tmp); j++ {
+	//tmp[j] = make([]field.Element, s.db.BlockSize+1)
+	//}
+	//dpf.EvalFull(key, uint64(bits.Len(uint(s.db.NumColumns))), tmp)
 
+	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
+	dpf.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns))), s.db.BlockSize+1, q)
+	//for i := 0; i < s.db.NumColumns; i++ {
+	//copy(q[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp[i])
+	//}
 	return answer(q, s.db)
 }

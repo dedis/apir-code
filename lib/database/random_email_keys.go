@@ -2,7 +2,6 @@ package database
 
 import (
 	"encoding/binary"
-	"log"
 	"math"
   "sort"
 
@@ -41,7 +40,6 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 	maxEntries := maxBytes / entryLength
 	blockLen := int(math.Ceil(float64(entryLength)/float64(chunkLength))) * maxEntries
 
-	log.Printf("numRows: %d, numColumns: %d, blockLen: %d\n", numRows, numColumns, blockLen)
 	// create all zeros db
 	db := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
 
@@ -51,8 +49,9 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 
 	// embed data into field elements
 	for k, v := range hashTable {
-		elements := make([]field.Element, 0)
+		elements := field.ZeroVector(blockLen)
 		// loop over all entries in v to avoid mixing bytes in element
+		index := 0
 		for i := 0; i < len(v); i += entryLength {
 			entry := v[i : i+entryLength]
 			// embed all bytes
@@ -62,14 +61,13 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 					end = len(entry)
 				}
 				e := new(field.Element).SetBytes(entry[j:end])
-        e.SetBytes(entry[j:j+1])
-				elements = append(elements, *e)
+				elements[index] = *e
+				index += 1
 			}
 		}
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
-		//fmt.Println("len in db:", len(db.Entries[k/numColumns][k%numColumns]), "blockLen:", blockLen, "len(elements):", len(elements), "len v:", len(v))
-		copy(db.Entries[k/numColumns][k%numColumns], elements)
+		copy(db.Entries[k/numColumns][(k%numColumns)*blockLen:(k%numColumns+1)*blockLen], elements)
 	}
 
 	return db, nil
