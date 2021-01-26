@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"log"
 	"math"
+  "sort"
 
 	"golang.org/x/crypto/blake2b"
 
@@ -61,6 +62,7 @@ func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, erro
 					end = len(entry)
 				}
 				e := new(field.Element).SetBytes(entry[j:end])
+        e.SetBytes(entry[j:j+1])
 				elements = append(elements, *e)
 			}
 		}
@@ -78,8 +80,16 @@ func generateHashTable(pairs map[string][]byte, maxNumHashKeys, idLength int) (m
 	// prepare db
 	db := make(map[int][]byte)
 
+  keys := make([]string, 0)
+  for k, _ := range pairs {
+    keys = append(keys, k)
+  }
+
+  sort.Strings(keys)
+
 	// range over all id,v pairs and assign every pair to a given bucket
-	for id, v := range pairs {
+	for _, id := range keys {
+    v := pairs[id]
 		hashKey := HashToIndex(id, maxNumHashKeys)
 
 		// prepare entry

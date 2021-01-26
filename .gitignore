@@ -20,3 +20,7 @@
 # Profiling files
 *.prof
 .*.swp
+
+# Binaries
+cmd/client/client
+cmd/server/server

@@ -71,8 +71,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 		// +1 to BlockSize for recovering true value
 		st.a = make([]field.Element, dbInfo.BlockSize+1)
 		st.a[0] = field.One()
-		st.a[1] = st.alpha
-		for i := 2; i < len(st.a); i++ {
+		for i := 1; i < len(st.a); i++ {
 			st.a[i].Mul(&st.a[i-1], &st.alpha)
 		}
 	} else {
