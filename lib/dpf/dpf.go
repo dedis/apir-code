@@ -64,7 +64,7 @@ func convertBlock(out []field.Element, in []byte) {
 		aes128MMO(&keyL[0], &buf[0], &in[0])
 		//out[i].SetBytes(buf[:])
 		out[i].SetFixedLengthBytes(buf)
-		in[0] += 1
+		in[0]++
 	}
 }
 
@@ -307,24 +307,22 @@ func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint6
 		ss := blockStack[lvl][0]
 		*ss = *s
 		//aes128MMO(&keyL[0], &ss[0], &ss[0])
-		//if len(out[*index])/blockLength != len(k.FinalCW) {
-		//panic("dpf: len(out[*index]) != len(k.FinalCW)")
-		//}
-
-		startBlock := *index * blockLengthUint
-		//endBlock := (*index + 1) * blockLengthUint
-
-		var buf [16]byte
-		for i := 0; i < blockLength; i++ {
-			//prfL.Encrypt(in, in)
-			aes128MMO(&keyL[0], &buf[0], &ss[0])
-			//out[i].SetBytes(buf[:])
-			out[int(startBlock)+i].SetFixedLengthBytes(buf)
-			ss[0]++
-			//convertBlock(out[startBlock:endBlock], ss[:])
+		if blockLength != len(k.FinalCW) {
+			panic("dpf: blockLength != len(k.FinalCW)")
 		}
 
+		startBlock := *index * blockLengthUint
+
+		// convertBlock
+		var buf [16]byte
+
 		for j := uint64(0); j < uint64(len(k.FinalCW)); j++ {
+			// convertBlock part
+			//prfL.Encrypt(in, in)
+			aes128MMO(&keyL[0], &buf[0], &ss[0])
+			out[startBlock+j].SetFixedLengthBytes(buf)
+			ss[0]++
+
 			if t != 0 {
 				out[startBlock+j].Add(&out[startBlock+j], &k.FinalCW[j])
 			}
