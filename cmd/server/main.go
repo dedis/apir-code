@@ -35,11 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not load the server config file: %v", err)
 	}
-	addresses, err := utils.ServerAddresses(config)
-	if err != nil {
-		log.Fatalf("could not parse servers addresses: %v", err)
-	}
-	addr := addresses[*sid]
+	addr := config.Addresses[*sid]
 
 	// generate db
 	// TODO: How do we choose dbLen (hence, nCols) ?

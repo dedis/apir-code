@@ -11,6 +11,8 @@ import (
 type Config struct {
 	DBLength int
 	Servers  map[string]Server
+
+	Addresses []string
 }
 
 type Server struct {
@@ -20,16 +22,14 @@ type Server struct {
 }
 
 func LoadConfig(configFile string) (*Config, error) {
+	// load config file
 	c := new(Config)
 	_, err := toml.DecodeFile(configFile, c)
 	if err != nil {
 		return nil, xerrors.Errorf("toml decoding: %v", err)
 	}
 
-	return c, nil
-}
-
-func ServerAddresses(c *Config) ([]string, error) {
+	// parse and store server addresses
 	addresses := make([]string, len(c.Servers))
 	for index, server := range c.Servers {
 		i, err := strconv.Atoi(index)
@@ -38,6 +38,7 @@ func ServerAddresses(c *Config) ([]string, error) {
 		}
 		addresses[i] = fmt.Sprintf("%s:%d", server.IP, server.Port)
 	}
+	c.Addresses = addresses
 
-	return addresses, nil
+	return c, nil
 }

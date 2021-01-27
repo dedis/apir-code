@@ -27,6 +27,9 @@ import (
 
 var creds credentials.TransportCredentials
 
+type localClient struct {
+}
+
 func init() {
 	// load servers certificates
 	cp := x509.NewCertPool()
@@ -56,10 +59,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not load the config file: %v", err)
 	}
-	addresses, err := utils.ServerAddresses(config)
-	if err != nil {
-		log.Fatalf("could not parse servers addresses: %v", err)
-	}
+	addresses := config.Addresses
 
 	// random generator
 	prg := utils.RandomPRG()
