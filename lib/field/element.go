@@ -257,6 +257,7 @@ func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
 		return nil, err
 	}
+
 	zs := make([]Element, length)
 	for i := 0; i < length; i++ {
 		zs[i].SetBytes(bytes[i*Bytes : (i+1)*Bytes])
@@ -717,7 +718,6 @@ func (z *Element) SetBytes(e []byte) *Element {
 
 	return z
 }
-
 
 func (z *Element) SetFixedLengthBytes(e [16]byte) *Element {
 	z[0] = binary.BigEndian.Uint64(e[0:8])

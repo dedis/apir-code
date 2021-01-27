@@ -201,7 +201,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 		log.Fatal("queries and server addresses length mismatch")
 	}
 
-	subCtx, cancel := context.WithTimeout(ctx, time.Second)
+	subCtx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
