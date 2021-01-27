@@ -3,13 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"math"
 	"os"
@@ -64,12 +62,7 @@ func main() {
 	}
 
 	// random generator
-	var key utils.PRGKey
-	_, err = io.ReadFull(rand.Reader, key[:])
-	if err != nil {
-		log.Fatalf("PRG initialization error: %v", err)
-	}
-	prg := utils.NewPRG(&key)
+	prg := utils.RandomPRG()
 
 	// initialize top level context
 	ctx := context.Background()
@@ -112,7 +105,7 @@ func main() {
 		log.Fatalf("error during reconstruction: %v", err)
 	}
 
-	// find correct key
+	// retrieve bytes from field elements
 	resultBytes := field.VectorToBytes(res)
 	keyLength := dbInfo.KeyLength
 	idLength := dbInfo.IDLength
@@ -205,10 +198,10 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 
 func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte {
 	if len(addrs) != len(queries) {
-		log.Fatal("Queries and server addresses length mismatch")
+		log.Fatal("queries and server addresses length mismatch")
 	}
 
-	subCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	subCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
@@ -223,7 +216,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	wg.Wait()
 	close(resCh)
 
-	// combinate ansers of all the servers
+	// combinate anwsers of all the servers
 	q := make([][]byte, 0)
 	for v := range resCh {
 		q = append(q, v)
