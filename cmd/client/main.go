@@ -69,7 +69,6 @@ func main() {
 
 	// get db info
 	dbInfo := runDBInfoRequest(ctx, addresses)
-	log.Printf("databaseInfo: %#v", dbInfo)
 
 	// start correct client
 	var c client.Client
@@ -130,12 +129,12 @@ func main() {
 		keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
 		// remove padding for last element
 		if lastElementBytes != 0 {
-			keyBytes = append(keyBytes[:len(keyBytes)-chunkLength], keyBytes[len(keyBytes)-(lastElementBytes):]...)
+			keyBytes = append(keyBytes[:len(keyBytes)-chunkLength],
+				keyBytes[len(keyBytes)-(lastElementBytes):]...)
 		}
 
 		// encode key
 		idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
-		fmt.Println(base64.StdEncoding.EncodeToString(keyBytes))
 	}
 	log.Printf("key: %s", idKey[id])
 }
@@ -166,8 +165,9 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 		log.Fatal("got different database info from servers")
 	}
 
-	return dbInfo[0]
+	log.Printf("databaseInfo: %#v", dbInfo[0])
 
+	return dbInfo[0]
 }
 
 func dbInfo(ctx context.Context, address string) *database.Info {
