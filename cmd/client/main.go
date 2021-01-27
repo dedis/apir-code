@@ -237,7 +237,6 @@ func query(ctx context.Context, address string, query []byte) []byte {
 	var opts []grpc.CallOption
 	opts = append(opts, grpc.UseCompressor(gzip.Name))
 	answer, err := c.Query(ctx, q, opts...)
-	//answer, err := c.Query(ctx, q)
 	if err != nil {
 		log.Fatalf("could not query: %v", err)
 	}
