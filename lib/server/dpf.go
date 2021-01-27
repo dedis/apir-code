@@ -53,7 +53,6 @@ func (s *DPF) Answer(key dpf.DPFkey) []field.Element {
 	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
 	s.mu.Lock()
 	dpf.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns))), s.db.BlockSize+1, q)
-
 	s.mu.Unlock()
 	return answer(q, s.db)
 }
