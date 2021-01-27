@@ -28,6 +28,7 @@ import (
 var creds credentials.TransportCredentials
 
 type localClient struct {
+	dbInfo *database.Info
 }
 
 func init() {
@@ -59,7 +60,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not load the config file: %v", err)
 	}
-	addresses := config.Addresses
 
 	// random generator
 	prg := utils.RandomPRG()
@@ -68,7 +68,7 @@ func main() {
 	ctx := context.Background()
 
 	// get db info
-	dbInfo := runDBInfoRequest(ctx, addresses)
+	dbInfo := runDBInfoRequest(ctx, config.Addresses)
 
 	// start correct client
 	var c client.Client
@@ -91,13 +91,13 @@ func main() {
 	log.Printf("id: %s, hashKey: %d", id, idHash)
 
 	// query for given idHash
-	queries, err := c.QueryBytes(idHash, len(addresses))
+	queries, err := c.QueryBytes(idHash, len(config.Addresses))
 	if err != nil {
 		log.Fatal("error when executing query")
 	}
 
 	// send queries to servers
-	answers := runQueries(ctx, addresses, queries)
+	answers := runQueries(ctx, config.Addresses, queries)
 
 	res, err := c.ReconstructBytes(answers)
 	if err != nil {
