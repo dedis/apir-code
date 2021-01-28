@@ -1,12 +1,13 @@
 package utils
 
+// adapted from https://github.com/henrycg/prio/blob/master/utils/rand.go
+
 import (
 	"bufio"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"io"
-	"math/big"
 	"sync"
 )
 
@@ -80,16 +81,6 @@ func NewBufPRG(prg *PRGReader) *BufPRGReader {
 	out := new(BufPRGReader)
 	out.Key = prg.Key
 	out.stream = bufio.NewReaderSize(prg, bufSize)
-	return out
-}
-
-func (b *BufPRGReader) RandInt(mod *big.Int) *big.Int {
-	out, err := rand.Int(b.stream, mod)
-	if err != nil {
-		// TODO: Replace this with non-absurd error handling.
-		panic("Catastrophic randomness failure!")
-	}
-
 	return out
 }
 
