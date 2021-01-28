@@ -29,7 +29,9 @@ var creds credentials.TransportCredentials
 
 type localClient struct {
 	connections map[string]*grpc.ClientConn
-	dbInfo      *database.Info
+	ctx         context.Context
+
+	dbInfo *database.Info
 }
 
 func init() {
@@ -79,7 +81,7 @@ func main() {
 	prg := utils.RandomPRG()
 
 	// initialize top level context
-	ctx := context.Background()
+	lc.ctx = context.Background()
 
 	// connect to servers and store connections
 	lc.connections = make(map[string]*grpc.ClientConn)
@@ -89,7 +91,7 @@ func main() {
 	}
 
 	// get and store db info
-	dbInfo := lc.runDBInfo(ctx)
+	dbInfo := lc.runDBInfo()
 	lc.dbInfo = dbInfo
 
 	// start correct client
@@ -119,7 +121,7 @@ func main() {
 	}
 
 	// send queries to servers
-	answers := lc.runQueries(ctx, queries)
+	answers := lc.runQueries(queries)
 
 	res, err := c.ReconstructBytes(answers)
 	if err != nil {
@@ -161,8 +163,8 @@ func main() {
 	log.Printf("key: %s", idKey[id])
 }
 
-func (lc *localClient) runDBInfo(ctx context.Context) *database.Info {
-	subCtx, cancel := context.WithTimeout(ctx, time.Second)
+func (lc *localClient) runDBInfo() *database.Info {
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Second)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
@@ -213,12 +215,12 @@ func dbInfo(ctx context.Context, conn *grpc.ClientConn) *database.Info {
 	return dbInfo
 }
 
-func (lc *localClient) runQueries(ctx context.Context, queries [][]byte) [][]byte {
+func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	if len(lc.connections) != len(queries) {
 		log.Fatal("queries and server addresses length mismatch")
 	}
 
-	subCtx, cancel := context.WithTimeout(ctx, time.Minute)
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Minute)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
