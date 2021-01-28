@@ -20,6 +20,7 @@ type DPF struct {
 	state  *state
 }
 
+// NewDPF returns a new client for the DPF-based single- and multi-bit schemes
 func NewDPF(rnd io.Reader, info database.Info) *DPF {
 	return &DPF{
 		rnd:    rnd,
@@ -28,6 +29,8 @@ func NewDPF(rnd io.Reader, info database.Info) *DPF {
 	}
 }
 
+// QueryBytes executes Query and encodes the result a byte array for each
+// server
 func (c *DPF) QueryBytes(index, numServers int) ([][]byte, error) {
 	queries := c.Query(index, numServers)
 

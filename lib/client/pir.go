@@ -2,10 +2,10 @@ package client
 
 import (
 	"crypto/rand"
-	"math"
+	"io"
 
-	cst "github.com/si-co/vpir-code/lib/constants"
-	"golang.org/x/crypto/blake2b"
+	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Information theoretic classical PIR client for scheme working in GF(2).
@@ -14,55 +14,39 @@ import (
 
 // Client for the information theoretic classical PIR single-bit scheme
 type ITSingleByte struct {
-	xof        blake2b.XOF
-	state      *itSingleByteState
-	rebalanced bool
-}
-
-type itSingleByteState struct {
-	ix       int
-	iy       int // unused if not rebalanced
-	dbLength int
+	rnd    io.Reader
+	dbInfo *database.Info
+	state  *state
 }
 
 // NewItSingleByte return a client for the classical PIR single-bit scheme in
-// Byte(2), working both with the vector and the rebalanced representation of the
+// GF(2), working both with the vector and the rebalanced representation of the
 // database.
-func NewITSingleByte(xof blake2b.XOF, rebalanced bool) *ITSingleByte {
+func NewITSingleByte(rnd io.Reader, rebalanced bool) *ITSingleByte {
 	return &ITSingleByte{
-		xof:        xof,
+		rnd:        rnd,
 		rebalanced: rebalanced,
 		state:      nil,
 	}
+}
+
+// QueryBytes is wrapper around Query to implement the Client interface
+func (c *ITSingleByte) QueryBytes(index, numServers int) ([][]byte, error) {
+	return c.Query(index, numServers)
 }
 
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
 func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
-	//if invalidQueryInputs(index, numServers) {
-	//	panic("invalid query inputs")
-	//}
+	if invalidQueryInputsIT(index, numServers) {
+		panic("invalid query inputs")
+	}
 
-	// set the client state depending on the dbInfo representation
-	switch c.rebalanced {
-	case false:
-		// iy is unused if the database is represented as a vector
-		c.state = &itSingleByteState{
-			ix:       index,
-			dbLength: cst.DBLength,
-		}
-	case true:
-		// verified at server side if integer square
-		dbLengthSqrt := int(math.Sqrt(cst.DBLength))
-		ix := index % dbLengthSqrt
-		iy := index / dbLengthSqrt
-
-		c.state = &itSingleByteState{
-			ix:       ix,
-			iy:       iy,
-			dbLength: dbLengthSqrt,
-		}
+	// set the client state. The entries specifi to VPIR are not used
+	c.state = &itSingleByteState{
+		ix: index / c.dbInfo.NumColumns,
+		iy: index % c.dbInfo.NumColumns,
 	}
 
 	vectors, err := c.secretSharing(numServers)
@@ -71,6 +55,11 @@ func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
 	}
 
 	return vectors
+}
+
+func (c *ITSingleByte) ReconstructBytes(a [][]byte) ([]field.Element, error) {
+	panic("not yet implemented")
+	return nil, nil
 }
 
 func (c *ITSingleByte) Reconstruct(answers [][]byte) (byte, error) {
