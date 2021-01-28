@@ -22,17 +22,17 @@ type ITSingleByte struct {
 // NewItSingleByte return a client for the classical PIR single-bit scheme in
 // GF(2), working both with the vector and the rebalanced representation of the
 // database.
-func NewITSingleByte(rnd io.Reader, rebalanced bool) *ITSingleByte {
+func NewITSingleByte(rnd io.Reader, info *database.Info) *ITSingleByte {
 	return &ITSingleByte{
-		rnd:        rnd,
-		rebalanced: rebalanced,
-		state:      nil,
+		rnd:    rnd,
+		dbInfo: info,
+		state:  nil,
 	}
 }
 
 // QueryBytes is wrapper around Query to implement the Client interface
 func (c *ITSingleByte) QueryBytes(index, numServers int) ([][]byte, error) {
-	return c.Query(index, numServers)
+	return c.Query(index, numServers), nil
 }
 
 // Query performs a client query for the given database index to numServers
@@ -44,7 +44,7 @@ func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
 	}
 
 	// set the client state. The entries specifi to VPIR are not used
-	c.state = &itSingleByteState{
+	c.state = &state{
 		ix: index / c.dbInfo.NumColumns,
 		iy: index % c.dbInfo.NumColumns,
 	}
@@ -74,38 +74,35 @@ func (c *ITSingleByte) Reconstruct(answers [][]byte) (byte, error) {
 	}
 
 	// select index depending on the matrix representation
-	i := 0
-	if c.rebalanced {
-		i = c.state.iy
-	}
+	i := c.state.ix
 
 	return sum[i], nil
 }
 
 func (c *ITSingleByte) secretSharing(numServers int) ([][]byte, error) {
-	ei := make([]byte, c.state.dbLength)
+	ei := make([]byte, c.dbInfo.NumColumns)
 	ei[c.state.ix] = byte(1)
 
 	vectors := make([][]byte, numServers)
 
 	// create query vectors for all the servers
 	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]byte, c.state.dbLength)
+		vectors[k] = make([]byte, c.dbInfo.NumColumns)
 	}
 
 	zero := byte(0)
 
 	// for all except one server, we need dbLength random elements
 	// to perform the secret sharing
-	b := make([]byte, c.state.dbLength*(numServers-1))
+	b := make([]byte, c.dbInfo.NumColumns*(numServers-1))
 	_, err := rand.Read(b)
 	if err != nil {
 		panic("error in randomness generation")
 	}
-	for i := 0; i < c.state.dbLength; i++ {
+	for i := 0; i < c.dbInfo.NumColumns; i++ {
 		sum := zero
 		for k := 0; k < numServers-1; k++ {
-			rand := b[c.state.dbLength*k+i] % 2
+			rand := b[c.dbInfo.NumColumns*k+i] % 2
 			vectors[k][i] = rand
 			sum ^= rand
 		}
