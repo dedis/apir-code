@@ -77,8 +77,15 @@ func main() {
 	// initialize top level context
 	ctx := context.Background()
 
+	// connect to servers
+	connections := make(map[string]*grpc.ClientConn)
+	for _, s := range config.Addresses {
+		connections[s] = connectToServer(s)
+		defer connections[s].Close()
+	}
+
 	// get db info
-	dbInfo := runDBInfoRequest(ctx, config.Addresses)
+	dbInfo := runDBInfoRequest(ctx, connections)
 
 	// start correct client
 	var c client.Client
@@ -107,7 +114,7 @@ func main() {
 	}
 
 	// send queries to servers
-	answers := runQueries(ctx, config.Addresses, queries)
+	answers := runQueries(ctx, connections, queries)
 
 	res, err := c.ReconstructBytes(answers)
 	if err != nil {
@@ -149,18 +156,18 @@ func main() {
 	log.Printf("key: %s", idKey[id])
 }
 
-func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
+func runDBInfoRequest(ctx context.Context, cs map[string]*grpc.ClientConn) *database.Info {
 	subCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan *database.Info, len(addresses))
-	for _, a := range addresses {
+	resCh := make(chan *database.Info, len(cs))
+	for _, conn := range cs {
 		wg.Add(1)
-		go func(addr string) {
-			resCh <- dbInfo(subCtx, addr)
+		go func(conn *grpc.ClientConn) {
+			resCh <- dbInfo(subCtx, conn)
 			wg.Done()
-		}(a)
+		}(conn)
 	}
 	wg.Wait()
 	close(resCh)
@@ -180,17 +187,15 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 	return dbInfo[0]
 }
 
-func dbInfo(ctx context.Context, address string) *database.Info {
-	conn := connectToServer(address)
-	defer conn.Close()
-
+func dbInfo(ctx context.Context, conn *grpc.ClientConn) *database.Info {
 	c := proto.NewVPIRClient(conn)
 	q := &proto.DatabaseInfoRequest{}
 	answer, err := c.DatabaseInfo(ctx, q)
 	if err != nil {
-		log.Fatalf("could not send database info request: %v", err)
+		log.Fatalf("could not send database info request to %s: %v",
+			conn.Target(), err)
 	}
-	log.Printf("sent databaseInfo request to %s", address)
+	log.Printf("sent databaseInfo request to %s", conn.Target())
 
 	dbInfo := &database.Info{
 		NumRows:    int(answer.GetNumRows()),
@@ -203,8 +208,8 @@ func dbInfo(ctx context.Context, address string) *database.Info {
 	return dbInfo
 }
 
-func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte {
-	if len(addrs) != len(queries) {
+func runQueries(ctx context.Context, cs map[string]*grpc.ClientConn, queries [][]byte) [][]byte {
+	if len(cs) != len(queries) {
 		log.Fatal("queries and server addresses length mismatch")
 	}
 
@@ -212,13 +217,15 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(addrs))
-	for i := 0; i < len(queries); i++ {
+	resCh := make(chan []byte, len(cs))
+	j := 0
+	for _, conn := range cs {
 		wg.Add(1)
-		go func(j int) {
-			resCh <- query(subCtx, addrs[j], queries[j])
+		go func(j int, conn *grpc.ClientConn) {
+			resCh <- query(subCtx, conn, queries[j])
 			wg.Done()
-		}(i)
+		}(j, conn)
+		j++
 	}
 	wg.Wait()
 	close(resCh)
@@ -232,18 +239,17 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 	return q
 }
 
-func query(ctx context.Context, address string, query []byte) []byte {
-	conn := connectToServer(address)
-	defer conn.Close()
-
+func query(ctx context.Context, conn *grpc.ClientConn, query []byte) []byte {
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
 	var opts []grpc.CallOption
 	opts = append(opts, grpc.UseCompressor(gzip.Name))
 	answer, err := c.Query(ctx, q, opts...)
 	if err != nil {
-		log.Fatalf("could not query: %v", err)
+		log.Fatalf("could not query %s: %v",
+			conn.Target(), err)
 	}
+	log.Printf("sent query to %s", conn.Target())
 
 	return answer.GetAnswer()
 }
