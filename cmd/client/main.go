@@ -48,16 +48,6 @@ func init() {
 	creds = credentials.NewTLS(cfg)
 }
 
-func connectToServer(address string) *grpc.ClientConn {
-	conn, err := grpc.Dial(address,
-		grpc.WithTransportCredentials(creds), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect to %s: %v", address, err)
-	}
-
-	return conn
-}
-
 func main() {
 	// set logs
 	log.SetOutput(os.Stdout)
@@ -90,16 +80,15 @@ func main() {
 	}
 
 	// get and store db info
-	dbInfo := lc.runDBInfo()
-	lc.dbInfo = dbInfo
+	lc.runDBInfo()
 
 	// start correct client
 	var c client.Client
 	switch *schemePtr {
 	case "dpf":
-		c = client.NewDPF(prg, *dbInfo)
+		c = client.NewDPF(prg, *lc.dbInfo)
 	case "it":
-		c = client.NewITClient(prg, *dbInfo)
+		c = client.NewITClient(prg, *lc.dbInfo)
 	default:
 		log.Fatal("undefined scheme type")
 	}
@@ -110,11 +99,11 @@ func main() {
 	if id == "" {
 		log.Fatal("id not provided")
 	}
-	idHash := database.HashToIndex(id, dbInfo.NumColumns*dbInfo.NumRows)
+	idHash := database.HashToIndex(id, lc.dbInfo.NumColumns*lc.dbInfo.NumRows)
 	log.Printf("id: %s, hashKey: %d", id, idHash)
 
 	// query for given idHash
-	queries, err := c.QueryBytes(idHash, len(config.Addresses))
+	queries, err := c.QueryBytes(idHash, len(lc.connections))
 	if err != nil {
 		log.Fatal("error when executing query")
 	}
@@ -129,8 +118,8 @@ func main() {
 
 	// retrieve bytes from field elements
 	resultBytes := field.VectorToBytes(res)
-	keyLength := dbInfo.KeyLength
-	idLength := dbInfo.IDLength
+	keyLength := lc.dbInfo.KeyLength
+	idLength := lc.dbInfo.IDLength
 	chunkLength := constants.ChunkBytesLength
 	zeroSlice := make([]byte, idLength)
 
@@ -162,7 +151,7 @@ func main() {
 	log.Printf("key: %s", idKey[id])
 }
 
-func (lc *localClient) runDBInfo() *database.Info {
+func (lc *localClient) runDBInfo() {
 	subCtx, cancel := context.WithTimeout(lc.ctx, time.Second)
 	defer cancel()
 
@@ -190,7 +179,7 @@ func (lc *localClient) runDBInfo() *database.Info {
 
 	log.Printf("databaseInfo: %#v", dbInfo[0])
 
-	return dbInfo[0]
+	lc.dbInfo = dbInfo[0]
 }
 
 func dbInfo(ctx context.Context, conn *grpc.ClientConn) *database.Info {
@@ -254,6 +243,16 @@ func query(ctx context.Context, conn *grpc.ClientConn, query []byte) []byte {
 	log.Printf("sent query to %s", conn.Target())
 
 	return answer.GetAnswer()
+}
+
+func connectToServer(address string) *grpc.ClientConn {
+	conn, err := grpc.Dial(address,
+		grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect to %s: %v", address, err)
+	}
+
+	return conn
 }
 
 func equalDBInfo(info []*database.Info) bool {
