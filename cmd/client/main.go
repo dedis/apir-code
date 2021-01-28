@@ -75,13 +75,12 @@ func main() {
 	}
 
 	// initialize local client
-	lc := &localClient{}
+	lc := &localClient{
+		ctx: context.Background(),
+	}
 
 	// random generator
 	prg := utils.RandomPRG()
-
-	// initialize top level context
-	lc.ctx = context.Background()
 
 	// connect to servers and store connections
 	lc.connections = make(map[string]*grpc.ClientConn)
@@ -216,10 +215,6 @@ func dbInfo(ctx context.Context, conn *grpc.ClientConn) *database.Info {
 }
 
 func (lc *localClient) runQueries(queries [][]byte) [][]byte {
-	if len(lc.connections) != len(queries) {
-		log.Fatal("queries and server addresses length mismatch")
-	}
-
 	subCtx, cancel := context.WithTimeout(lc.ctx, time.Minute)
 	defer cancel()
 
