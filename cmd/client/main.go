@@ -45,6 +45,16 @@ func init() {
 	creds = credentials.NewTLS(cfg)
 }
 
+func connectToServer(address string) *grpc.ClientConn {
+	conn, err := grpc.Dial(address,
+		grpc.WithTransportCredentials(creds), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect to %s: %v", address, err)
+	}
+
+	return conn
+}
+
 func main() {
 	// set logs
 	log.SetOutput(os.Stdout)
@@ -171,10 +181,7 @@ func runDBInfoRequest(ctx context.Context, addresses []string) *database.Info {
 }
 
 func dbInfo(ctx context.Context, address string) *database.Info {
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
+	conn := connectToServer(address)
 	defer conn.Close()
 
 	c := proto.NewVPIRClient(conn)
@@ -226,10 +233,7 @@ func runQueries(ctx context.Context, addrs []string, queries [][]byte) [][]byte 
 }
 
 func query(ctx context.Context, address string, query []byte) []byte {
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
+	conn := connectToServer(address)
 	defer conn.Close()
 
 	c := proto.NewVPIRClient(conn)
