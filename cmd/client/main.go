@@ -99,7 +99,6 @@ func main() {
 		//fmt.Print("enter id: ")
 		var id string
 		fmt.Scanln(&id)
-		fmt.Println(id)
 		if id == "" {
 			log.Fatal("id not provided")
 		}
