@@ -28,7 +28,8 @@ import (
 var creds credentials.TransportCredentials
 
 type localClient struct {
-	dbInfo *database.Info
+	connections map[string]*grpc.ClientConn
+	dbInfo      *database.Info
 }
 
 func init() {
@@ -71,21 +72,25 @@ func main() {
 		log.Fatalf("could not load the config file: %v", err)
 	}
 
+	// initialize local client
+	lc := &localClient{}
+
 	// random generator
 	prg := utils.RandomPRG()
 
 	// initialize top level context
 	ctx := context.Background()
 
-	// connect to servers
-	connections := make(map[string]*grpc.ClientConn)
+	// connect to servers and store connections
+	lc.connections = make(map[string]*grpc.ClientConn)
 	for _, s := range config.Addresses {
-		connections[s] = connectToServer(s)
-		defer connections[s].Close()
+		lc.connections[s] = connectToServer(s)
+		defer lc.connections[s].Close()
 	}
 
-	// get db info
-	dbInfo := runDBInfoRequest(ctx, connections)
+	// get and store db info
+	dbInfo := lc.runDBInfo(ctx)
+	lc.dbInfo = dbInfo
 
 	// start correct client
 	var c client.Client
@@ -114,7 +119,7 @@ func main() {
 	}
 
 	// send queries to servers
-	answers := runQueries(ctx, connections, queries)
+	answers := lc.runQueries(ctx, queries)
 
 	res, err := c.ReconstructBytes(answers)
 	if err != nil {
@@ -156,13 +161,13 @@ func main() {
 	log.Printf("key: %s", idKey[id])
 }
 
-func runDBInfoRequest(ctx context.Context, cs map[string]*grpc.ClientConn) *database.Info {
+func (lc *localClient) runDBInfo(ctx context.Context) *database.Info {
 	subCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan *database.Info, len(cs))
-	for _, conn := range cs {
+	resCh := make(chan *database.Info, len(lc.connections))
+	for _, conn := range lc.connections {
 		wg.Add(1)
 		go func(conn *grpc.ClientConn) {
 			resCh <- dbInfo(subCtx, conn)
@@ -208,8 +213,8 @@ func dbInfo(ctx context.Context, conn *grpc.ClientConn) *database.Info {
 	return dbInfo
 }
 
-func runQueries(ctx context.Context, cs map[string]*grpc.ClientConn, queries [][]byte) [][]byte {
-	if len(cs) != len(queries) {
+func (lc *localClient) runQueries(ctx context.Context, queries [][]byte) [][]byte {
+	if len(lc.connections) != len(queries) {
 		log.Fatal("queries and server addresses length mismatch")
 	}
 
@@ -217,9 +222,9 @@ func runQueries(ctx context.Context, cs map[string]*grpc.ClientConn, queries [][
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(cs))
+	resCh := make(chan []byte, len(lc.connections))
 	j := 0
-	for _, conn := range cs {
+	for _, conn := range lc.connections {
 		wg.Add(1)
 		go func(j int, conn *grpc.ClientConn) {
 			resCh <- query(subCtx, conn, queries[j])
