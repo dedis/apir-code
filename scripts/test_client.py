@@ -3,6 +3,8 @@ import csv
 import os
 import time
 
+# TODO: doesn't work with new client
+
 # change dir to root of project
 os.chdir("..")
 

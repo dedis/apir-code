@@ -6,7 +6,8 @@ run_server: $(PROTO_PB)
 
 run_client: $(PROTO_PB)
 	cd cmd/client && go build
-	go run cmd/client/main.go -id=$(id) -scheme=$(scheme)
+	go run cmd/client/main.go -scheme=$(scheme)
+	#go run cmd/client/main.go -id=$(id) -scheme=$(scheme)
 
 test: $(PROTO_PB)
 	go test
