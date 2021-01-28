@@ -2,8 +2,11 @@ package client
 
 import (
 	"crypto/rand"
+	"errors"
 	"io"
+	"log"
 
+	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -40,7 +43,7 @@ func (c *ITSingleByte) QueryBytes(index, numServers int) ([][]byte, error) {
 // on the client initialization.
 func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
 	if invalidQueryInputsIT(index, numServers) {
-		panic("invalid query inputs")
+		log.Fatal("invalid query inputs")
 	}
 
 	// set the client state. The entries specifi to VPIR are not used
@@ -51,7 +54,7 @@ func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
 
 	vectors, err := c.secretSharing(numServers)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return vectors
@@ -62,21 +65,62 @@ func (c *ITSingleByte) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	return nil, nil
 }
 
-func (c *ITSingleByte) Reconstruct(answers [][]byte) (byte, error) {
-	answersLen := len(answers[0])
-	sum := make([]byte, answersLen)
+func (c *ITSingleByte) Reconstruct(answers [][]byte) ([]byte, error) {
+	sum := make([][]byte, c.dbInfo.NumRows)
 
-	// sum answers
-	for i := 0; i < answersLen; i++ {
-		for s := range answers {
-			sum[i] ^= answers[s][i]
+	if dbInfo.BlockSize == cst.SingleBitBlockLength {
+		// sum answers as vectors in GF(2) only for the
+		// row of interest
+		for i := 0; i < dbInfo.NumRows; i++ {
+			sum[i] = make([]byte, 1)
+			for k := range answers {
+				sum[i][0] ^= answers[k][i]
+			}
+		}
+
+		return sum[st.ix][0]
+	}
+
+	// sum answers as vectors in F^(b+1)
+	for i := 0; i < dbInfo.NumRows; i++ {
+		sum[i] = make([]byte, dbInfo.BlockSize+1)
+		for b := 0; b < dbInfo.BlockSize+1; b++ {
+			for k := range answers {
+				sum[i][b].Add(&sum[i][b], &answers[k][i*(dbInfo.BlockSize+1)+b])
+			}
+		}
+	}
+	var tag, prod field.Element
+	messages := make([]field.Element, dbInfo.BlockSize)
+	for i := 0; i < dbInfo.NumRows; i++ {
+		copy(messages, sum[i][:len(sum[i])-1])
+		tag = sum[i][len(sum[i])-1]
+		// compute reconstructed tag
+		reconstructedTag := field.Zero()
+		for b := 0; b < len(messages); b++ {
+			prod.Mul(&st.a[b+1], &messages[b])
+			reconstructedTag.Add(&reconstructedTag, &prod)
+		}
+		if !tag.Equal(&reconstructedTag) {
+			return nil, errors.New("REJECT")
 		}
 	}
 
-	// select index depending on the matrix representation
-	i := c.state.ix
+	return sum[st.ix][:len(sum[st.ix])-1], nil
+	//answersLen := len(answers[0])
+	//sum := make([]byte, answersLen)
 
-	return sum[i], nil
+	//// sum answers
+	//for i := 0; i < answersLen; i++ {
+	//for s := range answers {
+	//sum[i] ^= answers[s][i]
+	//}
+	//}
+
+	//// select index depending on the matrix representation
+	//i := c.state.ix
+
+	//return sum[i], nil
 }
 
 func (c *ITSingleByte) secretSharing(numServers int) ([][]byte, error) {
