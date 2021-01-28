@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/si-co/vpir-code/lib/field_gcm"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -28,9 +29,9 @@ func main() {
 	c := client.NewITSingleGF(xof, rebalanced, vpir)
 	s0 := server.NewITSingleGF(rebalanced, db)
 	s1 := server.NewITSingleGF(rebalanced, db)
-	s2 := server.NewITSingleGF(rebalanced, db)
 
-	//fmt.Println("query,answer0,answer1,answer2,reconstruct")
+	// times taken in ms
+	fmt.Println("query,answer0,answer1,answer2,reconstruct")
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
@@ -41,26 +42,23 @@ func main() {
 		for i := 0; i < 8191; i++ {
 			m.Reset()
 			queries := c.Query(i, 3)
-			//fmt.Printf("%.3fms,", m.RecordAndReset())
+			fmt.Printf("%.3f,", m.RecordAndReset())
 
 			a0 := s0.Answer(queries[0])
-			//fmt.Printf("%.3fms,", m.RecordAndReset())
+			fmt.Printf("%.3f,", m.RecordAndReset())
 
 			a1 := s1.Answer(queries[1])
-			//fmt.Printf("%.3fms,", m.RecordAndReset())
+			fmt.Printf("%.3f,", m.RecordAndReset())
 
-			a2 := s2.Answer(queries[2])
-			//fmt.Printf("%.3fms,", m.RecordAndReset())
-
-			answers := [][]field_gcm.Element{a0, a1, a2}
+			answers := [][]field_gcm.Element{a0, a1}
 
 			m.Reset()
 			_, err := c.Reconstruct(answers)
-			//fmt.Printf("%.3fms\n", m.RecordAndReset())
+			fmt.Printf("%.3f,", m.RecordAndReset())
 			if err != nil {
 				panic(err)
 			}
 		}
-		fmt.Printf("Total time %dth iteration: %.1fms\n", j, totalTimer.Record())
+		fmt.Printf("%.3f\n", totalTimer.Record())
 	}
 }
