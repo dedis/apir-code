@@ -14,11 +14,6 @@ type DB struct {
 	Info
 }
 
-type Bytes struct {
-	Entries [][]byte
-	Info
-}
-
 type Info struct {
 	NumRows    int
 	NumColumns int
@@ -76,88 +71,11 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) *DB {
 			}
 		}
 	}
-	return &DB{Entries: entries, Info: Info{NumColumns: numColumns, NumRows: numRows, BlockSize: 0}}
-}
 
-/*
-func CreateVectorByte() *Bytes {
-	entries := make([][]byte, 1)
-	entries[0] = make([]byte, cst.DBLength)
-
-	return &Bytes{Entries: entries}
-}
-
-func CreateAsciiVectorByte() *Bytes {
-	// playing with VPIR in ascii
-	db := CreateVectorByte()
-
-	zero := byte(0)
-	one := byte(1)
-
-	for i, b := range text {
-		currentBit, err := strconv.Atoi(string(b))
-		if err != nil {
-			panic(err)
-		}
-		if currentBit == 0 {
-			db.Entries[0][i] = zero
-		} else {
-			db.Entries[0][i] = one
-		}
-
+	return &DB{Entries: entries,
+		Info: Info{NumColumns: numColumns,
+			NumRows:   numRows,
+			BlockSize: 0,
+		},
 	}
-
-	return db
 }
-
-func CreateMatrixByte() *Bytes {
-	// compute square root of db length
-	dbLengthSqrt := math.Sqrt(cst.DBLength)
-	if dbLengthSqrt != math.Floor(dbLengthSqrt) {
-		panic(errors.New("Square root of db length is not an integer"))
-	}
-	dbLengthSqrtInt := int(dbLengthSqrt)
-
-	entries := make([][]byte, dbLengthSqrtInt)
-	for i := 0; i < dbLengthSqrtInt; i++ {
-		entries[i] = make([]byte, dbLengthSqrtInt)
-	}
-
-	return &Bytes{Entries: entries, NumColumns: dbLengthSqrtInt}
-}
-
-func CreateAsciiMatrixByte() *Bytes {
-	// playing with VPIR in ascii
-	db := CreateMatrixByte()
-	for i, b := range text {
-		currentBit, err := strconv.Atoi(string(b))
-		if err != nil {
-			panic(err)
-		}
-		entry := byte(0)
-		if currentBit == 1 {
-			entry = byte(1)
-		}
-		db.Entries[i/db.NumColumns][i%db.NumColumns] = entry
-	}
-
-	return db
-}
-
-func CreateAsciiMatrixOneKbByte() *Bytes {
-	data := make([]byte, 1024)
-	rand.Read(data)
-	db := CreateMatrixByte()
-
-	bits := utils.Bytes2Bits(data)
-
-	for i, b := range bits {
-		entry := byte(0)
-		if b == 1 {
-			entry = byte(1)
-		}
-		db.Entries[i/db.NumColumns][i%db.NumColumns] = entry
-	}
-
-	return db
-}*/
