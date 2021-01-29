@@ -5,8 +5,9 @@ import (
 	"testing"
 )
 
-func TestCreatePGPDB(t *testing.T) {
-	CreatePGPDB(1)
+func TestGenerateRealKeysDB(t *testing.T) {
+	_, err := GenerateRealKeysDB(1)
+	require.NoError(t, err)
 }
 
 func TestGetEmailAddressFromId(t *testing.T) {

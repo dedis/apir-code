@@ -47,9 +47,6 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 	db, err := database.GenerateKeyDB(path, chunkLength, nRows, nCols)
 	require.NoError(t, err)
 
-	idLength := db.IDLength
-	keyLength := db.KeyLength
-
 	prg := utils.RandomPRG()
 
 	// client and servers
@@ -64,9 +61,6 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 
 	// Parse the file
 	r := csv.NewReader(f)
-
-	// helping variables
-	zeroSlice := make([]byte, idLength)
 
 	totalTimer := monitor.NewMonitor()
 	// Iterate through the records
@@ -88,16 +82,10 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		// query given hash key
 		fssKeys := c.Query(hashKey, 2)
 
-		//fmt.Println("client 0", "query:", fssKeys[0])
-		//fmt.Println("client 1", "query:", fssKeys[1])
-
 		// get servers answers
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
 		answers := [][]field.Element{a0, a1}
-
-		//fmt.Println("client 0", "answer:", answers[0])
-		//fmt.Println("client 1", "answer:", answers[1])
 
 		// reconstruct block
 		result, err := c.Reconstruct(answers)
@@ -105,38 +93,43 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 
 		// retrieve result bytes
 		resultBytes := field.VectorToBytes(result)
-
-		lastElementBytes := keyLength % chunkLength
-		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
-		totalLength := idLength + keyLengthWithPadding
-
-		// parse block entries
-		idKey := make(map[string]string)
-		for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
-			idBytes := resultBytes[i : i+idLength]
-			// test if we are in padding elements already
-			if bytes.Equal(idBytes, zeroSlice) {
-				break
-			}
-			idReconstructed := string(bytes.Trim(idBytes, "\x00"))
-
-			keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
-			// remove padding for last element
-			if lastElementBytes != 0 {
-				keyBytes = append(keyBytes[:len(keyBytes)-chunkLength], keyBytes[len(keyBytes)-(lastElementBytes):]...)
-			}
-
-			// encode key
-			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
-		}
-
-		//fmt.Println(idKey[expectedID])
-		require.Equal(t, expectedKey, idKey[expectedID])
+		validateRandomKey(t, expectedID, expectedKey, resultBytes, &db.Info, chunkLength)
 
 		// retrieve only one key
 		//break
 	}
 	fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
+}
+
+func validateRandomKey(t *testing.T, id, key string, result []byte, dbInfo *database.Info, chunkLength int) (string, string) {
+	var idReconstructed string
+	var keyBytes []byte
+	lastElementBytes := dbInfo.KeyLength % chunkLength
+	keyLengthWithPadding := int(math.Ceil(float64(dbInfo.KeyLength)/float64(chunkLength))) * chunkLength
+	totalLength := dbInfo.IDLength + keyLengthWithPadding
+
+	// helping variables
+	zeroSlice := make([]byte, dbInfo.IDLength)
+	// parse block entries
+	idKey := make(map[string]string)
+	for i := 0; i < len(result)-totalLength+1; i += totalLength {
+		idBytes := result[i : i+dbInfo.IDLength]
+		// test if we are in padding elements already
+		if bytes.Equal(idBytes, zeroSlice) {
+			break
+		}
+		idReconstructed = string(bytes.Trim(idBytes, "\x00"))
+
+		keyBytes = result[i+dbInfo.IDLength : i+dbInfo.IDLength+keyLengthWithPadding]
+		// remove padding for last element
+		if lastElementBytes != 0 {
+			keyBytes = append(keyBytes[:len(keyBytes)-chunkLength], keyBytes[len(keyBytes)-(lastElementBytes):]...)
+		}
+		idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
+	}
+	require.Equal(t, key, idKey[id])
+
+	return idReconstructed, base64.StdEncoding.EncodeToString(keyBytes)
 }
 
 /*

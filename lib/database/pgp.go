@@ -32,7 +32,7 @@ type key struct {
 	Timestamp int      `json:"timestamp"`
 }
 
-func CreatePGPDB(numRows int) (*DB, error) {
+func GenerateRealKeysDB(numRows int) (*DB, error) {
 	var keys []*key
 	var err error
 	chunkLength := constants.ChunkBytesLength
