@@ -25,11 +25,6 @@ type Info struct {
 	KeyLength int
 }
 
-type Bytes struct {
-	Entries      [][]byte
-	DBLengthSqrt int // unused for vector
-}
-
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
 	entries := make([][]field.Element, numRows)
 	for i := 0; i < numRows; i++ {
@@ -63,14 +58,13 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 
 func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) *DB {
 	var tmp field.Element
-	var tmpb byte
 	entries := make([][]field.Element, numRows)
 	numColumns := dbLen / numRows
 	for i := 0; i < numRows; i++ {
 		entries[i] = make([]field.Element, numColumns)
 		for j := 0; j < numColumns; j++ {
 			tmp.SetRandom(rnd)
-			tmpb = tmp.Bytes()[len(tmp.Bytes())-1]
+			tmpb := tmp.Bytes()[len(tmp.Bytes())-1]
 			if tmpb>>7 == 1 {
 				entries[i][j].SetOne()
 			} else {

@@ -1,8 +1,6 @@
 package client
 
 import (
-	"crypto/rand"
-	"errors"
 	"io"
 	"log"
 
@@ -16,7 +14,7 @@ import (
 // handled by this client, via a boolean variable
 
 // Client for the information theoretic classical PIR single-bit scheme
-type ITSingleByte struct {
+type PIR struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
@@ -25,34 +23,34 @@ type ITSingleByte struct {
 // NewItSingleByte return a client for the classical PIR single-bit scheme in
 // GF(2), working both with the vector and the rebalanced representation of the
 // database.
-func NewITSingleByte(rnd io.Reader, info *database.Info) *ITSingleByte {
-	return &ITSingleByte{
+func NewPIR(rnd io.Reader, info database.Info) *PIR {
+	return &PIR{
 		rnd:    rnd,
-		dbInfo: info,
+		dbInfo: &info,
 		state:  nil,
 	}
 }
 
 // QueryBytes is wrapper around Query to implement the Client interface
-func (c *ITSingleByte) QueryBytes(index, numServers int) ([][]byte, error) {
+func (c *PIR) QueryBytes(index, numServers int) ([][]byte, error) {
 	return c.Query(index, numServers), nil
 }
 
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
+func (c *PIR) Query(index int, numServers int) [][]byte {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
 
-	// set the client state. The entries specifi to VPIR are not used
+	// set the client state. The entries specific to VPIR are not used
 	c.state = &state{
 		ix: index / c.dbInfo.NumColumns,
 		iy: index % c.dbInfo.NumColumns,
 	}
 
-	vectors, err := c.secretSharing(numServers)
+	vectors, err := c.secretShare(numServers)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,97 +58,86 @@ func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
 	return vectors
 }
 
-func (c *ITSingleByte) ReconstructBytes(a [][]byte) ([]field.Element, error) {
+func (c *PIR) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	panic("not yet implemented")
 	return nil, nil
 }
 
-func (c *ITSingleByte) Reconstruct(answers [][]byte) ([]byte, error) {
-	sum := make([][]byte, c.dbInfo.NumRows)
-
-	if dbInfo.BlockSize == cst.SingleBitBlockLength {
+func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
+	if c.dbInfo.BlockSize == cst.SingleBitBlockLength {
 		// sum answers as vectors in GF(2) only for the
 		// row of interest
-		for i := 0; i < dbInfo.NumRows; i++ {
-			sum[i] = make([]byte, 1)
+		sum := make([]byte, c.dbInfo.NumRows)
+		for i := 0; i < c.dbInfo.NumRows; i++ {
 			for k := range answers {
-				sum[i][0] ^= answers[k][i]
+				sum[i] ^= answers[k][i]
 			}
 		}
 
-		return sum[st.ix][0]
+		return []byte{sum[c.state.ix]}, nil
 	}
+	sum := make([][]byte, c.dbInfo.NumRows)
 
 	// sum answers as vectors in F^(b+1)
-	for i := 0; i < dbInfo.NumRows; i++ {
-		sum[i] = make([]byte, dbInfo.BlockSize+1)
-		for b := 0; b < dbInfo.BlockSize+1; b++ {
+	for i := 0; i < c.dbInfo.NumRows; i++ {
+		sum[i] = make([]byte, c.dbInfo.BlockSize+1)
+		for b := 0; b < c.dbInfo.BlockSize+1; b++ {
 			for k := range answers {
-				sum[i][b].Add(&sum[i][b], &answers[k][i*(dbInfo.BlockSize+1)+b])
+				sum[i][b] ^= answers[k][i*(c.dbInfo.BlockSize+1)+b]
 			}
 		}
 	}
-	var tag, prod field.Element
-	messages := make([]field.Element, dbInfo.BlockSize)
-	for i := 0; i < dbInfo.NumRows; i++ {
+	messages := make([]byte, c.dbInfo.BlockSize)
+	for i := 0; i < c.dbInfo.NumRows; i++ {
 		copy(messages, sum[i][:len(sum[i])-1])
-		tag = sum[i][len(sum[i])-1]
-		// compute reconstructed tag
-		reconstructedTag := field.Zero()
-		for b := 0; b < len(messages); b++ {
-			prod.Mul(&st.a[b+1], &messages[b])
-			reconstructedTag.Add(&reconstructedTag, &prod)
-		}
-		if !tag.Equal(&reconstructedTag) {
-			return nil, errors.New("REJECT")
-		}
 	}
 
-	return sum[st.ix][:len(sum[st.ix])-1], nil
-	//answersLen := len(answers[0])
-	//sum := make([]byte, answersLen)
-
-	//// sum answers
-	//for i := 0; i < answersLen; i++ {
-	//for s := range answers {
-	//sum[i] ^= answers[s][i]
-	//}
-	//}
-
-	//// select index depending on the matrix representation
-	//i := c.state.ix
-
-	//return sum[i], nil
+	return sum[c.state.ix][:len(sum[c.state.ix])-1], nil
 }
 
-func (c *ITSingleByte) secretSharing(numServers int) ([][]byte, error) {
-	ei := make([]byte, c.dbInfo.NumColumns)
-	ei[c.state.ix] = byte(1)
+func (c *PIR) secretShare(numServers int) ([][]byte, error) {
+	// number of bytes in the whole vector
+	blockLen := c.dbInfo.BlockSize
+	// handle single bit case
+	if blockLen == 0 {
+		blockLen = 1
+	}
+	vectorLen := c.dbInfo.NumColumns * blockLen
 
+	// create query vectors for all the servers F^(1+b)
 	vectors := make([][]byte, numServers)
-
-	// create query vectors for all the servers
-	for k := 0; k < numServers; k++ {
-		vectors[k] = make([]byte, c.dbInfo.NumColumns)
+	for k := range vectors {
+		vectors[k] = make([]byte, vectorLen)
 	}
 
-	zero := byte(0)
-
-	// for all except one server, we need dbLength random elements
-	// to perform the secret sharing
-	b := make([]byte, c.dbInfo.NumColumns*(numServers-1))
-	_, err := rand.Read(b)
-	if err != nil {
-		panic("error in randomness generation")
+	// Get random elements for all numServers-1 vectors
+	rand := make([]byte, (numServers-1)*vectorLen)
+	if _, err := c.rnd.Read(rand); err != nil {
+		return nil, err
 	}
-	for i := 0; i < c.dbInfo.NumColumns; i++ {
-		sum := zero
+
+	// perform additive secret sharing
+	for j := 0; j < c.dbInfo.NumColumns; j++ {
+		colStart := j * blockLen
+		colEnd := (j + 1) * blockLen
+
+		// assign k - 1 random vectors of length dbLength
 		for k := 0; k < numServers-1; k++ {
-			rand := b[c.dbInfo.NumColumns*k+i] % 2
-			vectors[k][i] = rand
-			sum ^= rand
+			copy(vectors[k][colStart:colEnd], rand[k*vectorLen+colStart:k*vectorLen+colEnd])
 		}
-		vectors[numServers-1][i] = ei[i] ^ sum
+
+		// we should perform component-wise additive secret sharing
+		for b := colStart; b < colEnd; b++ {
+			sum := byte(0)
+			for k := 0; k < numServers-1; k++ {
+				sum ^= vectors[k][b]
+			}
+			vectors[numServers-1][b] = sum
+			// set alpha vector at the block we want to retrieve
+			if j == c.state.iy {
+				vectors[numServers-1][b] ^= byte(1)
+			}
+		}
 	}
 
 	return vectors, nil
