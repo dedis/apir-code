@@ -93,7 +93,7 @@ func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlo
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		if db.BlockSize == constants.SingleBitBlockLength {
-			require.ElementsMatch(t, db.Entries[i/db.NumColumns][i%db.NumColumns:i%db.NumColumns+1], res)
+			require.Equal(t, db.Entries[i/db.NumColumns][i%db.NumColumns:i%db.NumColumns+1], res)
 		} else {
 			require.ElementsMatch(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
 		}
