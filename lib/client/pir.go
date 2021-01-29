@@ -15,7 +15,7 @@ import (
 // handled by this client, via a boolean variable
 
 // Client for the information theoretic classical PIR single-bit scheme
-type ITSingleByte struct {
+type PIR struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
@@ -24,23 +24,23 @@ type ITSingleByte struct {
 // NewItSingleByte return a client for the classical PIR single-bit scheme in
 // GF(2), working both with the vector and the rebalanced representation of the
 // database.
-func NewITSingleByte(rnd io.Reader, info *database.Info) *ITSingleByte {
-	return &ITSingleByte{
+func NewPIR(rnd io.Reader, info database.Info) *PIR {
+	return &PIR{
 		rnd:    rnd,
-		dbInfo: info,
+		dbInfo: &info,
 		state:  nil,
 	}
 }
 
 // QueryBytes is wrapper around Query to implement the Client interface
-func (c *ITSingleByte) QueryBytes(index, numServers int) ([][]byte, error) {
+func (c *PIR) QueryBytes(index, numServers int) ([][]byte, error) {
 	return c.Query(index, numServers), nil
 }
 
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
+func (c *PIR) Query(index int, numServers int) [][]byte {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -59,12 +59,12 @@ func (c *ITSingleByte) Query(index int, numServers int) [][]byte {
 	return vectors
 }
 
-func (c *ITSingleByte) ReconstructBytes(a [][]byte) ([]field.Element, error) {
+func (c *PIR) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	panic("not yet implemented")
 	return nil, nil
 }
 
-func (c *ITSingleByte) Reconstruct(answers [][]byte) ([]byte, error) {
+func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
 	sum := make([][]byte, c.dbInfo.NumRows)
 
 	if c.dbInfo.BlockSize == cst.SingleBitBlockLength {
@@ -97,7 +97,7 @@ func (c *ITSingleByte) Reconstruct(answers [][]byte) ([]byte, error) {
 	return sum[c.state.ix][:len(sum[c.state.ix])-1], nil
 }
 
-func (c *ITSingleByte) secretSharing(numServers int) ([][]byte, error) {
+func (c *PIR) secretSharing(numServers int) ([][]byte, error) {
 	ei := make([]byte, c.dbInfo.NumColumns)
 	ei[c.state.ix] = byte(1)
 

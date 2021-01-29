@@ -9,29 +9,29 @@ import (
 // Both vector and matrix (rebalanced) representations of the database are
 // handled by this server, via a boolean variable
 
-// ITSingleByte is the server for the information theoretic single-bit scheme
-type ITSingleByte struct {
+// PIR is the server for the information theoretic single-bit scheme
+type PIR struct {
 	db *database.Bytes
 }
 
-// NewITSingleByte return a server for the information theoretic single-bit
+// NewPIR return a server for the information theoretic single-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITSingleByte(rebalanced bool, db *database.Bytes) *ITSingleByte {
-	return &ITSingleByte{db: db}
+func NewPIR(db *database.Bytes) *PIR {
+	return &PIR{db: db}
 }
 
-func (s *ITSingleByte) DBInfo() *database.Info {
+func (s *PIR) DBInfo() *database.Info {
 	return &s.db.Info
 }
 
-func (s *ITSingleByte) AnswerBytes(q []byte) ([]byte, error) {
+func (s *PIR) AnswerBytes(q []byte) ([]byte, error) {
 	panic("not yet implemented")
 	return nil, nil
 }
 
 // Answer computes the answer for the given query
-func (s *ITSingleByte) Answer(q []byte) []byte {
+func (s *PIR) Answer(q []byte) []byte {
 	// Doing simplified scheme if block consists of a single bit
 	if s.db.BlockSize == cst.SingleBitBlockLength {
 		a := make([]byte, s.db.NumRows)
