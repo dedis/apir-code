@@ -14,6 +14,11 @@ type DB struct {
 	Info
 }
 
+type Bytes struct {
+	Entries [][]byte
+	Info
+}
+
 type Info struct {
 	NumRows    int
 	NumColumns int
@@ -22,11 +27,6 @@ type Info struct {
 	// embedding info
 	IDLength  int
 	KeyLength int
-}
-
-type Bytes struct {
-	Entries      [][]byte
-	DBLengthSqrt int // unused for vector
 }
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
