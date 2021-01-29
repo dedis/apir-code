@@ -1,11 +1,8 @@
 package database
 
 import (
-	"encoding/binary"
 	"math"
-  "sort"
-
-	"golang.org/x/crypto/blake2b"
+	"sort"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
@@ -103,11 +100,4 @@ func generateHashTable(pairs map[string][]byte, maxNumHashKeys, idLength int) (m
 	}
 
 	return db, nil
-}
-
-// HashToIndex hashes the given id to an index for a database of the given
-// length
-func HashToIndex(id string, length int) int {
-	hash := blake2b.Sum256([]byte(id))
-	return int(binary.BigEndian.Uint64(hash[:]) % uint64(length))
 }
