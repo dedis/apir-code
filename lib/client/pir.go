@@ -64,20 +64,19 @@ func (c *PIR) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 }
 
 func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
-	sum := make([][]byte, c.dbInfo.NumRows)
-
 	if c.dbInfo.BlockSize == cst.SingleBitBlockLength {
 		// sum answers as vectors in GF(2) only for the
 		// row of interest
+		sum := make([]byte, c.dbInfo.NumRows)
 		for i := 0; i < c.dbInfo.NumRows; i++ {
-			sum[i] = make([]byte, 1)
 			for k := range answers {
-				sum[i][0] ^= answers[k][i]
+				sum[i] ^= answers[k][i]
 			}
 		}
 
-		return []byte{sum[c.state.ix][0]}, nil
+		return []byte{sum[c.state.ix]}, nil
 	}
+	sum := make([][]byte, c.dbInfo.NumRows)
 
 	// sum answers as vectors in F^(b+1)
 	for i := 0; i < c.dbInfo.NumRows; i++ {
