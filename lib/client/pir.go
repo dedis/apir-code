@@ -99,6 +99,10 @@ func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
 func (c *PIR) secretShare(numServers int) ([][]byte, error) {
 	// number of bytes in the whole vector
 	blockLen := c.dbInfo.BlockSize
+	// handle single bit case
+	if blockLen == 0 {
+		blockLen = 1
+	}
 	vectorLen := c.dbInfo.NumColumns * blockLen
 
 	// create query vectors for all the servers F^(1+b)
