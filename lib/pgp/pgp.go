@@ -23,6 +23,7 @@ func RecoverKeyGivenEmail(block []byte, email string) (*openpgp.Entity, error) {
 	// go over PGP entities and find the key with the given email as one of the ids
 	for j := range el {
 		for _, id := range el[j].Identities {
+			fmt.Println(id.UserId)
 			if id.UserId.Email == email {
 				return el[j], nil
 			}

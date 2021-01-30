@@ -1,6 +1,7 @@
 package database
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -38,14 +39,16 @@ func GenerateRealKeyDB(dumpPath string, numRows, chunkLength int) (*DB, error) {
 		return nil, err
 	}
 	// decide on the length of the hash table
-	tLen := int(float32(len(keys)) * numKeysToDBLengthRatio)
-	ht, err := makeHashTable(keys, tLen)
+	tableLen := int(float32(len(keys)) * numKeysToDBLengthRatio)
+	ht, err := makeHashTable(keys, tableLen)
 
 	// get the maximum byte length of the values in the hashTable
+	// +1 takes into account the padding 0x80 that is always added.
+	//maxBytes := utils.MaxBytesLength(ht) + 1
 	maxBytes := utils.MaxBytesLength(ht)
 	fmt.Println(maxBytes)
 	blockLen := int(math.Ceil(float64(maxBytes)/float64(chunkLength)))
-	numColumns := tLen
+	numColumns := tableLen
 
 	// create all zeros db
 	db := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
@@ -53,6 +56,8 @@ func GenerateRealKeyDB(dumpPath string, numRows, chunkLength int) (*DB, error) {
 	// embed data into field elements
 	for k, v := range ht {
 		elements := field.ZeroVector(blockLen)
+		// Pad the block
+		//v = PadBlock(v)
 		// embed all bytes
 		for j := 0; j < len(v); j += chunkLength {
 			end := j + chunkLength
@@ -129,7 +134,7 @@ func makeHashTable(keys []*key, tableLen int) (map[int][]byte, error) {
 		// iterate over all the ids of the key and hash for each id separately
 		// (the key is duplicated the length of the id times)
 		for _, id := range key.Id {
-			email, err = getEmailAddressFromId(id, re)
+			email, err = getEmailAddressFromPGPId(id, re)
 			if err != nil {
 				// if the id does not include an email, move on
 				//log.Printf("id without email: %s", id)
@@ -152,9 +157,9 @@ func makeHashTable(keys []*key, tableLen int) (map[int][]byte, error) {
 }
 
 // The PGP key ID typically has the form "Firstname Lastname <email address>".
-// getEmailAddressFromId parses the ID string and returns the email if found,
+// getEmailAddressFromPGPId parses the ID string and returns the email if found,
 // or returns an empty string and an error otherwise.
-func getEmailAddressFromId(id string, re *regexp.Regexp) (string, error) {
+func getEmailAddressFromPGPId(id string, re *regexp.Regexp) (string, error) {
 	email := re.FindString(id)
 	if email != "" {
 		email = strings.Trim(email, "<")
@@ -169,6 +174,21 @@ func getEmailAddressFromId(id string, re *regexp.Regexp) (string, error) {
 func compileRegexToMatchEmail() *regexp.Regexp {
 	email := `([a-zA-Z0-9_+\.-]+)@([a-zA-Z0-9\.-]+)\.([a-zA-Z\.]{2,10})`
 	return regexp.MustCompile(`\<` + email + `\>`)
+}
+
+// Simple ISO/IEC 7816-4 padding where 0x80 is appended to the block and
+// zeros are assumed afterwards
+func PadBlock(block []byte) []byte{
+	return append(block, byte(0x80))
+}
+
+func UnPadBlock(block []byte) []byte {
+	// remove zeros
+	block = bytes.TrimRightFunc(block, func(b rune) bool {
+		return b == 0
+	})
+	// remove 0x80 preceding zeros
+	return block[:len(block)-1]
 }
 
 func getNTopValuesFromMap(m map[string]int, n int) {

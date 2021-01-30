@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/csv"
+	"encoding/hex"
 	"fmt"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"golang.org/x/crypto/openpgp"
@@ -27,7 +28,6 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	var err error
 
 	sksPath := "data/sks/"
-	numKeysToTest := 2
 	nRows := 1
 	// Generate db from sks key dump
 	db, err := database.GenerateRealKeyDB(sksPath, nRows, constants.ChunkBytesLength)
@@ -41,12 +41,15 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	s1 := server.NewDPF(db, 1)
 	servers := []*server.DPF{s0, s1}
 
-	emails := []string{"carol@mail.com", "m1.steiner@von.ulm.de"}
-	for i := 0; i < numKeysToTest; i++ {
+	emails := []string{"jandro@ibm.net", "m1.steiner@von.ulm.de"}
+	for i := 0; i < len(emails); i++ {
 		result := retrieveBlockGivenId(t, c, servers, emails[i], db.NumColumns*db.NumRows)
+		fmt.Println(hex.EncodeToString(result))
+		result = database.UnPadBlock(result)
+		//TODO: remove zero padding before passing to PGP, otherwise it fails
+		fmt.Println(hex.EncodeToString(result))
 		key, err = pgp.RecoverKeyGivenEmail(result, emails[i])
 		require.NoError(t, err)
-		fmt.Println(key.PrimaryKey.PublicKey)
 		fmt.Println(key.Identities)
 	}
 
