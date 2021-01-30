@@ -25,10 +25,10 @@ type ITClient struct {
 // NewITClient returns a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITClient(rnd io.Reader, info database.Info) *ITClient {
+func NewITClient(rnd io.Reader, info *database.Info) *ITClient {
 	return &ITClient{
 		rnd:    rnd,
-		dbInfo: &info,
+		dbInfo: info,
 		state:  nil,
 	}
 }

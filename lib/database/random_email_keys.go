@@ -9,7 +9,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-func GenerateKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, error) {
+func GenerateRandomKeyDB(path string, chunkLength, numRows, numColumns int) (*DB, error) {
 	numBlocks := numRows * numColumns
 
 	// parse k->key file

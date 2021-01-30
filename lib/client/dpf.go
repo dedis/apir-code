@@ -21,10 +21,10 @@ type DPF struct {
 }
 
 // NewDPF returns a new client for the DPF-based single- and multi-bit schemes
-func NewDPF(rnd io.Reader, info database.Info) *DPF {
+func NewDPF(rnd io.Reader, info *database.Info) *DPF {
 	return &DPF{
 		rnd:    rnd,
-		dbInfo: &info,
+		dbInfo: info,
 		state:  nil,
 	}
 }

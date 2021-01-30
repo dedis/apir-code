@@ -23,10 +23,10 @@ type PIR struct {
 // NewItSingleByte return a client for the classical PIR single-bit scheme in
 // GF(2), working both with the vector and the rebalanced representation of the
 // database.
-func NewPIR(rnd io.Reader, info database.Info) *PIR {
+func NewPIR(rnd io.Reader, info *database.Info) *PIR {
 	return &PIR{
 		rnd:    rnd,
-		dbInfo: &info,
+		dbInfo: info,
 		state:  nil,
 	}
 }

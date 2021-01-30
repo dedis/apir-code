@@ -32,7 +32,7 @@ type key struct {
 	Timestamp int      `json:"timestamp"`
 }
 
-func GenerateRealKeysDB(numRows int) (*DB, error) {
+func GenerateRealKeyDB(numRows int) (*DB, error) {
 	var keys []*key
 	var err error
 	chunkLength := constants.ChunkBytesLength

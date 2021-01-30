@@ -114,7 +114,7 @@ func getXof(t *testing.T, key string) io.Reader {
 }
 
 func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
-	c := client.NewITClient(rnd, db.Info)
+	c := client.NewITClient(rnd, &db.Info)
 	s0 := server.NewITServer(db)
 	s1 := server.NewITServer(db)
 
@@ -140,7 +140,7 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 }
 
 func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
-	c := client.NewDPF(rnd, db.Info)
+	c := client.NewDPF(rnd, &db.Info)
 	s0 := server.NewDPF(db, 0)
 	s1 := server.NewDPF(db, 1)
 

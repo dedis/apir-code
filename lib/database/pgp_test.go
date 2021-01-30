@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateRealKeysDB(t *testing.T) {
-	_, err := GenerateRealKeysDB(1)
+	_, err := GenerateRealKeyDB(1)
 	require.NoError(t, err)
 }
 

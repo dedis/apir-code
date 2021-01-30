@@ -86,9 +86,9 @@ func main() {
 	var c client.Client
 	switch *schemePtr {
 	case "dpf":
-		c = client.NewDPF(prg, *lc.dbInfo)
+		c = client.NewDPF(prg, lc.dbInfo)
 	case "it":
-		c = client.NewITClient(prg, *lc.dbInfo)
+		c = client.NewITClient(prg, lc.dbInfo)
 	default:
 		log.Fatal("undefined scheme type")
 	}

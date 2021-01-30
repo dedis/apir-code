@@ -20,6 +20,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestRetrieveRealKeysVector(t *testing.T) {
+	nRows := 1
+	// Generate db from sks key dump
+	_, err := database.GenerateRealKeyDB(nRows)
+	require.NoError(t, err)
+
+}
+
 func TestRetrieveRandomKeyBlockVector(t *testing.T) {
 	// TODO: How do we choose dbLen (hence, nCols) ?
 	dbLen := 40 * oneKB
@@ -44,13 +52,13 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 	path := "data/random_id_key.csv"
 
 	// generate db from data
-	db, err := database.GenerateKeyDB(path, chunkLength, nRows, nCols)
+	db, err := database.GenerateRandomKeyDB(path, chunkLength, nRows, nCols)
 	require.NoError(t, err)
 
 	prg := utils.RandomPRG()
 
 	// client and servers
-	c := client.NewDPF(prg, db.Info)
+	c := client.NewDPF(prg, &db.Info)
 	s0 := server.NewDPF(db, 0)
 	s1 := server.NewDPF(db, 1)
 

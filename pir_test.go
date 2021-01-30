@@ -77,7 +77,7 @@ func TestSingleBitMatrixOneKbBytes(t *testing.T) {
 }
 
 func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
-	c := client.NewPIR(rnd, db.Info)
+	c := client.NewPIR(rnd, &db.Info)
 	s0 := server.NewPIR(db)
 	s1 := server.NewPIR(db)
 
