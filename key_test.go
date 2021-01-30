@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"encoding/csv"
 	"fmt"
+	"github.com/si-co/vpir-code/lib/pgp"
+	"golang.org/x/crypto/openpgp"
 	"io"
 	"math"
 	"os"
@@ -21,10 +23,32 @@ import (
 )
 
 func TestRetrieveRealKeysVector(t *testing.T) {
+	var key *openpgp.Entity
+	var err error
+
+	sksPath := "data/sks/"
+	numKeysToTest := 2
 	nRows := 1
 	// Generate db from sks key dump
-	_, err := database.GenerateRealKeyDB(nRows)
+	db, err := database.GenerateRealKeyDB(sksPath, nRows, constants.ChunkBytesLength)
 	require.NoError(t, err)
+
+	prg := utils.RandomPRG()
+
+	// client and servers
+	c := client.NewDPF(prg, &db.Info)
+	s0 := server.NewDPF(db, 0)
+	s1 := server.NewDPF(db, 1)
+	servers := []*server.DPF{s0, s1}
+
+	emails := []string{"carol@mail.com", "m1.steiner@von.ulm.de"}
+	for i := 0; i < numKeysToTest; i++ {
+		result := retrieveBlockGivenId(t, c, servers, emails[i], db.NumColumns*db.NumRows)
+		key, err = pgp.RecoverKeyGivenEmail(result, emails[i])
+		require.NoError(t, err)
+		fmt.Println(key.PrimaryKey.PublicKey)
+		fmt.Println(key.Identities)
+	}
 
 }
 
@@ -61,6 +85,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 	c := client.NewDPF(prg, &db.Info)
 	s0 := server.NewDPF(db, 0)
 	s1 := server.NewDPF(db, 1)
+	servers := []*server.DPF{s0, s1}
 
 	// open id->key file
 	f, err := os.Open(path)
@@ -84,27 +109,12 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		expectedID := record[0]
 		expectedKey := record[1]
 
-		// compute hash key for id
-		hashKey := database.HashToIndex(expectedID, nCols*nRows)
-
-		// query given hash key
-		fssKeys := c.Query(hashKey, 2)
-
-		// get servers answers
-		a0 := s0.Answer(fssKeys[0])
-		a1 := s1.Answer(fssKeys[1])
-		answers := [][]field.Element{a0, a1}
-
-		// reconstruct block
-		result, err := c.Reconstruct(answers)
-		require.NoError(t, err)
-
 		// retrieve result bytes
-		resultBytes := field.VectorToBytes(result)
-		validateRandomKey(t, expectedID, expectedKey, resultBytes, &db.Info, chunkLength)
+		result := retrieveBlockGivenId(t, c, servers, expectedID, nRows*nCols)
+		validateRandomKey(t, expectedID, expectedKey, result, &db.Info, chunkLength)
 
 		// retrieve only one key
-		//break
+		break
 	}
 	fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
 }
@@ -138,6 +148,26 @@ func validateRandomKey(t *testing.T, id, key string, result []byte, dbInfo *data
 	require.Equal(t, key, idKey[id])
 
 	return idReconstructed, base64.StdEncoding.EncodeToString(keyBytes)
+}
+
+func retrieveBlockGivenId(t *testing.T, c *client.DPF, ss []*server.DPF, id string, dbLenBlocks int) []byte {
+	// compute hash key for id
+	hashKey := database.HashToIndex(id, dbLenBlocks)
+
+	// query given hash key
+	fssKeys := c.Query(hashKey, len(ss))
+
+	// get servers answers
+	answers := make([][]field.Element, len(ss))
+	for i := range ss {
+		answers[i] = ss[i].Answer(fssKeys[i])
+	}
+	// reconstruct block
+	result, err := c.Reconstruct(answers)
+	require.NoError(t, err)
+
+	// return result bytes
+	return field.VectorToBytes(result)
 }
 
 /*

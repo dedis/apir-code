@@ -1,9 +1,10 @@
-package gpg
+package pgp
 
 import (
 	"bytes"
 	"crypto/x509"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,6 +12,24 @@ import (
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/packet"
 )
+
+func RecoverKeyGivenEmail(block []byte, email string) (*openpgp.Entity, error) {
+	// parse the input bytes as a key ring
+	reader := bytes.NewReader(block)
+	el, err := openpgp.ReadKeyRing(reader)
+	if err != nil {
+		return nil, err
+	}
+	// go over PGP entities and find the key with the given email as one of the ids
+	for j := range el {
+		for _, id := range el[j].Identities {
+			if id.UserId.Email == email {
+				return el[j], nil
+			}
+		}
+	}
+	return nil, errors.New("no key with the given email id is found")
+}
 
 func ReadPublicKeysFromDisk() (map[string][]byte, error) {
 	b, err := ioutil.ReadFile("keys.data")

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"io"
@@ -20,7 +19,6 @@ import (
 )
 
 const (
-	sksFilesPath                   = "../../data/sks/"
 	numKeysToDBLengthRatio float32 = 0.2
 	sixteenKiB                     = 16384
 )
@@ -32,11 +30,10 @@ type key struct {
 	Timestamp int      `json:"timestamp"`
 }
 
-func GenerateRealKeyDB(numRows int) (*DB, error) {
+func GenerateRealKeyDB(dumpPath string, numRows, chunkLength int) (*DB, error) {
 	var keys []*key
 	var err error
-	chunkLength := constants.ChunkBytesLength
-	keys, err = readKeyDump(sksFilesPath)
+	keys, err = ReadSKSKeyDump(dumpPath)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +71,7 @@ func GenerateRealKeyDB(numRows int) (*DB, error) {
 }
 
 // Reads in the SKS pgp key dump in the JSON format
-func readKeyDump(dir string) ([]*key, error) {
+func ReadSKSKeyDump(dir string) ([]*key, error) {
 	var err error
 	keys := make([]*key, 0)
 	files, err := ioutil.ReadDir(dir)

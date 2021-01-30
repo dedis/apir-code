@@ -1,4 +1,4 @@
-package gpg
+package pgp
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestReadFromDisk(t *testing.T) {
-	keys, err := ReadPublicKeysFromDisk()
+	_, err := ReadPublicKeysFromDisk()
 	require.NoError(t, err)
 }
 

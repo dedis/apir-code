@@ -1,12 +1,15 @@
 package database
 
 import (
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestGenerateRealKeysDB(t *testing.T) {
-	_, err := GenerateRealKeyDB(1)
+	sksFilesPath := "../../data/sks/"
+	nRows := 1
+	_, err := GenerateRealKeyDB(sksFilesPath, nRows, constants.ChunkBytesLength)
 	require.NoError(t, err)
 }
 

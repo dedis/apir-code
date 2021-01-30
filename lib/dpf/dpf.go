@@ -84,6 +84,7 @@ func Gen(alpha uint64, beta []field.Element, logN uint64) (DPFkey, DPFkey) {
 	if alpha >= (1<<logN) || logN > 63 {
 		panic("dpf: invalid parameters")
 	}
+	// TODO: Figure out why this check is needed and disable
 	if len(beta) > 256 {
 		panic("dpf: maximum len(beta) is 256")
 	}
