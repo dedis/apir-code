@@ -24,3 +24,6 @@
 # Binaries
 cmd/client/client
 cmd/server/server
+
+# log files
+*.log
