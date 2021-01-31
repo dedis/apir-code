@@ -46,7 +46,6 @@ func init() {
 		blockStack[i][0] = new(block)
 		blockStack[i][1] = new(block)
 	}
-
 }
 
 func getT(in *byte) byte {
@@ -298,14 +297,14 @@ func EvalFull(key DPFkey, logN uint64, out [][]field.Element) {
 	evalFullRecursive(key, s, t, 0, stop, &index, out)
 }
 
-func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, blockLength int, out []field.Element) {
+func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, blockLength int, bs [][2]*block, out []field.Element) {
 	blockLengthUint := uint64(blockLength)
 	if *index >= uint64(len(out)/blockLength) {
 		return
 	}
 
 	if lvl == stop {
-		ss := blockStack[lvl][0]
+		ss := bs[lvl][0]
 		*ss = *s
 		//aes128MMO(&keyL[0], &ss[0], &ss[0])
 		if blockLength != len(k.FinalCW) {
@@ -335,8 +334,8 @@ func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint6
 		*index++
 		return
 	}
-	sL := blockStack[lvl][0]
-	sR := blockStack[lvl][1]
+	sL := bs[lvl][0]
+	sR := bs[lvl][1]
 	tL, tR := prg(&s[0], &sL[0], &sR[0])
 	if t != 0 {
 		sCW := k.Bytes[17+lvl*18 : 17+lvl*18+16]
@@ -347,8 +346,8 @@ func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint6
 		tL ^= tLCW
 		tR ^= tRCW
 	}
-	evalFullRecursiveFlatten(k, sL, tL, lvl+1, stop, index, blockLength, out)
-	evalFullRecursiveFlatten(k, sR, tR, lvl+1, stop, index, blockLength, out)
+	evalFullRecursiveFlatten(k, sL, tL, lvl+1, stop, index, blockLength, bs, out)
+	evalFullRecursiveFlatten(k, sR, tR, lvl+1, stop, index, blockLength, bs, out)
 }
 
 func EvalFullFlatten(key DPFkey, logN uint64, blockLength int, out []field.Element) {
@@ -356,7 +355,13 @@ func EvalFullFlatten(key DPFkey, logN uint64, blockLength int, out []field.Eleme
 	copy(s[:], key.Bytes[:16])
 	t := key.Bytes[16]
 	stop := logN
-
 	index := uint64(0)
-	evalFullRecursiveFlatten(key, s, t, 0, stop, &index, blockLength, out)
+
+	bs := make([][2]*block, 63)
+	for i := 0; i < 63; i++ {
+		bs[i][0] = new(block)
+		bs[i][1] = new(block)
+	}
+
+	evalFullRecursiveFlatten(key, s, t, 0, stop, &index, blockLength, bs, out)
 }
