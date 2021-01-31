@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"math/bits"
-	"sync"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/dpf"
@@ -14,7 +13,6 @@ import (
 type DPF struct {
 	db        *database.DB
 	serverNum byte
-	mu        sync.Mutex
 }
 
 func NewDPF(db *database.DB, serverNum byte) *DPF {
@@ -51,8 +49,6 @@ func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 
 func (s *DPF) Answer(key dpf.DPFkey) []field.Element {
 	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
-	s.mu.Lock()
 	dpf.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns))), s.db.BlockSize+1, q)
-	s.mu.Unlock()
 	return answer(q, s.db)
 }
