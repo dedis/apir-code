@@ -50,7 +50,14 @@ func init() {
 
 func main() {
 	// set logs
-	log.SetOutput(os.Stdout)
+	f, err := os.Create("client.log")
+	if err != nil {
+		log.Fatal("Could not open file: ", err)
+	}
+
+	defer f.Close()
+	log.SetOutput(f)
+	//log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// flags
