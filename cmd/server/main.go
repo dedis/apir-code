@@ -55,6 +55,7 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// generate db
+	// TODO: generate different db if PIR
 	// TODO: How do we choose dbLen (hence, nCols) ?
 	dbLen := 40 * 1024 * 8
 	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
