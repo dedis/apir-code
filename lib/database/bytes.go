@@ -41,25 +41,3 @@ func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Byt
 		},
 	}
 }
-
-func CreateRandomSingleBitBytes(rnd io.Reader, dbLen, numRows int) *Bytes {
-	entries := make([][]byte, numRows)
-	numColumns := dbLen / numRows
-	for i := 0; i < numRows; i++ {
-		entries[i] = make([]byte, numColumns)
-		for j := 0; j < numColumns; j++ {
-			e := make([]byte, 1)
-			if _, err := rnd.Read(e); err != nil {
-				log.Fatal(err)
-			}
-			entries[i][j] = e[0] >> 7
-		}
-	}
-
-	return &Bytes{Entries: entries,
-		Info: Info{NumColumns: numColumns,
-			NumRows:   numRows,
-			BlockSize: 0,
-		},
-	}
-}
