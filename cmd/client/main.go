@@ -32,20 +32,22 @@ type localClient struct {
 }
 
 func main() {
-	// set logs
-	//f, err := os.Create("client.log")
-	//if err != nil {
-	//log.Fatal("Could not open file: ", err)
-	//}
-
-	//defer f.Close()
-	//log.SetOutput(f)
-	log.SetOutput(os.Stdout)
-	log.SetPrefix(fmt.Sprintf("[Client] "))
-
 	// flags
+	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
 	flag.Parse()
+
+	// set logs
+	log.SetOutput(os.Stdout)
+	log.SetPrefix(fmt.Sprintf("[Client] "))
+	if len(*logFile) > 0 {
+		f, err := os.Create(*logFile)
+		if err != nil {
+			log.Fatal("Could not open file: ", err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	}
 
 	// configs
 	config, err := utils.LoadConfig("config.toml")

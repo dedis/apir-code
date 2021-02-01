@@ -24,11 +24,20 @@ func main() {
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
 	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
+	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	flag.Parse()
 
 	// set logs
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
+	if len(*logFile) > 0 {
+		f, err := os.Create(*logFile)
+		if err != nil {
+			log.Fatal("Could not open file: ", err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	}
 
 	// configs
 	config, err := utils.LoadConfig("config.toml")
