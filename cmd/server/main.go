@@ -83,6 +83,8 @@ func main() {
 		s = server.NewDPF(db, byte(*sid))
 	case "it":
 		s = server.NewIT(db)
+	case "pir":
+		s = server.NewPIR(db)
 	default:
 		log.Fatal("undefined scheme type")
 	}

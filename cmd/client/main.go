@@ -96,6 +96,8 @@ func main() {
 		c = client.NewDPF(prg, lc.dbInfo)
 	case "it":
 		c = client.NewIT(prg, lc.dbInfo)
+	case "pir":
+		c = client.NewPIR(prg, lc.dbInfo)
 	default:
 		log.Fatal("undefined scheme type")
 	}
