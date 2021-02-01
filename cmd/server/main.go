@@ -25,7 +25,15 @@ func main() {
 	sid := flag.Int("id", -1, "Server ID")
 	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
+	prof := flag.Bool("prof", false, "Write CPU prof file")
 	flag.Parse()
+
+	// start profiling
+	if *prof {
+		fmt.Println("here")
+		utils.StartProfiling(fmt.Sprintf("server-%v.prof", *sid))
+		defer utils.StopProfiling()
+	}
 
 	// set logs
 	log.SetOutput(os.Stdout)

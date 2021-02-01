@@ -35,7 +35,14 @@ func main() {
 	// flags
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
+	prof := flag.Bool("prof", false, "Write pprof file")
 	flag.Parse()
+
+	// enable profiling
+	if *prof {
+		utils.StartProfiling("client.prof")
+		defer utils.StopProfiling()
+	}
 
 	// set logs
 	log.SetOutput(os.Stdout)
