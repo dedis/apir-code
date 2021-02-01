@@ -6,8 +6,6 @@ import (
 	"encoding/csv"
 	"encoding/hex"
 	"fmt"
-	"github.com/si-co/vpir-code/lib/pgp"
-	"golang.org/x/crypto/openpgp"
 	"io"
 	"math"
 	"os"
@@ -18,9 +16,11 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
+	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/openpgp"
 )
 
 func TestRetrieveRealKeysVector(t *testing.T) {

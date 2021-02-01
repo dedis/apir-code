@@ -114,9 +114,9 @@ func getXof(t *testing.T, key string) io.Reader {
 }
 
 func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
-	c := client.NewITClient(rnd, &db.Info)
-	s0 := server.NewITServer(db)
-	s1 := server.NewITServer(db)
+	c := client.NewIT(rnd, &db.Info)
+	s0 := server.NewIT(db)
+	s1 := server.NewIT(db)
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {

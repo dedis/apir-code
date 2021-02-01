@@ -95,7 +95,7 @@ func main() {
 	case "dpf":
 		c = client.NewDPF(prg, lc.dbInfo)
 	case "it":
-		c = client.NewITClient(prg, lc.dbInfo)
+		c = client.NewIT(prg, lc.dbInfo)
 	default:
 		log.Fatal("undefined scheme type")
 	}

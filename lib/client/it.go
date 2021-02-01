@@ -15,25 +15,25 @@ import (
 // representations of the database are handled by this client, via
 // a boolean variable
 
-// ITClient represents the client for the information theoretic multi-bit scheme
-type ITClient struct {
+// IT represents the client for the information theoretic multi-bit scheme
+type IT struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
 }
 
-// NewITClient returns a client for the information theoretic multi-bit
+// NewIT returns a client for the information theoretic multi-bit
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
-func NewITClient(rnd io.Reader, info *database.Info) *ITClient {
-	return &ITClient{
+func NewIT(rnd io.Reader, info *database.Info) *IT {
+	return &IT{
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
 	}
 }
 
-func (c *ITClient) QueryBytes(index, numServers int) ([][]byte, error) {
+func (c *IT) QueryBytes(index, numServers int) ([][]byte, error) {
 	// get reconstruction
 	queries := c.Query(index, numServers)
 
@@ -55,7 +55,7 @@ func (c *ITClient) QueryBytes(index, numServers int) ([][]byte, error) {
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *ITClient) Query(index, numServers int) [][]field.Element {
+func (c *IT) Query(index, numServers int) [][]field.Element {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -71,7 +71,7 @@ func (c *ITClient) Query(index, numServers int) [][]field.Element {
 	return vectors
 }
 
-func (c *ITClient) ReconstructBytes(a [][]byte) ([]field.Element, error) {
+func (c *IT) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	answer, err := decodeAnswer(a)
 	if err != nil {
 		return nil, err
@@ -80,12 +80,12 @@ func (c *ITClient) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	return c.Reconstruct(answer)
 }
 
-func (c *ITClient) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
+func (c *IT) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 	return reconstruct(answers, c.dbInfo, c.state)
 }
 
 // secretShare the vector a among numServers non-colluding servers
-func (c *ITClient) secretShare(numServers int) ([][]field.Element, error) {
+func (c *IT) secretShare(numServers int) ([][]field.Element, error) {
 	// get block length
 	blockLen := len(c.state.a)
 	// Number of field elements in the whole vector
