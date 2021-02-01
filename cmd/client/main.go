@@ -44,7 +44,6 @@ func main() {
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// flags
-	//idPtr := flag.String("id", "", "id for which key should be retrieved")
 	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
 	flag.Parse()
 
