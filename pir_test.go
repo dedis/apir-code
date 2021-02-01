@@ -17,20 +17,6 @@ func TestMultiBitVectorOneKbBytes(t *testing.T) {
 	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneKb")
 }
 
-func TestSingleBitVectorOneKbBytes(t *testing.T) {
-	dbLen := oneKB
-	nRows := 1
-	nCols := dbLen
-
-	// functions defined in vpir_test.go
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
-
-	db := database.CreateRandomSingleBitBytes(xofDB, dbLen, nRows)
-
-	retrieveBlocksBytes(t, xof, db, nRows*nCols, "SingleBitVectorOneKb")
-}
-
 func TestMultiBitMatrixOneKbBytes(t *testing.T) {
 	dbLen := oneKB
 	blockLen := constants.BlockLength
@@ -46,20 +32,6 @@ func TestMultiBitMatrixOneKbBytes(t *testing.T) {
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
 	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneKb")
-}
-
-func TestSingleBitMatrixOneKbBytes(t *testing.T) {
-	dbLen := oneKB - 92 // making the length a square
-	numBlocks := dbLen
-	nCols := int(math.Sqrt(float64(numBlocks)))
-	nRows := nCols
-
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
-
-	db := database.CreateRandomSingleBitBytes(xofDB, dbLen, nRows)
-
-	retrieveBlocksBytes(t, xof, db, numBlocks, "SingleBitMatrixOneKb")
 }
 
 func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
