@@ -34,13 +34,14 @@ func (s *PIR) AnswerBytes(q []byte) ([]byte, error) {
 func (s *PIR) Answer(q []byte) []byte {
 	// Doing simplified scheme if block consists of a single bit
 	if s.db.BlockSize == cst.SingleBitBlockLength {
-		a := make([]byte, s.db.NumRows)
-		for i := 0; i < s.db.NumRows; i++ {
-			for j := 0; j < s.db.NumColumns; j++ {
-				a[i] ^= q[j] & s.db.Entries[i][j]
-			}
-		}
-		return a
+		panic("single-bit classical PIR protocol not implemented")
+		//a := make([]byte, s.db.NumRows)
+		//for i := 0; i < s.db.NumRows; i++ {
+		//for j := 0; j < s.db.NumColumns; j++ {
+		//a[i] ^= q[j] & s.db.Entries[i][j]
+		//}
+		//}
+		//return a
 	}
 
 	// parse the query

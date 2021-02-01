@@ -65,16 +65,17 @@ func (c *PIR) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 
 func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
 	if c.dbInfo.BlockSize == cst.SingleBitBlockLength {
+		panic("single-bit classical PIR protocol not implemented")
 		// sum answers as vectors in GF(2) only for the
 		// row of interest
-		sum := make([]byte, c.dbInfo.NumRows)
-		for i := 0; i < c.dbInfo.NumRows; i++ {
-			for k := range answers {
-				sum[i] ^= answers[k][i]
-			}
-		}
+		//sum := make([]byte, c.dbInfo.NumRows)
+		//for i := 0; i < c.dbInfo.NumRows; i++ {
+		//for k := range answers {
+		//sum[i] ^= answers[k][i]
+		//}
+		//}
 
-		return []byte{sum[c.state.ix]}, nil
+		//return []byte{sum[c.state.ix]}, nil
 	}
 	sum := make([][]byte, c.dbInfo.NumRows)
 
