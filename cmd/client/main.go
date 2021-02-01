@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"flag"
@@ -25,8 +24,6 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 )
 
-var creds credentials.TransportCredentials
-
 type localClient struct {
 	connections map[string]*grpc.ClientConn
 	ctx         context.Context
@@ -34,30 +31,16 @@ type localClient struct {
 	dbInfo *database.Info
 }
 
-func init() {
-	// load servers certificates
-	cp := x509.NewCertPool()
-	for _, cert := range utils.ServerPublicKeys {
-		if !cp.AppendCertsFromPEM([]byte(cert)) {
-			log.Fatalf("credentials: failed to append certificates")
-		}
-	}
-	cfg := &tls.Config{RootCAs: cp}
-	// TODO: remove
-	cfg.InsecureSkipVerify = true
-	creds = credentials.NewTLS(cfg)
-}
-
 func main() {
 	// set logs
-	f, err := os.Create("client.log")
-	if err != nil {
-		log.Fatal("Could not open file: ", err)
-	}
+	//f, err := os.Create("client.log")
+	//if err != nil {
+	//log.Fatal("Could not open file: ", err)
+	//}
 
-	defer f.Close()
-	log.SetOutput(f)
-	//log.SetOutput(os.Stdout)
+	//defer f.Close()
+	//log.SetOutput(f)
+	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// flags
@@ -79,10 +62,19 @@ func main() {
 	// random generator
 	prg := utils.RandomPRG()
 
+	// load servers certificates
+	cp := x509.NewCertPool()
+	for _, cert := range utils.ServerPublicKeys {
+		if !cp.AppendCertsFromPEM([]byte(cert)) {
+			log.Fatalf("credentials: failed to append certificates")
+		}
+	}
+	creds := credentials.NewClientTLSFromCert(cp, "127.0.0.1")
+
 	// connect to servers and store connections
 	lc.connections = make(map[string]*grpc.ClientConn)
 	for _, s := range config.Addresses {
-		lc.connections[s] = connectToServer(s)
+		lc.connections[s] = connectToServer(creds, s)
 		defer lc.connections[s].Close()
 	}
 
@@ -256,7 +248,7 @@ func query(ctx context.Context, conn *grpc.ClientConn, query []byte) []byte {
 	return answer.GetAnswer()
 }
 
-func connectToServer(address string) *grpc.ClientConn {
+func connectToServer(creds credentials.TransportCredentials, address string) *grpc.ClientConn {
 	conn, err := grpc.Dial(address,
 		grpc.WithTransportCredentials(creds), grpc.WithBlock())
 	if err != nil {
