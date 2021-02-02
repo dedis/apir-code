@@ -15,10 +15,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMultiBitVectorOneMbBytes(t *testing.T) {
+func TestMultiBitVectorOneMbPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := constants.BlockLength
-	elemBitSize := field.Bytes * 8
+	// we want to download the same numer of bytes
+	// as in the field representation
+	blockLen := constants.BlockLength * field.Bytes
+	elemBitSize := 8
 	nRows := 1
 	nCols := dbLen / (elemBitSize * blockLen * nRows)
 
@@ -28,13 +30,13 @@ func TestMultiBitVectorOneMbBytes(t *testing.T) {
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneMbBytes")
+	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneMbPIR")
 }
 
-func TestMultiBitMatrixOneMbBytes(t *testing.T) {
+func TestMultiBitMatrixOneMbPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := constants.BlockLength
-	elemBitSize := field.Bytes * 8
+	blockLen := constants.BlockLength * field.Bytes
+	elemBitSize := 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
@@ -45,7 +47,7 @@ func TestMultiBitMatrixOneMbBytes(t *testing.T) {
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneMbBytes")
+	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneMbPIR")
 }
 
 func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
@@ -65,7 +67,6 @@ func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlo
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
-
 	}
 	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
 }

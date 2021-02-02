@@ -27,7 +27,6 @@ func NewPIR(rnd io.Reader, info *database.Info) *PIR {
 	if info.BlockSize == cst.SingleBitBlockLength {
 		panic("single-bit classical PIR protocol not implemented")
 	}
-
 	return &PIR{
 		rnd:    rnd,
 		dbInfo: info,

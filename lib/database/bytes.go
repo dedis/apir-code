@@ -3,6 +3,8 @@ package database
 import (
 	"io"
 	"log"
+
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 type Bytes struct {
@@ -26,7 +28,7 @@ func CreateZeroMultiBitBytes(numRows, numColumns, blockSize int) *Bytes {
 
 func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	entries := make([][]byte, numRows)
-	numColumns := dbLen / (128 * numRows * blockLen)
+	numColumns := field.Bytes * dbLen / (128 * numRows * blockLen)
 	for i := 0; i < numRows; i++ {
 		e := make([]byte, numColumns*blockLen)
 		if _, err := rnd.Read(e); err != nil {

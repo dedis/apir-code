@@ -2,13 +2,13 @@ package database
 
 import (
 	"encoding/binary"
-	"golang.org/x/crypto/blake2b"
 	"io"
 	"log"
 
+	"golang.org/x/crypto/blake2b"
+
 	"github.com/si-co/vpir-code/lib/field"
 )
-
 
 type DB struct {
 	Entries [][]field.Element
