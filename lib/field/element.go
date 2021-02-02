@@ -260,7 +260,9 @@ func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 
 	zs := make([]Element, length)
 	for i := 0; i < length; i++ {
-		zs[i].SetBytes(bytes[i*Bytes : (i+1)*Bytes])
+		var buf [16]byte
+		copy(buf[:], bytes[i*Bytes:(1+i)*Bytes])
+		zs[i].SetFixedLengthBytes(buf)
 	}
 
 	return zs, nil
