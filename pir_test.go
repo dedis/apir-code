@@ -15,12 +15,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMultiBitVectorOneKbBytes(t *testing.T) {
-	dbLen := oneKB
+func TestMultiBitVectorOneMbBytes(t *testing.T) {
+	dbLen := oneMB
 	blockLen := constants.BlockLength
-	elemSize := field.Bits
+	elemBitSize := field.Bytes * 8
 	nRows := 1
-	nCols := dbLen / (elemSize * blockLen * nRows)
+	nCols := dbLen / (elemBitSize * blockLen * nRows)
 
 	// functions defined in vpir_test.go
 	xofDB := getXof(t, "db key")
@@ -31,11 +31,11 @@ func TestMultiBitVectorOneKbBytes(t *testing.T) {
 	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneKbBytes")
 }
 
-func TestMultiBitMatrixOneKbBytes(t *testing.T) {
-	dbLen := oneKB
+func TestMultiBitMatrixOneMbBytes(t *testing.T) {
+	dbLen := oneMB
 	blockLen := constants.BlockLength
-	elemSize := field.Bits
-	numBlocks := dbLen / (elemSize * blockLen)
+	elemBitSize := field.Bytes * 8
+	numBlocks := dbLen / (elemBitSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
 
