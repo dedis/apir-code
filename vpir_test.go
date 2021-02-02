@@ -21,12 +21,12 @@ const (
 	oneKB = 1024 * 8
 )
 
-func TestMultiBitVectorOneKb(t *testing.T) {
-	dbLen := oneKB
+func TestMultiBitVectorOneMb(t *testing.T) {
+	dbLen := oneMB
 	blockLen := constants.BlockLength
-	elemSize := field.Bits
+	elemBitSize := field.Bytes * 8
 	nRows := 1
-	nCols := dbLen / (elemSize * blockLen * nRows)
+	nCols := dbLen / (elemBitSize * blockLen * nRows)
 
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
@@ -49,11 +49,11 @@ func TestSingleBitVectorOneKb(t *testing.T) {
 	retrieveBlocks(t, xof, db, nRows*nCols, "SingleBitVectorOneKb")
 }
 
-func TestMultiBitMatrixOneKb(t *testing.T) {
-	dbLen := oneKB
+func TestMultiBitMatrixOneMb(t *testing.T) {
+	dbLen := oneMB
 	blockLen := constants.BlockLength
-	elemSize := field.Bits
-	numBlocks := dbLen / (elemSize * blockLen)
+	elemBitSize := field.Bytes * 8
+	numBlocks := dbLen / (elemBitSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
 
@@ -61,7 +61,6 @@ func TestMultiBitMatrixOneKb(t *testing.T) {
 	xof := getXof(t, "client key")
 
 	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
-
 	retrieveBlocks(t, xof, db, numBlocks, "MultiBitMatrixOneKb")
 }
 
