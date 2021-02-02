@@ -35,7 +35,6 @@ func (s *PIR) AnswerBytes(q []byte) ([]byte, error) {
 
 // Answer computes the answer for the given query
 func (s *PIR) Answer(q []byte) []byte {
-	// parse the query
 	m := make([]byte, s.db.NumRows*s.db.BlockSize)
 	// we have to traverse column by column
 	for i := 0; i < s.db.NumRows; i++ {
