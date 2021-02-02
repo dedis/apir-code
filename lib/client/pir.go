@@ -52,7 +52,6 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 		ix: index / c.dbInfo.NumColumns,
 		iy: index % c.dbInfo.NumColumns,
 	}
-
 	vectors, err := c.secretShare(numServers)
 	if err != nil {
 		log.Fatal(err)
