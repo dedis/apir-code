@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"io"
 	"log"
 
@@ -53,7 +52,7 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 		ix: index / c.dbInfo.NumColumns,
 		iy: index % c.dbInfo.NumColumns,
 	}
-	fmt.Println(float64(index / c.dbInfo.NumColumns))
+
 	vectors, err := c.secretShare(numServers)
 	if err != nil {
 		log.Fatal(err)

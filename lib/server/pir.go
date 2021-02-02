@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 )
@@ -41,9 +42,7 @@ func (s *PIR) Answer(q []byte) []byte {
 		sum := make([]byte, s.db.BlockSize)
 		for j := 0; j < s.db.NumColumns; j++ {
 			if q[j] == byte(1) {
-				for b := 0; b < s.db.BlockSize; b++ {
-					sum[b] ^= s.db.Entries[i][j*s.db.BlockSize+b]
-				}
+				fastxor.Bytes(sum, sum, s.db.Entries[i][j*s.db.BlockSize:j*s.db.BlockSize+s.db.BlockSize])
 			}
 		}
 		copy(m[i*(s.db.BlockSize):(i+1)*(s.db.BlockSize)], sum)

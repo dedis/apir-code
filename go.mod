@@ -13,6 +13,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/hockeypuck/hockeypuck v0.0.0-20201211204814-46e64a62db0c // indirect
 	github.com/leanovate/gopter v0.2.8
+	github.com/lukechampine/fastxor v0.0.0-20200124170337-07dbf569dfe7
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
