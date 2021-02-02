@@ -28,7 +28,7 @@ func TestMultiBitVectorOneMbBytes(t *testing.T) {
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneKbBytes")
+	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneMbBytes")
 }
 
 func TestMultiBitMatrixOneMbBytes(t *testing.T) {
@@ -45,7 +45,7 @@ func TestMultiBitMatrixOneMbBytes(t *testing.T) {
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneKbBytes")
+	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneMbBytes")
 }
 
 func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
