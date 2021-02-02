@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"io"
 	"log"
 
@@ -47,13 +48,12 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
-
 	// set the client state. The entries specific to VPIR are not used
 	c.state = &state{
 		ix: index / c.dbInfo.NumColumns,
 		iy: index % c.dbInfo.NumColumns,
 	}
-
+	fmt.Println(float64(index / c.dbInfo.NumColumns))
 	vectors, err := c.secretShare(numServers)
 	if err != nil {
 		log.Fatal(err)
@@ -75,13 +75,9 @@ func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
 		sum[i] = make([]byte, c.dbInfo.BlockSize)
 		for b := 0; b < c.dbInfo.BlockSize; b++ {
 			for k := range answers {
-				sum[i][b] ^= answers[k][i*(c.dbInfo.BlockSize)+b]
+				sum[i][b] ^= answers[k][i*c.dbInfo.BlockSize+b]
 			}
 		}
-	}
-	messages := make([]byte, c.dbInfo.BlockSize)
-	for i := 0; i < c.dbInfo.NumRows; i++ {
-		copy(messages, sum[i])
 	}
 
 	return sum[c.state.ix], nil
