@@ -48,6 +48,7 @@ func (c *DPF) QueryBytes(index, numServers int) ([][]byte, error) {
 	return out, nil
 }
 
+// Query ...
 func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
@@ -63,6 +64,7 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
+// ReconstructBytes ...
 func (c *DPF) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	answer, err := decodeAnswer(a)
 
@@ -73,6 +75,7 @@ func (c *DPF) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	return c.Reconstruct(answer)
 }
 
+// Reconstruct ..
 func (c *DPF) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 	return reconstruct(answers, c.dbInfo, c.state)
 }
