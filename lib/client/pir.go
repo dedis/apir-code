@@ -91,6 +91,9 @@ func (c *PIR) secretShare(numServers int) ([][]byte, error) {
 	}
 
 	// Get random elements for all numServers-1 vectors
+	// TODO: these are actually too many bits, we need
+	// 1/8 of them and extract the random bits from
+	// the bytes
 	rand := make([]byte, (numServers-1)*vectorLen)
 	if _, err := c.rnd.Read(rand); err != nil {
 		return nil, err
