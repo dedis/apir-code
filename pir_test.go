@@ -1,6 +1,20 @@
 package main
 
-/*
+import (
+	"fmt"
+	"io"
+	"math"
+	"testing"
+
+	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/monitor"
+	"github.com/si-co/vpir-code/lib/server"
+	"github.com/stretchr/testify/require"
+)
+
 func TestMultiBitVectorOneKbBytes(t *testing.T) {
 	dbLen := oneKB
 	blockLen := constants.BlockLength
@@ -14,7 +28,7 @@ func TestMultiBitVectorOneKbBytes(t *testing.T) {
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneKb")
+	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneKbBytes")
 }
 
 func TestMultiBitMatrixOneKbBytes(t *testing.T) {
@@ -31,7 +45,7 @@ func TestMultiBitMatrixOneKbBytes(t *testing.T) {
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneKb")
+	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneKbBytes")
 }
 
 func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
@@ -50,13 +64,8 @@ func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlo
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		if db.BlockSize == constants.SingleBitBlockLength {
-			require.Equal(t, db.Entries[i/db.NumColumns][i%db.NumColumns:i%db.NumColumns+1], res)
-		} else {
-			require.ElementsMatch(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
-		}
+		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
 
 	}
 	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
 }
-*/

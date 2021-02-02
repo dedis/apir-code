@@ -18,6 +18,9 @@ type PIR struct {
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
 func NewPIR(db *database.Bytes) *PIR {
+	if db.BlockSize == cst.SingleBitBlockLength {
+		panic("single-bit classical PIR protocol not implemented")
+	}
 	return &PIR{db: db}
 }
 
@@ -32,35 +35,19 @@ func (s *PIR) AnswerBytes(q []byte) ([]byte, error) {
 
 // Answer computes the answer for the given query
 func (s *PIR) Answer(q []byte) []byte {
-	// Doing simplified scheme if block consists of a single bit
-	if s.db.BlockSize == cst.SingleBitBlockLength {
-		panic("single-bit classical PIR protocol not implemented")
-		//a := make([]byte, s.db.NumRows)
-		//for i := 0; i < s.db.NumRows; i++ {
-		//for j := 0; j < s.db.NumColumns; j++ {
-		//a[i] ^= q[j] & s.db.Entries[i][j]
-		//}
-		//}
-		//return a
-	}
-
 	// parse the query
-	qZeroBase := make([]byte, s.db.NumColumns)
-	for j := 0; j < s.db.NumColumns; j++ {
-		qZeroBase[j] = q[j*(s.db.BlockSize+1)]
-	}
-
 	m := make([]byte, s.db.NumRows*s.db.BlockSize)
 	// we have to traverse column by column
 	for i := 0; i < s.db.NumRows; i++ {
 		sum := make([]byte, s.db.BlockSize)
 		for j := 0; j < s.db.NumColumns; j++ {
-			for b := 0; b < s.db.BlockSize; b++ {
-				sum[b] ^= s.db.Entries[i][j*s.db.BlockSize+b] & qZeroBase[j]
-
+			if q[j] == byte(1) {
+				for b := 0; b < s.db.BlockSize; b++ {
+					sum[b] ^= s.db.Entries[i][j*s.db.BlockSize+b]
+				}
 			}
 		}
-		copy(m[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)-1], sum)
+		copy(m[i*(s.db.BlockSize):(i+1)*(s.db.BlockSize)], sum)
 	}
 
 	return m
