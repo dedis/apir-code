@@ -50,6 +50,20 @@ func TestMultiBitMatrixOneMbPIR(t *testing.T) {
 	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneMbPIR")
 }
 
+func TestDPFMultiVectorPIR(t *testing.T) {
+	dbLen := oneMB
+	blockLen := constants.BlockLength * field.Bytes
+	elemBitSize := 8
+	numBlocks := dbLen / (elemBitSize * blockLen)
+	nRows := 1
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
+
+	retrieveBlocksDPFBytes(t, xof, db, numBlocks, "TestDPFMultiVectorPIR")
+}
+
 func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
 	c := client.NewPIR(rnd, &db.Info)
 	s0 := server.NewPIR(db)
@@ -69,4 +83,26 @@ func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlo
 		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
 	}
 	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
+}
+
+func retrieveBlocksDPFBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
+	c := client.NewPIRdpf(rnd, &db.Info)
+	s0 := server.NewPIRdpf(db, 0)
+	s1 := server.NewPIRdpf(db, 1)
+
+	totalTimer := monitor.NewMonitor()
+	for i := 0; i < numBlocks; i++ {
+		fssKeys := c.Query(i, 2)
+
+		a0 := s0.Answer(fssKeys[0])
+		a1 := s1.Answer(fssKeys[1])
+
+		answers := [][]byte{a0, a1}
+
+		res, err := c.Reconstruct(answers)
+		require.NoError(t, err)
+		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
+	}
+
+	fmt.Printf("Total time dpf-based %s: %.1fms\n", testName, totalTimer.Record())
 }
