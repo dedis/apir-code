@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestReadFromDisk(t *testing.T) {
-	_, err := ReadPublicKeysFromDisk()
-	require.NoError(t, err)
-}
+//func TestLoadFromDisk(t *testing.T) {
+//	_, err := LoadKeysFromDisk()
+//	require.NoError(t, err)
+//}
 
 func TestImportEntireDump(t *testing.T) {
 	errorCounts := 0
@@ -62,4 +62,31 @@ func TestImportSingleDump(t *testing.T) {
 	for id, key := range primaryKeys {
 		fmt.Println("id: ", id, " key: ", key)
 	}
+}
+
+func TestGetEmailAddressFromId(t *testing.T) {
+	var email string
+	var err error
+	re := compileRegexToMatchEmail()
+	// expected format
+	email, err = getEmailAddressFromPGPId("Alice Wonderland <alice@wonderland.com>", re)
+	require.NoError(t, err)
+	require.Equal(t, "alice@wonderland.com", email)
+
+	// still valid email
+	email, err = getEmailAddressFromPGPId("Michael Steiner <m1.steiner@von.ulm.de>", re)
+	require.NoError(t, err)
+	require.Equal(t, "m1.steiner@von.ulm.de", email)
+
+	// id without email
+	email, err = getEmailAddressFromPGPId("Alice Wonderland", re)
+	require.Error(t, err)
+
+	// empty email
+	email, err = getEmailAddressFromPGPId("Alice Wonderland <>", re)
+	require.Error(t, err)
+
+	// non-valid email
+	email, err = getEmailAddressFromPGPId("Bob <??@bob.bob>", re)
+	require.Error(t, err)
 }

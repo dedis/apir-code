@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/csv"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"math"
 	"os"
 	"testing"
 
+	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
@@ -20,7 +20,6 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/openpgp"
 )
 
 func TestRetrieveRealKeysVector(t *testing.T) {
@@ -44,10 +43,7 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	emails := []string{"jandro@ibm.net", "m1.steiner@von.ulm.de"}
 	for i := 0; i < len(emails); i++ {
 		result := retrieveBlockGivenId(t, c, servers, emails[i], db.NumColumns*db.NumRows)
-		fmt.Println(hex.EncodeToString(result))
 		result = database.UnPadBlock(result)
-		//TODO: remove zero padding before passing to PGP, otherwise it fails
-		fmt.Println(hex.EncodeToString(result))
 		key, err = pgp.RecoverKeyGivenEmail(result, emails[i])
 		require.NoError(t, err)
 		fmt.Println(key.Identities)

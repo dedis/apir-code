@@ -6,12 +6,175 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"github.com/nikirill/go-crypto/openpgp/packet"
 	"io/ioutil"
+	"log"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
 
-	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/packet"
+	"github.com/nikirill/go-crypto/openpgp"
 )
+
+const (
+	eightKiB                = 8192
+	sksParsedOutputFileName = "sks-dump.pgp"
+	keySizeLimit            = eightKiB
+)
+
+// Key defines a PGP item after processing and saving into a binary file
+type Key struct {
+	Id     string
+	Packet []byte
+}
+
+func AnalyzeDumpFiles() (map[string]*openpgp.Entity, error) {
+	// map for the parsed entityMap
+	entityMap := make(map[string]*openpgp.Entity)
+
+	in, err := os.Open("sks-dump/sks-dump-0000.pgp")
+	if err != nil {
+		return nil, err
+	}
+	defer in.Close()
+	el, err := openpgp.ReadKeyRing(in)
+	if err != nil {
+		return nil, err
+	}
+	//var expired bool
+	var email string
+	for _, e := range el {
+		// skip revoked keys
+		if len(e.Revocations) > 0 {
+			continue
+		}
+		email = e.PrimaryIdentity().UserId.Email
+		// iterate over identities in search for the email if
+		// the primary identity does not have one
+		if email == "" {
+			for _, id := range e.Identities {
+				if id.UserId.Email != "" {
+					email = id.UserId.Email
+					break
+				}
+			}
+		}
+		// skip keys without emails
+		if email == "" {
+			continue
+		}
+		// TODO: Should we skip expired keys?
+		//expired, email = isExpired(e)
+		//if expired {
+		//	numExpired += 1
+		//	continue
+		//}
+
+		//Remove subkeys (as a PoC) so that only the primary key is left
+		e.Subkeys = nil
+		// we index the entityMap by the primary identity and keep only
+		// the latest key if there are multiple for a given identity
+		if prev, ok := entityMap[email]; !ok {
+			entityMap[email] = e
+		} else {
+			// save the entity if the primary key is fresher than the stored one
+			if prev.PrimaryKey.CreationTime.Before(e.PrimaryKey.CreationTime) {
+				entityMap[email] = e
+			}
+		}
+	}
+	return entityMap, nil
+}
+
+func WriteKeysOnDisk(entities map[string]*openpgp.Entity) error {
+	var err error
+	var buf bytes.Buffer
+
+	out, err := os.OpenFile(sksParsedOutputFileName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	encoder := gob.NewEncoder(out)
+	defer out.Close()
+
+	for email, entity := range entities {
+		err = entity.Serialize(&buf)
+		if err != nil {
+			return err
+		}
+		// If the serialized key packet is larger than an enforced upper-bound,
+		// we ignore this key.
+		if buf.Len() > keySizeLimit {
+			continue
+		}
+		err = encoder.Encode(&Key{Id: email, Packet: buf.Bytes()})
+		if err != nil {
+			return err
+		}
+		buf.Reset()
+	}
+
+	return nil
+}
+
+func LoadKeysFromDisk(dir string) ([]*Key, error) {
+	var err error
+	keys := make([]*Key, 0)
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		f, err := os.Open(filepath.Join(dir, file.Name()))
+		if err != nil {
+			return nil, err
+		}
+		decoder := gob.NewDecoder(f)
+		// Decoding the serialized data
+		if err = decoder.Decode(&keys); err != nil {
+			return nil, err
+		}
+		if err = f.Close(); err != nil {
+			return nil, err
+		}
+	}
+	return keys, nil
+}
+
+// isExpired checks whether there is an user id with non-expired self-signature
+// and replies with an email corresponding to the primary id or the non-expired Id.
+func isExpired(e *openpgp.Entity) (expired bool, email string) {
+	expired = true
+	for _, id := range e.Identities {
+		if !id.SelfSignature.KeyExpired(time.Now()) {
+			expired = false
+			email = id.UserId.Email
+			break
+		}
+	}
+	if !e.PrimaryIdentity().SelfSignature.KeyExpired(time.Now()) && !expired {
+		email = e.PrimaryIdentity().UserId.Email
+	}
+
+	return
+}
+
+func readParsed() {
+	in, err := os.Open("sks-0003.pgp")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer in.Close()
+	el, err := openpgp.ReadKeyRing(in)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, e := range el {
+		fmt.Printf("%s\t", e.PrimaryIdentity().Name)
+	}
+}
 
 func RecoverKeyGivenEmail(block []byte, email string) (*openpgp.Entity, error) {
 	// parse the input bytes as a key ring
@@ -32,21 +195,24 @@ func RecoverKeyGivenEmail(block []byte, email string) (*openpgp.Entity, error) {
 	return nil, errors.New("no key with the given email id is found")
 }
 
-func ReadPublicKeysFromDisk() (map[string][]byte, error) {
-	b, err := ioutil.ReadFile("keys.data")
-	if err != nil {
-		return nil, err
+// The PGP key ID typically has the form "Firstname Lastname <email address>".
+// getEmailAddressFromPGPId parses the ID string and returns the email if found,
+// or returns an empty string and an error otherwise.
+func getEmailAddressFromPGPId(id string, re *regexp.Regexp) (string, error) {
+	email := re.FindString(id)
+	if email != "" {
+		email = strings.Trim(email, "<")
+		email = strings.Trim(email, ">")
+		return email, nil
+	} else {
+		return "", errors.New("email not found in the id")
 	}
+}
 
-	var keys map[string][]byte
-	d := gob.NewDecoder(bytes.NewReader(b))
-
-	// Decoding the serialized data
-	if err = d.Decode(&keys); err != nil {
-		return nil, err
-	}
-
-	return keys, nil
+// Regex for finding an email address surrounded by <>
+func compileRegexToMatchEmail() *regexp.Regexp {
+	email := `([a-zA-Z0-9_+\.-]+)@([a-zA-Z0-9\.-]+)\.([a-zA-Z\.]{2,10})`
+	return regexp.MustCompile(`\<` + email + `\>`)
 }
 
 func writePublicKeysOnDisk(keys map[string][]byte) error {
