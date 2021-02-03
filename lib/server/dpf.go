@@ -49,6 +49,6 @@ func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 
 func (s *DPF) Answer(key dpf.DPFkey) []field.Element {
 	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
-	dpf.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns))), s.db.BlockSize+1, q)
+	dpf.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns)-1)), s.db.BlockSize+1, q)
 	return answer(q, s.db)
 }

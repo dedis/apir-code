@@ -59,7 +59,7 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 		log.Fatal(err)
 	}
 	// client initialization is the same for both single- and multi-bit scheme
-	key0, key1 := dpf.Gen(uint64(c.state.iy), c.state.a, uint64(bits.Len(uint(c.dbInfo.NumColumns))))
+	key0, key1 := dpf.Gen(uint64(c.state.iy), c.state.a, uint64(bits.Len(uint(c.dbInfo.NumColumns)-1)))
 
 	return []dpf.DPFkey{key0, key1}
 }
