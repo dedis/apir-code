@@ -4,8 +4,6 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"golang.org/x/crypto/blake2b"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,21 +31,21 @@ func TestAdd(t *testing.T) {
 	require.Equal(t, "00000000000000000000000000000002", res.HexString())
 }
 
-func TestSquare(t *testing.T) {
-	var g, g2, gd, g3, g4, g4_b Element
-	xof, err := blake2b.NewXOF(0, []byte("test key"))
-	require.NoError(t, err)
-	g.SetRandom(xof)
-	g2.Mul(&g, &g)
-	gd.Double(&g)
-	require.Equal(t, g2, gd)
+//func TestSquare(t *testing.T) {
+//var g, g2, gd, g3, g4, g4_b Element
+//xof, err := blake2b.NewXOF(0, []byte("test key"))
+//require.NoError(t, err)
+//g.SetRandom(xof)
+//g2.Mul(&g, &g)
+//gd.Double(&g)
+//require.Equal(t, g2, gd)
 
-	g3.Mul(&g, &g2)
-	g4.Mul(&g2, &g2)
-	g4_b.Mul(&g3, &g)
+//g3.Mul(&g, &g2)
+//g4.Mul(&g2, &g2)
+//g4_b.Mul(&g3, &g)
 
-	require.Equal(t, true, g4.Equal(&g4_b))
-}
+//require.Equal(t, true, g4.Equal(&g4_b))
+//}
 
 //
 //func TestRandom(t *testing.T) {
