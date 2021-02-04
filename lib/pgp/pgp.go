@@ -6,7 +6,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/nikirill/go-crypto/openpgp/packet"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/nikirill/go-crypto/openpgp"
+	"github.com/nikirill/go-crypto/openpgp/packet"
 )
 
 const (
@@ -30,74 +31,81 @@ type Key struct {
 	Packet []byte
 }
 
-func AnalyzeDumpFiles() (map[string]*openpgp.Entity, error) {
+func AnalyzeDumpFiles(files []string) (map[string]*openpgp.Entity, error) {
 	// map for the parsed entityMap
 	entityMap := make(map[string]*openpgp.Entity)
 
-	in, err := os.Open("sks-dump/sks-dump-0000.pgp")
-	if err != nil {
-		return nil, err
-	}
-	defer in.Close()
-	el, err := openpgp.ReadKeyRing(in)
-	if err != nil {
-		return nil, err
-	}
-	//var expired bool
-	var email string
-	for _, e := range el {
-		// skip revoked keys
-		if len(e.Revocations) > 0 {
-			continue
+	for _, file := range files {
+		in, err := os.Open(file)
+		if err != nil {
+			return nil, err
 		}
-		email = e.PrimaryIdentity().UserId.Email
-		// iterate over identities in search for the email if
-		// the primary identity does not have one
-		if email == "" {
-			for _, id := range e.Identities {
-				if id.UserId.Email != "" {
-					email = id.UserId.Email
-					break
+		el, err := openpgp.ReadKeyRing(in)
+		if err != nil {
+			return nil, err
+		}
+		//var expired bool
+		var email string
+		for _, e := range el {
+			// skip revoked keys
+			if len(e.Revocations) > 0 {
+				continue
+			}
+			email = e.PrimaryIdentity().UserId.Email
+			// iterate over identities in search for the email if
+			// the primary identity does not have one
+			if email == "" {
+				for _, id := range e.Identities {
+					if id.UserId.Email != "" {
+						email = id.UserId.Email
+						break
+					}
+				}
+			}
+			// skip keys without emails
+			if email == "" {
+				continue
+			}
+			// making all the emails lowercase
+			email = strings.ToLower(email)
+			// TODO: Should we skip expired keys?
+			//expired, email = isExpired(e)
+			//if expired {
+			//	numExpired += 1
+			//	continue
+			//}
+
+			//Remove subkeys (as a PoC) so that only the primary key is left
+			e.Subkeys = nil
+			// we index the entityMap by the primary identity and keep only
+			// the latest key if there are multiple for a given identity
+			if prev, ok := entityMap[email]; !ok {
+				entityMap[email] = e
+			} else {
+				// save the entity if the primary key is fresher than the stored one
+				if prev.PrimaryKey.CreationTime.Before(e.PrimaryKey.CreationTime) {
+					entityMap[email] = e
 				}
 			}
 		}
-		// skip keys without emails
-		if email == "" {
-			continue
-		}
-		// TODO: Should we skip expired keys?
-		//expired, email = isExpired(e)
-		//if expired {
-		//	numExpired += 1
-		//	continue
-		//}
-
-		//Remove subkeys (as a PoC) so that only the primary key is left
-		e.Subkeys = nil
-		// we index the entityMap by the primary identity and keep only
-		// the latest key if there are multiple for a given identity
-		if prev, ok := entityMap[email]; !ok {
-			entityMap[email] = e
-		} else {
-			// save the entity if the primary key is fresher than the stored one
-			if prev.PrimaryKey.CreationTime.Before(e.PrimaryKey.CreationTime) {
-				entityMap[email] = e
-			}
+		if err = in.Close(); err != nil {
+			log.Printf("Unable to close file %s", file)
+			return nil, err
 		}
 	}
+
 	return entityMap, nil
 }
 
-func WriteKeysOnDisk(entities map[string]*openpgp.Entity) error {
+func WriteKeysOnDisk(dir string, entities map[string]*openpgp.Entity) error {
 	var err error
 	var buf bytes.Buffer
-
-	out, err := os.OpenFile(sksParsedOutputFileName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	// If the file already exists, the content is overwritten
+	out, err := os.OpenFile(filepath.Join(dir, sksParsedOutputFileName), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return err
 	}
 	encoder := gob.NewEncoder(out)
-	defer out.Close()
 
 	for email, entity := range entities {
 		err = entity.Serialize(&buf)
@@ -107,13 +115,16 @@ func WriteKeysOnDisk(entities map[string]*openpgp.Entity) error {
 		// If the serialized key packet is larger than an enforced upper-bound,
 		// we ignore this key.
 		if buf.Len() > keySizeLimit {
+			buf.Reset()
 			continue
 		}
-		err = encoder.Encode(&Key{Id: email, Packet: buf.Bytes()})
-		if err != nil {
+		if err = encoder.Encode(&Key{Id: email, Packet: buf.Bytes()}); err != nil {
 			return err
 		}
 		buf.Reset()
+	}
+	if err = out.Close(); err != nil {
+		return err
 	}
 
 	return nil
@@ -132,9 +143,17 @@ func LoadKeysFromDisk(dir string) ([]*Key, error) {
 			return nil, err
 		}
 		decoder := gob.NewDecoder(f)
-		// Decoding the serialized data
-		if err = decoder.Decode(&keys); err != nil {
-			return nil, err
+		for {
+			key := new(Key)
+			// Decoding the serialized data
+			if err = decoder.Decode(key); err != nil {
+				if err == io.EOF {
+					break
+				}
+				log.Fatal(err)
+				return nil, err
+			}
+			keys = append(keys, key)
 		}
 		if err = f.Close(); err != nil {
 			return nil, err
@@ -161,22 +180,9 @@ func isExpired(e *openpgp.Entity) (expired bool, email string) {
 	return
 }
 
-func readParsed() {
-	in, err := os.Open("sks-0003.pgp")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer in.Close()
-	el, err := openpgp.ReadKeyRing(in)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, e := range el {
-		fmt.Printf("%s\t", e.PrimaryIdentity().Name)
-	}
-}
-
-func RecoverKeyGivenEmail(block []byte, email string) (*openpgp.Entity, error) {
+// Returns an Entity with the given email in the primary ID from a block of
+// serialized entities.
+func RecoverKeyFromBlock(block []byte, email string) (*openpgp.Entity, error) {
 	// parse the input bytes as a key ring
 	reader := bytes.NewReader(block)
 	el, err := openpgp.ReadKeyRing(reader)
@@ -184,12 +190,10 @@ func RecoverKeyGivenEmail(block []byte, email string) (*openpgp.Entity, error) {
 		return nil, err
 	}
 	// go over PGP entities and find the key with the given email as one of the ids
-	for j := range el {
-		for _, id := range el[j].Identities {
-			fmt.Println(id.UserId)
-			if id.UserId.Email == email {
-				return el[j], nil
-			}
+	for _, e := range el {
+		fmt.Println(e.Identities)
+		if strings.ToLower(e.PrimaryIdentity().UserId.Email) == email {
+			return e, nil
 		}
 	}
 	return nil, errors.New("no key with the given email id is found")

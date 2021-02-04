@@ -40,15 +40,14 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	s1 := server.NewDPF(db, 1)
 	servers := []*server.DPF{s0, s1}
 
-	emails := []string{"jandro@ibm.net", "m1.steiner@von.ulm.de"}
+	emails := []string{"salto@bastardi.net"}
 	for i := 0; i < len(emails); i++ {
 		result := retrieveBlockGivenId(t, c, servers, emails[i], db.NumColumns*db.NumRows)
 		result = database.UnPadBlock(result)
-		key, err = pgp.RecoverKeyGivenEmail(result, emails[i])
+		key, err = pgp.RecoverKeyFromBlock(result, emails[i])
 		require.NoError(t, err)
-		fmt.Println(key.Identities)
+		require.Equal(t, emails[i], key.PrimaryIdentity().UserId.Email)
 	}
-
 }
 
 func TestRetrieveRandomKeyBlockVector(t *testing.T) {

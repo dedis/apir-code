@@ -15,9 +15,8 @@ const numKeysToDBLengthRatio float32 = 0.2
 
 
 func GenerateRealKeyDB(dataPath string, numRows, elementLength int) (*DB, error) {
-	var keys []*pgp.Key
 	var err error
-	keys, err = pgp.LoadKeysFromDisk(dataPath)
+	keys, err := pgp.LoadKeysFromDisk(dataPath)
 	// Sort the keys by id, higher first, to make sure that
 	// all the servers end up with an identical hash table.
 	sort.Slice(keys, func(i, j int) bool {
@@ -42,10 +41,11 @@ func GenerateRealKeyDB(dataPath string, numRows, elementLength int) (*DB, error)
 
 	// embed data into field elements
 	for k, v := range ht {
-		elements := field.ZeroVector(blockLen)
 		// Pad the block
 		v = PadBlock(v)
-		// embed all bytes
+		// create empty element vector of fixed length
+		elements := field.ZeroVector(blockLen)
+		// embed all the bytes
 		for j := 0; j < len(v); j += elementLength {
 			end := j + elementLength
 			if end > len(v) {
