@@ -16,6 +16,8 @@
 
 package field
 
+import "testing"
+
 //import (
 //	"crypto/rand"
 //	"math/big"
@@ -31,7 +33,8 @@ package field
 //// most benchmarks are rudimentary and should sample a large number of random inputs
 //// or be run multiple times to ensure it didn't measure the fastest path of the function
 //
-//var benchResElement Element
+var benchResElement Element
+
 //
 //func BenchmarkElementSetBytes(b *testing.B) {
 //	var x Element
@@ -146,18 +149,18 @@ package field
 //	}
 //}
 //
-//func BenchmarkElementMul(b *testing.B) {
-//	x := Element{
-//		4,
-//		0,
-//	}
-//	benchResElement.SetOne()
-//	b.ResetTimer()
-//	for i := 0; i < b.N; i++ {
-//		benchResElement.Mul(&benchResElement, &x)
-//	}
-//}
-//
+func BenchmarkElementMul(b *testing.B) {
+	x := Element{
+		4,
+		0,
+	}
+	benchResElement.SetOne()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		benchResElement.Mul(&benchResElement, &x)
+	}
+}
+
 //func BenchmarkElementCmp(b *testing.B) {
 //	x := Element{
 //		4,

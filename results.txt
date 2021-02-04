@@ -1,4 +1,0 @@
-Total time MultiBitVectorOneMbPIR: 512.58ms
-Total time MultiBitMatrixOneMbPIR: 703.23ms
-Total time MultiBitVectorOneMbVPIR: 149595.09ms
-Total time MultiBitMatrixOneKbVPIR: 26048.56ms
