@@ -14,6 +14,7 @@ import (
 // Client represents the client instance in both the IT and DPF-based schemes
 type Client interface {
 	QueryBytes(int, int) ([][]byte, error)
+	// TODO: return empty interface to accomodate both VPIR and PIR?
 	ReconstructBytes([][]byte) ([]field.Element, error)
 }
 

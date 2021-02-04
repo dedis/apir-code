@@ -49,7 +49,7 @@ func (c *PIRdpf) QueryBytes(index, numServers int) ([][]byte, error) {
 	return out, nil
 }
 
-// Query ...
+// Query outputs numServers query for index i
 func (c *PIRdpf) Query(index, numServers int) []dpf.DPFkey {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
@@ -70,7 +70,7 @@ func (c *PIRdpf) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	return nil, nil
 }
 
-// Reconstruct...
+// Reconstruct reconstruct the entry of the database from answers
 func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 	sum := make([][]byte, c.dbInfo.NumRows)
 
