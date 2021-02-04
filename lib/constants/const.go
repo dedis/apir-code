@@ -7,7 +7,7 @@ import (
 const (
 	DBLength             = 40000
 	BlockLength          = 16
-	ChunkBytesLength     = 15
+	ChunkBytesLength     = 4
 	SingleBitBlockLength = 0
 	IDLengthBytes        = 45
 )

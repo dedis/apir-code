@@ -1,8 +1,6 @@
 package server
 
 import (
-	"sync"
-
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -33,17 +31,10 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// parse the query
 	qZeroBase := make([]field.Element, db.NumColumns)
 	qOne := make([]field.Element, db.NumColumns*db.BlockSize)
-	var wg sync.WaitGroup
-	wg.Add(db.NumColumns)
 	for j := 0; j < db.NumColumns; j++ {
-		go func(j int) {
-			defer wg.Done()
-			qZeroBase[j] = q[j*(db.BlockSize+1)]
-			copy(qOne[j*db.BlockSize:(j+1)*db.BlockSize], q[j*(db.BlockSize+1)+1:(j+1)*(db.BlockSize+1)])
-		}(j)
+		qZeroBase[j] = q[j*(db.BlockSize+1)]
+		copy(qOne[j*db.BlockSize:(j+1)*db.BlockSize], q[j*(db.BlockSize+1)+1:(j+1)*(db.BlockSize+1)])
 	}
-
-	wg.Wait()
 
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
@@ -56,16 +47,18 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		sum := field.ZeroVector(db.BlockSize)
 		for j := 0; j < db.NumColumns; j++ {
 			for b := 0; b < db.BlockSize; b++ {
-				prod.Mul(&db.Entries[i][j*db.BlockSize+b], &qZeroBase[j])
-				sum[b].Add(&sum[b], &prod)
+				//prod.Mul(&db.Entries[i][j*db.BlockSize+b], &qZeroBase[j])
+				prod = db.Entries[i][j*db.BlockSize+b] * qZeroBase[j]
+				sum[b] = field.Add(sum[b], prod)
 
-				prodTag.Mul(&db.Entries[i][j*db.BlockSize+b], &qOne[j*db.BlockSize+b])
-				sumTag.Add(&sumTag, &prodTag)
+				//prodTag.Mul(&db.Entries[i][j*db.BlockSize+b], &qOne[j*db.BlockSize+b])
+				prodTag = db.Entries[i][j*db.BlockSize+b] * qOne[j*db.BlockSize+b]
+				sumTag = field.Add(sumTag, prodTag)
 			}
 		}
 		copy(m[i*(db.BlockSize+1):(i+1)*(db.BlockSize+1)-1], sum)
 		// add tag
-		m[(i+1)*(db.BlockSize+1)-1].Set(&sumTag)
+		m[(i+1)*(db.BlockSize+1)-1] = sumTag
 	}
 
 	return m

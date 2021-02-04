@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"io"
 	"log"
+	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -117,13 +118,15 @@ func (c *IT) secretShare(numServers int) ([][]field.Element, error) {
 		for b := colStart; b < colEnd; b++ {
 			sum := field.Zero()
 			for k := 0; k < numServers-1; k++ {
-				sum.Add(&sum, &vectors[k][b])
+				sum = field.Add(sum, vectors[k][b])
 			}
-			vectors[numServers-1][b].Set(&sum)
-			vectors[numServers-1][b].Neg(&vectors[numServers-1][b])
+			vectors[numServers-1][b] = sum
+			//vectors[numServers-1][b].Neg(&vectors[numServers-1][b])
+			diff, _ := bits.Sub32(uint32(0), uint32(vectors[numServers-1][b]), 0)
+			vectors[numServers-1][b] = field.Element(diff)
 			// set alpha vector at the block we want to retrieve
 			if j == c.state.iy {
-				vectors[numServers-1][b].Add(&vectors[numServers-1][b], &c.state.a[b-j*blockLen])
+				vectors[numServers-1][b] = field.Add(vectors[numServers-1][b], c.state.a[b-j*blockLen])
 			}
 		}
 	}
