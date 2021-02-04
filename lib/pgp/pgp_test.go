@@ -2,6 +2,7 @@ package pgp
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"testing"
@@ -25,6 +26,9 @@ func TestSerialization(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, len(entities))
 		require.Equal(t, key.PrimaryKey.PublicKey, entities[0].PrimaryKey.PublicKey)
+		if key.PrimaryIdentity().UserId.Email == "741555@ziplip.com" {
+			fmt.Println(hex.EncodeToString(buf.Bytes()))
+		}
 		buf.Reset()
 	}
 }
@@ -42,7 +46,7 @@ func TestWriteThenLoadKeys(t *testing.T) {
 	require.NoError(t, err)
 	m2, err = LoadKeysFromDisk(sksDir)
 	for _, key := range m2 {
-		fmt.Printf("%s\n", key.Id)
+		//fmt.Printf("%s\n", key.Id)
 		entities, err = openpgp.ReadKeyRing(bytes.NewBuffer(key.Packet))
 		require.NoError(t, err)
 		require.Equal(t, 1, len(entities))

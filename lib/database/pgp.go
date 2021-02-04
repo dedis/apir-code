@@ -2,7 +2,6 @@ package database
 
 import (
 	"bytes"
-	"fmt"
 	"math"
 	"sort"
 
@@ -12,7 +11,6 @@ import (
 )
 
 const numKeysToDBLengthRatio float32 = 0.2
-
 
 func GenerateRealKeyDB(dataPath string, numRows, elementLength int) (*DB, error) {
 	var err error
@@ -32,8 +30,8 @@ func GenerateRealKeyDB(dataPath string, numRows, elementLength int) (*DB, error)
 	// get the maximum byte length of the values in the hashTable
 	// +1 takes into account the padding 0x80 that is always added.
 	maxBytes := utils.MaxBytesLength(ht) + 1
-	fmt.Println(maxBytes)
-	blockLen := int(math.Ceil(float64(maxBytes)/float64(elementLength)))
+	//fmt.Println(maxBytes)
+	blockLen := int(math.Ceil(float64(maxBytes) / float64(elementLength)))
 	numColumns := tableLen
 
 	// create all zeros db
@@ -41,18 +39,14 @@ func GenerateRealKeyDB(dataPath string, numRows, elementLength int) (*DB, error)
 
 	// embed data into field elements
 	for k, v := range ht {
-		// Pad the block
-		v = PadBlock(v)
-		// create empty element vector of fixed length
-		elements := field.ZeroVector(blockLen)
+		// Pad the block to be a multiple of blockLen
+		v = PadBlock(v, blockLen)
+		// create empty element vector of a fixed length
+		elements := make([]field.Element, 0)
 		// embed all the bytes
 		for j := 0; j < len(v); j += elementLength {
-			end := j + elementLength
-			if end > len(v) {
-				end = len(v)
-			}
-			e := new(field.Element).SetBytes(v[j:end])
-			elements[j/elementLength] = *e
+			e := new(field.Element).SetBytes(v[j : j+elementLength])
+			elements = append(elements, *e)
 		}
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
@@ -75,10 +69,12 @@ func makeHashTable(keys []*pgp.Key, tableLen int) (map[int][]byte, error) {
 	return db, nil
 }
 
-// Simple ISO/IEC 7816-4 padding where 0x80 is appended to the block and
-// zeros are assumed afterwards
-func PadBlock(block []byte) []byte{
-	return append(block, byte(0x80))
+// Simple ISO/IEC 7816-4 padding where 0x80 is appended to the block, then
+// zeros to make up to blockLen
+func PadBlock(block []byte, blockLen int) []byte {
+	block = append(block, byte(0x80))
+	zeros := make([]byte, blockLen-(len(block)%blockLen))
+	return append(block, zeros...)
 }
 
 func UnPadBlock(block []byte) []byte {
