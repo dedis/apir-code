@@ -47,6 +47,10 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		sum := field.ZeroVector(db.BlockSize)
 		for j := 0; j < db.NumColumns; j++ {
 			for b := 0; b < db.BlockSize; b++ {
+				if db.Entries[i][j*db.BlockSize+b].IsZero() {
+					// no need to multiply is the the element value is zero
+					continue
+				}
 				prod.Mul(&db.Entries[i][j*db.BlockSize+b], &qZeroBase[j])
 				sum[b].Add(&sum[b], &prod)
 
