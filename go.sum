@@ -172,6 +172,8 @@ github.com/nikirill/go-crypto v0.0.0-20210202150603-118cc5519486 h1:EztSegZ4DEZ0
 github.com/nikirill/go-crypto v0.0.0-20210202150603-118cc5519486/go.mod h1:NK8L+M1v0odZ7nzvsjuBpHQCrdTnW2BQD3gL1OKCZkc=
 github.com/nikirill/go-crypto v0.0.0-20210204115809-99e94b373076 h1:dz6fahSoK6O9+66I3m/iT3bgypZY3B4to9i2Dn/ALLo=
 github.com/nikirill/go-crypto v0.0.0-20210204115809-99e94b373076/go.mod h1:NK8L+M1v0odZ7nzvsjuBpHQCrdTnW2BQD3gL1OKCZkc=
+github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691 h1:jCXIU67iBeylgPYW1G1DaUeKOewGMoTcWms84Jp//NY=
+github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691/go.mod h1:NK8L+M1v0odZ7nzvsjuBpHQCrdTnW2BQD3gL1OKCZkc=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=

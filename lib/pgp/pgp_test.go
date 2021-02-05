@@ -2,7 +2,6 @@ package pgp
 
 import (
 	"bytes"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"testing"
@@ -26,9 +25,6 @@ func TestSerialization(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, len(entities))
 		require.Equal(t, key.PrimaryKey.PublicKey, entities[0].PrimaryKey.PublicKey)
-		if key.PrimaryIdentity().UserId.Email == "741555@ziplip.com" {
-			fmt.Println(hex.EncodeToString(buf.Bytes()))
-		}
 		buf.Reset()
 	}
 }
@@ -51,7 +47,8 @@ func TestWriteThenLoadKeys(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, len(entities))
 		require.Equal(t, m1[key.Id].PrimaryKey, entities[0].PrimaryKey)
-		require.Equal(t, m1[key.Id].PrimaryIdentity().UserId.Email, entities[0].PrimaryIdentity().UserId.Email)
+		require.Equal(t, PrimaryEmail(m1[key.Id]), PrimaryEmail(entities[0]))
+		require.Equal(t, key.Id, PrimaryEmail(m1[key.Id]))
 	}
 }
 

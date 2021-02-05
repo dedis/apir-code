@@ -4,22 +4,22 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/csv"
+	"encoding/hex"
 	"fmt"
-	"github.com/nikirill/go-crypto/openpgp"
-	"github.com/si-co/vpir-code/lib/pgp"
 	"io"
 	"math"
 	"math/rand"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
+	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
+	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
@@ -61,11 +61,11 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 		// Get a key from the block with the id of the search
 		retrievedKey, err = pgp.RecoverKeyFromBlock(result, realKeys[j].Id)
 		require.NoError(t, err)
-		require.Equal(t, realKeys[j].Id, strings.ToLower(retrievedKey.PrimaryIdentity().UserId.Email))
+		require.Equal(t, realKeys[j].Id, pgp.PrimaryEmail(retrievedKey))
 		// Check that the retrieved entity serializes to the same binary as the real key
 		err = retrievedKey.Serialize(&buf)
 		require.NoError(t, err)
-		require.Equal(t, realKeys[j].Packet, buf.Bytes())
+		require.Equal(t, hex.EncodeToString(realKeys[j].Packet), hex.EncodeToString(buf.Bytes()))
 		buf.Reset()
 	}
 	fmt.Printf("Total time to retrieve %d real keys: %.1fms\n", numKeysToCheck, totalTimer.Record())
