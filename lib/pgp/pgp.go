@@ -195,12 +195,12 @@ func RecoverKeyFromBlock(block []byte, email string) (*openpgp.Entity, error) {
 	}
 	// go over PGP entities and find the key with the given email as one of the ids
 	for _, e := range el {
-		if strings.ToLower(e.PrimaryIdentity().UserId.Email) == email {
+		if PrimaryEmail(e) == email {
 			return e, nil
 		}
 	}
-	fmt.Println(email)
-	fmt.Println(hex.EncodeToString(block))
+	log.Println(email)
+	log.Println(hex.EncodeToString(block))
 	return nil, errors.New("no key with the given email id is found")
 }
 
