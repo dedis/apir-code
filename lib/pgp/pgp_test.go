@@ -2,8 +2,6 @@ package pgp
 
 import (
 	"bytes"
-	"fmt"
-	"log"
 	"testing"
 
 	"github.com/nikirill/go-crypto/openpgp"
@@ -52,7 +50,7 @@ func TestWriteThenLoadKeys(t *testing.T) {
 	}
 }
 
-func TestImportEntireDump(t *testing.T) {
+/*func TestImportEntireDump(t *testing.T) {
 	errorCounts := 0
 	basePath := ""
 	if basePath == "" {
@@ -101,7 +99,7 @@ func TestImportSingleDump(t *testing.T) {
 	for id, key := range primaryKeys {
 		fmt.Println("id: ", id, " key: ", key)
 	}
-}
+}*/
 
 func TestGetEmailAddressFromId(t *testing.T) {
 	var email string

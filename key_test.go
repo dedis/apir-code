@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/csv"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"math"
@@ -28,7 +27,6 @@ import (
 func TestRetrieveRealKeysVector(t *testing.T) {
 	var retrievedKey *openpgp.Entity
 	var err error
-	var buf bytes.Buffer
 	var j int
 
 	numKeysToCheck := 100
@@ -40,7 +38,7 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	require.NoError(t, err)
 
 	// read in the real pgp key values
-	realKeys, err := pgp.LoadKeysFromDisk(sksPath)
+	realKeys, err := pgp.LoadAndParseKeys(sksPath)
 	require.NoError(t, err)
 
 	prg := utils.RandomPRG()
@@ -54,19 +52,15 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numKeysToCheck; i++ {
-		fmt.Println(realKeys[j].Id)
 		j = rand.Intn(len(realKeys))
-		result := retrieveBlockGivenId(t, c, servers, realKeys[j].Id, db.NumColumns*db.NumRows)
+		fmt.Println(pgp.PrimaryEmail(realKeys[j]))
+		result := retrieveBlockGivenId(t, c, servers, pgp.PrimaryEmail(realKeys[j]), db.NumColumns*db.NumRows)
 		result = database.UnPadBlock(result)
 		// Get a key from the block with the id of the search
-		retrievedKey, err = pgp.RecoverKeyFromBlock(result, realKeys[j].Id)
+		retrievedKey, err = pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
 		require.NoError(t, err)
-		require.Equal(t, realKeys[j].Id, pgp.PrimaryEmail(retrievedKey))
-		// Check that the retrieved entity serializes to the same binary as the real key
-		err = retrievedKey.Serialize(&buf)
-		require.NoError(t, err)
-		require.Equal(t, hex.EncodeToString(realKeys[j].Packet), hex.EncodeToString(buf.Bytes()))
-		buf.Reset()
+		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
+		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
 	}
 	fmt.Printf("Total time to retrieve %d real keys: %.1fms\n", numKeysToCheck, totalTimer.Record())
 }

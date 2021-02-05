@@ -2,11 +2,9 @@ package pgp
 
 import (
 	"bytes"
-	"crypto/x509"
 	"encoding/gob"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,7 +15,6 @@ import (
 	"time"
 
 	"github.com/nikirill/go-crypto/openpgp"
-	"github.com/nikirill/go-crypto/openpgp/packet"
 )
 
 const (
@@ -150,6 +147,24 @@ func LoadKeysFromDisk(dir string) ([]*Key, error) {
 	return keys, nil
 }
 
+func LoadAndParseKeys(dir string) ([]*openpgp.Entity, error) {
+	var entities openpgp.EntityList
+	keys, err := LoadKeysFromDisk(dir)
+	if err != nil {
+		return nil, err
+	}
+	el := make([]*openpgp.Entity, len(keys))
+	for i, key := range keys {
+		entities, err = openpgp.ReadKeyRing(bytes.NewBuffer(key.Packet))
+		if len(entities) != 1 {
+			return nil, errors.New("too many encoded entities")
+		}
+		el[i] = entities[0]
+	}
+
+	return el, nil
+}
+
 // isExpired checks whether there is an user id with non-expired self-signature
 // and replies with an email corresponding to the primary id or the non-expired Id.
 func isExpired(e *openpgp.Entity) (expired bool, email string) {
@@ -199,8 +214,7 @@ func RecoverKeyFromBlock(block []byte, email string) (*openpgp.Entity, error) {
 			return e, nil
 		}
 	}
-	log.Println(email)
-	log.Println(hex.EncodeToString(block))
+	log.Printf("The key with user email %s is not the block %s\n", email, hex.EncodeToString(block))
 	return nil, errors.New("no key with the given email id is found")
 }
 
@@ -224,30 +238,7 @@ func compileRegexToMatchEmail() *regexp.Regexp {
 	return regexp.MustCompile(`\<` + email + `\>`)
 }
 
-func writePublicKeysOnDisk(keys map[string][]byte) error {
-	b := new(bytes.Buffer)
-	e := gob.NewEncoder(b)
-
-	if err := e.Encode(keys); err != nil {
-		return err
-	}
-
-	err := ioutil.WriteFile("keys.data", b.Bytes(), 0644)
-	if err != nil {
-		return err
-	}
-
-	// change permission
-	// TODO: we really need this?
-	err = os.Chmod("keys.data", 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func marshalPublicKeys(primaryKeys map[string]*packet.PublicKey) map[string][]byte {
+/*func marshalPublicKeys(primaryKeys map[string]*packet.PublicKey) map[string][]byte {
 	m := make(map[string][]byte)
 	for e, pk := range primaryKeys {
 		//  MarshalPKIXPublicKey converts a public key to PKIX, ASN.1
@@ -297,4 +288,4 @@ func importSingleDump(path string) (openpgp.EntityList, error) {
 	}
 
 	return el, nil
-}
+}*/
