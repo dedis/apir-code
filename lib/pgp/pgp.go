@@ -52,23 +52,11 @@ func AnalyzeDumpFiles(files []string) (map[string]*openpgp.Entity, error) {
 			if len(e.Revocations) > 0 {
 				continue
 			}
-			email = e.PrimaryIdentity().UserId.Email
-			// iterate over identities in search for the email if
-			// the primary identity does not have one
-			if email == "" {
-				for _, id := range e.Identities {
-					if id.UserId.Email != "" {
-						email = id.UserId.Email
-						break
-					}
-				}
-			}
+			email = PrimaryEmail(e)
 			// skip keys without emails
 			if email == "" {
 				continue
 			}
-			// making all the emails lowercase
-			email = strings.ToLower(email)
 			// TODO: Should we skip expired keys?
 			//expired, email = isExpired(e)
 			//if expired {
@@ -178,6 +166,22 @@ func isExpired(e *openpgp.Entity) (expired bool, email string) {
 	}
 
 	return
+}
+
+// Returns the lower-cased email from the primary identity, or
+// if it is empty, the alphabetically first non-empty lower-cased email
+func PrimaryEmail(e *openpgp.Entity) string {
+	email := e.PrimaryIdentity().UserId.Email
+	// iterate over identities in search for the email if
+	// the primary identity does not have one
+	if email == "" {
+		for _, id := range e.Identities {
+			if id.UserId.Email != "" && (email == "" || email > id.UserId.Email) {
+				email = id.UserId.Email
+			}
+		}
+	}
+	return strings.ToLower(email)
 }
 
 // Returns an Entity with the given email in the primary ID from a block of

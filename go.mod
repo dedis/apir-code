@@ -9,7 +9,7 @@ require (
 	github.com/dimakogan/dpf-go v0.0.0-20210127221207-b1d9b62bab9b
 	github.com/golang/protobuf v1.4.3
 	github.com/lukechampine/fastxor v0.0.0-20200124170337-07dbf569dfe7
-	github.com/nikirill/go-crypto v0.0.0-20210204115809-99e94b373076
+	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c
