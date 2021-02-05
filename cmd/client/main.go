@@ -27,6 +27,7 @@ import (
 type localClient struct {
 	connections map[string]*grpc.ClientConn
 	ctx         context.Context
+	callOptions []grpc.CallOption
 
 	dbInfo *database.Info
 }
@@ -64,7 +65,8 @@ func main() {
 
 	// initialize local client
 	lc := &localClient{
-		ctx: context.Background(),
+		ctx:         context.Background(),
+		callOptions: []grpc.CallOption{grpc.UseCompressor(gzip.Name)},
 	}
 
 	// random generator
@@ -173,7 +175,7 @@ func (lc *localClient) runDBInfo() {
 	for _, conn := range lc.connections {
 		wg.Add(1)
 		go func(conn *grpc.ClientConn) {
-			resCh <- dbInfo(subCtx, conn)
+			resCh <- dbInfo(subCtx, conn, lc.callOptions)
 			wg.Done()
 		}(conn)
 	}
@@ -195,10 +197,10 @@ func (lc *localClient) runDBInfo() {
 	lc.dbInfo = dbInfo[0]
 }
 
-func dbInfo(ctx context.Context, conn *grpc.ClientConn) *database.Info {
+func dbInfo(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption) *database.Info {
 	c := proto.NewVPIRClient(conn)
 	q := &proto.DatabaseInfoRequest{}
-	answer, err := c.DatabaseInfo(ctx, q)
+	answer, err := c.DatabaseInfo(ctx, q, opts...)
 	if err != nil {
 		log.Fatalf("could not send database info request to %s: %v",
 			conn.Target(), err)
@@ -226,7 +228,7 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	for _, conn := range lc.connections {
 		wg.Add(1)
 		go func(j int, conn *grpc.ClientConn) {
-			resCh <- query(subCtx, conn, queries[j])
+			resCh <- query(subCtx, conn, lc.callOptions, queries[j])
 			wg.Done()
 		}(j, conn)
 		j++
@@ -243,11 +245,9 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	return q
 }
 
-func query(ctx context.Context, conn *grpc.ClientConn, query []byte) []byte {
+func query(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, query []byte) []byte {
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
-	var opts []grpc.CallOption
-	opts = append(opts, grpc.UseCompressor(gzip.Name))
 	answer, err := c.Query(ctx, q, opts...)
 	if err != nil {
 		log.Fatalf("could not query %s: %v",
