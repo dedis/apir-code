@@ -1,4 +1,12 @@
+.PHONY: install lint keys test
+
 PROTO_PB=lib/proto/vpir.pb.go
+
+install:
+	go get -u -t ./...
+
+lint:
+	golint ./...
 
 run_server: $(PROTO_PB)
 	cd cmd/server && go build -race
@@ -11,6 +19,10 @@ run_client: $(PROTO_PB)
 
 test: $(PROTO_PB)
 	go test
+
+keys:
+	cd data && go build -o parser
+	cd data && ./parser
 
 $(PROTO_PB): lib/proto/vpir.proto
 	protoc --go_out=. --go_opt=paths=source_relative \

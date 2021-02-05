@@ -2,12 +2,11 @@ package database
 
 import (
 	"bytes"
-	"math"
-	"sort"
-
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
+	"math"
+	"sort"
 )
 
 const numKeysToDBLengthRatio float32 = 0.2
@@ -15,14 +14,13 @@ const numKeysToDBLengthRatio float32 = 0.2
 func GenerateRealKeyDB(dataPath string, numRows, elementLength int) (*DB, error) {
 	var err error
 	keys, err := pgp.LoadKeysFromDisk(dataPath)
-	// Sort the keys by id, higher first, to make sure that
-	// all the servers end up with an identical hash table.
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i].Id > keys[j].Id
-	})
 	if err != nil {
 		return nil, err
 	}
+	// Sort the keys by id, higher first, to make sure that
+	// all the servers end up with an identical hash table.
+	sortById(keys)
+
 	// decide on the length of the hash table
 	tableLen := int(float32(len(keys)) * numKeysToDBLengthRatio)
 	ht, err := makeHashTable(keys, tableLen)
@@ -62,7 +60,7 @@ func makeHashTable(keys []*pgp.Key, tableLen int) (map[int][]byte, error) {
 
 	// range over all id,v pairs and assign every pair to a given bucket
 	for _, key := range keys {
-		hashKey := HashToIndex(key.Id, tableLen)
+		hashKey := HashToIndex(key.ID, tableLen)
 		db[hashKey] = append(db[hashKey], key.Packet...)
 	}
 
@@ -84,6 +82,12 @@ func UnPadBlock(block []byte) []byte {
 	})
 	// remove 0x80 preceding zeros
 	return block[:len(block)-1]
+}
+
+func sortById(keys []*pgp.Key) {
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].ID > keys[j].ID
+	})
 }
 
 //func getNTopValuesFromMap(m map[string]int, n int) {

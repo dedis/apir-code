@@ -9,6 +9,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -31,11 +32,12 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 
 	numKeysToCheck := 100
 
-	sksPath := "data/sks/"
+	sksPath := filepath.Join("data", pgp.SksDestinationFolder)
 	nRows := 1
 	// Generate db from sks key dump
 	db, err := database.GenerateRealKeyDB(sksPath, nRows, constants.ChunkBytesLength)
 	require.NoError(t, err)
+	numBlocks := db.NumColumns*db.NumRows
 
 	// read in the real pgp key values
 	realKeys, err := pgp.LoadAndParseKeys(sksPath)
@@ -54,7 +56,7 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	for i := 0; i < numKeysToCheck; i++ {
 		j = rand.Intn(len(realKeys))
 		fmt.Println(pgp.PrimaryEmail(realKeys[j]))
-		result := retrieveBlockGivenId(t, c, servers, pgp.PrimaryEmail(realKeys[j]), db.NumColumns*db.NumRows)
+		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
 		result = database.UnPadBlock(result)
 		// Get a key from the block with the id of the search
 		retrievedKey, err = pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
@@ -123,7 +125,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		expectedKey := record[1]
 
 		// retrieve result bytes
-		result := retrieveBlockGivenId(t, c, servers, expectedID, nRows*nCols)
+		result := retrieveBlockGivenID(t, c, servers, expectedID, nRows*nCols)
 		validateRandomKey(t, expectedID, expectedKey, result, &db.Info, chunkLength)
 
 		// retrieve only one key
@@ -163,7 +165,7 @@ func validateRandomKey(t *testing.T, id, key string, result []byte, dbInfo *data
 	return idReconstructed, base64.StdEncoding.EncodeToString(keyBytes)
 }
 
-func retrieveBlockGivenId(t *testing.T, c *client.DPF, ss []*server.DPF, id string, dbLenBlocks int) []byte {
+func retrieveBlockGivenID(t *testing.T, c *client.DPF, ss []*server.DPF, id string, dbLenBlocks int) []byte {
 	// compute hash key for id
 	hashKey := database.HashToIndex(id, dbLenBlocks)
 

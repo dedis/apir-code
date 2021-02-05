@@ -24,6 +24,11 @@
 # Binaries
 cmd/client/client
 cmd/server/server
+data/parser
 
 # log files
 *.log
+
+# Data folders
+data/sks-original
+data/sks

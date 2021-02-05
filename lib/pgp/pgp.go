@@ -19,22 +19,24 @@ import (
 
 const (
 	eightKiB                = 8192
-	sksParsedOutputFileName = "sks-dump.pgp"
 	keySizeLimit            = eightKiB
+	sksParsedOutputFileName = "sks-dump.pgp"
+	SksOriginalFolder       = "sks-original"
+	SksDestinationFolder    = "sks"
 )
 
 // Key defines a PGP item after processing and saving into a binary file
 type Key struct {
-	Id     string
+	ID     string
 	Packet []byte
 }
 
-func AnalyzeDumpFiles(files []string) (map[string]*openpgp.Entity, error) {
+func AnalyzeDumpFiles(files []os.FileInfo) (map[string]*openpgp.Entity, error) {
 	// map for the parsed entityMap
 	entityMap := make(map[string]*openpgp.Entity)
 
 	for _, file := range files {
-		in, err := os.Open(file)
+		in, err := os.Open(filepath.Join(SksOriginalFolder, file.Name()))
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +106,7 @@ func WriteKeysOnDisk(dir string, entities map[string]*openpgp.Entity) error {
 			buf.Reset()
 			continue
 		}
-		if err = encoder.Encode(&Key{Id: email, Packet: buf.Bytes()}); err != nil {
+		if err = encoder.Encode(&Key{ID: email, Packet: buf.Bytes()}); err != nil {
 			return err
 		}
 		buf.Reset()
@@ -114,6 +116,23 @@ func WriteKeysOnDisk(dir string, entities map[string]*openpgp.Entity) error {
 	}
 
 	return nil
+}
+
+// Reads the given directory and returns the info all files
+// matching the sks dump description
+func GetSksDumpFiles(dir string) ([]os.FileInfo, error) {
+	allFiles, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	re := regexp.MustCompile(`sks-dump-[0-9]{4}\.pgp`)
+	dumpFiles := make([]os.FileInfo, 0)
+	for _, file := range allFiles {
+		if re.MatchString(file.Name()) {
+			dumpFiles = append(dumpFiles, file)
+		}
+	}
+	return dumpFiles, nil
 }
 
 func LoadKeysFromDisk(dir string) ([]*Key, error) {
@@ -166,7 +185,7 @@ func LoadAndParseKeys(dir string) ([]*openpgp.Entity, error) {
 }
 
 // isExpired checks whether there is an user id with non-expired self-signature
-// and replies with an email corresponding to the primary id or the non-expired Id.
+// and replies with an email corresponding to the primary id or the non-expired ID.
 func isExpired(e *openpgp.Entity) (expired bool, email string) {
 	expired = true
 	for _, id := range e.Identities {
@@ -227,9 +246,8 @@ func getEmailAddressFromPGPId(id string, re *regexp.Regexp) (string, error) {
 		email = strings.Trim(email, "<")
 		email = strings.Trim(email, ">")
 		return email, nil
-	} else {
-		return "", errors.New("email not found in the id")
 	}
+	return "", errors.New("email not found in the id")
 }
 
 // Regex for finding an email address surrounded by <>

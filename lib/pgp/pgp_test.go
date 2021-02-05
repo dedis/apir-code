@@ -40,13 +40,13 @@ func TestWriteThenLoadKeys(t *testing.T) {
 	require.NoError(t, err)
 	m2, err = LoadKeysFromDisk(sksDir)
 	for _, key := range m2 {
-		//fmt.Printf("%s\n", key.Id)
+		//fmt.Printf("%s\n", key.ID)
 		entities, err = openpgp.ReadKeyRing(bytes.NewBuffer(key.Packet))
 		require.NoError(t, err)
 		require.Equal(t, 1, len(entities))
-		require.Equal(t, m1[key.Id].PrimaryKey, entities[0].PrimaryKey)
-		require.Equal(t, PrimaryEmail(m1[key.Id]), PrimaryEmail(entities[0]))
-		require.Equal(t, key.Id, PrimaryEmail(m1[key.Id]))
+		require.Equal(t, m1[key.ID].PrimaryKey, entities[0].PrimaryKey)
+		require.Equal(t, PrimaryEmail(m1[key.ID]), PrimaryEmail(entities[0]))
+		require.Equal(t, key.ID, PrimaryEmail(m1[key.ID]))
 	}
 }
 

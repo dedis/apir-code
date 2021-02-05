@@ -12,8 +12,9 @@ require (
 	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c
-	golang.org/x/tools v0.0.0-20210105164027-a548c3f4af2d // indirect
+	golang.org/x/tools v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/genproto v0.0.0-20210203152818-3206188e46ba // indirect
 	google.golang.org/grpc v1.35.0

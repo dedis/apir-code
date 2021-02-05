@@ -10,12 +10,15 @@ import (
 func main() {
 	var m map[string]*openpgp.Entity
 	var err error
-	fileList := []string{"sks-dump/sks-dump-0000.pgp"}
+	fileList, err := pgp.GetSksDumpFiles(pgp.SksOriginalFolder)
+	if err != nil {
+		log.Fatal(err)
+	}
 	m, err = pgp.AnalyzeDumpFiles(fileList)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = pgp.WriteKeysOnDisk("sks/", m)
+	err = pgp.WriteKeysOnDisk(pgp.SksDestinationFolder, m)
 	if err != nil {
 		log.Fatal(err)
 	}
