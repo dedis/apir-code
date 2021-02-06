@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -18,11 +19,11 @@ import (
 )
 
 const (
-	eightKiB                = 8192
-	keySizeLimit            = eightKiB
-	sksParsedOutputFileName = "sks-dump.pgp"
-	SksOriginalFolder       = "sks-original"
-	SksDestinationFolder    = "sks"
+	eightKiB              = 8192
+	keySizeLimit          = eightKiB
+	SksParsedFullFileName = "sks-full.pgp"
+	SksOriginalFolder     = "sks-original"
+	SksDestinationFolder  = "sks"
 )
 
 // Key defines a PGP item after processing and saving into a binary file
@@ -31,12 +32,13 @@ type Key struct {
 	Packet []byte
 }
 
-func AnalyzeDumpFiles(files []os.FileInfo) (map[string]*openpgp.Entity, error) {
-	// map for the parsed entityMap
-	entityMap := make(map[string]*openpgp.Entity)
+func AnalyzeKeyDump(files []string) (map[string]*openpgp.Entity, error) {
+	// map for the parsed keys
+	keys := make(map[string]*openpgp.Entity)
 
 	for _, file := range files {
-		in, err := os.Open(filepath.Join(SksOriginalFolder, file.Name()))
+		fmt.Printf("Processing %s\n", file)
+		in, err := os.Open(filepath.Join(SksOriginalFolder, file))
 		if err != nil {
 			return nil, err
 		}
@@ -44,37 +46,8 @@ func AnalyzeDumpFiles(files []os.FileInfo) (map[string]*openpgp.Entity, error) {
 		if err != nil {
 			return nil, err
 		}
-		//var expired bool
-		var email string
 		for _, e := range el {
-			// skip revoked keys
-			if len(e.Revocations) > 0 {
-				continue
-			}
-			email = PrimaryEmail(e)
-			// skip keys without emails
-			if email == "" {
-				continue
-			}
-			// TODO: Should we skip expired keys?
-			//expired, email = isExpired(e)
-			//if expired {
-			//	numExpired += 1
-			//	continue
-			//}
-
-			//Remove subkeys (as a PoC) so that only the primary key is left
-			e.Subkeys = nil
-			// we index the entityMap by the primary identity and keep only
-			// the latest key if there are multiple for a given identity
-			if prev, ok := entityMap[email]; !ok {
-				entityMap[email] = e
-			} else {
-				// save the entity if the primary key is fresher than the stored one
-				if prev.PrimaryKey.CreationTime.Before(e.PrimaryKey.CreationTime) {
-					entityMap[email] = e
-				}
-			}
+			saveKeyIfValid(e, keys)
 		}
 		if err = in.Close(); err != nil {
 			log.Printf("Unable to close file %s", file)
@@ -82,14 +55,49 @@ func AnalyzeDumpFiles(files []os.FileInfo) (map[string]*openpgp.Entity, error) {
 		}
 	}
 
-	return entityMap, nil
+	return keys, nil
+}
+
+// Analyzes whether a given key is valid for us and, if so, saves it to the key map
+func saveKeyIfValid(e *openpgp.Entity, keyMap map[string]*openpgp.Entity) {
+	//var expired bool
+
+	// skip revoked keys
+	if len(e.Revocations) > 0 {
+		return
+	}
+	email := PrimaryEmail(e)
+	// skip keys without any email info
+	if email == "" {
+		return
+	}
+	// TODO: Should we skip expired keys?
+	//expired, email = isExpired(e)
+	//if expired {
+	//	return
+	//}
+
+	//Remove subkeys (as a PoC) so that only the primary key is left
+	e.Subkeys = nil
+	// we index the keyMap by the primary identity and keep only
+	// the latest key if there are multiple for a given identity
+	if prev, ok := keyMap[email]; !ok {
+		keyMap[email] = e
+	} else {
+		// save the entity if the primary key is fresher than the stored one
+		if prev.PrimaryKey.CreationTime.Before(e.PrimaryKey.CreationTime) {
+			keyMap[email] = e
+		}
+	}
 }
 
 func WriteKeysOnDisk(dir string, entities map[string]*openpgp.Entity) error {
 	var err error
 	var buf bytes.Buffer
+
+	fmt.Printf("Saving to %s\n", filepath.Join(dir, SksParsedFullFileName))
 	// If the file already exists, the content is overwritten
-	out, err := os.OpenFile(filepath.Join(dir, sksParsedOutputFileName), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	out, err := os.OpenFile(filepath.Join(dir, SksParsedFullFileName), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -118,32 +126,34 @@ func WriteKeysOnDisk(dir string, entities map[string]*openpgp.Entity) error {
 	return nil
 }
 
-// Reads the given directory and returns the info all files
+// Reads the given directory and returns the file names
 // matching the sks dump description
-func GetSksDumpFiles(dir string) ([]os.FileInfo, error) {
+func GetSksOriginalDumpFiles(dir string) ([]string, error) {
+	sksRgx := `sks-dump-[0-9]{4}\.pgp`
+	return GetFilesThatMatch(dir, sksRgx)
+}
+
+// GetFilesThatMatch returns the filenames from the directory which
+// match with the given regex expression
+func GetFilesThatMatch(dir string, rgx string) ([]string, error) {
 	allFiles, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
-	re := regexp.MustCompile(`sks-dump-[0-9]{4}\.pgp`)
-	dumpFiles := make([]os.FileInfo, 0)
+	re := regexp.MustCompile(rgx)
+	files := make([]string, 0)
 	for _, file := range allFiles {
 		if re.MatchString(file.Name()) {
-			dumpFiles = append(dumpFiles, file)
+			files = append(files, file.Name())
 		}
 	}
-	return dumpFiles, nil
+	return files, nil
 }
 
-func LoadKeysFromDisk(dir string) ([]*Key, error) {
-	var err error
+func LoadKeysFromDisk(files []string) ([]*Key, error) {
 	keys := make([]*Key, 0)
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
 	for _, file := range files {
-		f, err := os.Open(filepath.Join(dir, file.Name()))
+		f, err := os.Open(file)
 		if err != nil {
 			return nil, err
 		}
@@ -166,9 +176,9 @@ func LoadKeysFromDisk(dir string) ([]*Key, error) {
 	return keys, nil
 }
 
-func LoadAndParseKeys(dir string) ([]*openpgp.Entity, error) {
+func LoadAndParseKeys(files []string) ([]*openpgp.Entity, error) {
 	var entities openpgp.EntityList
-	keys, err := LoadKeysFromDisk(dir)
+	keys, err := LoadKeysFromDisk(files)
 	if err != nil {
 		return nil, err
 	}

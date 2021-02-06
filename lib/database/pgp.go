@@ -11,9 +11,9 @@ import (
 
 const numKeysToDBLengthRatio float32 = 0.2
 
-func GenerateRealKeyDB(dataPath string, numRows, elementLength int) (*DB, error) {
+func GenerateRealKeyDB(dataPaths []string, numRows, elementLength int) (*DB, error) {
 	var err error
-	keys, err := pgp.LoadKeysFromDisk(dataPath)
+	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
 		return nil, err
 	}

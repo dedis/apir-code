@@ -2,6 +2,8 @@ package pgp
 
 import (
 	"bytes"
+	"io/ioutil"
+	"math/rand"
 	"testing"
 
 	"github.com/nikirill/go-crypto/openpgp"
@@ -9,14 +11,13 @@ import (
 )
 
 func TestSerialization(t *testing.T) {
-	var m1 map[string]*openpgp.Entity
+	var m map[string]*openpgp.Entity
 	var entities openpgp.EntityList
 	var err error
 	var buf bytes.Buffer
 
-	m1, err = AnalyzeDumpFiles([]string{"../../data/sks-dump/sks-dump-0000.pgp"})
-	require.NoError(t, err)
-	for _, key := range m1 {
+	m, _ = analyzeRandomSksDumpFile(t)
+	for _, key := range m {
 		err = key.Serialize(&buf)
 		require.NoError(t, err)
 		entities, err = openpgp.ReadKeyRing(bytes.NewBuffer(buf.Bytes()))
@@ -32,13 +33,13 @@ func TestWriteThenLoadKeys(t *testing.T) {
 	var m2 []*Key
 	var entities openpgp.EntityList
 	var err error
-	sksDir := "../../data/sks/"
+	tmpDir := "../../data/sks-tmp/"
 
-	m1, err = AnalyzeDumpFiles([]string{"../../data/sks-dump/sks-dump-0000.pgp"})
+	m1, fileName := analyzeRandomSksDumpFile(t)
+	err = WriteKeysOnDisk(tmpDir, m1)
 	require.NoError(t, err)
-	err = WriteKeysOnDisk(sksDir, m1)
-	require.NoError(t, err)
-	m2, err = LoadKeysFromDisk(sksDir)
+
+	m2, err = LoadKeysFromDisk([]string{fileName})
 	for _, key := range m2 {
 		//fmt.Printf("%s\n", key.ID)
 		entities, err = openpgp.ReadKeyRing(bytes.NewBuffer(key.Packet))
@@ -48,6 +49,16 @@ func TestWriteThenLoadKeys(t *testing.T) {
 		require.Equal(t, PrimaryEmail(m1[key.ID]), PrimaryEmail(entities[0]))
 		require.Equal(t, key.ID, PrimaryEmail(m1[key.ID]))
 	}
+}
+
+func analyzeRandomSksDumpFile(t *testing.T) (map[string]*openpgp.Entity, string) {
+	files, err := ioutil.ReadDir("../../data/sks-dump/")
+	require.NoError(t, err)
+	j := rand.Intn(len(files))
+
+	m, err := AnalyzeKeyDump([]string{files[j].Name()})
+	require.NoError(t, err)
+	return m, files[j].Name()
 }
 
 /*func TestImportEntireDump(t *testing.T) {
