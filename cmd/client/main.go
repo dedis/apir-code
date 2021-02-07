@@ -254,6 +254,7 @@ func query(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, q
 			conn.Target(), err)
 	}
 	log.Printf("sent query to %s", conn.Target())
+	log.Printf("query size in bytes %d", len(query))
 
 	return answer.GetAnswer()
 }

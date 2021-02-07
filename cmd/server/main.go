@@ -128,6 +128,7 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("answer size in bytes: %d", len(a))
 
 	return &proto.QueryResponse{Answer: a}, nil
 }
