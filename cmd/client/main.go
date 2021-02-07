@@ -37,6 +37,7 @@ func main() {
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
 	prof := flag.Bool("prof", false, "Write pprof file")
+	realApplication := flag.Bool("app", true, "Run key server client or client used for experiments")
 	flag.Parse()
 
 	// enable profiling
@@ -108,65 +109,71 @@ func main() {
 		log.Fatal("undefined scheme type")
 	}
 	log.Printf("scheme: %s", *schemePtr)
+	if !*realApplication {
+		log.Printf("running client for micro-benchmarks")
+	}
 
 	// get id and compute corresponding hash
-	for {
-		//fmt.Print("enter id: ")
-		var id string
-		fmt.Scanln(&id)
-		if id == "" {
-			log.Fatal("id not provided")
-		}
-		idHash := database.HashToIndex(id, lc.dbInfo.NumColumns*lc.dbInfo.NumRows)
-		log.Printf("id: %s, hashKey: %d", id, idHash)
-
-		// query for given idHash
-		queries, err := c.QueryBytes(idHash, len(lc.connections))
-		if err != nil {
-			log.Fatal("error when executing query")
-		}
-
-		// send queries to servers
-		answers := lc.runQueries(queries)
-
-		res, err := c.ReconstructBytes(answers)
-		if err != nil {
-			log.Fatalf("error during reconstruction: %v", err)
-		}
-
-		// retrieve bytes from field elements
-		resultBytes := field.VectorToBytes(res)
-		keyLength := lc.dbInfo.KeyLength
-		idLength := lc.dbInfo.IDLength
-		chunkLength := constants.ChunkBytesLength
-		zeroSlice := make([]byte, idLength)
-
-		// determine (id, key) length in bytes
-		lastElementBytes := keyLength % chunkLength
-		keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
-		totalLength := idLength + keyLengthWithPadding
-
-		// parse block entries
-		idKey := make(map[string]string)
-		for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
-			idBytes := resultBytes[i : i+idLength]
-			// test if we are in padding elements already
-			if bytes.Equal(idBytes, zeroSlice) {
-				break
+	if *realApplication {
+		log.Printf("running key server client")
+		for {
+			//fmt.Print("enter id: ")
+			var id string
+			fmt.Scanln(&id)
+			if id == "" {
+				log.Fatal("id not provided")
 			}
-			idReconstructed := string(bytes.Trim(idBytes, "\x00"))
+			idHash := database.HashToIndex(id, lc.dbInfo.NumColumns*lc.dbInfo.NumRows)
+			log.Printf("id: %s, hashKey: %d", id, idHash)
 
-			keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
-			// remove padding for last element
-			if lastElementBytes != 0 {
-				keyBytes = append(keyBytes[:len(keyBytes)-chunkLength],
-					keyBytes[len(keyBytes)-(lastElementBytes):]...)
+			// query for given idHash
+			queries, err := c.QueryBytes(idHash, len(lc.connections))
+			if err != nil {
+				log.Fatal("error when executing query")
 			}
 
-			// encode key
-			idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
+			// send queries to servers
+			answers := lc.runQueries(queries)
+
+			res, err := c.ReconstructBytes(answers)
+			if err != nil {
+				log.Fatalf("error during reconstruction: %v", err)
+			}
+
+			// retrieve bytes from field elements
+			resultBytes := field.VectorToBytes(res)
+			keyLength := lc.dbInfo.KeyLength
+			idLength := lc.dbInfo.IDLength
+			chunkLength := constants.ChunkBytesLength
+			zeroSlice := make([]byte, idLength)
+
+			// determine (id, key) length in bytes
+			lastElementBytes := keyLength % chunkLength
+			keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
+			totalLength := idLength + keyLengthWithPadding
+
+			// parse block entries
+			idKey := make(map[string]string)
+			for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
+				idBytes := resultBytes[i : i+idLength]
+				// test if we are in padding elements already
+				if bytes.Equal(idBytes, zeroSlice) {
+					break
+				}
+				idReconstructed := string(bytes.Trim(idBytes, "\x00"))
+
+				keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
+				// remove padding for last element
+				if lastElementBytes != 0 {
+					keyBytes = append(keyBytes[:len(keyBytes)-chunkLength],
+						keyBytes[len(keyBytes)-(lastElementBytes):]...)
+				}
+
+				// encode key
+				idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
+			}
+			log.Printf("key: %s", idKey[id])
 		}
-		log.Printf("key: %s", idKey[id])
 	}
 }
 
