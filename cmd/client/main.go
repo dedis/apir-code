@@ -65,8 +65,12 @@ func main() {
 
 	// initialize local client
 	lc := &localClient{
-		ctx:         context.Background(),
-		callOptions: []grpc.CallOption{grpc.UseCompressor(gzip.Name)},
+		ctx: context.Background(),
+		callOptions: []grpc.CallOption{
+			grpc.UseCompressor(gzip.Name),
+			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
+			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
+		},
 	}
 
 	// random generator

@@ -75,7 +75,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	rpcServer := grpc.NewServer(grpc.Creds(credentials.NewTLS(cfg)))
+	rpcServer := grpc.NewServer(
+		grpc.MaxRecvMsgSize(1024*1024*1024),
+		grpc.MaxSendMsgSize(1024*1024*1024),
+		grpc.Creds(credentials.NewTLS(cfg)),
+	)
 
 	// select correct server
 	var s server.Server
