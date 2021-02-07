@@ -30,7 +30,8 @@ type localClient struct {
 	ctx         context.Context
 	callOptions []grpc.CallOption
 
-	dbInfo *database.Info
+	dbInfo     *database.Info
+	vpirClient client.Client
 }
 
 func main() {
@@ -109,10 +110,11 @@ func main() {
 	default:
 		log.Fatal("undefined scheme type")
 	}
+	lc.vpirClient = c
 	log.Printf("scheme: %s", *schemePtr)
 
 	if !*realApplication {
-		runExperiment(lc, c)
+		lc.runExperiment()
 	}
 
 	// get id and compute corresponding hash
@@ -296,7 +298,7 @@ func equalDBInfo(info []*database.Info) bool {
 	return true
 }
 
-func runExperiment(lc *localClient, c client.Client) {
+func (lc *localClient) runExperiment() {
 	// TODO: use separate logger experiments outputs
 	// TODO: repeat the experiment multiple times using a
 	// configurable parameter
@@ -317,7 +319,7 @@ func runExperiment(lc *localClient, c client.Client) {
 	for i := 0; i < numBlocks; i++ {
 		// query given block
 		m.Reset()
-		queries, err := c.QueryBytes(i, len(lc.connections))
+		queries, err := lc.vpirClient.QueryBytes(i, len(lc.connections))
 		fmt.Printf("%.3f,", m.RecordAndReset())
 		if err != nil {
 			log.Fatal("error when executing query")
@@ -328,7 +330,7 @@ func runExperiment(lc *localClient, c client.Client) {
 
 		// reconstruct, we don't use the actual result
 		m.Reset()
-		_, err = c.ReconstructBytes(answers)
+		_, err = lc.vpirClient.ReconstructBytes(answers)
 		fmt.Printf("%.3f,", m.RecordAndReset())
 		if err != nil {
 			log.Fatalf("error during reconstruction: %v", err)
