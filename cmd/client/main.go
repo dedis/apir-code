@@ -110,45 +110,9 @@ func main() {
 		log.Fatal("undefined scheme type")
 	}
 	log.Printf("scheme: %s", *schemePtr)
+
 	if !*realApplication {
-		// TODO: repeat the experiment multiple times using a
-		// configurable parameter
-		log.Printf("running client for micro-benchmarks")
-
-		// TODO: this is for a db represented as a vector
-		// find a way to unify
-		numBlocks := lc.dbInfo.NumColumns * lc.dbInfo.NumRows
-
-		// save in csv file
-		// TODO: use log for this?
-		fmt.Println("query,reconstruct,total_client")
-
-		// create main monitor for CPU time
-		totalTimer := monitor.NewMonitor()
-		m := monitor.NewMonitor()
-
-		for i := 0; i < numBlocks; i++ {
-			// query given block
-			m.Reset()
-			queries, err := c.QueryBytes(i, len(lc.connections))
-			fmt.Printf("%.3f,", m.RecordAndReset())
-			if err != nil {
-				log.Fatal("error when executing query")
-			}
-
-			// send queries to servers and get answers
-			answers := lc.runQueries(queries)
-
-			// reconstruct, we don't use the actual result
-			m.Reset()
-			_, err = c.ReconstructBytes(answers)
-			fmt.Printf("%.3f,", m.RecordAndReset())
-			if err != nil {
-				log.Fatalf("error during reconstruction: %v", err)
-			}
-		}
-		fmt.Printf("%.3f\n", totalTimer.Record())
-
+		runExperiment(lc, c)
 	}
 
 	// get id and compute corresponding hash
@@ -330,4 +294,45 @@ func equalDBInfo(info []*database.Info) bool {
 	}
 
 	return true
+}
+
+func runExperiment(lc *localClient, c client.Client) {
+	// TODO: use separate logger experiments outputs
+	// TODO: repeat the experiment multiple times using a
+	// configurable parameter
+	log.Printf("running client for micro-benchmarks")
+
+	// TODO: this is for a db represented as a vector
+	// find a way to unify
+	numBlocks := lc.dbInfo.NumColumns * lc.dbInfo.NumRows
+
+	// save in csv file
+	// TODO: use log for this?
+	fmt.Println("query,reconstruct,total_client")
+
+	// create main monitor for CPU time
+	totalTimer := monitor.NewMonitor()
+	m := monitor.NewMonitor()
+
+	for i := 0; i < numBlocks; i++ {
+		// query given block
+		m.Reset()
+		queries, err := c.QueryBytes(i, len(lc.connections))
+		fmt.Printf("%.3f,", m.RecordAndReset())
+		if err != nil {
+			log.Fatal("error when executing query")
+		}
+
+		// send queries to servers and get answers
+		answers := lc.runQueries(queries)
+
+		// reconstruct, we don't use the actual result
+		m.Reset()
+		_, err = c.ReconstructBytes(answers)
+		fmt.Printf("%.3f,", m.RecordAndReset())
+		if err != nil {
+			log.Fatalf("error during reconstruction: %v", err)
+		}
+	}
+	fmt.Printf("%.3f\n", totalTimer.Record())
 }
