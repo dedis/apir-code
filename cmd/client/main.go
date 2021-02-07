@@ -17,6 +17,7 @@ import (
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
@@ -110,7 +111,44 @@ func main() {
 	}
 	log.Printf("scheme: %s", *schemePtr)
 	if !*realApplication {
+		// TODO: repeat the experiment multiple times using a
+		// configurable parameter
 		log.Printf("running client for micro-benchmarks")
+
+		// TODO: this is for a db represented as a vector
+		// find a way to unify
+		numBlocks := lc.dbInfo.NumColumns * lc.dbInfo.NumRows
+
+		// save in csv file
+		// TODO: use log for this?
+		fmt.Println("query,reconstruct,total_client")
+
+		// create main monitor for CPU time
+		totalTimer := monitor.NewMonitor()
+		m := monitor.NewMonitor()
+
+		for i := 0; i < numBlocks; i++ {
+			// query given block
+			m.Reset()
+			queries, err := c.QueryBytes(i, len(lc.connections))
+			fmt.Printf("%.3f,", m.RecordAndReset())
+			if err != nil {
+				log.Fatal("error when executing query")
+			}
+
+			// send queries to servers and get answers
+			answers := lc.runQueries(queries)
+
+			// reconstruct, we don't use the actual result
+			m.Reset()
+			_, err = c.ReconstructBytes(answers)
+			fmt.Printf("%.3f,", m.RecordAndReset())
+			if err != nil {
+				log.Fatalf("error during reconstruction: %v", err)
+			}
+		}
+		fmt.Printf("%.3f\n", totalTimer.Record())
+
 	}
 
 	// get id and compute corresponding hash
