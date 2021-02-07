@@ -1,5 +1,3 @@
-DBLength = 40000
-
 [servers]
   [servers.0]
   ip = "localhost"

@@ -9,8 +9,7 @@ import (
 )
 
 type Config struct {
-	DBLength int
-	Servers  map[string]Server
+	Servers map[string]Server
 
 	Addresses []string
 }

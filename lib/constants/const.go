@@ -5,7 +5,6 @@ import (
 )
 
 const (
-	DBLength             = 40000
 	BlockLength          = 16
 	ChunkBytesLength     = 15
 	SingleBitBlockLength = 0
