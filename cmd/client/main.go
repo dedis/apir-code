@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/x509"
 	"flag"
 	"fmt"
 	"log"
@@ -77,13 +76,10 @@ func main() {
 	prg := utils.RandomPRG()
 
 	// load servers certificates
-	cp := x509.NewCertPool()
-	for _, cert := range utils.ServerPublicKeys {
-		if !cp.AppendCertsFromPEM([]byte(cert)) {
-			log.Fatalf("credentials: failed to append certificates")
-		}
+	creds, err := utils.LoadServersCertificates()
+	if err != nil {
+		log.Fatalf("could not load servers certificates: %v", err)
 	}
-	creds := credentials.NewClientTLSFromCert(cp, "127.0.0.1")
 
 	// connect to servers and store connections
 	lc.connections = make(map[string]*grpc.ClientConn)

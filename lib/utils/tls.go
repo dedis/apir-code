@@ -2,7 +2,11 @@ package utils
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"errors"
 	"log"
+
+	"google.golang.org/grpc/credentials"
 )
 
 // WARNING: DO NOT USE THESE KEYS IN A REAL DEPLOYMENT!
@@ -68,4 +72,16 @@ func init() {
 			log.Fatalf("could not load certficate #%v %v", i, err)
 		}
 	}
+}
+
+func LoadServersCertificates() (credentials.TransportCredentials, error) {
+	cp := x509.NewCertPool()
+	for _, cert := range ServerPublicKeys {
+		if !cp.AppendCertsFromPEM([]byte(cert)) {
+			return nil, errors.New("credentials: failed to append certificates")
+		}
+	}
+	creds := credentials.NewClientTLSFromCert(cp, "127.0.0.1")
+
+	return creds, nil
 }
