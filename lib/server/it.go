@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/gob"
-
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 )

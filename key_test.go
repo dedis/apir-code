@@ -188,15 +188,16 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	hashKey := database.HashToIndex(id, dbLenBlocks)
 
 	// query given hash key
-	fssKeys, err := c.QueryBytes(hashKey, len(ss))
+	queries, err := c.QueryBytes(hashKey, len(ss))
 	require.NoError(t, err)
 
 	// get servers answers
 	answers := make([][]byte, len(ss))
 	for i := range ss {
-		answers[i], err = ss[i].AnswerBytes(fssKeys[i])
+		answers[i], err = ss[i].AnswerBytes(queries[i])
 		require.NoError(t, err)
 	}
+
 	// reconstruct block
 	result, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)

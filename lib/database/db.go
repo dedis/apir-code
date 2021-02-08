@@ -86,7 +86,7 @@ func HashToIndex(id string, length int) int {
 // Increase num to the next perfect square.
 // If the square root is a whole number, do not modify anything.
 // Otherwise, return the square of the square root + 1.
-func IncreaseToSquare(num *int) {
+func IncreaseToNextSquare(num *int) {
 	i, f := math.Modf(math.Sqrt(float64(*num)))
 	if f == 0 {
 		return

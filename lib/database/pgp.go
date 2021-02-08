@@ -24,7 +24,7 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	// decide on the length of the hash table
 	numBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
 	if rebalanced {
-		IncreaseToSquare(&numBlocks)
+		IncreaseToNextSquare(&numBlocks)
 	}
 	ht, err := makeHashTable(keys, numBlocks)
 
