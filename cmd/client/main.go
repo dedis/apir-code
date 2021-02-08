@@ -26,20 +26,24 @@ type localClient struct {
 	ctx         context.Context
 	callOptions []grpc.CallOption
 
+	flags flags
+
 	dbInfo     *database.Info
 	vpirClient client.Client
 }
 
+type flags struct {
+	scheme          string
+	realApplication bool
+	logFile         string
+	profiling       bool
+}
+
 func main() {
-	// flags
-	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
-	schemePtr := flag.String("scheme", "", "dpf for DPF-based and IT for information-theoretic")
-	prof := flag.Bool("prof", false, "Write pprof file")
-	realApplication := flag.Bool("app", true, "Run key server client or client used for experiments")
-	flag.Parse()
+	flags := parseFlags()
 
 	// enable profiling
-	if *prof {
+	if flags.profiling {
 		utils.StartProfiling("client.prof")
 		defer utils.StopProfiling()
 	}
@@ -47,8 +51,8 @@ func main() {
 	// set logs
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
-	if len(*logFile) > 0 {
-		f, err := os.Create(*logFile)
+	if len(flags.logFile) > 0 {
+		f, err := os.Create(flags.logFile)
 		if err != nil {
 			log.Fatal("Could not open file: ", err)
 		}
@@ -93,7 +97,7 @@ func main() {
 
 	// start correct client
 	var c client.Client
-	switch *schemePtr {
+	switch flags.scheme {
 	case "dpf":
 		c = client.NewDPF(prg, lc.dbInfo)
 	case "it":
@@ -104,14 +108,14 @@ func main() {
 		log.Fatal("undefined scheme type")
 	}
 	lc.vpirClient = c
-	log.Printf("scheme: %s", *schemePtr)
+	log.Printf("scheme: %s", flags.scheme)
 
-	if !*realApplication {
+	if !flags.realApplication {
 		lc.runExperiment()
 	}
 
 	// get id and compute corresponding hash
-	if *realApplication {
+	if flags.realApplication {
 		log.Printf("running key server client")
 		for {
 			var id string
@@ -308,4 +312,16 @@ func (lc *localClient) runExperiment() {
 		}
 	}
 	fmt.Printf("%.3f\n", totalTimer.Record())
+}
+
+func parseFlags() *flags {
+	f := new(flags)
+
+	flag.StringVar(&f.scheme, "scheme", "", "dpf for DPF-based and IT for information-theoretic")
+	flag.StringVar(&f.logFile, "log", "", "write log to file instead of stdout/stderr")
+	flag.BoolVar(&f.profiling, "prof", false, "Write pprof file")
+	flag.BoolVar(&f.realApplication, "app", true, "Run key server client or client used for experiments")
+	flag.Parse()
+
+	return f
 }
