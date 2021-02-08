@@ -22,12 +22,13 @@ import (
 )
 
 type localClient struct {
-	connections map[string]*grpc.ClientConn
 	ctx         context.Context
 	callOptions []grpc.CallOption
+	connections map[string]*grpc.ClientConn
 
-	flags flags
-
+	prg        *utils.PRGReader
+	config     *utils.Config
+	flags      *flags
 	dbInfo     *database.Info
 	vpirClient client.Client
 }
@@ -39,33 +40,7 @@ type flags struct {
 	profiling       bool
 }
 
-func main() {
-	flags := parseFlags()
-
-	// enable profiling
-	if flags.profiling {
-		utils.StartProfiling("client.prof")
-		defer utils.StopProfiling()
-	}
-
-	// set logs
-	log.SetOutput(os.Stdout)
-	log.SetPrefix(fmt.Sprintf("[Client] "))
-	if len(flags.logFile) > 0 {
-		f, err := os.Create(flags.logFile)
-		if err != nil {
-			log.Fatal("Could not open file: ", err)
-		}
-		defer f.Close()
-		log.SetOutput(f)
-	}
-
-	// configs
-	config, err := utils.LoadConfig("config.toml")
-	if err != nil {
-		log.Fatalf("could not load the config file: %v", err)
-	}
-
+func newLocalClient() *localClient {
 	// initialize local client
 	lc := &localClient{
 		ctx: context.Background(),
@@ -74,10 +49,40 @@ func main() {
 			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
 			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
 		},
+		prg:   utils.RandomPRG(),
+		flags: parseFlags(),
 	}
 
-	// random generator
-	prg := utils.RandomPRG()
+	// enable profiling if needed
+	if lc.flags.profiling {
+		utils.StartProfiling("client.prof")
+		defer utils.StopProfiling()
+	}
+
+	// load configs
+	config, err := utils.LoadConfig("config.toml")
+	if err != nil {
+		log.Fatalf("could not load the config file: %v", err)
+	}
+	lc.config = config
+
+	return lc
+}
+
+func main() {
+	lc := newLocalClient()
+
+	// set logs
+	log.SetOutput(os.Stdout)
+	log.SetPrefix(fmt.Sprintf("[Client] "))
+	if len(lc.flags.logFile) > 0 {
+		f, err := os.Create(lc.flags.logFile)
+		if err != nil {
+			log.Fatal("Could not open file: ", err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	}
 
 	// load servers certificates
 	creds, err := utils.LoadServersCertificates()
@@ -87,7 +92,7 @@ func main() {
 
 	// connect to servers and store connections
 	lc.connections = make(map[string]*grpc.ClientConn)
-	for _, s := range config.Addresses {
+	for _, s := range lc.config.Addresses {
 		lc.connections[s] = connectToServer(creds, s)
 		defer lc.connections[s].Close()
 	}
@@ -97,25 +102,25 @@ func main() {
 
 	// start correct client
 	var c client.Client
-	switch flags.scheme {
+	switch lc.flags.scheme {
 	case "dpf":
-		c = client.NewDPF(prg, lc.dbInfo)
+		c = client.NewDPF(lc.prg, lc.dbInfo)
 	case "it":
-		c = client.NewIT(prg, lc.dbInfo)
+		c = client.NewIT(lc.prg, lc.dbInfo)
 	case "pir":
-		c = client.NewPIR(prg, lc.dbInfo)
+		c = client.NewPIR(lc.prg, lc.dbInfo)
 	default:
 		log.Fatal("undefined scheme type")
 	}
 	lc.vpirClient = c
-	log.Printf("scheme: %s", flags.scheme)
+	log.Printf("scheme: %s", lc.flags.scheme)
 
-	if !flags.realApplication {
+	if !lc.flags.realApplication {
 		lc.runExperiment()
 	}
 
 	// get id and compute corresponding hash
-	if flags.realApplication {
+	if lc.flags.realApplication {
 		log.Printf("running key server client")
 		for {
 			var id string
