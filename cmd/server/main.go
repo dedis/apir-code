@@ -59,10 +59,9 @@ func main() {
 	// generate db
 	// TODO: generate different db if PIR
 	// TODO: automatically determine nRows
-	nRows := 1
 	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
 	filePath := filepath.Join(sksDir, "sks-000.pgp")
-	db, err := database.GenerateRealKeyDB([]string{filePath}, nRows, constants.ChunkBytesLength)
+	db, err := database.GenerateRealKeyDB([]string{filePath}, constants.ChunkBytesLength, false)
 	if err != nil {
 		log.Fatalf("impossible to generate real keys db: %v", err)
 	}
