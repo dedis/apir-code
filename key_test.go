@@ -26,8 +26,6 @@ import (
 )
 
 func TestRetrieveRealKeysDPFVector(t *testing.T) {
-	var err error
-
 	filePaths := getDBFilePaths()
 	// Generate db from sks key dump
 	db, err := database.GenerateRealKeyDB(filePaths, constants.ChunkBytesLength, false)
@@ -47,8 +45,6 @@ func TestRetrieveRealKeysDPFVector(t *testing.T) {
 }
 
 func TestRetrieveRealKeysITMatrix(t *testing.T) {
-	var err error
-
 	filePaths := getDBFilePaths()
 	// Generate db from sks key dump
 	db, err := database.GenerateRealKeyDB(filePaths, constants.ChunkBytesLength, true)
