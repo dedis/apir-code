@@ -1,0 +1,6 @@
+Name = "vpirSingleVector"
+Primitive = "vpir"
+DBLengthBits = 8388608 # oneMB
+NumRows = 1
+BlockLength = 0
+ElementBitSize = 

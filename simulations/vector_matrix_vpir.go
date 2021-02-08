@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 
-	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/BurntSushi/toml"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 
@@ -14,40 +15,52 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 )
 
-const (
-	oneMB = 1048576 * 8
-	oneKB = 1024 * 8
-)
-
-type BlockResult struct {
-	Query       float64
-	Answer0     float64
-	Answer1     float64
-	Reconstruct float64
-}
-
-type DBResult struct {
-	BlockResults []*BlockResult
-	Total        float64
-}
-
-type ExperimentResults struct {
-	Results []*DBResult
+type Simulation struct {
+	Name           string
+	Primitive      string
+	DBLengthBits   int
+	NumRows        int
+	BlockLength    int
+	ElementBitSize int
+	Repetitions    int
 }
 
 func main() {
-	// repeat the experiments nRepeat times
-	nRepeat := 10
+	cfg := flag.String("config", "", "config file for simulation")
+	flag.Parse()
+
+	// make sure cfg file is specified
+	if *cfg == "" {
+		panic("simulation's config file not provided")
+	}
+
+	// load simulation's config file
+	s := new(Simulation)
+	_, err := toml.DecodeFile(configFile, s)
+	if err != nil {
+		panic(err)
+	}
+
+	// check simulation
+	if s.Primitive != "vpir" && s.Primitive != "pir" {
+		panic("unsupported primitive")
+	}
 
 	// database data
-	dbLen := oneMB
-	blockLen := constants.BlockLength
-	elemBitSize := field.Bytes * 8
-	nRows := 1
+	dbLen := s.DBLengthBits
+	blockLen := s.BlockLength
+	elemBitSize := s.ElementBitSize
+	nRows := s.NumRows
+	// TODO: fix nCols for single-bit schemes
 	nCols := dbLen / (elemBitSize * blockLen * nRows)
 
-	// create db
-	db := database.CreateRandomMultiBitDB(utils.RandomPRG(), dbLen, nRows, blockLen)
+	// setup db
+	dbPRG := utils.RandomPRG()
+	if s.BlockLength == constants.SingleBlockLength {
+		db := database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
+	} else {
+		db := database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
+	}
 
 	// run experiment
 	retrieveBlocks(db, nCols, nRepeat)

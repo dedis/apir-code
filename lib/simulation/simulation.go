@@ -1,7 +1,5 @@
 package simulation
 
-import "fmt"
-
 type BlockResult struct {
 	Query       float64
 	Answer0     float64
@@ -18,6 +16,8 @@ type ExperimentResult struct {
 	ExperimentResult []*DBResult
 }
 
-func main() {
-	fmt.Println("vim-go")
-}
+const (
+	nRepeat = 10
+	oneMB   = 1048576 * 8
+	oneKB   = 1024 * 8
+)
