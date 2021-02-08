@@ -73,6 +73,7 @@ func main() {
 	lc := newLocalClient()
 
 	// set logs
+	// TODO: move somewhere else, but mind the defer
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 	if len(lc.flags.logFile) > 0 {
@@ -91,6 +92,7 @@ func main() {
 	}
 
 	// connect to servers and store connections
+	// TODO: move somewhere else, but mind the defer
 	lc.connections = make(map[string]*grpc.ClientConn)
 	for _, s := range lc.config.Addresses {
 		lc.connections[s] = connectToServer(creds, s)
@@ -284,8 +286,6 @@ func (lc *localClient) runExperiment() {
 	// configurable parameter
 	log.Printf("running client for micro-benchmarks")
 
-	// TODO: this is for a db represented as a vector
-	// find a way to unify
 	numBlocks := lc.dbInfo.NumColumns * lc.dbInfo.NumRows
 
 	// save in csv file
