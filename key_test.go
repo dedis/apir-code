@@ -25,40 +25,78 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRetrieveRealKeysVector(t *testing.T) {
-	var retrievedKey *openpgp.Entity
+func TestRetrieveRealKeysDPFVector(t *testing.T) {
 	var err error
-	var j int
 
-	numKeysToCheck := 100
-	nRows := 1
-
-	rand.Seed(time.Now().UnixNano())
-	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
-	// get a random chunk of the key dump in the folder
-	filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))
-	//filePath := filepath.Join(sksDir, "sks-000.pgp")
-	fmt.Printf("Testing with %s\n", filePath)
-
+	filePaths := getDBFilePaths()
 	// Generate db from sks key dump
-	db, err := database.GenerateRealKeyDB([]string{filePath}, nRows, constants.ChunkBytesLength)
+	db, err := database.GenerateRealKeyDB(filePaths, constants.ChunkBytesLength, false)
 	require.NoError(t, err)
 	numBlocks := db.NumColumns * db.NumRows
 
 	// read in the real pgp key values
-	realKeys, err := pgp.LoadAndParseKeys([]string{filePath})
+	realKeys, err := pgp.LoadAndParseKeys(filePaths)
 	require.NoError(t, err)
 
 	prg := utils.RandomPRG()
-
 	// client and servers
 	c := client.NewDPF(prg, &db.Info)
-	s0 := server.NewDPF(db, 0)
-	s1 := server.NewDPF(db, 1)
-	servers := []*server.DPF{s0, s1}
+	servers := makeDPFServers(db)
 
+	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
+}
+
+func TestRetrieveRealKeysITMatrix(t *testing.T) {
+	var err error
+
+	filePaths := getDBFilePaths()
+	// Generate db from sks key dump
+	db, err := database.GenerateRealKeyDB(filePaths, constants.ChunkBytesLength, true)
+	require.NoError(t, err)
+	numBlocks := db.NumColumns * db.NumRows
+
+	// read in the real pgp key values
+	realKeys, err := pgp.LoadAndParseKeys(filePaths)
+	require.NoError(t, err)
+
+	prg := utils.RandomPRG()
+	// client and servers
+	c := client.NewIT(prg, &db.Info)
+	servers := makeITServers(db)
+
+	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
+}
+
+func TestRetrieveRandomKeyBlockVector(t *testing.T) {
+	// TODO: How do we choose dbLen (hence, nCols) ?
+	dbLen := 40 * oneKB
+	// maximum number of bytes embedded in a field elements
+	chunkLength := constants.ChunkBytesLength
+	nRows := 1
+	nCols := dbLen / (nRows * chunkLength)
+	retrieveRandomKeyBlock(t, chunkLength, nRows, nCols)
+}
+
+func TestRetrieveRandomKeyBlockMatrix(t *testing.T) {
+	// TODO: How do we choose dbLen (hence, nCols) ?
+	dbLen := 40 * oneKB
+	// maximum number of bytes embedded in a field elements
+	chunkLength := constants.ChunkBytesLength
+	nRows := int(math.Sqrt(float64(dbLen / chunkLength)))
+	nCols := nRows
+	retrieveRandomKeyBlock(t, chunkLength, nRows, nCols)
+}
+
+func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
+	var err error
+	var j int
+	var retrievedKey *openpgp.Entity
+
+	numKeys := 100
+
+	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
-	for i := 0; i < numKeysToCheck; i++ {
+	for i := 0; i < numKeys; i++ {
 		j = rand.Intn(len(realKeys))
 		fmt.Println(pgp.PrimaryEmail(realKeys[j]))
 		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
@@ -69,27 +107,7 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
 		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
 	}
-	fmt.Printf("Total time to retrieve %d real keys: %.1fms\n", numKeysToCheck, totalTimer.Record())
-}
-
-func TestRetrieveRandomKeyBlockVector(t *testing.T) {
-	// TODO: How do we choose dbLen (hence, nCols) ?
-	dbLen := 40 * oneKB
-	// maximum numer of bytes embedded in a field elements
-	chunkLength := constants.ChunkBytesLength
-	nRows := 1
-	nCols := dbLen / (nRows * chunkLength)
-	retrieveRandomKeyBlock(t, chunkLength, nRows, nCols)
-}
-
-func TestRetrieveRandomKeyBlockMatrix(t *testing.T) {
-	// TODO: How do we choose dbLen (hence, nCols) ?
-	dbLen := 40 * oneKB
-	// maximum numer of bytes embedded in a field elements
-	chunkLength := constants.ChunkBytesLength
-	nRows := int(math.Sqrt(float64(dbLen / chunkLength)))
-	nCols := nRows
-	retrieveRandomKeyBlock(t, chunkLength, nRows, nCols)
+	fmt.Printf("Total time to retrieve %d real keys: %.1fms\n", numKeys, totalTimer.Record())
 }
 
 func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
@@ -103,9 +121,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 
 	// client and servers
 	c := client.NewDPF(prg, &db.Info)
-	s0 := server.NewDPF(db, 0)
-	s1 := server.NewDPF(db, 1)
-	servers := []*server.DPF{s0, s1}
+	servers := makeDPFServers(db)
 
 	// open id->key file
 	f, err := os.Open(path)
@@ -170,24 +186,49 @@ func validateRandomKey(t *testing.T, id, key string, result []byte, dbInfo *data
 	return idReconstructed, base64.StdEncoding.EncodeToString(keyBytes)
 }
 
-func retrieveBlockGivenID(t *testing.T, c *client.DPF, ss []*server.DPF, id string, dbLenBlocks int) []byte {
+func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
+	var err error
 	// compute hash key for id
 	hashKey := database.HashToIndex(id, dbLenBlocks)
 
 	// query given hash key
-	fssKeys := c.Query(hashKey, len(ss))
+	fssKeys, err := c.QueryBytes(hashKey, len(ss))
+	require.NoError(t, err)
 
 	// get servers answers
-	answers := make([][]field.Element, len(ss))
+	answers := make([][]byte, len(ss))
 	for i := range ss {
-		answers[i] = ss[i].Answer(fssKeys[i])
+		answers[i], err = ss[i].AnswerBytes(fssKeys[i])
+		require.NoError(t, err)
 	}
 	// reconstruct block
-	result, err := c.Reconstruct(answers)
+	result, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
 
 	// return result bytes
 	return field.VectorToBytes(result)
+}
+
+func makeDPFServers(db *database.DB) []server.Server {
+	s0 := server.NewDPF(db, 0)
+	s1 := server.NewDPF(db, 1)
+	return []server.Server{s0, s1}
+}
+
+func makeITServers(db *database.DB) []server.Server {
+	s0 := server.NewIT(db)
+	s1 := server.NewIT(db)
+	return []server.Server{s0, s1}
+}
+
+func getDBFilePaths() []string {
+	rand.Seed(time.Now().UnixNano())
+	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
+	// get a random chunk of the key dump in the folder
+	filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))
+	//filePath := filepath.Join(sksDir, "sks-000.pgp")
+	fmt.Printf("Testing with %s\n", filePath)
+	return []string{filePath}
 }
 
 /*

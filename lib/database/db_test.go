@@ -9,7 +9,7 @@ import (
 func TestGenerateRealKeysDB(t *testing.T) {
 	sksFilesPath := "../../data/sks/"
 	nRows := 1
-	_, err := GenerateRealKeyDB(sksFilesPath, nRows, constants.ChunkBytesLength)
+	_, err := GenerateRealKeyDB(sksFilesPath, constants.ChunkBytesLength, false)
 	require.NoError(t, err)
 }
 

@@ -12,7 +12,7 @@ import (
 
 const numKeysToDBLengthRatio float32 = 0.2
 
-func GenerateRealKeyDB(dataPaths []string, numRows, elementLength int) (*DB, error) {
+func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
 		return nil, err
@@ -22,15 +22,23 @@ func GenerateRealKeyDB(dataPaths []string, numRows, elementLength int) (*DB, err
 	sortById(keys)
 
 	// decide on the length of the hash table
-	tableLen := int(float32(len(keys)) * numKeysToDBLengthRatio)
-	ht, err := makeHashTable(keys, tableLen)
+	numBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
+	if rebalanced {
+		IncreaseToSquare(&numBlocks)
+	}
+	ht, err := makeHashTable(keys, numBlocks)
 
 	// get the maximum byte length of the values in the hashTable
 	// +1 takes into account the padding 0x80 that is always added.
 	maxBytes := utils.MaxBytesLength(ht) + 1
 	//fmt.Println(maxBytes)
 	blockLen := int(math.Ceil(float64(maxBytes) / float64(elementLength)))
-	numColumns := tableLen
+	numColumns := numBlocks
+	numRows := 1
+	if rebalanced {
+		numColumns = int(math.Sqrt(float64(numBlocks)))
+		numRows = numColumns
+	}
 
 	// create all zeros db
 	db := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
