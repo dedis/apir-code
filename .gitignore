@@ -32,3 +32,6 @@ data/parser
 # Data folders
 data/sks-original
 data/sks
+
+# experiment results
+*.json
