@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"math"
 
 	"github.com/BurntSushi/toml"
 	"github.com/si-co/vpir-code/lib/field"
@@ -42,17 +43,36 @@ func main() {
 	}
 
 	// check simulation
-	if s.Primitive != "vpir" && s.Primitive != "pir" {
+	if !s.validSimulation() {
 		panic("unsupported primitive")
 	}
 
-	// database data
+	// compute database data
+	// vector case
 	dbLen := s.DBLengthBits
 	blockLen := s.BlockLength
 	elemBitSize := s.ElementBitSize
 	nRows := s.NumRows
-	// TODO: fix nCols for single-bit schemes
-	nCols := dbLen / (elemBitSize * blockLen * nRows)
+	var nCols int
+	if numRows == 1 {
+		if s.BlockLength == constants.SingleBitBlockLength {
+			nCols = dbLen
+		} else {
+			nCols = dbLen / (elemBitSize * blockLen * nRows)
+		}
+	} else {
+		// TODO: find next perfect square
+		if s.BlockLength == constants.SingleBitBlockLength {
+			numBlocks := dbLen
+			nCols = int(math.Sqrt(float64(numBlocks)))
+			nRows = nCols
+		} else {
+			numBlocks := dbLen / (elemBitSize * blockLen)
+			nCols = int(math.Sqrt(float64(numBlocks)))
+			nRows = nCols
+		}
+
+	}
 
 	// setup db
 	dbPRG := utils.RandomPRG()
@@ -121,4 +141,8 @@ func retrieveBlocks(db *database.DB, numBlocks int, nRepeat int) {
 
 	fmt.Println(string(res))
 
+}
+
+func (s *Simulation) validSimulation() bool {
+	return s.Primitive == "vpir" || s.Primitive == "pir"
 }
