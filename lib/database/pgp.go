@@ -2,17 +2,17 @@ package database
 
 import (
 	"bytes"
+	"math"
+	"sort"
+
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
-	"math"
-	"sort"
 )
 
 const numKeysToDBLengthRatio float32 = 0.2
 
 func GenerateRealKeyDB(dataPaths []string, numRows, elementLength int) (*DB, error) {
-	var err error
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
 		return nil, err

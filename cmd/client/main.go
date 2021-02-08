@@ -1,23 +1,20 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"crypto/x509"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
+	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
@@ -121,62 +118,40 @@ func main() {
 	if *realApplication {
 		log.Printf("running key server client")
 		for {
-			//fmt.Print("enter id: ")
 			var id string
 			fmt.Scanln(&id)
 			if id == "" {
 				log.Fatal("id not provided")
 			}
-			idHash := database.HashToIndex(id, lc.dbInfo.NumColumns*lc.dbInfo.NumRows)
-			log.Printf("id: %s, hashKey: %d", id, idHash)
 
-			// query for given idHash
-			queries, err := c.QueryBytes(idHash, len(lc.connections))
+			// compute hash key for id
+			hashKey := database.HashToIndex(id, lc.dbInfo.NumRows*lc.dbInfo.NumColumns)
+			log.Printf("id: %s, hashKey: %d", id, hashKey)
+
+			// query given hash key
+			queries, err := c.QueryBytes(hashKey, len(lc.connections))
 			if err != nil {
-				log.Fatal("error when executing query")
+				log.Fatalf("error when executing query: %v", err)
 			}
 
 			// send queries to servers
 			answers := lc.runQueries(queries)
 
-			res, err := c.ReconstructBytes(answers)
+			// reconstruct block
+			resultField, err := c.ReconstructBytes(answers)
 			if err != nil {
 				log.Fatalf("error during reconstruction: %v", err)
 			}
 
-			// retrieve bytes from field elements
-			resultBytes := field.VectorToBytes(res)
-			keyLength := lc.dbInfo.KeyLength
-			idLength := lc.dbInfo.IDLength
-			chunkLength := constants.ChunkBytesLength
-			zeroSlice := make([]byte, idLength)
+			// return result bytes
+			result := field.VectorToBytes(resultField)
 
-			// determine (id, key) length in bytes
-			lastElementBytes := keyLength % chunkLength
-			keyLengthWithPadding := int(math.Ceil(float64(keyLength)/float64(chunkLength))) * chunkLength
-			totalLength := idLength + keyLengthWithPadding
+			// unpad result
+			result = database.UnPadBlock(result)
 
-			// parse block entries
-			idKey := make(map[string]string)
-			for i := 0; i < len(resultBytes)-totalLength+1; i += totalLength {
-				idBytes := resultBytes[i : i+idLength]
-				// test if we are in padding elements already
-				if bytes.Equal(idBytes, zeroSlice) {
-					break
-				}
-				idReconstructed := string(bytes.Trim(idBytes, "\x00"))
-
-				keyBytes := resultBytes[i+idLength : i+idLength+keyLengthWithPadding]
-				// remove padding for last element
-				if lastElementBytes != 0 {
-					keyBytes = append(keyBytes[:len(keyBytes)-chunkLength],
-						keyBytes[len(keyBytes)-(lastElementBytes):]...)
-				}
-
-				// encode key
-				idKey[idReconstructed] = base64.StdEncoding.EncodeToString(keyBytes)
-			}
-			log.Printf("key: %s", idKey[id])
+			// get a key from the block with the id of the search
+			retrievedKey, err := pgp.RecoverKeyFromBlock(result, id)
+			log.Printf("key: %#v", retrievedKey)
 		}
 	}
 }

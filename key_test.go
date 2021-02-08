@@ -5,6 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/csv"
 	"fmt"
+	"io"
+	"math"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
 	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
@@ -15,13 +23,6 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
-	"io"
-	"math"
-	"math/rand"
-	"os"
-	"path/filepath"
-	"testing"
-	"time"
 )
 
 func TestRetrieveRealKeysVector(t *testing.T) {
@@ -36,12 +37,13 @@ func TestRetrieveRealKeysVector(t *testing.T) {
 	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
 	// get a random chunk of the key dump in the folder
 	filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))
+	//filePath := filepath.Join(sksDir, "sks-000.pgp")
 	fmt.Printf("Testing with %s\n", filePath)
 
 	// Generate db from sks key dump
 	db, err := database.GenerateRealKeyDB([]string{filePath}, nRows, constants.ChunkBytesLength)
 	require.NoError(t, err)
-	numBlocks := db.NumColumns*db.NumRows
+	numBlocks := db.NumColumns * db.NumRows
 
 	// read in the real pgp key values
 	realKeys, err := pgp.LoadAndParseKeys([]string{filePath})

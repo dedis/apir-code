@@ -8,9 +8,11 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
 
 	"github.com/si-co/vpir-code/lib/proto"
@@ -56,14 +58,13 @@ func main() {
 
 	// generate db
 	// TODO: generate different db if PIR
-	// TODO: How do we choose dbLen (hence, nCols) ?
-	dbLen := 40 * 1024 * 8
-	chunkLength := constants.ChunkBytesLength // maximum numer of bytes embedded in a field elements
+	// TODO: automatically determine nRows
 	nRows := 1
-	nCols := dbLen / (nRows * chunkLength)
-	db, err := database.GenerateRandomKeyDB("data/random_id_key.csv", chunkLength, nRows, nCols)
+	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
+	filePath := filepath.Join(sksDir, "sks-000.pgp")
+	db, err := database.GenerateRealKeyDB([]string{filePath}, nRows, constants.ChunkBytesLength)
 	if err != nil {
-		log.Fatalf("could not generate keys db: %v", err)
+		log.Fatalf("impossible to generate real keys db: %v", err)
 	}
 
 	// run server with TLS
