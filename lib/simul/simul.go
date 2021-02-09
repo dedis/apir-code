@@ -1,4 +1,4 @@
-package simulation
+package simul
 
 type BlockResult struct {
 	Query       float64
@@ -8,12 +8,12 @@ type BlockResult struct {
 }
 
 type DBResult struct {
-	BlockResults []*BlockResult
-	Total        float64
+	Results []*BlockResult
+	Total   float64
 }
 
-type ExperimentResult struct {
-	ExperimentResult []*DBResult
+type Experiment struct {
+	Results []*DBResult
 }
 
 const (

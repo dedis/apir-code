@@ -7,13 +7,14 @@ import (
 	"math"
 
 	"github.com/BurntSushi/toml"
-	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/utils"
-
 	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/simul"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 type Simulation struct {
@@ -27,17 +28,17 @@ type Simulation struct {
 }
 
 func main() {
-	cfg := flag.String("config", "", "config file for simulation")
+	configFile := flag.String("config", "", "config file for simulation")
 	flag.Parse()
 
 	// make sure cfg file is specified
-	if *cfg == "" {
+	if *configFile == "" {
 		panic("simulation's config file not provided")
 	}
 
 	// load simulation's config file
 	s := new(Simulation)
-	_, err := toml.DecodeFile(configFile, s)
+	_, err := toml.DecodeFile(*configFile, s)
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +55,7 @@ func main() {
 	elemBitSize := s.ElementBitSize
 	nRows := s.NumRows
 	var nCols int
-	if numRows == 1 {
+	if nRows == 1 {
 		if s.BlockLength == constants.SingleBitBlockLength {
 			nCols = dbLen
 		} else {
@@ -76,14 +77,15 @@ func main() {
 
 	// setup db
 	dbPRG := utils.RandomPRG()
-	if s.BlockLength == constants.SingleBlockLength {
-		db := database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
+	db := new(database.DB)
+	if s.BlockLength == constants.SingleBitBlockLength {
+		db = database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
 	} else {
-		db := database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
+		db = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
 	}
 
 	// run experiment
-	retrieveBlocks(db, nCols, nRepeat)
+	retrieveBlocks(db, nCols, s.Repetitions)
 }
 
 func retrieveBlocks(db *database.DB, numBlocks int, nRepeat int) {
@@ -96,33 +98,33 @@ func retrieveBlocks(db *database.DB, numBlocks int, nRepeat int) {
 	m := monitor.NewMonitor()
 
 	// run the experiment nRepeat times
-	results := &ExperimentResults{Results: make([]*DBResult, nRepeat)}
+	results := &simul.Experiment{Results: make([]*simul.DBResult, nRepeat)}
 
 	for j := 0; j < nRepeat; j++ {
-		results.Results[j] = &DBResult{BlockResults: make([]*BlockResult, numBlocks)}
+		results.Results[j] = &simul.DBResult{Results: make([]*simul.BlockResult, numBlocks)}
 		totalTimer := monitor.NewMonitor()
 		for i := 0; i < numBlocks; i++ {
-			results.Results[j].BlockResults[i] = new(BlockResult)
+			results.Results[j].Results[i] = new(simul.BlockResult)
 
 			m.Reset()
 			queries := c.Query(i, 2)
 			//fmt.Printf("%.3f,", m.RecordAndReset())
-			results.Results[j].BlockResults[i].Query = m.RecordAndReset()
+			results.Results[j].Results[i].Query = m.RecordAndReset()
 
 			a0 := s0.Answer(queries[0])
 			//fmt.Printf("%.3f,", m.RecordAndReset())
-			results.Results[j].BlockResults[i].Answer0 = m.RecordAndReset()
+			results.Results[j].Results[i].Answer0 = m.RecordAndReset()
 
 			a1 := s1.Answer(queries[1])
 			//fmt.Printf("%.3f,", m.RecordAndReset())
-			results.Results[j].BlockResults[i].Answer1 = m.RecordAndReset()
+			results.Results[j].Results[i].Answer1 = m.RecordAndReset()
 
 			answers := [][]field.Element{a0, a1}
 
 			m.Reset()
 			_, err := c.Reconstruct(answers)
 			//fmt.Printf("%.3f,", m.RecordAndReset())
-			results.Results[j].BlockResults[i].Reconstruct = m.RecordAndReset()
+			results.Results[j].Results[i].Reconstruct = m.RecordAndReset()
 			if err != nil {
 				panic(err)
 			}
