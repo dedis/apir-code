@@ -58,13 +58,14 @@ func main() {
 
 	// generate db
 	// TODO: generate different db if PIR
-	// TODO: automatically determine nRows
+	log.Println("Starting to read in the DB data")
 	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
 	filePath := filepath.Join(sksDir, "sks-000.pgp")
-	db, err := database.GenerateRealKeyDB([]string{filePath}, constants.ChunkBytesLength, false)
+	db, err := database.GenerateRealKeyDB([]string{filePath}, constants.ChunkBytesLength, true)
 	if err != nil {
 		log.Fatalf("impossible to generate real keys db: %v", err)
 	}
+	log.Println("DB generated")
 
 	// run server with TLS
 	cfg := &tls.Config{

@@ -37,8 +37,8 @@ func (c *DPF) QueryBytes(index, numServers int) ([][]byte, error) {
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
 	for i, q := range queries {
-		var buf bytes.Buffer
-		enc := gob.NewEncoder(&buf)
+		buf := new(bytes.Buffer)
+		enc := gob.NewEncoder(buf)
 		if err := enc.Encode(q); err != nil {
 			return nil, err
 		}

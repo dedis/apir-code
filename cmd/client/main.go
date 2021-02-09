@@ -158,7 +158,14 @@ func main() {
 
 			// get a key from the block with the id of the search
 			retrievedKey, err := pgp.RecoverKeyFromBlock(result, id)
-			log.Printf("key: %#v", retrievedKey)
+			if err != nil {
+				log.Fatalf("error retrieving key from the block: %v", err)
+			}
+			armored, err := pgp.ArmorKey(retrievedKey)
+			if err != nil {
+				log.Fatalf("error armor-encoding the key: %v", err)
+			}
+			fmt.Println(armored)
 		}
 	}
 }

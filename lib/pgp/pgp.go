@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/nikirill/go-crypto/openpgp/armor"
 	"io"
 	"io/ioutil"
 	"log"
@@ -247,6 +248,24 @@ func RecoverKeyFromBlock(block []byte, email string) (*openpgp.Entity, error) {
 	return nil, errors.New("no key with the given email id is found")
 }
 
+func ArmorKey(entity *openpgp.Entity) (string, error) {
+	var err error
+	buf := new(bytes.Buffer)
+	headers := map[string]string{"Comment": "Retrieved with VPIR"}
+	arm, err := armor.Encode(buf, openpgp.PublicKeyType, headers)
+	if err != nil {
+		return "", err
+	}
+	err = entity.Serialize(arm)
+	if err != nil {
+		return "", err
+	}
+	if err = arm.Close(); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
 // The PGP key ID typically has the form "Firstname Lastname <email address>".
 // getEmailAddressFromPGPId parses the ID string and returns the email if found,
 // or returns an empty string and an error otherwise.
@@ -285,35 +304,4 @@ func compileRegexToMatchEmail() *regexp.Regexp {
 	}
 
 	return m
-}
-
-func extractPrimaryKeys(el openpgp.EntityList) map[string]*packet.PublicKey {
-	m := make(map[string]*packet.PublicKey)
-	for _, e := range el {
-		ids := ""
-		for _, id := range e.Identities {
-			ids += id.UserId.Email
-		}
-		m[ids] = e.PrimaryKey
-
-	}
-
-	return m
-}
-
-func importSingleDump(path string) (openpgp.EntityList, error) {
-	// open single dump file
-	f, err := os.Open(path)
-	defer f.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	// read the keys
-	el, err := openpgp.ReadKeyRing(f)
-	if err != nil {
-		return nil, err
-	}
-
-	return el, nil
 }*/

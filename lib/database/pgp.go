@@ -10,7 +10,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-const numKeysToDBLengthRatio float32 = 0.2
+const numKeysToDBLengthRatio float32 = 0.1
 
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
