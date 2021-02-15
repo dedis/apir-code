@@ -5,4 +5,4 @@ DBLengthBits = 8192 # oneKB
 NumRows = 1
 BlockLength = 0
 ElementBitSize = 1
-Repetitions = 1
+Repetitions = 10
