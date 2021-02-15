@@ -108,7 +108,7 @@ func main() {
 }
 
 func retrieveBlocks(db *database.DB, dbLen int, numBlocks int, nRepeat int) []*DBResult {
-	log.Printf("retrieving blocks from DB with dbLen %d bits", dbLen)
+	log.Printf("retrieving blocks from DB with dbLen = %d bits", dbLen)
 
 	prg := utils.RandomPRG()
 	c := client.NewIT(prg, &db.Info)
@@ -122,6 +122,7 @@ func retrieveBlocks(db *database.DB, dbLen int, numBlocks int, nRepeat int) []*D
 	results := make([]*DBResult, nRepeat)
 
 	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = &DBResult{
 			Results:      make([]*BlockResult, numBlocks),
 			DBLengthBits: dbLen,
