@@ -1,7 +1,0 @@
-Name = "vpirMultiVectorMB"
-Primitive = "vpir"
-DBLengthBits = 8388608 # oneMB
-NumRows = 1
-BlockLength = 16
-ElementBitSize = 128
-Repetitions = 10

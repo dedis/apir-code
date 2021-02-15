@@ -8,8 +8,9 @@ type BlockResult struct {
 }
 
 type DBResult struct {
-	Results []*BlockResult
-	Total   float64
+	Results      []*BlockResult
+	Total        float64
+	DBLengthBits int
 }
 
 type Experiment struct {

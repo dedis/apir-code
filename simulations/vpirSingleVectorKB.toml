@@ -1,7 +1,0 @@
-Name = "vpirSingleVectorKB"
-Primitive = "vpir"
-DBLengthBits = 8192 # oneKB
-NumRows = 1
-BlockLength = 0
-ElementBitSize = 1
-Repetitions = 10
