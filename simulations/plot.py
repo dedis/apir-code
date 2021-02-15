@@ -2,39 +2,18 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from utils import *
 
-file="vpirSingleVector.json"
-
-# parse results
-client = []
-server = []
-total = []
-with open(file) as f:
-    data = json.load(f)
-    for dbResult in data['Results']:
-        client.append(0)
-        server.append(0)
-        for blockResult in dbResult['Results']:
-            client[-1] += blockResult['Query'] + blockResult['Reconstruct']
-            server[-1] += (blockResult['Answer0'] + blockResult['Answer1'])/2
-        total.append(dbResult['Total'])
-
-# compute averages
-clientAvg = np.mean(client)
-clientStd = np.std(client)
-serverAvg = np.mean(server)
-serverStd = np.std(server)
-totalAvg = np.mean(total)
-totalStd = np.std(total)
+vpirSingleVectorFileKB = "vpirSingleVector.json"
+clientStats, serverStats, totalStats = allStats(vpirSingleVectorFileKB)
 
 # plot graph
 labels = ['1KB']
-client_means = [clientAvg]
-server_means = [serverAvg]
-client_std = [clientStd]
-print(clientStd)
-server_std = [serverStd]
-width = 0.35       # the width of the bars: can also be len(x) sequence
+client_means = [clientStats['mean']]
+server_means = [serverStats['mean']]
+client_std = [clientStats['std']]
+server_std = [serverStats['std']]
+width = 0.35 # the width of the bars: can also be len(x) sequence
 
 fig, ax = plt.subplots()
 
