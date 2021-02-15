@@ -1,19 +1,28 @@
 #!/usr/bin/python3
 import json
+import numpy as np
 
-file="vpir_vector_oneMB.json"
+file="vpirSingleVector.json"
 
+# parse results
 data = []
 query = []
 answer = []
 reconstruct = []
+total = []
 with open(file) as f:
     data = json.load(f)
-    for db_result in data['Results']:
-        for block_result in db_result['BlockResults']:
-            query.append(block_result['Query'])
-            answer.append(block_result['Answer0'])
-            answer.append(block_result['Answer1'])
-            reconstruct.append(block_result['Reconstruct'])
+    for dbResult in data['Results']:
+        for blockResult in dbResult['Results']:
+            query.append(blockResult['Query'])
+            answer.append(blockResult['Answer0'])
+            answer.append(blockResult['Answer1'])
+            reconstruct.append(blockResult['Reconstruct'])
+        total.append(dbResult['Total'])
 
-
+# compute averages
+queryAvg = np.mean(query)
+answerAvg = np.mean(answer)
+reconstructAvg = np.mean(reconstruct)
+totalAvg = np.mean(total)
+print(queryAvg, answerAvg,reconstructAvg,totalAvg)

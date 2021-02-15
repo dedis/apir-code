@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"math"
 
 	"github.com/BurntSushi/toml"
@@ -41,6 +42,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("running simulation %#v\n", s)
 
 	// check simulation
 	if !s.validSimulation() {
@@ -128,13 +130,11 @@ func retrieveBlocks(db *database.DB, numBlocks int, nRepeat int) {
 
 	// print results
 	res, err := json.Marshal(results)
-
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	fmt.Println(string(res))
-
 }
 
 func (s *Simulation) validSimulation() bool {

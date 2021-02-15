@@ -1,6 +1,8 @@
 Name = "vpirSingleVector"
 Primitive = "vpir"
-DBLengthBits = 8388608 # oneMB
+#DBLengthBits = 8388608 # oneMB
+DBLengthBits = 8192 # oneKB
 NumRows = 1
 BlockLength = 0
 ElementBitSize = 1
+Repetitions = 1
