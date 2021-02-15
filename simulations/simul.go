@@ -95,13 +95,13 @@ func retrieveBlocks(db *database.DB, numBlocks int, nRepeat int) {
 	m := monitor.NewMonitor()
 
 	// run the experiment nRepeat times
-	results := &simul.Experiment{Results: make([]*simul.DBResult, nRepeat)}
+	results := &Experiment{Results: make([]*DBResult, nRepeat)}
 
 	for j := 0; j < nRepeat; j++ {
-		results.Results[j] = &simul.DBResult{Results: make([]*simul.BlockResult, numBlocks)}
+		results.Results[j] = &DBResult{Results: make([]*BlockResult, numBlocks)}
 		totalTimer := monitor.NewMonitor()
 		for i := 0; i < numBlocks; i++ {
-			results.Results[j].Results[i] = new(simul.BlockResult)
+			results.Results[j].Results[i] = new(BlockResult)
 
 			m.Reset()
 			queries := c.Query(i, 2)
