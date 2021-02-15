@@ -1,0 +1,6 @@
+* Code
+  - fix DPF randomness state (> 256)
+  - Use fastxor everywhere for PIR
+  - parallelize server in both VPIR and PIR
+
+* Experiments
