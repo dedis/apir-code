@@ -13,7 +13,6 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
-	"github.com/si-co/vpir-code/lib/simul"
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
@@ -49,12 +48,12 @@ func main() {
 	}
 
 	// compute database data
-	// vector case
 	dbLen := s.DBLengthBits
 	blockLen := s.BlockLength
 	elemBitSize := s.ElementBitSize
 	nRows := s.NumRows
 	var nCols int
+	// vector case
 	if nRows == 1 {
 		if s.BlockLength == constants.SingleBitBlockLength {
 			nCols = dbLen

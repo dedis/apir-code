@@ -1,4 +1,4 @@
-package simul
+package main
 
 type BlockResult struct {
 	Query       float64

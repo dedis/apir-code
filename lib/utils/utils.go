@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"golang.org/x/xerrors"
-)
+import "math"
 
 // MaxBytesLength get maximal []byte length in map[int][]byte
 func MaxBytesLength(in map[int][]byte) int {
@@ -16,25 +14,13 @@ func MaxBytesLength(in map[int][]byte) int {
 	return max
 }
 
-func BitStringToBytes(s string) ([]byte, error) {
-	b := make([]byte, (len(s)+(8-1))/8)
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if c < '0' || c > '1' {
-			return nil, xerrors.New("not a bit")
-		}
-		b[i>>3] |= (c - '0') << uint(7-i&7)
+// Increase num to the next perfect square.
+// If the square root is a whole number, do not modify anything.
+// Otherwise, return the square of the square root + 1.
+func IncreaseToNextSquare(num *int) {
+	i, f := math.Modf(math.Sqrt(float64(*num)))
+	if f == 0 {
+		return
 	}
-	return b, nil
-}
-
-func Bytes2Bits(data []byte) []int {
-	dst := make([]int, 0)
-	for _, v := range data {
-		for i := 0; i < 8; i++ {
-			move := uint(7 - i)
-			dst = append(dst, int((v>>move)&1))
-		}
-	}
-	return dst
+	*num = int(math.Pow(i+1, 2))
 }

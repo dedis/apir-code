@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"io"
 	"log"
-	"math"
 
 	"golang.org/x/crypto/blake2b"
 
@@ -81,15 +80,4 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) *DB {
 func HashToIndex(id string, length int) int {
 	hash := blake2b.Sum256([]byte(id))
 	return int(binary.BigEndian.Uint64(hash[:]) % uint64(length))
-}
-
-// Increase num to the next perfect square.
-// If the square root is a whole number, do not modify anything.
-// Otherwise, return the square of the square root + 1.
-func IncreaseToNextSquare(num *int) {
-	i, f := math.Modf(math.Sqrt(float64(*num)))
-	if f == 0 {
-		return
-	}
-	*num = int(math.Pow(i+1, 2))
 }
