@@ -6,4 +6,4 @@ DBLengthsBits = [0.01, 0.1, 1.0, 10.0, 100.0]
 NumRows = 1
 BlockLength = 16
 ElementBitSize = 128
-Repetitions = 10
+Repetitions = 3
