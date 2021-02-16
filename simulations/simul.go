@@ -55,7 +55,7 @@ func main() {
 
 	for _, dl := range s.DBLengthsBits {
 		// compute database data
-		dbLen := int(dl * 1000000.0)
+		dbLen := int(dl)
 		blockLen := s.BlockLength
 		elemBitSize := s.ElementBitSize
 		nRows := s.NumRows
