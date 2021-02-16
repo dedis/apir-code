@@ -19,13 +19,13 @@ import (
 )
 
 type Simulation struct {
+	DBLengthsBits  []float64
+	Repetitions    int
 	Name           string
 	Primitive      string
-	DBLengthsBits  []float64
 	NumRows        int
 	BlockLength    int
 	ElementBitSize int
-	Repetitions    int
 }
 
 func main() {
@@ -36,6 +36,7 @@ func main() {
 	if *configFile == "" {
 		panic("simulation's config file not provided")
 	}
+	log.Printf("config file %s", *configFile)
 
 	// load simulation's config file
 	s := new(Simulation)
@@ -100,7 +101,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err = ioutil.WriteFile(path.Join("results", s.Name, ".json"), res, 0644); err != nil {
+	fileName := s.Name + ".json"
+	if err = ioutil.WriteFile(path.Join("results", fileName), res, 0644); err != nil {
 		panic(err)
 	}
 
