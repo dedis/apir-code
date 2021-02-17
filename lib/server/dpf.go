@@ -15,10 +15,8 @@ type DPF struct {
 	serverNum byte
 }
 
-func NewDPF(db *database.DB, serverNum byte) *DPF {
-	return &DPF{db: db,
-		serverNum: serverNum,
-	}
+func NewDPF(db *database.DB) *DPF {
+	return &DPF{db: db}
 }
 
 func (s *DPF) DBInfo() *database.Info {

@@ -86,7 +86,7 @@ func main() {
 	var s server.Server
 	switch *schemePtr {
 	case "dpf":
-		s = server.NewDPF(db, byte(*sid))
+		s = server.NewDPF(db)
 	case "it":
 		s = server.NewIT(db)
 	default:

@@ -138,8 +138,8 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 
 func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
 	c := client.NewDPF(rnd, &db.Info)
-	s0 := server.NewDPF(db, 0)
-	s1 := server.NewDPF(db, 1)
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {

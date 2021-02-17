@@ -120,8 +120,8 @@ func retrieveBlocksDPF(db *database.DB, dbLen int, numBlocks int, nRepeat int) [
 
 	prg := utils.RandomPRG()
 	c := client.NewDPF(prg, &db.Info)
-	s0 := server.NewDPF(db, 0)
-	s1 := server.NewDPF(db, 1)
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()

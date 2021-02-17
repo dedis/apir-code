@@ -207,8 +207,8 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 }
 
 func makeDPFServers(db *database.DB) []server.Server {
-	s0 := server.NewDPF(db, 0)
-	s1 := server.NewDPF(db, 1)
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
 	return []server.Server{s0, s1}
 }
 
