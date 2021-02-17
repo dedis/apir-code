@@ -42,6 +42,10 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 	var err error
 	entries := make([][]field.Element, numRows)
 	numColumns := dbLen / (128 * numRows * blockLen)
+	// handle very small db
+	if numColumns == 0 {
+		numColumns = 1
+	}
 	for i := 0; i < numRows; i++ {
 		entries[i], err = field.RandomVector(rnd, numColumns*blockLen)
 		if err != nil {
