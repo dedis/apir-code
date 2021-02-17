@@ -52,7 +52,7 @@ func main() {
 	}
 
 	// initialize experiment
-	experiment := &Experiment{Results: make([]*DBResult, 0)}
+	experiment := &Experiment{Results: make(map[int][]*DBResult, 0)}
 
 	// range over all the DB lengths specified in the general simulation config
 	for _, dl := range s.DBLengthsBits {
@@ -96,10 +96,9 @@ func main() {
 		}
 
 		// run experiment
-		results := retrieveBlocksIT(db, dbLen, nCols, s.Repetitions)
-
-		// append result to general experiment
-		experiment.Results = append(experiment.Results, results...)
+		log.Printf("retrieving blocks with DPF scheme from DB with dbLen = %d bits", dbLen)
+		results := retrieveBlocksIT(db, nCols, s.Repetitions)
+		experiment.Results[dbLen] = results
 	}
 
 	// print results
@@ -115,9 +114,7 @@ func main() {
 	log.Println("simulation terminated succesfully")
 }
 
-func retrieveBlocksDPF(db *database.DB, dbLen int, numBlocks int, nRepeat int) []*DBResult {
-	log.Printf("retrieving blocks with DPF scheme from DB with dbLen = %d bits", dbLen)
-
+func retrieveBlocksDPF(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
 	prg := utils.RandomPRG()
 	c := client.NewDPF(prg, &db.Info)
 	s0 := server.NewDPF(db)
@@ -132,8 +129,7 @@ func retrieveBlocksDPF(db *database.DB, dbLen int, numBlocks int, nRepeat int) [
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = &DBResult{
-			Results:      make([]*BlockResult, numBlocks),
-			DBLengthBits: dbLen,
+			Results: make([]*BlockResult, numBlocks),
 		}
 
 		totalTimer := monitor.NewMonitor()
@@ -166,9 +162,7 @@ func retrieveBlocksDPF(db *database.DB, dbLen int, numBlocks int, nRepeat int) [
 	return results
 }
 
-func retrieveBlocksIT(db *database.DB, dbLen int, numBlocks int, nRepeat int) []*DBResult {
-	log.Printf("retrieving blocks with IT scheme from DB with dbLen = %d bits", dbLen)
-
+func retrieveBlocksIT(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
 	prg := utils.RandomPRG()
 	c := client.NewIT(prg, &db.Info)
 	s0 := server.NewIT(db)
@@ -183,8 +177,7 @@ func retrieveBlocksIT(db *database.DB, dbLen int, numBlocks int, nRepeat int) []
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = &DBResult{
-			Results:      make([]*BlockResult, numBlocks),
-			DBLengthBits: dbLen,
+			Results: make([]*BlockResult, numBlocks),
 		}
 
 		totalTimer := monitor.NewMonitor()

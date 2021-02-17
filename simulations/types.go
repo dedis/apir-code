@@ -8,13 +8,12 @@ type BlockResult struct {
 }
 
 type DBResult struct {
-	Results      []*BlockResult
-	Total        float64
-	DBLengthBits int
+	Results []*BlockResult
+	Total   float64
 }
 
 type Experiment struct {
-	Results []*DBResult
+	Results map[int][]*DBResult
 }
 
 const (
