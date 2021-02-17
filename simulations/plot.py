@@ -4,8 +4,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import *
 
-vpirSingleVectorFileKB = "vpirSingleVector.json"
-clientStats, serverStats, totalStats = allStats(vpirSingleVectorFileKB)
+resultFolder = "results/"
+vpirSingleVectorFile = resultFolder + "vpirSingleVector.json"
+vpirSingleMatrixFile = resultFolder + "vpirSingleMatrix.json"
+vpirMultiVectorFile = resultFolder + "vpirMultiVector.json"
+vpirMultiMatrixFile = resultFolder + "vpirMultiMatrix.json"
+
+cSV, sSV, tSV, bSV = allStats(vpirSingleVectorFile)
+cSM, sSM, tSM, bSM = allStats(vpirSingleMatrixFile)
+cMV, sMV, tMV, bMV = allStats(vpirMultiVectorFile)
+cMM, sMM, tMM, bMV = allStats(vpirMultiMatrixFile)
 
 # plot graph
 labels = ['1KB']

@@ -6,12 +6,15 @@ def allStats(file):
 
 def parseResults(file):
     # parse results
+    results = dict()
     client = []
     server = []
     total = []
     with open(file) as f:
         data = json.load(f)
         for dbResult in data['Results']:
+            if dbResult['DBLengthBits'] not in results:
+                results
             client.append(0)
             server.append(0)
             for blockResult in dbResult['Results']:
