@@ -1,7 +1,5 @@
-Name = "vpirSingleVectorKB"
+Name = "vpirSingleMatrix"
 Primitive = "vpir"
-NumRows = 0 # every NumRows != 0 indicate matrix
+NumRows = 0 # every NumRows != 1 indicate matrix
 BlockLength = 0
 ElementBitSize = 1
-DBLengthsBits = [1000.0, 10000.0, 100000.0]
-Repetitions = 3

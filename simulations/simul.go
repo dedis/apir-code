@@ -54,6 +54,7 @@ func main() {
 	// initialize experiment
 	experiment := &Experiment{Results: make([]*DBResult, 0)}
 
+	// range over all the DB lengths specified in the general simulation config
 	for _, dl := range s.DBLengthsBits {
 		// compute database data
 		dbLen := int(dl)
@@ -76,11 +77,16 @@ func main() {
 				numBlocks = dbLen / (elemBitSize * blockLen)
 			}
 			utils.IncreaseToNextSquare(&numBlocks)
+			// for really small db
+			if numBlocks == 0 {
+				numBlocks = 1
+			}
 			nCols = int(math.Sqrt(float64(numBlocks)))
 			nRows = nCols
+
 		}
 
-		// setup db
+		// setup db, this is the same for DPF or IT
 		dbPRG := utils.RandomPRG()
 		db := new(database.DB)
 		if s.BlockLength == constants.SingleBitBlockLength {
