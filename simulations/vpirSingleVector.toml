@@ -3,3 +3,5 @@ Primitive = "vpir"
 NumRows = 1
 BlockLength = 0
 ElementBitSize = 1
+DBLengthsBits = [1000.0, 10000.0, 100000.0]
+Repetitions = 3

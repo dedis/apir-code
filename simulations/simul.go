@@ -90,7 +90,7 @@ func main() {
 		}
 
 		// run experiment
-		results := retrieveBlocks(db, dbLen, nCols, s.Repetitions)
+		results := retrieveBlocksIT(db, dbLen, nCols, s.Repetitions)
 
 		// append result to general experiment
 		experiment.Results = append(experiment.Results, results...)
@@ -109,8 +109,59 @@ func main() {
 	log.Println("simulation terminated succesfully")
 }
 
-func retrieveBlocks(db *database.DB, dbLen int, numBlocks int, nRepeat int) []*DBResult {
-	log.Printf("retrieving blocks from DB with dbLen = %d bits", dbLen)
+func retrieveBlocksDPF(db *database.DB, dbLen int, numBlocks int, nRepeat int) []*DBResult {
+	log.Printf("retrieving blocks with DPF scheme from DB with dbLen = %d bits", dbLen)
+
+	prg := utils.RandomPRG()
+	c := client.NewDPF(prg, &db.Info)
+	s0 := server.NewDPF(db, 0)
+	s1 := server.NewDPF(db, 1)
+
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+
+	// run the experiment nRepeat times
+	results := make([]*DBResult, nRepeat)
+
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = &DBResult{
+			Results:      make([]*BlockResult, numBlocks),
+			DBLengthBits: dbLen,
+		}
+
+		totalTimer := monitor.NewMonitor()
+		for i := 0; i < numBlocks; i++ {
+			results[j].Results[i] = new(BlockResult)
+
+			m.Reset()
+			queries := c.Query(i, 2)
+			results[j].Results[i].Query = m.RecordAndReset()
+
+			a0 := s0.Answer(queries[0])
+			results[j].Results[i].Answer0 = m.RecordAndReset()
+
+			a1 := s1.Answer(queries[1])
+			results[j].Results[i].Answer1 = m.RecordAndReset()
+
+			answers := [][]field.Element{a0, a1}
+
+			m.Reset()
+			_, err := c.Reconstruct(answers)
+			results[j].Results[i].Reconstruct = m.RecordAndReset()
+			if err != nil {
+				panic(err)
+			}
+
+		}
+		results[j].Total = totalTimer.Record()
+	}
+
+	return results
+}
+
+func retrieveBlocksIT(db *database.DB, dbLen int, numBlocks int, nRepeat int) []*DBResult {
+	log.Printf("retrieving blocks with IT scheme from DB with dbLen = %d bits", dbLen)
 
 	prg := utils.RandomPRG()
 	c := client.NewIT(prg, &db.Info)
