@@ -1,8 +1,11 @@
 #!/usr/bin/python3
+import numpy as np
+import json
 
 def allStats(file):
     client, server, total = parseResults(file)
     return stats(client), stats(server), stats(total)
+
 
 def parseResults(file):
     # parse results
@@ -23,8 +26,9 @@ def parseResults(file):
             total.append(dbResult['Total'])
     return client, server, total
 
+
 def stats(data):
-      s = dict()
-      s['mean'] = np.mean(data)
-      s['std'] = np.std(data)
-      return s
+    s = dict()
+    s['mean'] = np.mean(data)
+    s['std'] = np.std(data)
+    return s
