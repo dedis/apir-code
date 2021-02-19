@@ -29,7 +29,7 @@ ax.bar(labels, client_means, width, yerr=client_std, label='Client')
 ax.bar(labels, server_means, width, yerr=server_std, bottom=client_means, label='Server')
 
 ax.set_ylabel('CPU time [ms]')
-ax.set_title('Database size')
+ax.set_title('Database size [B]')
 ax.legend()
 
 plt.show()

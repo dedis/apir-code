@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+import numpy as np
+import json
 import matplotlib as mpl
 
 def prepare_for_latex():
@@ -32,6 +34,7 @@ def allStats(file):
     client, server, total = parseResults(file)
     return stats(client), stats(server), stats(total)
 
+
 def parseResults(file):
     # parse results
     results = dict()
@@ -51,8 +54,9 @@ def parseResults(file):
             total.append(dbResult['Total'])
     return client, server, total
 
+
 def stats(data):
-      s = dict()
-      s['mean'] = np.mean(data)
-      s['std'] = np.std(data)
-      return s
+    s = dict()
+    s['mean'] = np.mean(data)
+    s['std'] = np.std(data)
+    return s
