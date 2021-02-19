@@ -35,3 +35,5 @@ data/sks
 
 # experiment results
 *.json
+
+__pycache__/
