@@ -2,6 +2,7 @@
 import numpy as np
 import json
 import matplotlib as mpl
+import math
 
 def allStats(file):
     s = dict()
@@ -48,7 +49,7 @@ def stats(data):
 def prepare_for_latex():
     # parameters for Latex
     fig_width = 3.39
-    golden_mean = (sqrt(5)-1.0)/2.0    # aesthetic ratio
+    golden_mean = (math.sqrt(5)-1.0)/2.0    # aesthetic ratio
     fig_height = fig_width*golden_mean # height in inches
     MAX_HEIGHT_INCHES = 8.0
     if fig_height > MAX_HEIGHT_INCHES:
@@ -56,8 +57,9 @@ def prepare_for_latex():
               "so will reduce to" + MAX_HEIGHT_INCHES + "inches.")
         fig_height = MAX_HEIGHT_INCHES
 
-    params = {'backend': 'pdf', # was ps
-              'text.latex.preamble': [r'\usepackage{gensymb}', r'\usepackage{sansmath}', r'\sansmath'],
+    params = {'backend': 'ps', 
+              #'text.latex.preamble': [r'\usepackage{gensymb}', r'\usepackage{sansmath}', r'\sansmath'],
+              #'text.latex.preamble': [r'\usepackage{mathptmx}'],
               'axes.labelsize': 10, 
               'axes.titlesize': 10,
               'font.size': 10, 
