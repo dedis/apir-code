@@ -37,3 +37,6 @@ data/sks
 *.json
 
 __pycache__/
+
+# ignore plot results
+*.png
