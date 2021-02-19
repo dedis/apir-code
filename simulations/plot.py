@@ -52,26 +52,33 @@ for dbSize in statsSV:
 
 width = 0.2 # the width of the bars: can also be len(x) sequence
 x = np.arange(len(labels))
+print(x)
 fig, ax = plt.subplots()
 
 # SV
-ax.bar(x - 2*width, cMeansSV, width, yerr=cStdSV, label='Client')
-ax.bar(x - 2*width, sMeansSV, width, yerr=sStdSV, bottom=cMeansSV, label='Server')
+ax.bar(x - 2*width + width/2, cMeansSV, width, yerr=cStdSV, label='Client SV')
+ax.bar(x - 2*width + width/2, sMeansSV, width, yerr=sStdSV, bottom=cMeansSV, label='Server SV')
 
 # SM
-ax.bar(x - width, cMeansSM, width, yerr=cStdSM, label='Client')
-ax.bar(x - width, sMeansSM, width, yerr=sStdSM, bottom=cMeansSM, label='Server')
+ax.bar(x - width + width/2, cMeansSM, width, yerr=cStdSM, label='Client SM')
+ax.bar(x - width + width/2, sMeansSM, width, yerr=sStdSM, bottom=cMeansSM, label='Server SM')
 
 # MV
-ax.bar(x, cMeansMV, width, yerr=cStdMV, label='Client')
-ax.bar(x, sMeansMV, width, yerr=sStdMV, bottom=cMeansMV, label='Server')
+ax.bar(x + width/2, cMeansMV, width, yerr=cStdMV, label='Client MV')
+ax.bar(x + width/2, sMeansMV, width, yerr=sStdMV, bottom=cMeansMV, label='Server MV')
 
 # MM
-ax.bar(x + width, cMeansMM, width, yerr=cStdMM, label='Client')
-ax.bar(x + width, sMeansMM, width, yerr=sStdMM, bottom=cMeansMM, label='Server')
+ax.bar(x + width + width/2, cMeansMM, width, yerr=cStdMM, label='Client MM')
+ax.bar(x + width + width/2, sMeansMM, width, yerr=sStdMM, bottom=cMeansMM, label='Server MM')
+
+# Totals
+#plt.errorbar(x_obs, y_obs, 0.1, fmt='.', color='black')
 
 ax.set_ylabel('CPU time [ms]')
 ax.set_title('Database size [bits]')
+ax.set_xticks(x)
+ax.set_xticklabels(labels)
 ax.legend()
 
+plt.yscale('log')
 plt.show()
