@@ -3,6 +3,48 @@ import numpy as np
 import json
 import matplotlib as mpl
 
+def allStats(file):
+    s = dict()
+    parsedResults = parseResults(file)
+    for dbSize, results in parsedResults.items():
+        s[dbSize] = {
+            "client": stats(results["client"]),  
+            "server": stats(results["server"]), 
+            "total": stats(results["total"]),
+        }
+    return s
+
+
+def parseResults(file):
+    # parse results
+    parsedResults = dict()
+    # read json file
+    with open(file) as f:
+        data = json.load(f)
+        # dbResults is a dict containing all the results for the
+        # given size of the db, expressed in bits
+        dbResults = data['Results']
+        # iterate the (size, results) pairs
+        for dbSize, dbResult in dbResults.items():
+            client = []
+            server = []
+            total = []
+            # iterate over the repetitions of the test
+            for repetition in dbResult:
+                # iterate over the results of a single block
+                for blockResult in repetition['Results']:
+                    client.append(blockResult['Query'] + blockResult['Reconstruct'])
+                    server.append((blockResult['Answer0'] + blockResult['Answer1'])/2)
+                total.append(repetition['Total'])
+            parsedResults[dbSize] = {"client": client, "server": server, "total": total}
+    return parsedResults
+
+def stats(data):
+    s = dict()
+    s['mean'] = np.mean(data)
+    s['std'] = np.std(data)
+    return s
+
 def prepare_for_latex():
     # parameters for Latex
     fig_width = 3.39
@@ -29,34 +71,3 @@ def prepare_for_latex():
               'font.family': 'serif'
               }
     mpl.rcParams.update(params)
-
-def allStats(file):
-    client, server, total = parseResults(file)
-    return stats(client), stats(server), stats(total)
-
-
-def parseResults(file):
-    # parse results
-    results = dict()
-    client = []
-    server = []
-    total = []
-    with open(file) as f:
-        data = json.load(f)
-        for dbResult in data['Results']:
-            if dbResult['DBLengthBits'] not in results:
-                results
-            client.append(0)
-            server.append(0)
-            for blockResult in dbResult['Results']:
-                client[-1] += blockResult['Query'] + blockResult['Reconstruct']
-                server[-1] += (blockResult['Answer0'] + blockResult['Answer1'])/2
-            total.append(dbResult['Total'])
-    return client, server, total
-
-
-def stats(data):
-    s = dict()
-    s['mean'] = np.mean(data)
-    s['std'] = np.std(data)
-    return s

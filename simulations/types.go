@@ -17,7 +17,6 @@ type Experiment struct {
 }
 
 const (
-	nRepeat = 10
-	oneMB   = 1048576 * 8
-	oneKB   = 1024 * 8
+	oneMB = 1048576 * 8
+	oneKB = 1024 * 8
 )

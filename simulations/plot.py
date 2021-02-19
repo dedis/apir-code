@@ -10,17 +10,24 @@ vpirSingleMatrixFile = resultFolder + "vpirSingleMatrix.json"
 vpirMultiVectorFile = resultFolder + "vpirMultiVector.json"
 vpirMultiMatrixFile = resultFolder + "vpirMultiMatrix.json"
 
-cSV, sSV, tSV, bSV = allStats(vpirSingleVectorFile)
-cSM, sSM, tSM, bSM = allStats(vpirSingleMatrixFile)
-cMV, sMV, tMV, bMV = allStats(vpirMultiVectorFile)
-cMM, sMM, tMM, bMV = allStats(vpirMultiMatrixFile)
+statsSV = allStats(vpirSingleVectorFile)
+statsSM = allStats(vpirSingleMatrixFile)
+statsMV = allStats(vpirMultiVectorFile)
+statsMM = allStats(vpirMultiMatrixFile)
 
 # plot graph
-labels = ['1KB']
-client_means = [clientStats['mean']]
-server_means = [serverStats['mean']]
-client_std = [clientStats['std']]
-server_std = [serverStats['std']]
+labels = []
+client_means = []
+client_std = []
+server_means =  []
+server_std = []
+for dbSize in statsSV:
+    labels.append(dbSize)
+    client_means.append(statsSV[dbSize]["client"]["mean"])
+    client_std.append(statsSV[dbSize]["client"]["std"])
+    server_means.append(statsSV[dbSize]["server"]["mean"])
+    server_std.append(statsSV[dbSize]["server"]["std"])
+
 width = 0.35 # the width of the bars: can also be len(x) sequence
 
 fig, ax = plt.subplots()
@@ -29,7 +36,7 @@ ax.bar(labels, client_means, width, yerr=client_std, label='Client')
 ax.bar(labels, server_means, width, yerr=server_std, bottom=client_means, label='Server')
 
 ax.set_ylabel('CPU time [ms]')
-ax.set_title('Database size [B]')
+ax.set_title('Database size [bits]')
 ax.legend()
 
 plt.show()
