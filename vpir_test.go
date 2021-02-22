@@ -17,13 +17,14 @@ import (
 )
 
 const (
-	oneMB = 1048576 * 8
-	oneKB = 1024 * 8
+	oneMB           = 1048576 * 8
+	oneKB           = 1024 * 8
+	testBlockLength = 16
 )
 
 func TestMultiBitVectorOneMbVPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := constants.BlockLength
+	blockLen := testBlockLength
 	elemBitSize := field.Bytes * 8
 	nRows := 1
 	nCols := dbLen / (elemBitSize * blockLen * nRows)
@@ -51,7 +52,7 @@ func TestSingleBitVectorOneKbVPIR(t *testing.T) {
 
 func TestMultiBitMatrixOneMbVPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := constants.BlockLength
+	blockLen := testBlockLength
 	elemBitSize := field.Bytes * 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
@@ -80,7 +81,7 @@ func TestSingleBitMatrixOneKbVPIR(t *testing.T) {
 
 func TestDPFMultiBitVectorVPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := constants.BlockLength
+	blockLen := testBlockLength
 	elemSize := 128
 	numBlocks := dbLen / (elemSize * blockLen)
 	nRows := 1
@@ -94,7 +95,7 @@ func TestDPFMultiBitVectorVPIR(t *testing.T) {
 
 func TestDPFMultiBitMatrixVPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := constants.BlockLength
+	blockLen := testBlockLength
 	elemSize := 128
 	numBlocks := dbLen / (elemSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))

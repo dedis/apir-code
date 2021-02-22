@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	BlockLength          = 16
+	//BlockLength          = 16
 	ChunkBytesLength     = 15
 	SingleBitBlockLength = 0
 	IDLengthBytes        = 45
