@@ -96,7 +96,7 @@ func main() {
 		}
 
 		// run experiment
-		log.Printf("retrieving blocks with DPF scheme from DB with dbLen = %d bits", dbLen)
+		log.Printf("retrieving blocks from DB with dbLen = %d bits", dbLen)
 		results := retrieveBlocksIT(db, nCols, s.Repetitions)
 		experiment.Results[dbLen] = results
 	}

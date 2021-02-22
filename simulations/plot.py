@@ -33,10 +33,10 @@ for dbSize in statsSV:
     sStdSV.append(statsSV[dbSize]["server"]["std"])
 
     # SM
-    cMeansSM.append(statsSM[dbSize]["client"]["mean"])
-    cStdSM.append(statsSM[dbSize]["client"]["std"])
-    sMeansSM.append(statsSM[dbSize]["server"]["mean"])
-    sStdSM.append(statsSM[dbSize]["server"]["std"])
+    # cMeansSM.append(statsSM[dbSize]["client"]["mean"])
+    # cStdSM.append(statsSM[dbSize]["client"]["std"])
+    # sMeansSM.append(statsSM[dbSize]["server"]["mean"])
+    # sStdSM.append(statsSM[dbSize]["server"]["std"])
 
     # MV
     cMeansMV.append(statsMV[dbSize]["client"]["mean"])
@@ -45,30 +45,34 @@ for dbSize in statsSV:
     sStdMV.append(statsMV[dbSize]["server"]["std"])
 
     # MM
-    cMeansMM.append(statsMM[dbSize]["client"]["mean"])
-    cStdMM.append(statsMM[dbSize]["client"]["std"])
-    sMeansMM.append(statsMM[dbSize]["server"]["mean"])
-    sStdMM.append(statsMM[dbSize]["server"]["std"])
+    # cMeansMM.append(statsMM[dbSize]["client"]["mean"])
+    # cStdMM.append(statsMM[dbSize]["client"]["std"])
+    # sMeansMM.append(statsMM[dbSize]["server"]["mean"])
+    # sStdMM.append(statsMM[dbSize]["server"]["std"])
 
-width = 0.2 # the width of the bars: can also be len(x) sequence
+width = 0.3 # the width of the bars: can also be len(x) sequence
 x = np.arange(len(labels))
 fig, ax = plt.subplots()
 
 # SV
-ax.bar(x - width*3/2, cMeansSV, width, yerr=cStdSV, label='Client SV')
-ax.bar(x - width*3/2, sMeansSV, width, yerr=sStdSV, bottom=cMeansSV, label='Server SV')
+# ax.bar(x - width*3/2, cMeansSV, width, yerr=cStdSV, label='Client SV')
+# ax.bar(x - width*3/2, sMeansSV, width, yerr=sStdSV, bottom=cMeansSV, label='Server SV')
+ax.bar(x - width/2, cMeansSV, width, yerr=cStdSV, label='Client SV', color = 'red')
+ax.bar(x - width/2, sMeansSV, width, yerr=sStdSV, bottom=cMeansSV, label='Server SV', color = 'blue')
 
 # MV
-ax.bar(x - width/2, cMeansMV, width, yerr=cStdMV, label='Client MV', hatch = '//')
-ax.bar(x - width/2, sMeansMV, width, yerr=sStdMV, bottom=cMeansMV, label='Server MV', hatch = '//')
+# ax.bar(x - width/2, cMeansMV, width, yerr=cStdMV, label='Client MV', hatch = '//')
+# ax.bar(x - width/2, sMeansMV, width, yerr=sStdMV, bottom=cMeansMV, label='Server MV', hatch = '//')
+ax.bar(x + width/2, cMeansMV, width, yerr=cStdMV, label='Client MV', hatch = '//', color = 'red')
+ax.bar(x + width/2, sMeansMV, width, yerr=sStdMV, bottom=cMeansMV, label='Server MV', hatch = '//', color = 'blue')
 
 # SM
-ax.bar(x + width/2, cMeansSM, width, yerr=cStdSM, label='Client SM')
-ax.bar(x + width/2, sMeansSM, width, yerr=sStdSM, bottom=cMeansSM, label='Server SM')
+# ax.bar(x + width/2, cMeansSM, width, yerr=cStdSM, label='Client SM')
+# ax.bar(x + width/2, sMeansSM, width, yerr=sStdSM, bottom=cMeansSM, label='Server SM')
 
 # MM
-ax.bar(x + width*3/2, cMeansMM, width, yerr=cStdMM, label='Client MM', hatch = '//')
-ax.bar(x + width*3/2, sMeansMM, width, yerr=sStdMM, bottom=cMeansMM, label='Server MM', hatch='//')
+# ax.bar(x + width*3/2, cMeansMM, width, yerr=cStdMM, label='Client MM', hatch = '//')
+# ax.bar(x + width*3/2, sMeansMM, width, yerr=sStdMM, bottom=cMeansMM, label='Server MM', hatch='//')
 
 # Totals
 #plt.errorbar(x_obs, y_obs, 0.1, fmt='.', color='black')
