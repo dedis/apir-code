@@ -39,9 +39,7 @@ func init() {
 	}
 	expandKeyAsm(&prfkeyL[0], &keyL[0])
 	expandKeyAsm(&prfkeyR[0], &keyR[0])
-	//if cpu.X86.HasSSE2 == false || cpu.X86.HasAVX2 == false {
-	//	panic("we need sse2 and avx")
-	//}
+
 	for i := 0; i < 63; i++ {
 		blockStack[i][0] = new(block)
 		blockStack[i][1] = new(block)
@@ -61,7 +59,6 @@ func convertBlock(out []field.Element, in []byte) {
 	for i := 0; i < len(out); i++ {
 		//prfL.Encrypt(in, in)
 		aes128MMO(&keyL[0], &buf[0], &in[0])
-		//out[i].SetBytes(buf[:])
 		out[i].SetFixedLengthBytes(buf)
 		in[0]++
 	}
@@ -230,7 +227,6 @@ func Eval(k DPFkey, x uint64, logN uint64, out []field.Element) {
 			t = tL
 		}
 	}
-	//fmt.Println("Debug", s, t)
 
 	convertBlock(out, s[:])
 
@@ -242,59 +238,6 @@ func Eval(k DPFkey, x uint64, logN uint64, out []field.Element) {
 			out[i].Neg(&out[i])
 		}
 	}
-}
-
-func evalFullRecursive(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, out [][]field.Element) {
-	if *index >= uint64(len(out)) {
-		return
-	}
-
-	if lvl == stop {
-		ss := blockStack[lvl][0]
-		*ss = *s
-		//aes128MMO(&keyL[0], &ss[0], &ss[0])
-		if len(out[*index]) != len(k.FinalCW) {
-			panic("dpf: len(out[*index]) != len(k.FinalCW)")
-		}
-
-		convertBlock(out[*index], ss[:])
-
-		for j := 0; j < len(k.FinalCW); j++ {
-			if t != 0 {
-				out[*index][j].Add(&out[*index][j], &k.FinalCW[j])
-			}
-			if k.ServerIdx != 0 {
-				out[*index][j].Neg(&out[*index][j])
-			}
-		}
-
-		*index += 1
-		return
-	}
-	sL := blockStack[lvl][0]
-	sR := blockStack[lvl][1]
-	tL, tR := prg(&s[0], &sL[0], &sR[0])
-	if t != 0 {
-		sCW := k.Bytes[17+lvl*18 : 17+lvl*18+16]
-		tLCW := k.Bytes[17+lvl*18+16]
-		tRCW := k.Bytes[17+lvl*18+17]
-		xor16(&sL[0], &sL[0], &sCW[0])
-		xor16(&sR[0], &sR[0], &sCW[0])
-		tL ^= tLCW
-		tR ^= tRCW
-	}
-	evalFullRecursive(k, sL, tL, lvl+1, stop, index, out)
-	evalFullRecursive(k, sR, tR, lvl+1, stop, index, out)
-}
-
-func EvalFull(key DPFkey, logN uint64, out [][]field.Element) {
-	s := new(block)
-	copy(s[:], key.Bytes[:16])
-	t := key.Bytes[16]
-	stop := logN
-
-	index := uint64(0)
-	evalFullRecursive(key, s, t, 0, stop, &index, out)
 }
 
 func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint64, index *uint64, blockLength int, bs [][2]*block, out []field.Element) {
