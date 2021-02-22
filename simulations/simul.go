@@ -96,8 +96,15 @@ func main() {
 		}
 
 		// run experiment
-		log.Printf("retrieving blocks from DB with dbLen = %d bits", dbLen)
-		results := retrieveBlocksIT(db, nCols, s.Repetitions)
+		var results []*DBResult
+		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
+		if s.Primitive == "vpir-it" {
+			results = retrieveBlocksIT(db, nCols, s.Repetitions)
+		} else if s.Primitive == "vpir-dpf" {
+			results = retrieveBlocksDPF(db, nCols, s.Repetitions)
+		} else {
+			panic("not yet implemented")
+		}
 		experiment.Results[dbLen] = results
 	}
 
@@ -211,5 +218,5 @@ func retrieveBlocksIT(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
 }
 
 func (s *Simulation) validSimulation() bool {
-	return s.Primitive == "vpir" || s.Primitive == "pir"
+	return s.Primitive == "vpir-it" || s.Primitive == "vpir-dpf" || s.Primitive == "pir"
 }

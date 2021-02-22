@@ -1,5 +1,5 @@
 Name = "vpirSingleVector"
-Primitive = "vpir"
+Primitive = "vpir-it"
 NumRows = 1
 BlockLength = 0
 ElementBitSize = 1

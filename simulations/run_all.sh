@@ -23,10 +23,12 @@ function clean() {
 mkdir -p results
 
 # run experiments
-make -s run_simul config=vpirSingleVector.toml
-make -s run_simul config=vpirMultiVector.toml
+#make -s run_simul config=vpirSingleVector.toml
+#make -s run_simul config=vpirMultiVector.toml
+make -s run_simul config=vpirMultiVectorBlockLength16.toml
 #make -s run_simul config=vpirSingleMatrix.toml
-#make -s run_simul config=vpirMultiMatrix.toml
+make -s run_simul config=vpirMultiMatrix.toml
+make -s run_simul config=vpirMultiVectorBlockLength16DPF.toml
 
 # clean if we finish
 clean

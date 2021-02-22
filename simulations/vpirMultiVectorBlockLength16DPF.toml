@@ -1,0 +1,5 @@
+Name = "vpirMultiVectorBlockLength16DPF"
+Primitive = "vpir-dpf"
+NumRows = 1
+BlockLength = 16
+ElementBitSize = 128

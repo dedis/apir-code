@@ -1,5 +1,5 @@
 Name = "vpirMultiMatrix"
-Primitive = "vpir"
+Primitive = "vpir-it"
 NumRows = 0 # every NumRows != 1 indicate matrix
 BlockLength = 16
 ElementBitSize = 128

@@ -1,5 +1,5 @@
-Name = "vpirMultiVector"
+Name = "vpirMultiVectorBlockLength16"
 Primitive = "vpir-it"
 NumRows = 1
-BlockLength = 1
+BlockLength = 16
 ElementBitSize = 128
