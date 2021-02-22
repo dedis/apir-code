@@ -60,7 +60,7 @@ func convertBlock(out []field.Element, in []byte) {
 		//prfL.Encrypt(in, in)
 		aes128MMO(&keyL[0], &buf[0], &in[0])
 		out[i].SetFixedLengthBytes(buf)
-		in[0]++
+		in[i/256]++
 	}
 }
 
@@ -264,7 +264,8 @@ func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint6
 			//prfL.Encrypt(in, in)
 			aes128MMO(&keyL[0], &buf[0], &ss[0])
 			out[startBlock+j].SetFixedLengthBytes(buf)
-			ss[0]++
+			//ss[0]++
+			ss[j/uint64(256)]++
 
 			if t != 0 {
 				out[startBlock+j].Add(&out[startBlock+j], &k.FinalCW[j])
