@@ -2,7 +2,13 @@ package database
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"fmt"
 	"io"
+
+	"github.com/si-co/vpir-code/lib/field"
+
+	"gitlab.com/NebulousLabs/merkletree"
 )
 
 type Merkle struct {
@@ -15,7 +21,13 @@ type Merkle struct {
 func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Merkle {
 	db := CreateRandomMultiBitBytes(rnd, dbLen, numRows, blockLen)
 	entriesFlatten := flatten(db.Entries)
-	r := bytes.NewReader(byteData)
+	fmt.Println(entriesFlatten)
+	r := bytes.NewReader(entriesFlatten)
+
+	for i, _ := range entriesFlatten {
+		merkleRoot, proof, numLeaves, _ := merkletree.BuildReaderProof(r, sha256.New(), blockLen*field.Bytes, uint64(i))
+		fmt.Println(merkleRoot, proof, numLeaves)
+	}
 
 	return nil
 }
