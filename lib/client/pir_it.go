@@ -67,19 +67,7 @@ func (c *PIR) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 
 // Reconstruct reconstruct the entry of the database from answers
 func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
-	sum := make([][]byte, c.dbInfo.NumRows)
-
-	// sum answers as vectors in GF(2)
-	for i := 0; i < c.dbInfo.NumRows; i++ {
-		sum[i] = make([]byte, c.dbInfo.BlockSize)
-		for b := 0; b < c.dbInfo.BlockSize; b++ {
-			for k := range answers {
-				sum[i][b] ^= answers[k][i*c.dbInfo.BlockSize+b]
-			}
-		}
-	}
-
-	return sum[c.state.ix], nil
+	return reconstructPIR(answers, c.dbInfo, c.state)
 }
 
 func (c *PIR) secretShare(numServers int) ([][]byte, error) {

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -139,6 +140,21 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 	}
 
 	return sum[st.ix][:len(sum[st.ix])-1], nil
+}
+
+func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]byte, error) {
+	sum := make([][]byte, dbInfo.NumRows)
+
+	// sum answers as vectors in GF(2)
+	bs := dbInfo.BlockSize
+	for i := 0; i < dbInfo.NumRows; i++ {
+		sum[i] = make([]byte, dbInfo.BlockSize)
+		for k := range answers {
+			fastxor.Bytes(sum[i], sum[i], answers[k][i*bs:bs*(i+1)])
+		}
+	}
+
+	return sum[state.ix], nil
 }
 
 // return true if the query inputs are invalid for IT schemes
