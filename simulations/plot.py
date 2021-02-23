@@ -7,6 +7,13 @@ from utils import *
 resultFolder = "results/"
 width = 0.3
 
+# colors and constants
+colors = ['#E2DC27', '#071784', '#077C0F', '#BC220A']
+devcolors = ['#FFFDCD', '#CDE1FF', '#D4FFE3', '#FFDFD1']
+markers = ['d', 's', 'x', '.']
+linestyles = ['--', ':', '-', '-.']
+patterns = ['', '.', '//']
+
 
 def plotVectorMatrixDPF():
     vectorFile = resultFolder + "vpirMultiVectorBlockLength16.json"
@@ -121,24 +128,38 @@ def plotSingleMulti():
     #plt.show()
 
 
-def plot_vpir_benchmarks():
-    vpirSingleVectorFile = resultFolder + "vpirSingleVector.json"
-    vectorFile = resultFolder + "vpirMultiVector.json"
-    vectorBloackFile = resultFolder + "vpirMultiVectorBlockLength16.json"
+def plotVpirBenchmarks():
+    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlockLength16.json"]
+    labels = ["Single-bit", "Multi-bit", "Multi-bit Blocks"]
 
+    i = 0
+    for scheme in schemes:
+        stats = allStats(resultFolder + scheme)
+        Xs, Ys, Yerrup, Yerrdown = [], [], [], []
+        for dbSize in sorted(stats.keys()):
+            Xs.append(dbSize)
+            Ys.append(stats[dbSize]["client"]["mean"] + stats[dbSize]["server"]["mean"])
+            std = stats[dbSize]["client"]["std"] + stats[dbSize]["server"]["std"]
+            Yerrup.append(Ys[-1] + std)
+            Yerrdown.append(Ys[-1] - std)
 
+        print(Xs)
+        print(Ys)
+        plt.loglog(Xs, Ys, color=colors[i], label=labels[i], marker=markers[i], linestyle=linestyles[i])
+        plt.fill_between(Xs, Yerrdown, Yerrup, facecolor=devcolors[i])
+        i += 1
 
-    fig, ax = plt.subplots()
-    ax.set_ylabel('CPU time [ms]')
-    ax.set_title('Database size [bits]')
-    ax.legend()
+    plt.legend(loc='upper left', fontsize=12)
+    plt.ylabel('CPU time [ms]')
+    plt.xlabel('Database size [bits]')
+    plt.axis()
     # plt.savefig('figures/multi_benchmarks.eps', format='eps', dpi=300)
     plt.show()
 
 
 if __name__ == "__main__":
-    plotSingleMulti()
+    # plotSingleMulti()
     # plotVectorMatrixDPF()
-    # plot_vpir_benchmarks()
+    plotVpirBenchmarks()
 
 

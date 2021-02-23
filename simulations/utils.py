@@ -4,6 +4,7 @@ import json
 import matplotlib as mpl
 import math
 
+
 def allStats(file):
     s = dict()
     parsedResults = parseResults(file)
@@ -37,14 +38,16 @@ def parseResults(file):
                     client.append(blockResult['Query'] + blockResult['Reconstruct'])
                     server.append((blockResult['Answer0'] + blockResult['Answer1'])/2)
                 total.append(repetition['Total'])
-            parsedResults[dbSize] = {"client": client, "server": server, "total": total}
+            parsedResults[int(dbSize)] = {"client": client, "server": server, "total": total}
     return parsedResults
+
 
 def stats(data):
     s = dict()
     s['mean'] = np.mean(data)
     s['std'] = np.std(data)
     return s
+
 
 def prepare_for_latex():
     # parameters for Latex
