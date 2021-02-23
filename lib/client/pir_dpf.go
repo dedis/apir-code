@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/bits"
 
+	"github.com/lukechampine/fastxor"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 
@@ -64,7 +65,7 @@ func (c *PIRdpf) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
-// ReconstructBytes..
+// ReconstructBytes will never be implemented for PIR
 func (c *PIRdpf) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	panic("not yet implemented")
 	return nil, nil
@@ -75,12 +76,11 @@ func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 	sum := make([][]byte, c.dbInfo.NumRows)
 
 	// sum answers as vectors in GF(2)
+	bs := c.dbInfo.BlockSize
 	for i := 0; i < c.dbInfo.NumRows; i++ {
 		sum[i] = make([]byte, c.dbInfo.BlockSize)
-		for b := 0; b < c.dbInfo.BlockSize; b++ {
-			for k := range answers {
-				sum[i][b] ^= answers[k][i*c.dbInfo.BlockSize+b]
-			}
+		for k := range answers {
+			fastxor.Bytes(sum[i], sum[i], answers[k][i*bs:bs*(i+1)])
 		}
 	}
 

@@ -59,11 +59,13 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 	return vectors
 }
 
+// ReconReconstructBytes will never the implemented for PIR
 func (c *PIR) ReconstructBytes(a [][]byte) ([]field.Element, error) {
 	panic("not yet implemented")
 	return nil, nil
 }
 
+// Reconstruct reconstruct the entry of the database from answers
 func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
 	sum := make([][]byte, c.dbInfo.NumRows)
 
