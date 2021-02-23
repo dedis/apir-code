@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"math/rand"
 	"path"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/si-co/vpir-code/lib/client"
@@ -18,9 +20,15 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-type Simulation struct {
-	DBLengthsBits  []float64
+const generalConfigFile = "simul.toml"
+
+type generalParam struct {
+	DBBitLengths   []int
 	Repetitions    int
+	BitsToRetrieve int
+}
+
+type individualParam struct {
 	Name           string
 	Primitive      string
 	NumRows        int
@@ -28,22 +36,35 @@ type Simulation struct {
 	ElementBitSize int
 }
 
+type Simulation struct {
+	generalParam
+	individualParam
+}
+
 func main() {
-	configFile := flag.String("config", "", "config file for simulation")
+	indivConfigFile := flag.String("config", "", "config file for simulation")
 	flag.Parse()
 
 	// make sure cfg file is specified
-	if *configFile == "" {
+	if *indivConfigFile == "" {
 		panic("simulation's config file not provided")
 	}
-	log.Printf("config file %s", *configFile)
+	log.Printf("config file %s", *indivConfigFile)
 
-	// load simulation's config file
-	s := new(Simulation)
-	_, err := toml.DecodeFile(*configFile, s)
+	// load simulation's config files
+	var err error
+	genConfig := new(generalParam)
+	_, err = toml.DecodeFile(generalConfigFile, genConfig)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+	indConfig := new(individualParam)
+	_, err = toml.DecodeFile(*indivConfigFile, indConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	s := &Simulation{generalParam: *genConfig, individualParam: *indConfig}
+
 	log.Printf("running simulation %#v\n", s)
 
 	// check simulation
@@ -55,36 +76,31 @@ func main() {
 	experiment := &Experiment{Results: make(map[int][]*DBResult, 0)}
 
 	// range over all the DB lengths specified in the general simulation config
-	for _, dl := range s.DBLengthsBits {
+	for _, dl := range s.DBBitLengths {
 		// compute database data
-		dbLen := int(dl)
+		dbLen := dl
 		blockLen := s.BlockLength
 		elemBitSize := s.ElementBitSize
 		nRows := s.NumRows
+
+		var numBlocks int
 		var nCols int
-		// vector case
-		if nRows == 1 {
-			if s.BlockLength == constants.SingleBitBlockLength {
-				nCols = dbLen
-			} else {
-				nCols = dbLen / (elemBitSize * blockLen * nRows)
-			}
+		// Find the total number of blocks in the db
+		if s.BlockLength == constants.SingleBitBlockLength {
+			numBlocks = dbLen
 		} else {
-			var numBlocks int
-			if s.BlockLength == constants.SingleBitBlockLength {
-				numBlocks = dbLen
-			} else {
-				numBlocks = dbLen / (elemBitSize * blockLen)
-			}
-			utils.IncreaseToNextSquare(&numBlocks)
+			numBlocks = dbLen / (elemBitSize * blockLen)
 			// for really small db
 			if numBlocks == 0 {
 				numBlocks = 1
 			}
-			nCols = int(math.Sqrt(float64(numBlocks)))
-			nRows = nCols
-
 		}
+		// rebalanced db
+		if nRows != 1 {
+			utils.IncreaseToNextSquare(&numBlocks)
+			nRows = int(math.Sqrt(float64(numBlocks)))
+		}
+		nCols = numBlocks / nRows
 
 		// setup db, this is the same for DPF or IT
 		dbPRG := utils.RandomPRG()
@@ -99,7 +115,7 @@ func main() {
 		var results []*DBResult
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		if s.Primitive == "vpir-it" {
-			results = retrieveBlocksIT(db, nCols, s.Repetitions)
+			results = retrieveBlocksIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "vpir-dpf" {
 			results = retrieveBlocksDPF(db, nCols, s.Repetitions)
 		} else {
@@ -118,7 +134,7 @@ func main() {
 		panic(err)
 	}
 
-	log.Println("simulation terminated succesfully")
+	log.Println("simulation terminated successfully")
 }
 
 func retrieveBlocksDPF(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
@@ -169,11 +185,21 @@ func retrieveBlocksDPF(db *database.DB, numBlocks int, nRepeat int) []*DBResult 
 	return results
 }
 
-func retrieveBlocksIT(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
+func retrieveBlocksIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*DBResult {
 	prg := utils.RandomPRG()
 	c := client.NewIT(prg, &db.Info)
 	s0 := server.NewIT(db)
 	s1 := server.NewIT(db)
+
+	var numBlocksToRetrieve int
+	if db.BlockSize == constants.SingleBitBlockLength {
+		numBlocksToRetrieve = numBitsToRetrieve
+	} else {
+		numBlocksToRetrieve = numBitsToRetrieve / (db.BlockSize * elemBitSize)
+	}
+
+	// seed non-cryptographic randomness
+	rand.Seed(time.Now().UnixNano())
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
@@ -181,18 +207,20 @@ func retrieveBlocksIT(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
 	// run the experiment nRepeat times
 	results := make([]*DBResult, nRepeat)
 
+	var startIndex int
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = &DBResult{
-			Results: make([]*BlockResult, numBlocks),
+			Results: make([]*BlockResult, numBlocksToRetrieve),
 		}
-
+		// pick a random block index to start the retrieval
+		startIndex = rand.Intn(db.NumRows*db.NumColumns - numBlocksToRetrieve)
 		totalTimer := monitor.NewMonitor()
-		for i := 0; i < numBlocks; i++ {
+		for i := 0; i < numBlocksToRetrieve; i++ {
 			results[j].Results[i] = new(BlockResult)
 
 			m.Reset()
-			queries := c.Query(i, 2)
+			queries := c.Query(startIndex+i, 2)
 			results[j].Results[i].Query = m.RecordAndReset()
 
 			a0 := s0.Answer(queries[0])
@@ -207,9 +235,8 @@ func retrieveBlocksIT(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
 			_, err := c.Reconstruct(answers)
 			results[j].Results[i].Reconstruct = m.RecordAndReset()
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
-
 		}
 		results[j].Total = totalTimer.Record()
 	}

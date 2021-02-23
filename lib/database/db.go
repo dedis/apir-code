@@ -41,7 +41,7 @@ func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
 func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 	var err error
 	entries := make([][]field.Element, numRows)
-	numColumns := dbLen / (128 * numRows * blockLen)
+	numColumns := dbLen / (8 * field.Bytes * numRows * blockLen)
 	// handle very small db
 	if numColumns == 0 {
 		numColumns = 1

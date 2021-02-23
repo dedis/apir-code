@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +6,7 @@ from utils import *
 
 resultFolder = "results/"
 width = 0.3
+
 
 def plotVectorMatrixDPF():
     vectorFile = resultFolder + "vpirMultiVectorBlockLength16.json"
@@ -68,6 +69,7 @@ def plotVectorMatrixDPF():
     plt.savefig('figures/vector_matrix_dpf.png')
     #plt.show()
 
+
 def plotSingleMulti():
     vpirSingleVectorFile = resultFolder + "vpirSingleVector.json"
     vpirMultiVectorFile = resultFolder + "vpirMultiVector.json"
@@ -119,5 +121,24 @@ def plotSingleMulti():
     #plt.show()
 
 
-#plotSingleMulti()
-plotVectorMatrixDPF()
+def plot_vpir_benchmarks():
+    vpirSingleVectorFile = resultFolder + "vpirSingleVector.json"
+    vectorFile = resultFolder + "vpirMultiVector.json"
+    vectorBloackFile = resultFolder + "vpirMultiVectorBlockLength16.json"
+
+
+
+    fig, ax = plt.subplots()
+    ax.set_ylabel('CPU time [ms]')
+    ax.set_title('Database size [bits]')
+    ax.legend()
+    # plt.savefig('figures/multi_benchmarks.eps', format='eps', dpi=300)
+    plt.show()
+
+
+if __name__ == "__main__":
+    plotSingleMulti()
+    # plotVectorMatrixDPF()
+    # plot_vpir_benchmarks()
+
+
