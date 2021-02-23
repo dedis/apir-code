@@ -28,6 +28,9 @@ func CreateZeroMultiBitBytes(numRows, numColumns, blockSize int) *Bytes {
 
 func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	entries := make([][]byte, numRows)
+	// TODO: clarify what this 128 representes. 16 * 8, so the bits in a
+	// single field element?
+	// Then this should be explained better in the code
 	numColumns := field.Bytes * dbLen / (128 * numRows * blockLen)
 	for i := 0; i < numRows; i++ {
 		e := make([]byte, numColumns*blockLen)
