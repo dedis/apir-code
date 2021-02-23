@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 
+	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -80,33 +81,28 @@ func (c *PIR) secretShare(numServers int) ([][]byte, error) {
 		vectors[k] = make([]byte, vectorLen)
 	}
 
-	// Get random elements for all numServers-1 vectors
-	// TODO: these are actually too many bits, we need
-	// 1/8 of them and extract the random bits from
-	// the bytes
+	// Get random elements for all numServers-1 vectors.
+	// This is faster than extracting single bits
 	rand := make([]byte, (numServers-1)*vectorLen)
 	if _, err := c.rnd.Read(rand); err != nil {
 		return nil, err
 	}
 
 	// perform secret sharing
+	sum := make([]byte, c.dbInfo.NumColumns)
 	for j := 0; j < c.dbInfo.NumColumns; j++ {
 		// assign k - 1 random bits for this column
-		sum := byte(0)
+		sum[j] = byte(0)
 		for k := 0; k < numServers-1; k++ {
-			vectors[k][j] = rand[j+k] % 2
-			sum ^= rand[j+k] % 2
+			vectors[k][j] = rand[j+k] & 1
+			sum[j] ^= vectors[k][j]
 		}
-
-		// vectors[numerServers-1][j] is initialized at zero
-		vectors[numServers-1][j] ^= sum
-		// set alpha vector at the block we want to retrieve
 		if j == c.state.iy {
-			// we have to add up 1 in this case, as the value
-			// is initialized at zero
 			vectors[numServers-1][j] ^= byte(1)
 		}
 	}
+
+	fastxor.Bytes(vectors[numServers-1], vectors[numServers-1], sum)
 
 	return vectors, nil
 }

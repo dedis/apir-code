@@ -59,6 +59,8 @@ func (c *PIRdpf) Query(index, numServers int) []dpf.DPFkey {
 		ix: index / c.dbInfo.NumColumns,
 		iy: index % c.dbInfo.NumColumns,
 	}
+
+	// compute dpf keys
 	key0, key1 := dpf.Gen(uint64(c.state.iy), uint64(bits.Len(uint(c.dbInfo.NumColumns)-1)))
 
 	return []dpf.DPFkey{key0, key1}
