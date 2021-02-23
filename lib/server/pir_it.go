@@ -10,7 +10,7 @@ import (
 // Both vector and matrix (rebalanced) representations of the database are
 // handled by this server, via a boolean variable
 
-// PIR is the server for the information theoretic single-bit scheme
+// PIR is the server for the information theoretic classical PIR scheme
 type PIR struct {
 	db *database.Bytes
 }
@@ -25,27 +25,29 @@ func NewPIR(db *database.Bytes) *PIR {
 	return &PIR{db: db}
 }
 
+// DBInfo returns database info
 func (s *PIR) DBInfo() *database.Info {
 	return &s.db.Info
 }
 
+// AnswerBytes computes the answer for the given query encoded in bytes
 func (s *PIR) AnswerBytes(q []byte) ([]byte, error) {
-	panic("not yet implemented")
-	return nil, nil
+	return s.Answer(q), nil
 }
 
 // Answer computes the answer for the given query
 func (s *PIR) Answer(q []byte) []byte {
-	m := make([]byte, s.db.NumRows*s.db.BlockSize)
+	bs := s.db.BlockSize
+	m := make([]byte, s.db.NumRows*bs)
 	// we have to traverse column by column
 	for i := 0; i < s.db.NumRows; i++ {
-		sum := make([]byte, s.db.BlockSize)
+		sum := make([]byte, bs)
 		for j := 0; j < s.db.NumColumns; j++ {
 			if q[j] == byte(1) {
-				fastxor.Bytes(sum, sum, s.db.Entries[i][j*s.db.BlockSize:j*s.db.BlockSize+s.db.BlockSize])
+				fastxor.Bytes(sum, sum, s.db.Entries[i][j*bs:bs*(j+1)])
 			}
 		}
-		copy(m[i*(s.db.BlockSize):(i+1)*(s.db.BlockSize)], sum)
+		copy(m[i*bs:(i+1)*bs], sum)
 	}
 
 	return m
