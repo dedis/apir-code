@@ -3,7 +3,6 @@ package database
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"io"
 	"log"
 
@@ -12,7 +11,9 @@ import (
 )
 
 type Merkle struct {
-	DB          *Bytes
+	Entries [][]byte
+	Info
+
 	Root        []byte
 	ProofLength int
 }
@@ -32,11 +33,12 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 		log.Fatalf("impossible to create Merkle tree: %v", err)
 	}
 
-	// getch the root hash of the tree
-	//root := tree.Root()
+	// get the root hash of the tree
+	root := tree.Root()
 
 	// generate and (gob) encode all the proofs
 	proofs := make([][]byte, len(blocks))
+	proofLen := 0
 	for i, b := range blocks {
 		var buff bytes.Buffer
 		enc := gob.NewEncoder(&buff)
@@ -48,47 +50,31 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 			log.Fatal("encode:", err)
 		}
 		// the encoding of proofs should be fixed length and after some
-		// tests it seems that gob encoding respect that
+		// tests it seems that gob encoding respect this
 		proofs[i] = buff.Bytes()
-		fmt.Println(len(proofs[i]))
-
+		proofLen = len(proofs[i])
 	}
 
 	// enlarge the database, i.e., add the proof for every block
+	enEntries := make([][]byte, len(db.Entries))
+	p := 0
+	bl := blockLenBytes
+	for i := range db.Entries {
+		enEntries[i] = make([]byte, 0)
+		for j := 0; j < len(db.Entries[0])-bl; j += bl {
+			enEntries[i] = append(enEntries[i], append(db.Entries[i][:j+bl], proofs[p]...)...)
+			p++
+		}
+	}
 
-	//// hash function for the Merkle tree
-	//h := sha256.New()
+	m := &Merkle{
+		Entries:     enEntries,
+		Info:        Info{},
+		Root:        root,
+		ProofLength: proofLen,
+	}
 
-	//// compute the proof for each block
-	//var mr []byte
-	//proofs := make([][]byte, len(entriesFlatten))
-	//for i, _ := range entriesFlatten {
-	//r := bytes.NewReader(entriesFlatten)
-	//merkleRoot, proof, _, err := merkletree.BuildReaderProof(r, h, segmentSize, uint64(i))
-	//if err != nil {
-	//panic(err)
-	//}
-	//fmt.Println(proof)
-	//proofs[i] = flatten(proof)
-	//mr = merkleRoot // always the same
-	//}
-
-	//m := &Merkle{
-	//DB:         db,
-	//MerkleRoot: mr,
-	//}
-
-	//// enlarge the db by adding a proof to each block
-	//enlargedEntries := make([][]byte, 0) // TODO: specify length
-	//for i := range db.Entries {
-	//for j := 0; j < db.Entries[0]; j += segmentSize {
-	//a = append(a[:i], append(make([]T, j), a[i:]...)...)
-	//append(enlargedEntries[i][:j], append(proofs[i*len(db.Entries[0])+j], enlar
-	//}
-	//}
-
-	//return m
-	return nil
+	return m
 }
 
 func entriesToBlocks(e [][]byte, blockLength int) [][]byte {
