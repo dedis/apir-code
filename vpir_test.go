@@ -134,7 +134,7 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 		}
 
 	}
-	fmt.Printf("Total time %s: %.2fms\n", testName, totalTimer.Record())
+	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
 }
 
 func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
@@ -156,5 +156,5 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
 	}
 
-	fmt.Printf("Total time %s: %.1fms\n", testName, totalTimer.Record())
+	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 }

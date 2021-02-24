@@ -1,19 +1,18 @@
 package main
 
-type BlockResult struct {
+type Block struct {
 	Query       float64
-	Answer0     float64
-	Answer1     float64
+	Answers     []float64
 	Reconstruct float64
 }
 
-type DBResult struct {
-	Results []*BlockResult
-	Total   float64
+type Chunk struct {
+	CPU            []*Block
+	Bandwidth      []*Block
 }
 
 type Experiment struct {
-	Results map[int][]*DBResult
+	Results map[int][]*Chunk
 }
 
 const (

@@ -40,3 +40,4 @@ __pycache__/
 
 # ignore plot results
 *.png
+*.eps

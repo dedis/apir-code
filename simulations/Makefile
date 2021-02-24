@@ -7,4 +7,4 @@ lint:
 	golint ./...
 
 run_simul: 
-	go run . -config=$(config)
+	env GOGC=10000 go run . -config=$(config)

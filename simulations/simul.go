@@ -14,7 +14,6 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -73,7 +72,7 @@ func main() {
 	}
 
 	// initialize experiment
-	experiment := &Experiment{Results: make(map[int][]*DBResult, 0)}
+	experiment := &Experiment{Results: make(map[int][]*Chunk, 0)}
 
 	// range over all the DB lengths specified in the general simulation config
 	for _, dl := range s.DBBitLengths {
@@ -84,7 +83,6 @@ func main() {
 		nRows := s.NumRows
 
 		var numBlocks int
-		var nCols int
 		// Find the total number of blocks in the db
 		if s.BlockLength == constants.SingleBitBlockLength {
 			numBlocks = dbLen
@@ -100,7 +98,6 @@ func main() {
 			utils.IncreaseToNextSquare(&numBlocks)
 			nRows = int(math.Sqrt(float64(numBlocks)))
 		}
-		nCols = numBlocks / nRows
 
 		// setup db, this is the same for DPF or IT
 		dbPRG := utils.RandomPRG()
@@ -112,12 +109,12 @@ func main() {
 		}
 
 		// run experiment
-		var results []*DBResult
+		var results []*Chunk
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		if s.Primitive == "vpir-it" {
-			results = retrieveBlocksIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			results = retrieveIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "vpir-dpf" {
-			results = retrieveBlocksDPF(db, nCols, s.Repetitions)
+			results = retrieveDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else {
 			panic("not yet implemented")
 		}
@@ -137,59 +134,10 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
-func retrieveBlocksDPF(db *database.DB, numBlocks int, nRepeat int) []*DBResult {
+func retrieveIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
-	c := client.NewDPF(prg, &db.Info)
-	s0 := server.NewDPF(db)
-	s1 := server.NewDPF(db)
-
-	// create main monitor for CPU time
-	m := monitor.NewMonitor()
-
-	// run the experiment nRepeat times
-	results := make([]*DBResult, nRepeat)
-
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = &DBResult{
-			Results: make([]*BlockResult, numBlocks),
-		}
-
-		totalTimer := monitor.NewMonitor()
-		for i := 0; i < numBlocks; i++ {
-			results[j].Results[i] = new(BlockResult)
-
-			m.Reset()
-			queries := c.Query(i, 2)
-			results[j].Results[i].Query = m.RecordAndReset()
-
-			a0 := s0.Answer(queries[0])
-			results[j].Results[i].Answer0 = m.RecordAndReset()
-
-			a1 := s1.Answer(queries[1])
-			results[j].Results[i].Answer1 = m.RecordAndReset()
-
-			answers := [][]field.Element{a0, a1}
-
-			m.Reset()
-			_, err := c.Reconstruct(answers)
-			results[j].Results[i].Reconstruct = m.RecordAndReset()
-			if err != nil {
-				panic(err)
-			}
-
-		}
-		results[j].Total = totalTimer.Record()
-	}
-
-	return results
-}
-
-func retrieveBlocksIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*DBResult {
-	prg := utils.RandomPRG()
-	c := client.NewIT(prg, &db.Info)
-	s0 := server.NewIT(db)
-	s1 := server.NewIT(db)
+	cl := client.NewIT(prg, &db.Info)
+	servers := makeITServers(db)
 
 	var numBlocksToRetrieve int
 	if db.BlockSize == constants.SingleBitBlockLength {
@@ -198,6 +146,25 @@ func retrieveBlocksIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, n
 		numBlocksToRetrieve = numBitsToRetrieve / (db.BlockSize * elemBitSize)
 	}
 
+	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
+}
+
+func retrieveDPF(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+	prg := utils.RandomPRG()
+	cl := client.NewDPF(prg, &db.Info)
+	servers := makeDPFServers(db)
+
+	var numBlocksToRetrieve int
+	if db.BlockSize == constants.SingleBitBlockLength {
+		numBlocksToRetrieve = numBitsToRetrieve
+	} else {
+		numBlocksToRetrieve = numBitsToRetrieve / (db.BlockSize * elemBitSize)
+	}
+
+	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
+}
+
+func retrieveBlocks(c client.Client, ss []server.Server, totalBlocks, retrieveBlocks, nRepeat int) []*Chunk {
 	// seed non-cryptographic randomness
 	rand.Seed(time.Now().UnixNano())
 
@@ -205,45 +172,181 @@ func retrieveBlocksIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, n
 	m := monitor.NewMonitor()
 
 	// run the experiment nRepeat times
-	results := make([]*DBResult, nRepeat)
+	results := make([]*Chunk, nRepeat)
 
 	var startIndex int
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = &DBResult{
-			Results: make([]*BlockResult, numBlocksToRetrieve),
+		results[j] = &Chunk{
+			CPU:       make([]*Block, retrieveBlocks),
+			Bandwidth: make([]*Block, retrieveBlocks),
 		}
 		// pick a random block index to start the retrieval
-		startIndex = rand.Intn(db.NumRows*db.NumColumns - numBlocksToRetrieve)
-		totalTimer := monitor.NewMonitor()
-		for i := 0; i < numBlocksToRetrieve; i++ {
-			results[j].Results[i] = new(BlockResult)
+		startIndex = rand.Intn(totalBlocks - retrieveBlocks)
+		for i := 0; i < retrieveBlocks; i++ {
+			results[j].CPU[i] = &Block{
+				Query:       0,
+				Answers:     make([]float64, len(ss)),
+				Reconstruct: 0,
+			}
+			results[j].Bandwidth[i] = &Block{
+				Query:       0,
+				Answers:     make([]float64, len(ss)),
+				Reconstruct: 0,
+			}
 
 			m.Reset()
-			queries := c.Query(startIndex+i, 2)
-			results[j].Results[i].Query = m.RecordAndReset()
+			queries, err := c.QueryBytes(startIndex+i, 2)
+			if err != nil {
+				log.Fatal(err)
+			}
+			results[j].CPU[i].Query = m.RecordAndReset()
+			for r := range queries {
+				results[j].Bandwidth[i].Query += float64(len(queries[r]))
+			}
 
-			a0 := s0.Answer(queries[0])
-			results[j].Results[i].Answer0 = m.RecordAndReset()
+			// get servers answers
+			answers := make([][]byte, len(ss))
+			for k := range ss {
+				answers[k], err = ss[k].AnswerBytes(queries[k])
+				if err != nil {
+					log.Fatal(err)
+				}
+				results[j].CPU[i].Answers[k] = m.RecordAndReset()
+				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
+			}
 
-			a1 := s1.Answer(queries[1])
-			results[j].Results[i].Answer1 = m.RecordAndReset()
-
-			answers := [][]field.Element{a0, a1}
-
-			m.Reset()
-			_, err := c.Reconstruct(answers)
-			results[j].Results[i].Reconstruct = m.RecordAndReset()
+			_, err = c.ReconstructBytes(answers)
+			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			results[j].Bandwidth[i].Reconstruct = 0
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
-		results[j].Total = totalTimer.Record()
 	}
 
 	return results
 }
 
+func makeDPFServers(db *database.DB) []server.Server {
+	s0 := server.NewDPF(db)
+	s1 := server.NewDPF(db)
+	return []server.Server{s0, s1}
+}
+
+func makeITServers(db *database.DB) []server.Server {
+	s0 := server.NewIT(db)
+	s1 := server.NewIT(db)
+	return []server.Server{s0, s1}
+}
+
 func (s *Simulation) validSimulation() bool {
 	return s.Primitive == "vpir-it" || s.Primitive == "vpir-dpf" || s.Primitive == "pir"
 }
+
+//func retrieveBlocksDPF(db *database.DB, numBlocks int, nRepeat int) []*Chunk {
+//	prg := utils.RandomPRG()
+//	c := client.NewDPF(prg, &db.Info)
+//	s0 := server.NewDPF(db)
+//	s1 := server.NewDPF(db)
+//
+//	// create main monitor for CPU time
+//	m := monitor.NewMonitor()
+//
+//	// run the experiment nRepeat times
+//	results := make([]*Chunk, nRepeat)
+//
+//	for j := 0; j < nRepeat; j++ {
+//		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+//		results[j] = &Chunk{
+//			CPU: make([]*Block, numBlocks),
+//		}
+//
+//		totalTimer := monitor.NewMonitor()
+//		for i := 0; i < numBlocks; i++ {
+//			results[j].CPU[i] = new(Block)
+//
+//			m.Reset()
+//			queries := c.Query(i, 2)
+//			results[j].CPU[i].Query = m.RecordAndReset()
+//
+//			a0 := s0.Answer(queries[0])
+//			results[j].CPU[i].Answer0 = m.RecordAndReset()
+//
+//			a1 := s1.Answer(queries[1])
+//			results[j].CPU[i].Answer1 = m.RecordAndReset()
+//
+//			answers := [][]field.Element{a0, a1}
+//
+//			m.Reset()
+//			_, err := c.Reconstruct(answers)
+//			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+//			if err != nil {
+//				panic(err)
+//			}
+//
+//		}
+//		results[j].TotalCPU = totalTimer.Record()
+//	}
+//
+//	return results
+//}
+
+//func retrieveBlocksIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+//	prg := utils.RandomPRG()
+//	c := client.NewIT(prg, &db.Info)
+//	s0 := server.NewIT(db)
+//	s1 := server.NewIT(db)
+//
+//	var numBlocksToRetrieve int
+//	if db.BlockSize == constants.SingleBitBlockLength {
+//		numBlocksToRetrieve = numBitsToRetrieve
+//	} else {
+//		numBlocksToRetrieve = numBitsToRetrieve / (db.BlockSize * elemBitSize)
+//	}
+//
+//	// seed non-cryptographic randomness
+//	rand.Seed(time.Now().UnixNano())
+//
+//	// create main monitor for CPU time
+//	m := monitor.NewMonitor()
+//
+//	// run the experiment nRepeat times
+//	results := make([]*Chunk, nRepeat)
+//
+//	var startIndex int
+//	for j := 0; j < nRepeat; j++ {
+//		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+//		results[j] = &Chunk{
+//			CPU: make([]*Block, numBlocksToRetrieve),
+//		}
+//		// pick a random block index to start the retrieval
+//		startIndex = rand.Intn(db.NumRows*db.NumColumns - numBlocksToRetrieve)
+//		totalTimer := monitor.NewMonitor()
+//		for i := 0; i < numBlocksToRetrieve; i++ {
+//			results[j].CPU[i] = new(Block)
+//
+//			m.Reset()
+//			queries := c.Query(startIndex+i, 2)
+//			results[j].CPU[i].Query = m.RecordAndReset()
+//
+//			a0 := s0.Answer(queries[0])
+//			results[j].CPU[i].Answer0 = m.RecordAndReset()
+//
+//			a1 := s1.Answer(queries[1])
+//			results[j].CPU[i].Answer1 = m.RecordAndReset()
+//
+//			answers := [][]field.Element{a0, a1}
+//
+//			m.Reset()
+//			_, err := c.Reconstruct(answers)
+//			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+//			if err != nil {
+//				log.Fatal(err)
+//			}
+//		}
+//		results[j].TotalCPU = totalTimer.Record()
+//	}
+//
+//	return results
+//}

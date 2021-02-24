@@ -103,7 +103,7 @@ func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Serve
 		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
 		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
 	}
-	fmt.Printf("Total time to retrieve %d real keys: %.1fms\n", numKeys, totalTimer.Record())
+	fmt.Printf("TotalCPU time to retrieve %d real keys: %.1fms\n", numKeys, totalTimer.Record())
 }
 
 func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
@@ -148,7 +148,7 @@ func retrieveRandomKeyBlock(t *testing.T, chunkLength, nRows, nCols int) {
 		// retrieve only one key
 		break
 	}
-	fmt.Printf("Total time retrieve key: %.1fms\n", totalTimer.Record())
+	fmt.Printf("TotalCPU time retrieve key: %.1fms\n", totalTimer.Record())
 }
 
 func validateRandomKey(t *testing.T, id, key string, result []byte, dbInfo *database.Info, chunkLength int) (string, string) {
