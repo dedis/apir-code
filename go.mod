@@ -12,7 +12,7 @@ require (
 	github.com/lukechampine/fastxor v0.0.0-20200124170337-07dbf569dfe7
 	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691
 	github.com/stretchr/testify v1.7.0
-	github.com/wealdtech/go-merkletree v1.0.0 // indirect
+	github.com/wealdtech/go-merkletree v1.0.0
 	gitlab.com/NebulousLabs/merkletree v0.0.0-20200118113624-07fbf710afc4 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect

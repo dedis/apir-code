@@ -51,26 +51,16 @@ func main() {
 	log.Printf("config file %s", *indivConfigFile)
 
 	// load simulation's config files
-	var err error
-	genConfig := new(generalParam)
-	_, err = toml.DecodeFile(generalConfigFile, genConfig)
+	s, err := loadSimulationConfigs(generalConfigFile, *indivConfigFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	indConfig := new(individualParam)
-	_, err = toml.DecodeFile(*indivConfigFile, indConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-	s := &Simulation{generalParam: *genConfig, individualParam: *indConfig}
-
-	log.Printf("running simulation %#v\n", s)
-
 	// check simulation
 	if !s.validSimulation() {
-		panic("invalid simulation")
+		log.Fatal("invalid simulation")
 	}
 
+	log.Printf("running simulation %#v\n", s)
 	// initialize experiment
 	experiment := &Experiment{Results: make(map[int][]*Chunk, 0)}
 
@@ -273,6 +263,21 @@ func makePIRDPFServers(db *database.Bytes) []server.Server {
 	s0 := server.NewPIRdpf(db)
 	s1 := server.NewPIRdpf(db)
 	return []server.Server{s0, s1}
+}
+
+func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
+	var err error
+	genConfig := new(generalParam)
+	_, err = toml.DecodeFile(genFile, genConfig)
+	if err != nil {
+		return nil, err
+	}
+	indConfig := new(individualParam)
+	_, err = toml.DecodeFile(indFile, indConfig)
+	if err != nil {
+		return nil, err
+	}
+	return &Simulation{generalParam: *genConfig, individualParam: *indConfig}, nil
 }
 
 func (s *Simulation) validSimulation() bool {
