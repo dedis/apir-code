@@ -130,7 +130,7 @@ def plotSingleMulti():
 
 def plotVpirBenchmarksLinear():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlockLength16.json"]
-    labels = ["Single-bit", "Multi-bit", "Multi-bit Blocks"]
+    labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
 
     i = 0
     for scheme in schemes:
@@ -160,7 +160,7 @@ def plotVpirBenchmarksLinear():
 
 def plotVpirBenchmarksBarBw():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlockLength16.json"]
-    labels = ["Single-bit", "Multi-bit", "Multi-bit Blocks"]
+    labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
 
     Xs = np.arange(len(schemes))
     width = 0.35
@@ -204,7 +204,7 @@ def plotVpirBenchmarksBarBw():
 
 def plotVpirBenchmarksBar():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlockLength16.json"]
-    labels = ["Single-bit", "Multi-bit", "Multi-bit Blocks"]
+    labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
     colors = ['lightgrey', 'darkgrey', 'dimgrey', 'black']
 
     fig, ax = plt.subplots()
@@ -212,8 +212,7 @@ def plotVpirBenchmarksBar():
 
     Xs = np.arange(len(schemes))
     width = 0.15
-    Ys, Yerr = [], []
-    dbSizes = ["10KB", "50KB", "100KB", "200KB"]
+    dbSizes = sorted([int(size/1000) for size in allStats(resultFolder + schemes[0]).keys()])
     bars = [[]]*len(dbSizes)
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme)
@@ -223,16 +222,16 @@ def plotVpirBenchmarksBar():
             bars[j] = ax.bar(i+j*width, Ys, width, color=colors[j], yerr=Yerr)
 
     ax.set_ylabel("CPU time [ms]")
-    ax.set_xticks(Xs + width*4 / 3)
+    ax.set_xticks(Xs + width*len(dbSizes)/2)
     ax.set_xticklabels(labels)
     plt.yscale('log')
     ax.legend(bars, dbSizes, fontsize=12)
 
     # fig.tight_layout()  # otherwise the right y-label is slightly clipped
     # plt.yscale('log')
-    plt.title("Retrieval of 2KB of data from DBs of different size")
-    plt.savefig('multi_cpu.eps', format='eps', dpi=300)
-    # plt.show()
+    plt.title("Retrieval of 2KB of data from DBs of different size in KB")
+    # plt.savefig('multi_cpu.eps', format='eps', dpi=300)
+    plt.show()
 
 
 if __name__ == "__main__":
