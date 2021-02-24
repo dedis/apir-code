@@ -21,11 +21,13 @@ type Merkle struct {
 func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Merkle {
 	db := CreateRandomMultiBitBytes(rnd, dbLen, numRows, blockLen)
 	entriesFlatten := flatten(db.Entries)
-	fmt.Println(entriesFlatten)
-	r := bytes.NewReader(entriesFlatten)
 
 	for i, _ := range entriesFlatten {
-		merkleRoot, proof, numLeaves, _ := merkletree.BuildReaderProof(r, sha256.New(), blockLen*field.Bytes, uint64(i))
+		r := bytes.NewReader(entriesFlatten)
+		merkleRoot, proof, numLeaves, err := merkletree.BuildReaderProof(r, sha256.New(), blockLen*field.Bytes, uint64(i))
+		if err != nil {
+			panic(err)
+		}
 		fmt.Println(merkleRoot, proof, numLeaves)
 	}
 
@@ -33,5 +35,12 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 }
 
 func flatten(m [][]byte) []byte {
-	return m[0][:cap(m[0])]
+	out := make([]byte, len(m)*len(m[0]))
+	for i := range m {
+		for j := range m[0] {
+			out[i*len(m)+j] = m[i][j]
+		}
+	}
+
+	return out
 }
