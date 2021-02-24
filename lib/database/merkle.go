@@ -1,6 +1,8 @@
 package database
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"log"
@@ -34,13 +36,19 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 	// getch the root hash of the tree
 	//root := tree.Root()
 
-	// generate and encode all the proofs
-	proofs := make([]byte, len(blocks))
+	// generate and (gob) encode all the proofs
+	proofs := make([][]byte, len(blocks))
+	var buff bytes.Buffer
 	for i, b := range blocks {
-		proofs[i], err = tree.GenerateProof(b)
+		enc := gob.NewEncoder(&buff)
+		p, err := tree.GenerateProof(b)
 		if err != nil {
 			log.Fatalf("impossible to generate proof for block %v: %v", b, err)
 		}
+		if err = enc.Encode(p); err != nil {
+			log.Fatal("encode:", err)
+		}
+		proofs[i] = buff.Bytes()
 
 	}
 	fmt.Println(proofs)
