@@ -1,0 +1,5 @@
+Name = "pirDPF"
+Primitive = "pir-dpf"
+NumRows = 1
+BlockLength = 128
+ElementBitSize = 8

@@ -1,4 +1,4 @@
-Name = "vpirMultiVectorBlockLength16DPF"
+Name = "vpirMultiVectorBlockDPF"
 Primitive = "vpir-dpf"
 NumRows = 1
 BlockLength = 16

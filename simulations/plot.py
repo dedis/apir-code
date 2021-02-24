@@ -129,7 +129,7 @@ def plotSingleMulti():
 
 
 def plotVpirBenchmarksLinear():
-    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlockLength16.json"]
+    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
 
     i = 0
@@ -159,7 +159,7 @@ def plotVpirBenchmarksLinear():
 
 
 def plotVpirBenchmarksBarBw():
-    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlockLength16.json"]
+    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
 
     Xs = np.arange(len(schemes))
@@ -203,7 +203,7 @@ def plotVpirBenchmarksBarBw():
 
 
 def plotVpirBenchmarksBar():
-    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlockLength16.json"]
+    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
     colors = ['lightgrey', 'darkgrey', 'dimgrey', 'black']
 

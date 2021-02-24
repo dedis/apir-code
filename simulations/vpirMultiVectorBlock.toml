@@ -1,4 +1,4 @@
-Name = "vpirMultiVectorBlockLength16"
+Name = "vpirMultiVectorBlock"
 Primitive = "vpir-it"
 NumRows = 1
 BlockLength = 16

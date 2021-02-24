@@ -102,21 +102,30 @@ func main() {
 		// setup db, this is the same for DPF or IT
 		dbPRG := utils.RandomPRG()
 		db := new(database.DB)
-		if s.BlockLength == constants.SingleBitBlockLength {
-			db = database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
-		} else {
-			db = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
+		dbBytes := new(database.Bytes)
+		if s.Primitive[:4] == "vpir" {
+			if s.BlockLength == constants.SingleBitBlockLength {
+				db = database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
+			} else {
+				db = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
+			}
+		} else if s.Primitive[:3] == "pir" {
+			dbBytes = database.CreateRandomMultiBitBytes(dbPRG, dbLen, nRows, blockLen)
 		}
 
 		// run experiment
 		var results []*Chunk
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		if s.Primitive == "vpir-it" {
-			results = retrieveIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			results = vpirIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "vpir-dpf" {
-			results = retrieveDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			results = vpirDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+		} else if s.Primitive == "pir-it" {
+			results = pirIT(dbBytes, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+		} else if s.Primitive == "pir-dpf" {
+			results = pirDPF(dbBytes, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else {
-			panic("not yet implemented")
+			log.Fatal("unknown primitive type")
 		}
 		experiment.Results[dbLen] = results
 	}
@@ -134,32 +143,38 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
-func retrieveIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+func vpirIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	cl := client.NewIT(prg, &db.Info)
 	servers := makeITServers(db)
-
-	var numBlocksToRetrieve int
-	if db.BlockSize == constants.SingleBitBlockLength {
-		numBlocksToRetrieve = numBitsToRetrieve
-	} else {
-		numBlocksToRetrieve = numBitsToRetrieve / (db.BlockSize * elemBitSize)
-	}
+	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
 	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
 }
 
-func retrieveDPF(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+func vpirDPF(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	cl := client.NewDPF(prg, &db.Info)
 	servers := makeDPFServers(db)
+	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
-	var numBlocksToRetrieve int
-	if db.BlockSize == constants.SingleBitBlockLength {
-		numBlocksToRetrieve = numBitsToRetrieve
-	} else {
-		numBlocksToRetrieve = numBitsToRetrieve / (db.BlockSize * elemBitSize)
-	}
+	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
+}
+
+func pirIT(db *database.Bytes, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+	prg := utils.RandomPRG()
+	cl := client.NewPIR(prg, &db.Info)
+	servers := makePIRITServers(db)
+	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
+
+	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
+}
+
+func pirDPF(db *database.Bytes, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+	prg := utils.RandomPRG()
+	cl := client.NewPIRdpf(prg, &db.Info)
+	servers := makePIRDPFServers(db)
+	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
 	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
 }
@@ -197,23 +212,23 @@ func retrieveBlocks(c client.Client, ss []server.Server, totalBlocks, retrieveBl
 
 			m.Reset()
 			queries, err := c.QueryBytes(startIndex+i, 2)
-			if err != nil {
-				log.Fatal(err)
-			}
 			results[j].CPU[i].Query = m.RecordAndReset()
 			for r := range queries {
 				results[j].Bandwidth[i].Query += float64(len(queries[r]))
+			}
+			if err != nil {
+				log.Fatal(err)
 			}
 
 			// get servers answers
 			answers := make([][]byte, len(ss))
 			for k := range ss {
 				answers[k], err = ss[k].AnswerBytes(queries[k])
+				results[j].CPU[i].Answers[k] = m.RecordAndReset()
+				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
 				if err != nil {
 					log.Fatal(err)
 				}
-				results[j].CPU[i].Answers[k] = m.RecordAndReset()
-				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
 			}
 
 			_, err = c.ReconstructBytes(answers)
@@ -228,6 +243,14 @@ func retrieveBlocks(c client.Client, ss []server.Server, totalBlocks, retrieveBl
 	return results
 }
 
+// Converts number of bits to retrieve into the number of db blocks
+func bitsToBlocks(blockSize, elemSize, numBits int) int {
+	if blockSize == constants.SingleBitBlockLength {
+		return numBits
+	}
+	return numBits / (blockSize * elemSize)
+}
+
 func makeDPFServers(db *database.DB) []server.Server {
 	s0 := server.NewDPF(db)
 	s1 := server.NewDPF(db)
@@ -240,113 +263,18 @@ func makeITServers(db *database.DB) []server.Server {
 	return []server.Server{s0, s1}
 }
 
-func (s *Simulation) validSimulation() bool {
-	return s.Primitive == "vpir-it" || s.Primitive == "vpir-dpf" || s.Primitive == "pir"
+func makePIRITServers(db *database.Bytes) []server.Server {
+	s0 := server.NewPIR(db)
+	s1 := server.NewPIR(db)
+	return []server.Server{s0, s1}
 }
 
-//func retrieveBlocksDPF(db *database.DB, numBlocks int, nRepeat int) []*Chunk {
-//	prg := utils.RandomPRG()
-//	c := client.NewDPF(prg, &db.Info)
-//	s0 := server.NewDPF(db)
-//	s1 := server.NewDPF(db)
-//
-//	// create main monitor for CPU time
-//	m := monitor.NewMonitor()
-//
-//	// run the experiment nRepeat times
-//	results := make([]*Chunk, nRepeat)
-//
-//	for j := 0; j < nRepeat; j++ {
-//		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-//		results[j] = &Chunk{
-//			CPU: make([]*Block, numBlocks),
-//		}
-//
-//		totalTimer := monitor.NewMonitor()
-//		for i := 0; i < numBlocks; i++ {
-//			results[j].CPU[i] = new(Block)
-//
-//			m.Reset()
-//			queries := c.Query(i, 2)
-//			results[j].CPU[i].Query = m.RecordAndReset()
-//
-//			a0 := s0.Answer(queries[0])
-//			results[j].CPU[i].Answer0 = m.RecordAndReset()
-//
-//			a1 := s1.Answer(queries[1])
-//			results[j].CPU[i].Answer1 = m.RecordAndReset()
-//
-//			answers := [][]field.Element{a0, a1}
-//
-//			m.Reset()
-//			_, err := c.Reconstruct(answers)
-//			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-//			if err != nil {
-//				panic(err)
-//			}
-//
-//		}
-//		results[j].TotalCPU = totalTimer.Record()
-//	}
-//
-//	return results
-//}
+func makePIRDPFServers(db *database.Bytes) []server.Server {
+	s0 := server.NewPIRdpf(db)
+	s1 := server.NewPIRdpf(db)
+	return []server.Server{s0, s1}
+}
 
-//func retrieveBlocksIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
-//	prg := utils.RandomPRG()
-//	c := client.NewIT(prg, &db.Info)
-//	s0 := server.NewIT(db)
-//	s1 := server.NewIT(db)
-//
-//	var numBlocksToRetrieve int
-//	if db.BlockSize == constants.SingleBitBlockLength {
-//		numBlocksToRetrieve = numBitsToRetrieve
-//	} else {
-//		numBlocksToRetrieve = numBitsToRetrieve / (db.BlockSize * elemBitSize)
-//	}
-//
-//	// seed non-cryptographic randomness
-//	rand.Seed(time.Now().UnixNano())
-//
-//	// create main monitor for CPU time
-//	m := monitor.NewMonitor()
-//
-//	// run the experiment nRepeat times
-//	results := make([]*Chunk, nRepeat)
-//
-//	var startIndex int
-//	for j := 0; j < nRepeat; j++ {
-//		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-//		results[j] = &Chunk{
-//			CPU: make([]*Block, numBlocksToRetrieve),
-//		}
-//		// pick a random block index to start the retrieval
-//		startIndex = rand.Intn(db.NumRows*db.NumColumns - numBlocksToRetrieve)
-//		totalTimer := monitor.NewMonitor()
-//		for i := 0; i < numBlocksToRetrieve; i++ {
-//			results[j].CPU[i] = new(Block)
-//
-//			m.Reset()
-//			queries := c.Query(startIndex+i, 2)
-//			results[j].CPU[i].Query = m.RecordAndReset()
-//
-//			a0 := s0.Answer(queries[0])
-//			results[j].CPU[i].Answer0 = m.RecordAndReset()
-//
-//			a1 := s1.Answer(queries[1])
-//			results[j].CPU[i].Answer1 = m.RecordAndReset()
-//
-//			answers := [][]field.Element{a0, a1}
-//
-//			m.Reset()
-//			_, err := c.Reconstruct(answers)
-//			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-//			if err != nil {
-//				log.Fatal(err)
-//			}
-//		}
-//		results[j].TotalCPU = totalTimer.Record()
-//	}
-//
-//	return results
-//}
+func (s *Simulation) validSimulation() bool {
+	return s.Primitive == "vpir-it" || s.Primitive == "vpir-dpf" || s.Primitive == "pir-it" || s.Primitive == "pir-dpf"
+}

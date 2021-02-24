@@ -7,10 +7,8 @@ import (
 	"log"
 	"math/bits"
 
-	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
-
 	"github.com/dimakogan/dpf-go/dpf"
+	"github.com/si-co/vpir-code/lib/database"
 )
 
 // PIRdpf represent the client for the DPF-based multi-bit classical PIR scheme
@@ -66,10 +64,9 @@ func (c *PIRdpf) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
-// ReconstructBytes will never be implemented for PIR, because we work in GF(2)
-func (c *PIRdpf) ReconstructBytes(a [][]byte) ([]field.Element, error) {
-	panic("not yet implemented")
-	return nil, nil
+// ReconstructBytes returns []byte
+func (c *PIRdpf) ReconstructBytes(a [][]byte) (interface{}, error) {
+	return c.Reconstruct(a)
 }
 
 // Reconstruct reconstruct the entry of the database from answers

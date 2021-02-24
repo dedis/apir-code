@@ -86,8 +86,8 @@ func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlo
 
 func retrieveBlocksDPFBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
 	c := client.NewPIRdpf(rnd, &db.Info)
-	s0 := server.NewPIRdpf(db, 0)
-	s1 := server.NewPIRdpf(db, 1)
+	s0 := server.NewPIRdpf(db)
+	s1 := server.NewPIRdpf(db)
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {

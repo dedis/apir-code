@@ -7,7 +7,6 @@ import (
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Information theoretic classical PIR client for scheme working in GF(2).
@@ -60,10 +59,9 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 	return vectors
 }
 
-// ReconReconstructBytes will never the implemented for PIR
-func (c *PIR) ReconstructBytes(a [][]byte) ([]field.Element, error) {
-	panic("not yet implemented")
-	return nil, nil
+// ReconstructBytes returns []byte
+func (c *PIR) ReconstructBytes(a [][]byte) (interface{}, error) {
+	return c.Reconstruct(a)
 }
 
 // Reconstruct reconstruct the entry of the database from answers

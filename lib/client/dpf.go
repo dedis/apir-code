@@ -64,8 +64,8 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
-// ReconstructBytes ...
-func (c *DPF) ReconstructBytes(a [][]byte) ([]field.Element, error) {
+// ReconstructBytes returns []field.Element
+func (c *DPF) ReconstructBytes(a [][]byte) (interface{}, error) {
 	answer, err := decodeAnswer(a)
 
 	if err != nil {

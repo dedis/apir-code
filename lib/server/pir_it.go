@@ -44,7 +44,7 @@ func (s *PIR) Answer(q []byte) []byte {
 		sum := make([]byte, bs)
 		for j := 0; j < s.db.NumColumns; j++ {
 			if q[j] == byte(1) {
-				fastxor.Bytes(sum, sum, s.db.Entries[i][j*bs:bs*(j+1)])
+				fastxor.Bytes(sum, sum, s.db.Entries[i][j*bs:(j+1)*bs])
 			}
 		}
 		copy(m[i*bs:(i+1)*bs], sum)

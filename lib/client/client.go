@@ -16,7 +16,7 @@ import (
 type Client interface {
 	QueryBytes(int, int) ([][]byte, error)
 	// TODO: return empty interface to accommodate both VPIR and PIR?
-	ReconstructBytes([][]byte) ([]field.Element, error)
+	ReconstructBytes([][]byte) (interface{}, error)
 }
 
 type state struct {
