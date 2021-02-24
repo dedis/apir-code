@@ -12,8 +12,9 @@ import (
 )
 
 type Merkle struct {
-	DB   *Bytes
-	Root []byte
+	DB          *Bytes
+	Root        []byte
+	ProofLength int
 }
 
 // CreateRandomMultiBitMerkle
@@ -25,8 +26,6 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 	// a leaf contains a block, which has the same numbers of bytes as a
 	// block composed of field elements
 	blockLenBytes := blockLen * field.Bytes
-	fmt.Println("blockLenblockLenBytes:", blockLenBytes)
-	fmt.Println(blockLenBytes)
 	blocks := entriesToBlocks(db.Entries, blockLenBytes)
 	tree, err := merkletree.New(blocks)
 	if err != nil {
@@ -38,8 +37,8 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 
 	// generate and (gob) encode all the proofs
 	proofs := make([][]byte, len(blocks))
-	var buff bytes.Buffer
 	for i, b := range blocks {
+		var buff bytes.Buffer
 		enc := gob.NewEncoder(&buff)
 		p, err := tree.GenerateProof(b)
 		if err != nil {
@@ -48,10 +47,14 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 		if err = enc.Encode(p); err != nil {
 			log.Fatal("encode:", err)
 		}
+		// the encoding of proofs should be fixed length and after some
+		// tests it seems that gob encoding respect that
 		proofs[i] = buff.Bytes()
+		fmt.Println(len(proofs[i]))
 
 	}
-	fmt.Println(proofs)
+
+	// enlarge the database, i.e., add the proof for every block
 
 	//// hash function for the Merkle tree
 	//h := sha256.New()
@@ -94,7 +97,6 @@ func entriesToBlocks(e [][]byte, blockLength int) [][]byte {
 	for i := range e {
 		for j := 0; j < len(e[0])-blockLength; j += blockLength {
 			blocks[b] = e[i][j : j+blockLength]
-			fmt.Println(len(blocks[b]))
 			b++
 		}
 	}
