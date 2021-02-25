@@ -3,6 +3,7 @@ package database
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"io"
 	"log"
 
@@ -38,7 +39,6 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 
 	// generate and (gob) encode all the proofs
 	proofs := make([][]byte, len(blocks))
-	proofLen := 0
 	for i, b := range blocks {
 		var buff bytes.Buffer
 		enc := gob.NewEncoder(&buff)
@@ -52,7 +52,21 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 		// the encoding of proofs should be fixed length and after some
 		// tests it seems that gob encoding respect this
 		proofs[i] = buff.Bytes()
-		proofLen = len(proofs[i])
+	}
+
+	// pad gob encoding to fixed size
+	max := 0
+	for _, p := range proofs {
+		if len(p) > max {
+			max = len(p)
+		}
+	}
+	proofLen := max
+	fmt.Println("max:", proofLen)
+
+	for i, p := range proofs {
+		proofs[i] = PadBlock(p, proofLen)
+		fmt.Println(len(proofs[i]))
 	}
 
 	// enlarge the database, i.e., add the proof for every block
@@ -65,11 +79,17 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 			ee[i] = append(ee[i], append(db.Entries[i][:j+bl], proofs[p]...)...)
 			p++
 		}
+		//fmt.Println(len(db.Entries[i]))
+		//fmt.Println(len(ee[i]))
 	}
 
 	m := &Merkle{
-		Entries:     ee,
-		Info:        Info{},
+		Entries: ee,
+		Info: Info{
+			NumRows:    numRows,
+			NumColumns: 0,
+			BlockSize:  blockLenBytes + proofLen,
+		},
 		Root:        root,
 		ProofLength: proofLen,
 	}
@@ -78,12 +98,21 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 }
 
 func entriesToBlocks(e [][]byte, blockLength int) [][]byte {
-	blocks := make([][]byte, len(e)*len(e[0])/blockLength)
-	b := 0
+	blocks := make([][]byte, 0)
+	var block []byte
 	for i := range e {
-		for j := 0; j < len(e[0])-blockLength; j += blockLength {
-			blocks[b] = e[i][j : j+blockLength]
-			b++
+		for j := 0; j < len(e[0]); j += blockLength {
+			end := j + blockLength
+			if end > len(e[0]) {
+				// pad here with 0 bytes. We don't care about
+				// the padding as this is not used in the PoC
+				padLength := end - len(e[0])
+				pad := make([]byte, padLength)
+				block = append(e[i][j:end-padLength], pad...)
+			} else {
+				block = e[i][j:end]
+			}
+			blocks = append(blocks, block)
 		}
 	}
 
