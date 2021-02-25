@@ -60,7 +60,7 @@ func splitFullDumpIntoChunks(file string) {
 			fmt.Printf("Writing into %s\n", outputName)
 			encoder = gob.NewEncoder(out)
 			numWrittenBytes = 0
-			outputNum += 1
+			outputNum++
 		}
 		key := new(pgp.Key)
 		// Decoding the serialized data
