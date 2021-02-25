@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-import json
-import numpy as np
+import argparse
 import matplotlib.pyplot as plt
 from utils import *
 
@@ -173,7 +172,7 @@ def plotVpirBenchmarksBarBw():
 def plotVpirBenchmarks():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
-    colors = ['black', 'lightgrey', 'grey']
+    colors = ['black', 'grey', 'lightgrey']
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
@@ -206,8 +205,8 @@ def plotVpirBenchmarks():
     plt.tick_params(left=False, labelleft=False)
     plt.yscale('log')
     plt.title("Retrieval of 256B data from a DB of different sizes")
-    # plt.savefig('benchmarks.eps', format='eps', dpi=300, transparent=True)
-    plt.show()
+    plt.savefig('benchmarks.eps', format='eps', dpi=300, transparent=True)
+    # plt.show()
 
 
 def plotVpirPerformance():
@@ -215,33 +214,55 @@ def plotVpirPerformance():
     devcolors = ['mistyrose', 'papayawhip', 'honeydew', 'ghostwhite']
     schemes = ["vpirMultiMatrix.json", "vpirMultiVectorBlockDPF.json", "pirMatrix.json", "pirDPF.json"]
     labels = ["VPIR rebalanced", "VPIR DPF", "PIR rebalanced", "PIR DPF"]
+    lines = []
 
-    fig, ax = plt.subplots()
-    i = 0
-    for scheme in schemes:
+    fig, ax1 = plt.subplots()
+    ax1.legend(fontsize=12)
+    ax1.set_ylabel('CPU time [ms]')
+    ax1.set_xlabel('Database size [MB]')
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+
+    # ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    # ax2.set_ylabel("Bandwidth [B]")
+    # ax2.spines['top'].set_visible(False)
+    # ax2.set_yscale('log')
+
+    width = 0.3
+    for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme)
-        Xs, Ys, Yerr = [], [], []
+        Xs, Ys, Yerr, Xbw, Ybw = [], [], [], [], []
         for dbSize in sorted(stats.keys()):
             Xs.append(dbSize/8000000)
             Ys.append(stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean'])
             Yerr.append(stats[dbSize]['client']['cpu']['std'] + stats[dbSize]['server']['cpu']['std'])
+            # Xbw.append(dbSize/8000000 + i*width)
+            # Ybw.append(stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean'])
 
         print(Ys)
-        ax.errorbar(Xs, Ys, yerr=Yerr, color=colors[i], label=labels[i], marker=markers[i], linestyle=linestyles[i])
+        lines.append(ax1.errorbar(Xs, Ys, yerr=Yerr, color=colors[i], label=labels[i], marker=markers[i], linestyle=linestyles[i]))
+        # ax2.bar(Xbw, Ybw, width, color=colors[i])
         # ax.fill_between(Xs, Yerrdown, Yerrup, facecolor=devcolors[i])
-        i += 1
 
-    ax.legend(fontsize=12)
-    ax.set_ylabel('CPU time [ms]')
-    ax.set_xlabel('Database size [MB]')
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    # plt.xscale('log')
+    ax1.legend(lines, labels, fontsize=12)
+    # ax2.set_xticks(np.array(Xs) + width*(len(Xs)-1) / 2)
     plt.axis()
-    # plt.savefig('performance.eps', format='eps', dpi=300, transparent=True)
-    plt.show()
+    plt.title("Performance of VPIR vs PIR for different db sizes")
+    plt.savefig('performance.eps', format='eps', dpi=300, transparent=True)
+    # plt.show()
 
+
+# -----------Argument Parser-------------
+parser = argparse.ArgumentParser()
+parser.add_argument("-e", "--expr", type=str, help="experiment to plot: benchmarks, performance", required=True)
+
+args = parser.parse_args()
+EXPR = args.expr
 
 if __name__ == "__main__":
-    plotVpirBenchmarks()
-    # plotVpirPerformance()
+    if EXPR == "benchmarks":
+        plotVpirBenchmarks()
+    elif EXPR == "performance":
+        plotVpirPerformance()
+    else:
+        print("Unknown experiment: choose between benchmarks and performance")
