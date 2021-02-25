@@ -1,4 +1,4 @@
-#DBBitLengths = [10000, 30000, 100000, 300000, 1000000]
-DBBitLengths = [10000, 50000, 100000, 200000]
+#DBBitLengths = [8000000, 40000000, 80000000, 120000000]
+DBBitLengths = [8000, 80000, 800000]
 Repetitions = 5
 BitsToRetrieve = 2048
