@@ -1,9 +1,7 @@
 package database
 
 import (
-	"bytes"
-	"encoding/gob"
-	"fmt"
+	"encoding/binary"
 	"io"
 	"log"
 
@@ -39,34 +37,14 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 
 	// generate and (gob) encode all the proofs
 	proofs := make([][]byte, len(blocks))
+	proofLen := 0
 	for i, b := range blocks {
-		var buff bytes.Buffer
-		enc := gob.NewEncoder(&buff)
 		p, err := tree.GenerateProof(b)
 		if err != nil {
 			log.Fatalf("error while generating proof for block %v: %v", b, err)
 		}
-		if err = enc.Encode(p); err != nil {
-			log.Fatal("encode:", err)
-		}
-		// the encoding of proofs should be fixed length and after some
-		// tests it seems that gob encoding respect this
-		proofs[i] = buff.Bytes()
-	}
-
-	// pad gob encoding to fixed size
-	max := 0
-	for _, p := range proofs {
-		if len(p) > max {
-			max = len(p)
-		}
-	}
-	proofLen := max
-	fmt.Println("max:", proofLen)
-
-	for i, p := range proofs {
-		proofs[i] = PadBlock(p, proofLen)
-		fmt.Println(len(proofs[i]))
+		proofs[i] = encodeProof(p)
+		proofLen = len(proofs[i]) // always the same
 	}
 
 	// enlarge the database, i.e., add the proof for every block
@@ -79,15 +57,13 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 			ee[i] = append(ee[i], append(db.Entries[i][:j+bl], proofs[p]...)...)
 			p++
 		}
-		//fmt.Println(len(db.Entries[i]))
-		//fmt.Println(len(ee[i]))
 	}
 
 	m := &Merkle{
 		Entries: ee,
 		Info: Info{
 			NumRows:    numRows,
-			NumColumns: 0,
+			NumColumns: len(ee[0]),
 			BlockSize:  blockLenBytes + proofLen,
 		},
 		Root:        root,
@@ -95,6 +71,28 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 	}
 
 	return m
+}
+
+func encodeProof(p *merkletree.Proof) []byte {
+	out := make([]byte, 0)
+
+	// encode number of hashes
+	numHashes := uint32(len(p.Hashes))
+	b := make([]byte, 4)
+	binary.LittleEndian.PutUint32(b, numHashes)
+	out = append(out, b...)
+
+	// encode hashes
+	for _, h := range p.Hashes {
+		out = append(out, h...)
+	}
+
+	// encode index
+	b1 := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b1, p.Index)
+	out = append(out, b1...)
+
+	return out
 }
 
 func entriesToBlocks(e [][]byte, blockLength int) [][]byte {
