@@ -23,6 +23,9 @@ type Info struct {
 	// embedding info
 	IDLength  int
 	KeyLength int
+
+	// PIR type: classical, merkle, signature
+	PIRType string
 }
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
