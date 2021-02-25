@@ -44,7 +44,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 		enc := gob.NewEncoder(&buff)
 		p, err := tree.GenerateProof(b)
 		if err != nil {
-			log.Fatalf("impossible to generate proof for block %v: %v", b, err)
+			log.Fatalf("error while generating proof for block %v: %v", b, err)
 		}
 		if err = enc.Encode(p); err != nil {
 			log.Fatal("encode:", err)
@@ -56,19 +56,19 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 	}
 
 	// enlarge the database, i.e., add the proof for every block
-	enEntries := make([][]byte, len(db.Entries))
+	ee := make([][]byte, len(db.Entries))
 	p := 0
 	bl := blockLenBytes
 	for i := range db.Entries {
-		enEntries[i] = make([]byte, 0)
+		ee[i] = make([]byte, 0)
 		for j := 0; j < len(db.Entries[0])-bl; j += bl {
-			enEntries[i] = append(enEntries[i], append(db.Entries[i][:j+bl], proofs[p]...)...)
+			ee[i] = append(ee[i], append(db.Entries[i][:j+bl], proofs[p]...)...)
 			p++
 		}
 	}
 
 	m := &Merkle{
-		Entries:     enEntries,
+		Entries:     ee,
 		Info:        Info{},
 		Root:        root,
 		ProofLength: proofLen,

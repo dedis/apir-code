@@ -8,5 +8,5 @@ import (
 
 func TestMerkle(t *testing.T) {
 	rng := utils.RandomPRG()
-	CreateRandomMultiBitMerkle(rng, 100000, 2, 10)
+	CreateRandomMultiBitMerkle(rng, 10000, 1, 10)
 }
