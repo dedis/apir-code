@@ -9,18 +9,10 @@ import (
 	merkletree "github.com/wealdtech/go-merkletree"
 )
 
-type Merkle struct {
-	Entries [][]byte
-	Info
-
-	Root        []byte
-	ProofLength int
-}
-
 // CreateRandomMultiBitMerkle
 // blockLen is the number of byte in a block, as byte is viewd as an element in this
 // case
-func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Merkle {
+func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	db := CreateRandomMultiBitBytes(rnd, dbLen, numRows, blockLen)
 
 	// a leaf contains a block, which has the same numbers of bytes as a
@@ -37,14 +29,12 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 
 	// generate and (gob) encode all the proofs
 	proofs := make([][]byte, len(blocks))
-	proofLen := 0
 	for i, b := range blocks {
 		p, err := tree.GenerateProof(b)
 		if err != nil {
 			log.Fatalf("error while generating proof for block %v: %v", b, err)
 		}
 		proofs[i] = encodeProof(p)
-		proofLen = len(proofs[i]) // always the same
 	}
 
 	// enlarge the database, i.e., add the proof for every block
@@ -59,18 +49,37 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Me
 		}
 	}
 
-	m := &Merkle{
+	m := &Bytes{
 		Entries: ee,
 		Info: Info{
 			NumRows:    numRows,
 			NumColumns: len(ee[0]),
-			BlockSize:  blockLenBytes + proofLen,
+			BlockSize:  blockLenBytes,
+			Root:       root,
 		},
-		Root:        root,
-		ProofLength: proofLen,
 	}
 
 	return m
+}
+
+func DecodeProof(p []byte) *merkletree.Proof {
+	// number of hashes
+	numHashes := binary.LittleEndian.Uint32(p[0:])
+
+	// hashes
+	hashLength := uint32(32) // sha256
+	hashes := make([][]byte, numHashes)
+	for i := uint32(0); i < numHashes; i++ {
+		hashes[i] = p[4+hashLength*i : 4+hashLength*(i+1)]
+	}
+
+	// index
+	index := binary.LittleEndian.Uint64(p[len(p)-9:])
+
+	return &merkletree.Proof{
+		Hashes: hashes,
+		Index:  index,
+	}
 }
 
 func encodeProof(p *merkletree.Proof) []byte {

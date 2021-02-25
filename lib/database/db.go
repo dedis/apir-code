@@ -26,6 +26,9 @@ type Info struct {
 
 	// PIR type: classical, merkle, signature
 	PIRType string
+
+	// Only for Merkle-tree based approach
+	Root []byte
 }
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {

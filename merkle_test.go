@@ -20,5 +20,7 @@ func TestMultiBitVectorOneMbMerkle(t *testing.T) {
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
 
-	db := database.CreateRandomMultiBitMerle(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
+
+	retrieveBlocksDPFBytes(t, xof, db, nRows*nCols, "DPFMultiBitVectorMerkle")
 }

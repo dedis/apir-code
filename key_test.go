@@ -203,7 +203,7 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	require.NoError(t, err)
 
 	// return result bytes
-	return field.VectorToBytes(result)
+	return field.VectorToBytes(result.([]field.Element))
 }
 
 func makeDPFServers(db *database.DB) []server.Server {
