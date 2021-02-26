@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 
-	"github.com/si-co/vpir-code/lib/field"
 	merkletree "github.com/wealdtech/go-merkletree"
 )
 
@@ -17,8 +16,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 
 	// a leaf contains a block, which has the same numbers of bytes as a
 	// block composed of field elements
-	blockLenBytes := blockLen * field.Bytes
-	blocks := entriesToBlocks(db.Entries, blockLenBytes)
+	blocks := entriesToBlocks(db.Entries, blockLen)
 	tree, err := merkletree.New(blocks)
 	if err != nil {
 		log.Fatalf("impossible to create Merkle tree: %v", err)
@@ -42,7 +40,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	// enlarge the database, i.e., add the proof for every block
 	ee := make([][]byte, len(db.Entries))
 	p := 0
-	bl := blockLenBytes
+	bl := blockLen
 	for i := range db.Entries {
 		ee[i] = make([]byte, 0)
 		for j := 0; j < len(db.Entries[0])-bl; j += bl {
@@ -55,8 +53,9 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 		Entries: ee,
 		Info: Info{
 			NumRows:    numRows,
-			NumColumns: len(ee[0]),
-			BlockSize:  blockLenBytes + proofLen,
+			NumColumns: db.Info.NumColumns,
+			BlockSize:  blockLen + proofLen,
+			PIRType:    "merkle",
 			Root:       root,
 		},
 	}
