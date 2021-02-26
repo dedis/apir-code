@@ -57,6 +57,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 			BlockSize:  blockLen + proofLen,
 			PIRType:    "merkle",
 			Root:       root,
+			ProofLen:   proofLen,
 		},
 	}
 

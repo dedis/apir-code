@@ -85,10 +85,11 @@ func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 		if err != nil {
 			return block, err
 		}
-		data := block[:c.dbInfo.BlockSize]
+		data := block[:c.dbInfo.BlockSize-c.dbInfo.ProofLen]
 
 		// check Merkle proof
-		encodedProof := block[c.dbInfo.BlockSize:]
+		encodedProof := block[c.dbInfo.BlockSize-c.dbInfo.ProofLen:]
+		fmt.Println("encoded proof:", encodedProof)
 		proof := database.DecodeProof(encodedProof)
 		verified, err := merkletree.VerifyProof(data, proof, c.dbInfo.Root)
 		if err != nil {

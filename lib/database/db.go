@@ -28,7 +28,8 @@ type Info struct {
 	PIRType string
 
 	// Only for Merkle-tree based approach
-	Root []byte
+	Root     []byte
+	ProofLen int
 }
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
