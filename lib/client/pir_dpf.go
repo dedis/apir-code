@@ -78,7 +78,7 @@ func (c *PIRdpf) ReconstructBytes(a [][]byte) (interface{}, error) {
 // Reconstruct reconstruct the entry of the database from answers
 func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 	switch c.dbInfo.PIRType {
-	case "classical":
+	case "classical", "":
 		return reconstructPIR(answers, c.dbInfo, c.state)
 	case "merkle":
 		block, err := reconstructPIR(answers, c.dbInfo, c.state)
