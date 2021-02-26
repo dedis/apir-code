@@ -76,7 +76,7 @@ func DecodeProof(p []byte) *merkletree.Proof {
 	}
 
 	// index
-	index := binary.LittleEndian.Uint64(p[len(p)-9:])
+	index := binary.LittleEndian.Uint64(p[len(p)-8:])
 
 	return &merkletree.Proof{
 		Hashes: hashes,
