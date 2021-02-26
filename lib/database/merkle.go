@@ -44,7 +44,8 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	for i := range db.Entries {
 		ee[i] = make([]byte, 0)
 		for j := 0; j < len(db.Entries[0])-bl; j += bl {
-			ee[i] = append(ee[i], append(db.Entries[i][j:j+bl], proofs[p]...)...)
+			//ee[i] = append(ee[i], append(db.Entries[i][j:j+bl], proofs[p]...)...)
+			ee[i] = append(ee[i], append(blocks[p], proofs[p]...)...)
 			p++
 		}
 	}
