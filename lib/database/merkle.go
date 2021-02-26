@@ -2,6 +2,8 @@ package database
 
 import (
 	"encoding/binary"
+	"encoding/hex"
+	"fmt"
 	"io"
 	"log"
 
@@ -43,6 +45,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 			if err != nil {
 				log.Fatalf("error while generating proof for block %v: %v", b, err)
 			}
+			fmt.Println("Original:", hex.EncodeToString(blocks[b]), hex.EncodeToString(encodedProof))
 			e = append(e, append(blocks[b], encodedProof...)...)
 			proofLen = len(encodedProof) // always same length
 			b++

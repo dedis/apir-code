@@ -200,9 +200,9 @@ def plotVpirBenchmarks():
     ax.legend(bars, labels, fontsize=12)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
 
-    plt.tick_params(left=False, labelleft=False)
+    # plt.tick_params(left=False, labelleft=False)
     plt.yscale('log')
     plt.title("Retrieval of 256B data from a DB of different sizes")
     plt.savefig('benchmarks.eps', format='eps', dpi=300, transparent=True)

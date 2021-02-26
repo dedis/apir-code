@@ -3,7 +3,9 @@ package client
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"math/bits"
@@ -90,17 +92,18 @@ func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 		// check Merkle proof
 		encodedProof := block[c.dbInfo.BlockSize-c.dbInfo.ProofLen:]
 		proof := database.DecodeProof(encodedProof)
+		fmt.Println("Retrieved:", hex.EncodeToString(data), hex.EncodeToString(encodedProof))
 		verified, err := merkletree.VerifyProof(data, proof, c.dbInfo.Root)
 		if err != nil {
 			log.Fatalf("impossible to verify proof: %v", err)
 		}
-
+		fmt.Println(verified)
 		if !verified {
 			return nil, errors.New("REJECT!")
 		}
 
 		return data, nil
 	default:
-		panic("unknow PIRType")
+		panic("unknown PIRType")
 	}
 }
