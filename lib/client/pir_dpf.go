@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"math/bits"
@@ -92,7 +91,6 @@ func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 		encodedProof := block[c.dbInfo.BlockSize-c.dbInfo.ProofLen:]
 		proof := database.DecodeProof(encodedProof)
 		verified, err := merkletree.VerifyProof(data, proof, c.dbInfo.Root)
-		fmt.Println(verified)
 		if err != nil {
 			log.Fatalf("impossible to verify proof: %v", err)
 		}
