@@ -13,7 +13,7 @@ import (
 
 func TestMerkleTree(t *testing.T) {
 	rng := utils.RandomPRG()
-	dbLen := 10000
+	dbLen := 100000
 	numRows := 1
 	blockLen := 160
 
@@ -69,7 +69,7 @@ func TestMerkleTree(t *testing.T) {
 			proof := DecodeProof(encodedProof)
 			verified, err := merkletree.VerifyProof(data, proof, root)
 			require.NoError(t, err)
-			//require.True(t, verified)
+			require.True(t, verified)
 			fmt.Println(verified)
 		}
 	}
@@ -88,9 +88,8 @@ func TestEncodeDecodeProof(t *testing.T) {
 	tree, err := merkletree.New(data)
 	require.NoError(t, err)
 
-	// generate a proof for element 50
+	// generate a proof for random element
 	proof, err := tree.GenerateProof(data[rand.Intn(len(data))])
-	fmt.Println(proof)
 	require.NoError(t, err)
 
 	// encode the proof
