@@ -54,28 +54,64 @@ def stats(data):
 
 def prepare_for_latex():
     # parameters for Latex
-    fig_width = 3.39
-    golden_mean = (math.sqrt(5)-1.0)/2.0    # aesthetic ratio
-    fig_height = fig_width*golden_mean  # height in inches
-    MAX_HEIGHT_INCHES = 8.0
-    if fig_height > MAX_HEIGHT_INCHES:
-        print("WARNING: fig_height too large:" + fig_height +
-              "so will reduce to" + MAX_HEIGHT_INCHES + "inches.")
-        fig_height = MAX_HEIGHT_INCHES
+    fig_width = 400
+    fig_width, fig_height = set_size(fig_width)
 
     params = {'backend': 'ps', 
               #'text.latex.preamble': [r'\usepackage{gensymb}', r'\usepackage{sansmath}', r'\sansmath'],
               #'text.latex.preamble': [r'\usepackage{mathptmx}'],
-              'axes.labelsize': 10, 
-              'axes.titlesize': 10,
-              'font.size': 10, 
-              'legend.fontsize': 10, 
-              'legend.loc': 'upper left',
-              'lines.markersize': 10,
-              'xtick.labelsize': 10,
-              'ytick.labelsize': 10,
+              'axes.labelsize': 12,
+              'axes.titlesize': 12,
+              'font.size': 12,
+              'legend.fontsize': 12,
+              'lines.markersize': 8,
+              'xtick.labelsize': 12,
+              'ytick.labelsize': 12,
               'text.usetex': True,
               'figure.figsize': [fig_width,fig_height],
-              'font.family': 'serif'
+              'font.family': 'serif',
+              'pgf.texsystem': 'pdflatex',
+              'pgf.rcfonts': False
               }
     mpl.rcParams.update(params)
+
+
+# Taken from https://jwalton.info/Embed-Publication-Matplotlib-Latex/
+def set_size(width, fraction=1, subplots=(1, 1)):
+    """Set figure dimensions to avoid scaling in LaTeX.
+
+    Parameters
+    ----------
+    width: float or string
+            Document width in points, or string of predined document type
+    fraction: float, optional
+            Fraction of the width which you wish the figure to occupy
+    subplots: array-like, optional
+            The number of rows and columns of subplots.
+    Returns
+    -------
+    fig_dim: tuple
+            Dimensions of figure in inches
+    """
+    if width == 'thesis':
+        width_pt = 426.79135
+    elif width == 'beamer':
+        width_pt = 307.28987
+    else:
+        width_pt = width
+
+    # Width of figure (in pts)
+    fig_width_pt = width_pt * fraction
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+
+    # Golden ratio to set aesthetic figure height
+    # https://disq.us/p/2940ij3
+    golden_ratio = (5**.5 - 1) / 2
+
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+    # Figure height in inches
+    fig_height_in = fig_width_in * golden_ratio * (subplots[0] / subplots[1])
+
+    return fig_width_in, fig_height_in
