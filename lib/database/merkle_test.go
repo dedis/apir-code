@@ -45,10 +45,14 @@ func TestMerkleTree(t *testing.T) {
 		e := make([]byte, 0)
 		for j := 0; j < blocksPerRow; j++ {
 			p, err := tree.GenerateProof(blocks[b])
+			fmt.Printf("Original proof: %#v\n", p)
 			require.NoError(t, err)
 			encodedProof := encodeProof(p)
 			e = append(e, append(blocks[b], encodedProof...)...)
 			proofLen = len(encodedProof) // always same length
+
+			//fmt.Println("Original:", hex.EncodeToString(blocks[b]), hex.EncodeToString(encodedProof))
+			fmt.Println("")
 
 			// first verification here
 			verified, err := merkletree.VerifyProof(blocks[b], p, root)
@@ -56,6 +60,9 @@ func TestMerkleTree(t *testing.T) {
 			require.True(t, verified)
 
 			b++
+			if j == 1 {
+				break
+			}
 		}
 		entries[i] = e
 	}
@@ -66,11 +73,17 @@ func TestMerkleTree(t *testing.T) {
 			entireBlock := entries[i][j*(blockLen+proofLen) : (j+1)*(blockLen+proofLen)]
 			data := entireBlock[:blockLen]
 			encodedProof := entireBlock[blockLen:]
+			//fmt.Println("Extracted:", hex.EncodeToString(data), hex.EncodeToString(encodedProof))
+			fmt.Println("")
 			proof := DecodeProof(encodedProof)
+			fmt.Printf("Extracted proof: %#v\n", proof)
 			verified, err := merkletree.VerifyProof(data, proof, root)
 			require.NoError(t, err)
 			require.True(t, verified)
 			fmt.Println(verified)
+			if j == 1 {
+				break
+			}
 		}
 	}
 }
