@@ -41,6 +41,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// multithreading
 	// channel to pass the chunksChan from the routines back
 	numCores := runtime.NumCPU()
+	//numCores := 2
 	chunksChan := make(chan []field.Element, numCores*(db.BlockSize+1))
 	chunkLen := int(math.Ceil(float64(db.NumColumns) / float64(numCores)))
 	var numWorkers int
@@ -51,7 +52,6 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// we have to traverse column by column
 	var begin, end int
 	for i := 0; i < db.NumRows; i++ {
-		var result []field.Element
 		numWorkers = 0
 		for j := 0; j < db.NumColumns; j += chunkLen {
 			// avoiding overflow when chunkLen does not divide db.Columns evenly
@@ -64,7 +64,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 			go processChunk(db.Entries[i][begin:end], db.BlockSize, qZeroBase[j:j+chunkLen], qOne[begin:end], chunksChan)
 			numWorkers++
 		}
-		result = combineChunkResults(numWorkers, db.BlockSize+1, chunksChan)
+		result := combineChunkResults(numWorkers, db.BlockSize+1, chunksChan)
 		copy(m[i*(db.BlockSize+1):(i+1)*(db.BlockSize+1)], result)
 	}
 	close(chunksChan)
@@ -72,6 +72,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	return m
 }
 
+// processing a chunk of a database row
 func processChunk(dbChunk []field.Element, blockLen int, qZ []field.Element, qO []field.Element, reply chan<- []field.Element) {
 	var prodTag, prod field.Element
 	sumTag := field.Zero()
@@ -93,6 +94,7 @@ func processChunk(dbChunk []field.Element, blockLen int, qZ []field.Element, qO 
 	reply <- append(sum, sumTag)
 }
 
+// combine the results of processing a row by different routines
 func combineChunkResults(nw int, resLen int, workerReplies <-chan []field.Element) []field.Element {
 	product := make([]field.Element, resLen)
 	for i := 0; i < nw; i++ {

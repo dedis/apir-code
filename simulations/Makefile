@@ -1,13 +1,7 @@
-.PHONY: install lint run_simul benchmarks performance
-
-install:
-	go get -u -t ./...
-
-lint:
-	golint ./...
+.PHONY: run_simul benchmarks performance
 
 run_simul: 
-	env GOGC=10000 go run . -config=$(config) # -cpuprofile=$(config).prof
+	env GOGC=8000 go run . -config=$(config) # -cpuprofile=$(config).prof
 
 benchmarks:
 	$(MAKE) -s run_simul config=vpirSingleVector.toml; \
