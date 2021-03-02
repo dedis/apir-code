@@ -16,8 +16,6 @@ import (
 
 func TestMultiBitVectorOneMbMerkle(t *testing.T) {
 	dbLen := oneMB
-	// we want to download the same number of bytes
-	// as in the field representation
 	blockLen := testBlockLength * field.Bytes
 	nRows := 1
 
@@ -27,7 +25,7 @@ func TestMultiBitVectorOneMbMerkle(t *testing.T) {
 
 	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksDPFMerkle(t, xof, db, db.NumRows*db.NumColumns, "DPFMultiBitVectorMerkle")
+	retrieveBlocksITMerkle(t, xof, db, db.NumRows*db.NumColumns, "DPFMultiBitVectorMerkle")
 }
 
 func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
@@ -44,7 +42,29 @@ func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
 
 	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksDPFMerkle(t, xof, db, numBlocks, "MultiBitMatrixOneMbPIR")
+	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MultiBitMatrixOneMbPIR")
+}
+
+func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
+	c := client.NewPIR(rnd, &db.Info)
+	s0 := server.NewPIR(db)
+	s1 := server.NewPIR(db)
+
+	totalTimer := monitor.NewMonitor()
+	for i := 0; i < numBlocks; i++ {
+		queries := c.Query(i, 2)
+
+		a0 := s0.Answer(queries[0])
+		a1 := s1.Answer(queries[1])
+
+		answers := [][]byte{a0, a1}
+
+		res, err := c.Reconstruct(answers)
+		require.NoError(t, err)
+		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize-db.ProofLen], res)
+	}
+
+	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 }
 
 func retrieveBlocksDPFMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
