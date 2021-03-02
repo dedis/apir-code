@@ -37,8 +37,8 @@ func newProof(hashes [][]byte, index uint64) *Proof {
 // against historical trees without having to instantiate them.
 //
 // This returns true if the proof is verified, otherwise false.
-func VerifyProof(data []byte, salt bool, proof *Proof, pollard [][]byte) (bool, error) {
-	return VerifyProofUsing(data, salt, proof, pollard, NewSHA256())
+func VerifyProof(data []byte, salt bool, proof *Proof, root []byte) (bool, error) {
+	return VerifyProofUsing(data, salt, proof, root, NewSHA256())
 }
 
 // VerifyProofUsing verifies a Merkle tree proof for a piece of data using the provided hash type.
@@ -47,12 +47,10 @@ func VerifyProof(data []byte, salt bool, proof *Proof, pollard [][]byte) (bool, 
 // against historical trees without having to instantiate them.
 //
 // This returns true if the proof is verified, otherwise false.
-func VerifyProofUsing(data []byte, salt bool, proof *Proof, pollard [][]byte, hashType HashType) (bool, error) {
+func VerifyProofUsing(data []byte, salt bool, proof *Proof, root []byte, hashType HashType) (bool, error) {
 	proofHash := generateProofHash(data, salt, proof, hashType)
-	for i := 0; i < len(pollard)/2+1; i++ {
-		if bytes.Equal(pollard[len(pollard)-1-i], proofHash) {
-			return true, nil
-		}
+	if bytes.Equal(root, proofHash) {
+		return true, nil
 	}
 	return false, nil
 }

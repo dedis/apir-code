@@ -43,14 +43,14 @@ func TestMerkleTree(t *testing.T) {
 	for i := range entries {
 		e := make([]byte, 0)
 		for j := 0; j < blocksPerRow; j++ {
-			p, err := tree.GenerateProof(blocks[b], 0)
+			p, err := tree.GenerateProof(blocks[b])
 			require.NoError(t, err)
 			encodedProof := encodeProof(p)
 			e = append(e, append(blocks[b], encodedProof...)...)
 			proofLen = len(encodedProof) // always same length
 
 			// first verification here
-			verified, err := merkle.VerifyProof(blocks[b], false, p, [][]byte{root})
+			verified, err := merkle.VerifyProof(blocks[b], false, p, root)
 			require.NoError(t, err)
 			require.True(t, verified)
 
@@ -66,7 +66,7 @@ func TestMerkleTree(t *testing.T) {
 			data := entireBlock[:blockLen]
 			encodedProof := entireBlock[blockLen:]
 			proof := DecodeProof(encodedProof)
-			verified, err := merkle.VerifyProof(data, false, proof, [][]byte{root})
+			verified, err := merkle.VerifyProof(data, false, proof, root)
 			require.NoError(t, err)
 			require.True(t, verified)
 		}
@@ -87,7 +87,7 @@ func TestEncodeDecodeProof(t *testing.T) {
 	require.NoError(t, err)
 
 	// generate a proof for random element
-	proof, err := tree.GenerateProof(data[rand.Intn(len(data))], 0)
+	proof, err := tree.GenerateProof(data[rand.Intn(len(data))])
 	require.NoError(t, err)
 
 	// encode the proof

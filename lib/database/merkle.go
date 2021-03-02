@@ -38,7 +38,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	for i := range entries {
 		e := make([]byte, 0)
 		for j := 0; j < blocksPerRow; j++ {
-			p, err := tree.GenerateProof(blocks[b], 0)
+			p, err := tree.GenerateProof(blocks[b])
 			encodedProof := encodeProof(p)
 			if err != nil {
 				log.Fatalf("error while generating proof for block %v: %v", b, err)
@@ -49,42 +49,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 		}
 		entries[i] = e
 	}
-	//db := CreateRandomMultiBitBytes(rnd, dbLen, numRows, blockLen)
-
-	//// a leaf contains a block, which has the same numbers of bytes as a
-	//// block composed of field elements
-	//blocks := entriesToBlocks(db.Entries, blockLen)
-	//tree, err := merkletree.New(blocks)
-	//if err != nil {
-	//log.Fatalf("impossible to create Merkle tree: %v", err)
-	//}
-
-	// get the root hash of the tree
 	root := tree.Root()
-
-	// generate and (gob) encode all the proofs
-	//proofs := make([][]byte, len(blocks))
-	//for i, b := range blocks {
-	//p, err := tree.GenerateProof(b)
-	//if err != nil {
-	//log.Fatalf("error while generating proof for block %v: %v", b, err)
-	//}
-	//proofs[i] = encodeProof(p)
-	//proofLen = len(proofs[i]) // always same length
-	//}
-
-	// enlarge the database, i.e., add the proof for every block
-	//ee := make([][]byte, len(db.Entries))
-	//p := 0
-	//bl := blockLen
-	//for i := range db.Entries {
-	//ee[i] = make([]byte, 0)
-	//for j := 0; j < len(db.Entries[0])-bl; j += bl {
-	////ee[i] = append(ee[i], append(db.Entries[i][j:j+bl], proofs[p]...)...)
-	//ee[i] = append(ee[i], append(blocks[p], proofs[p]...)...)
-	//p++
-	//}
-	//}
 
 	m := &Bytes{
 		Entries: entries,

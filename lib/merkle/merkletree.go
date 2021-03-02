@@ -43,21 +43,20 @@ func (t *MerkleTree) indexOf(input []byte) (uint64, error) {
 }
 
 // GenerateProof generates the proof for a piece of data.
-// Height is the height of the pollard to verify the proof.  If using the Merkle root to verify this should be 0.
 // If the data is not present in the tree this will return an error.
 // If the data is present in the tree this will return the hashes for each level in the tree and the index of the value in the tree
-func (t *MerkleTree) GenerateProof(data []byte, height int) (*Proof, error) {
+func (t *MerkleTree) GenerateProof(data []byte) (*Proof, error) {
 	// Find the index of the data
 	index, err := t.indexOf(data)
 	if err != nil {
 		return nil, err
 	}
 
-	proofLen := int(math.Ceil(math.Log2(float64(len(t.data))))) - height
+	proofLen := int(math.Ceil(math.Log2(float64(len(t.data)))))
 	hashes := make([][]byte, proofLen)
 
 	cur := 0
-	minI := uint64(math.Pow(2, float64(height+1))) - 1
+	minI := uint64(math.Pow(2, float64(1))) - 1
 	for i := index + uint64(len(t.nodes)/2); i > minI; i /= 2 {
 		hashes[cur] = t.nodes[i^1]
 		cur++
