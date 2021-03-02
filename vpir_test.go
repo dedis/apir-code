@@ -117,6 +117,7 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 	s1 := server.NewIT(db)
 
 	totalTimer := monitor.NewMonitor()
+	fmt.Println(numBlocks)
 	for i := 0; i < numBlocks; i++ {
 		queries := c.Query(i, 2)
 
@@ -132,7 +133,6 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 		} else {
 			require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
 		}
-
 	}
 	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
 }
