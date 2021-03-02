@@ -7,7 +7,9 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
 	"path"
+	"runtime/pprof"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -41,8 +43,19 @@ type Simulation struct {
 }
 
 func main() {
+	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	indivConfigFile := flag.String("config", "", "config file for simulation")
 	flag.Parse()
+
+	// CPU profiling
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	// make sure cfg file is specified
 	if *indivConfigFile == "" {
