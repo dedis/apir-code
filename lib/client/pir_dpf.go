@@ -89,7 +89,7 @@ func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 
 		// check Merkle proof
 		encodedProof := block[c.dbInfo.BlockSize-c.dbInfo.ProofLen:]
-		proof := database.DecodeProof(encodedProof)
+		proof := merkle.DecodeProof(encodedProof)
 		verified, err := merkle.VerifyProof(data, false, proof, c.dbInfo.Root)
 		if err != nil {
 			log.Fatalf("impossible to verify proof: %v", err)

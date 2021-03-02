@@ -2,7 +2,6 @@ package database
 
 import (
 	"log"
-	"math/rand"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/merkle"
@@ -45,7 +44,7 @@ func TestMerkleTree(t *testing.T) {
 		for j := 0; j < blocksPerRow; j++ {
 			p, err := tree.GenerateProof(blocks[b])
 			require.NoError(t, err)
-			encodedProof := encodeProof(p)
+			encodedProof := merkle.EncodeProof(p)
 			e = append(e, append(blocks[b], encodedProof...)...)
 			proofLen = len(encodedProof) // always same length
 
@@ -65,36 +64,10 @@ func TestMerkleTree(t *testing.T) {
 			entireBlock := entries[i][j*(blockLen+proofLen) : (j+1)*(blockLen+proofLen)]
 			data := entireBlock[:blockLen]
 			encodedProof := entireBlock[blockLen:]
-			proof := DecodeProof(encodedProof)
+			proof := merkle.DecodeProof(encodedProof)
 			verified, err := merkle.VerifyProof(data, false, proof, root)
 			require.NoError(t, err)
 			require.True(t, verified)
 		}
 	}
-}
-
-func TestEncodeDecodeProof(t *testing.T) {
-	rng := utils.RandomPRG()
-	data := make([][]byte, rand.Intn(501))
-	for i := range data {
-		d := make([]byte, 32)
-		rng.Read(d)
-		data[i] = d
-	}
-
-	// create the tree
-	tree, err := merkle.New(data)
-	require.NoError(t, err)
-
-	// generate a proof for random element
-	proof, err := tree.GenerateProof(data[rand.Intn(len(data))])
-	require.NoError(t, err)
-
-	// encode the proof
-	b := encodeProof(proof)
-
-	// decode proof
-	p := DecodeProof(b)
-
-	require.Equal(t, *proof, *p)
 }

@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/binary"
 	"io"
 	"log"
 
@@ -39,7 +38,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 		e := make([]byte, 0)
 		for j := 0; j < blocksPerRow; j++ {
 			p, err := tree.GenerateProof(blocks[b])
-			encodedProof := encodeProof(p)
+			encodedProof := merkle.EncodeProof(p)
 			if err != nil {
 				log.Fatalf("error while generating proof for block %v: %v", b, err)
 			}
@@ -64,46 +63,4 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	}
 
 	return m
-}
-
-func DecodeProof(p []byte) *merkle.Proof {
-	// number of hashes
-	numHashes := binary.LittleEndian.Uint32(p[0:])
-
-	// hashes
-	hashLength := uint32(32) // sha256
-	hashes := make([][]byte, numHashes)
-	for i := uint32(0); i < numHashes; i++ {
-		hashes[i] = p[4+hashLength*i : 4+hashLength*(i+1)]
-	}
-
-	// index
-	index := binary.LittleEndian.Uint64(p[len(p)-8:])
-
-	return &merkle.Proof{
-		Hashes: hashes,
-		Index:  index,
-	}
-}
-
-func encodeProof(p *merkle.Proof) []byte {
-	out := make([]byte, 0)
-
-	// encode number of hashes
-	numHashes := uint32(len(p.Hashes))
-	b := make([]byte, 4)
-	binary.LittleEndian.PutUint32(b, numHashes)
-	out = append(out, b...)
-
-	// encode hashes
-	for _, h := range p.Hashes {
-		out = append(out, h...)
-	}
-
-	// encode index
-	b1 := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b1, p.Index)
-	out = append(out, b1...)
-
-	return out
 }
