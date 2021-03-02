@@ -4,6 +4,7 @@ import (
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"math"
 	"runtime"
 )
 
@@ -41,19 +42,26 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// channel to pass the chunksChan from the routines back
 	numCores := runtime.NumCPU()
 	chunksChan := make(chan []field.Element, numCores*(db.BlockSize+1))
-	var chunkLen int = db.NumColumns / numCores
+	chunkLen := int(math.Ceil(float64(db.NumColumns) / float64(numCores)))
 	var numWorkers int
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
 	// in DB(2^128)^b are executed component-wise
 	m := make([]field.Element, db.NumRows*(db.BlockSize+1))
 	// we have to traverse column by column
+	var begin, end int
 	for i := 0; i < db.NumRows; i++ {
 		var result []field.Element
 		numWorkers = 0
-		for c := 0; c < numCores; c++ {
-			go processChunk(db.Entries[i][c*chunkLen*db.BlockSize:(c+1)*chunkLen*db.BlockSize], db.BlockSize,
-				qZeroBase[c*chunkLen:(c+1)*chunkLen], qOne[c*chunkLen*db.BlockSize:(c+1)*chunkLen*db.BlockSize], chunksChan)
+		for j := 0; j < db.NumColumns; j += chunkLen {
+			// avoiding overflow when chunkLen does not divide db.Columns evenly
+			if j + chunkLen > db.NumColumns {
+				chunkLen = db.NumColumns - j
+			}
+			begin = j*db.BlockSize
+			end = (j+chunkLen)*db.BlockSize
+			//fmt.Println(begin, end)
+			go processChunk(db.Entries[i][begin:end], db.BlockSize, qZeroBase[j:j+chunkLen], qOne[begin:end], chunksChan)
 			numWorkers++
 		}
 		result = combineChunkResults(numWorkers, db.BlockSize+1, chunksChan)
