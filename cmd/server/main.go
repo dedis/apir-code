@@ -57,7 +57,6 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// generate db
-	// TODO: generate different db if PIR
 	log.Println("Starting to read in the DB data")
 	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
 	filePath := filepath.Join(sksDir, "sks-000.pgp")
