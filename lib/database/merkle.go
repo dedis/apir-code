@@ -107,25 +107,3 @@ func encodeProof(p *merkle.Proof) []byte {
 
 	return out
 }
-
-func entriesToBlocks(e [][]byte, blockLength int) [][]byte {
-	blocks := make([][]byte, 0)
-	var block []byte
-	for i := range e {
-		for j := 0; j < len(e[0]); j += blockLength {
-			end := j + blockLength
-			if end > len(e[0]) {
-				// pad here with 0 bytes. We don't care about
-				// the padding as this is not used in the PoC
-				padLength := end - len(e[0])
-				pad := make([]byte, padLength)
-				block = append(e[i][j:end-padLength], pad...)
-			} else {
-				block = e[i][j:end]
-			}
-			blocks = append(blocks, block)
-		}
-	}
-
-	return blocks
-}
