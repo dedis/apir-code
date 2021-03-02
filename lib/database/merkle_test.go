@@ -1,14 +1,13 @@
 package database
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"testing"
 
+	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
-	merkletree "github.com/wealdtech/go-merkletree"
 )
 
 func TestMerkleTree(t *testing.T) {
@@ -31,7 +30,7 @@ func TestMerkleTree(t *testing.T) {
 	}
 
 	// generate tree
-	tree, err := merkletree.New(blocks)
+	tree, err := merkle.New(blocks)
 	if err != nil {
 		log.Fatalf("impossible to create Merkle tree: %v", err)
 	}
@@ -44,25 +43,18 @@ func TestMerkleTree(t *testing.T) {
 	for i := range entries {
 		e := make([]byte, 0)
 		for j := 0; j < blocksPerRow; j++ {
-			p, err := tree.GenerateProof(blocks[b])
-			fmt.Printf("Original proof: %#v\n", p)
+			p, err := tree.GenerateProof(blocks[b], 0)
 			require.NoError(t, err)
 			encodedProof := encodeProof(p)
 			e = append(e, append(blocks[b], encodedProof...)...)
 			proofLen = len(encodedProof) // always same length
 
-			//fmt.Println("Original:", hex.EncodeToString(blocks[b]), hex.EncodeToString(encodedProof))
-			fmt.Println("")
-
 			// first verification here
-			verified, err := merkletree.VerifyProof(blocks[b], p, root)
+			verified, err := merkle.VerifyProof(blocks[b], false, p, [][]byte{root})
 			require.NoError(t, err)
 			require.True(t, verified)
 
 			b++
-			if j == 1 {
-				break
-			}
 		}
 		entries[i] = e
 	}
@@ -73,17 +65,10 @@ func TestMerkleTree(t *testing.T) {
 			entireBlock := entries[i][j*(blockLen+proofLen) : (j+1)*(blockLen+proofLen)]
 			data := entireBlock[:blockLen]
 			encodedProof := entireBlock[blockLen:]
-			//fmt.Println("Extracted:", hex.EncodeToString(data), hex.EncodeToString(encodedProof))
-			fmt.Println("")
 			proof := DecodeProof(encodedProof)
-			fmt.Printf("Extracted proof: %#v\n", proof)
-			verified, err := merkletree.VerifyProof(data, proof, root)
+			verified, err := merkle.VerifyProof(data, false, proof, [][]byte{root})
 			require.NoError(t, err)
 			require.True(t, verified)
-			fmt.Println(verified)
-			if j == 1 {
-				break
-			}
 		}
 	}
 }
@@ -98,11 +83,11 @@ func TestEncodeDecodeProof(t *testing.T) {
 	}
 
 	// create the tree
-	tree, err := merkletree.New(data)
+	tree, err := merkle.New(data)
 	require.NoError(t, err)
 
 	// generate a proof for random element
-	proof, err := tree.GenerateProof(data[rand.Intn(len(data))])
+	proof, err := tree.GenerateProof(data[rand.Intn(len(data))], 0)
 	require.NoError(t, err)
 
 	// encode the proof

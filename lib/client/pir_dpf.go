@@ -11,7 +11,7 @@ import (
 	"github.com/dimakogan/dpf-go/dpf"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	merkletree "github.com/wealdtech/go-merkletree"
+	"github.com/si-co/vpir-code/lib/merkle"
 )
 
 // PIRdpf represent the client for the DPF-based multi-bit classical PIR scheme
@@ -90,7 +90,7 @@ func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
 		// check Merkle proof
 		encodedProof := block[c.dbInfo.BlockSize-c.dbInfo.ProofLen:]
 		proof := database.DecodeProof(encodedProof)
-		verified, err := merkletree.VerifyProof(data, proof, c.dbInfo.Root)
+		verified, err := merkle.VerifyProof(data, false, proof, [][]byte{c.dbInfo.Root})
 		if err != nil {
 			log.Fatalf("impossible to verify proof: %v", err)
 		}

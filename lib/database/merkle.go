@@ -5,7 +5,7 @@ import (
 	"io"
 	"log"
 
-	merkletree "github.com/wealdtech/go-merkletree"
+	"github.com/si-co/vpir-code/lib/merkle"
 )
 
 // CreateRandomMultiBitMerkle
@@ -26,7 +26,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	}
 
 	// generate tree
-	tree, err := merkletree.New(blocks)
+	tree, err := merkle.New(blocks)
 	if err != nil {
 		log.Fatalf("impossible to create Merkle tree: %v", err)
 	}
@@ -38,7 +38,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	for i := range entries {
 		e := make([]byte, 0)
 		for j := 0; j < blocksPerRow; j++ {
-			p, err := tree.GenerateProof(blocks[b])
+			p, err := tree.GenerateProof(blocks[b], 0)
 			encodedProof := encodeProof(p)
 			if err != nil {
 				log.Fatalf("error while generating proof for block %v: %v", b, err)
@@ -101,7 +101,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	return m
 }
 
-func DecodeProof(p []byte) *merkletree.Proof {
+func DecodeProof(p []byte) *merkle.Proof {
 	// number of hashes
 	numHashes := binary.LittleEndian.Uint32(p[0:])
 
@@ -115,13 +115,13 @@ func DecodeProof(p []byte) *merkletree.Proof {
 	// index
 	index := binary.LittleEndian.Uint64(p[len(p)-8:])
 
-	return &merkletree.Proof{
+	return &merkle.Proof{
 		Hashes: hashes,
 		Index:  index,
 	}
 }
 
-func encodeProof(p *merkletree.Proof) []byte {
+func encodeProof(p *merkle.Proof) []byte {
 	out := make([]byte, 0)
 
 	// encode number of hashes
