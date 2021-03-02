@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"encoding/gob"
-	"errors"
 	"io"
 	"log"
 	"math/bits"
@@ -11,7 +10,6 @@ import (
 	"github.com/dimakogan/dpf-go/dpf"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/merkle"
 )
 
 // PIRdpf represent the client for the DPF-based multi-bit classical PIR scheme
@@ -77,29 +75,5 @@ func (c *PIRdpf) ReconstructBytes(a [][]byte) (interface{}, error) {
 
 // Reconstruct reconstruct the entry of the database from answers
 func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
-	switch c.dbInfo.PIRType {
-	case "classical", "":
-		return reconstructPIR(answers, c.dbInfo, c.state)
-	case "merkle":
-		block, err := reconstructPIR(answers, c.dbInfo, c.state)
-		if err != nil {
-			return block, err
-		}
-		data := block[:c.dbInfo.BlockSize-c.dbInfo.ProofLen]
-
-		// check Merkle proof
-		encodedProof := block[c.dbInfo.BlockSize-c.dbInfo.ProofLen:]
-		proof := merkle.DecodeProof(encodedProof)
-		verified, err := merkle.VerifyProof(data, false, proof, c.dbInfo.Root)
-		if err != nil {
-			log.Fatalf("impossible to verify proof: %v", err)
-		}
-		if !verified {
-			return nil, errors.New("REJECT!")
-		}
-
-		return data, nil
-	default:
-		panic("unknown PIRType")
-	}
+	return reconstructPIR(answers, c.dbInfo, c.state)
 }

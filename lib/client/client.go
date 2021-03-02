@@ -5,11 +5,13 @@ import (
 	"encoding/gob"
 	"errors"
 	"io"
+	"log"
 
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/merkle"
 )
 
 // Client represents the client instance in both the IT and DPF-based schemes
@@ -143,6 +145,34 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 }
 
 func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]byte, error) {
+	switch dbInfo.PIRType {
+	case "classical", "":
+		return reconstructValuePIR(answers, dbInfo, state)
+	case "merkle":
+		block, err := reconstructValuePIR(answers, dbInfo, state)
+		if err != nil {
+			return block, err
+		}
+		data := block[:dbInfo.BlockSize-dbInfo.ProofLen]
+
+		// check Merkle proof
+		encodedProof := block[dbInfo.BlockSize-dbInfo.ProofLen:]
+		proof := merkle.DecodeProof(encodedProof)
+		verified, err := merkle.VerifyProof(data, false, proof, dbInfo.Root)
+		if err != nil {
+			log.Fatalf("impossible to verify proof: %v", err)
+		}
+		if !verified {
+			return nil, errors.New("REJECT!")
+		}
+
+		return data, nil
+	default:
+		panic("unknown PIRType")
+	}
+}
+
+func reconstructValuePIR(answers [][]byte, dbInfo *database.Info, state *state) ([]byte, error) {
 	sum := make([][]byte, dbInfo.NumRows)
 
 	// sum answers as vectors in GF(2)
