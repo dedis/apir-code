@@ -80,10 +80,6 @@ func Gen(alpha uint64, beta []field.Element, logN uint64) (DPFkey, DPFkey) {
 	if alpha >= (1<<logN) || logN > 63 {
 		panic("dpf: invalid parameters")
 	}
-	// TODO: Figure out why this check is needed. Disabled for the moment.
-	//if len(beta) > 256 {
-	//	panic("dpf: maximum len(beta) is 256")
-	//}
 	var ka, kb DPFkey
 	ka.ServerIdx = 0
 	kb.ServerIdx = 1
