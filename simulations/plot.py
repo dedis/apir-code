@@ -7,8 +7,8 @@ resultFolder = "results/"
 width = 0.3
 
 # styles
-markers = ['d', 's', 'x', '.']
-linestyles = ['--', '-', ':', '-.']
+markers = ['.', 'x', 'd', 's']
+linestyles = ['-', '--', ':', '-.']
 patterns = ['', '.', '//']
 
 
@@ -171,7 +171,7 @@ def plotVpirBenchmarksBarBw():
 
 def plotVpirBenchmarks():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
+    labels = ["Single-bit", "Multi-bit", "Block"]
     colors = ['black', 'grey', 'lightgrey']
 
     fig, ax = plt.subplots()
@@ -203,52 +203,63 @@ def plotVpirBenchmarks():
     # ax.spines['left'].set_visible(False)
 
     # plt.tick_params(left=False, labelleft=False)
+    plt.tight_layout()
     plt.yscale('log')
-    plt.title("Retrieval of 256B data from a DB of different sizes")
-    plt.savefig('benchmarks.eps', format='eps', dpi=300, transparent=True)
+    # plt.title("Retrieval of 256B data from a DB of different sizes")
+    plt.savefig('multi_benchmarks.eps', format='eps', dpi=300, transparent=True)
     # plt.show()
 
 
 def plotVpirPerformance():
-    colors = ['darkred', 'darkorange', 'darkgreen', 'darkblue']
-    devcolors = ['mistyrose', 'papayawhip', 'honeydew', 'ghostwhite']
-    schemes = ["vpirMultiMatrix.json", "vpirMultiVectorBlockDPF.json", "pirMatrix.json", "pirDPF.json"]
-    labels = ["VPIR rebalanced", "VPIR DPF", "PIR rebalanced", "PIR DPF"]
-    lines = []
+    colors = ['darkred', 'darkblue', 'darkorange', 'darkgreen']
+    devcolors = ['mistyrose', 'ghostwhite', 'papayawhip', 'honeydew']
+    schemes = ["vpirMultiMatrixBlock.json", "vpirMultiVectorBlockDPF.json", "pirMatrix.json", "pirDPF.json"]
+    labels = ["CPU rebalanced", "BW rebalanced", "CPU DPF", "BW DPF"]
 
     fig, ax1 = plt.subplots()
-    ax1.legend(fontsize=12)
-    ax1.set_ylabel('CPU time [ms]')
+    ax1.set_ylabel('VPIR/PIR CPU ratio')
     ax1.set_xlabel('Database size [MB]')
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
 
-    # ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    # ax2.set_ylabel("Bandwidth [B]")
-    # ax2.spines['top'].set_visible(False)
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    ax2.set_ylabel("VPIR/PIR bandwidth ratio")
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['right'].set_linestyle((0, (5, 10)))
     # ax2.set_yscale('log')
 
-    width = 0.3
-    for i, scheme in enumerate(schemes):
+    # Save PIR values first so we can divide by them later
+    Xpir, Ypir, Ypirbw = [], [], []
+    for scheme in schemes[int(len(schemes)/2):]:
         stats = allStats(resultFolder + scheme)
-        Xs, Ys, Yerr, Xbw, Ybw = [], [], [], [], []
         for dbSize in sorted(stats.keys()):
-            Xs.append(dbSize/8000000)
-            Ys.append(stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean'])
-            Yerr.append(stats[dbSize]['client']['cpu']['std'] + stats[dbSize]['server']['cpu']['std'])
-            # Xbw.append(dbSize/8000000 + i*width)
-            # Ybw.append(stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean'])
+            Xpir.append(dbSize/8000000)
+            Ypir.append(stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean'])
+            Ypirbw.append(stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean'])
 
-        print(Ys)
-        lines.append(ax1.errorbar(Xs, Ys, yerr=Yerr, color=colors[i], label=labels[i], marker=markers[i], linestyle=linestyles[i]))
-        # ax2.bar(Xbw, Ybw, width, color=colors[i])
-        # ax.fill_between(Xs, Yerrdown, Yerrup, facecolor=devcolors[i])
+    j = 0
+    for i, scheme in enumerate(schemes[:int(len(schemes)/2)]):
+        stats = allStats(resultFolder + scheme)
+        Xs, Ys, Ybw = [], [], []
+        for dbSize in sorted(stats.keys()):
+            if Xpir[j] == dbSize/8000000:
+                Xs.append(dbSize/8000000)
+                Ys.append((stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']) / Ypir[j])
+                Ybw.append((stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']) / Ypirbw[j])
+            else:
+                print("Xs do not align")
+                break
+            j += 1
 
-    ax1.legend(lines, labels, fontsize=12)
-    # ax2.set_xticks(np.array(Xs) + width*(len(Xs)-1) / 2)
-    plt.axis()
-    plt.title("Performance of VPIR vs PIR for different db sizes")
-    plt.savefig('performance.eps', format='eps', dpi=300, transparent=True)
+        ax1.plot(Xs, Ys, color=colors[i], marker=markers[i], linestyle=linestyles[0], label=labels[2*i])
+        ax2.plot(Xs, Ybw, color=colors[i], marker=markers[i], linestyle=linestyles[1], label=labels[2*i+1])
+
+    handles, labels = [(a + b) for a, b in zip(ax1.get_legend_handles_labels(), ax2.get_legend_handles_labels())]
+    plt.legend(handles, labels, bbox_to_anchor=(0.95, 0.7), loc='center right',
+               ncol=1, borderaxespad=0.)
+    plt.tight_layout()
+    # plt.title("CPU and bandwidth VPIR-to-PIR ratio")
+    plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
     # plt.show()
 
 
@@ -260,6 +271,7 @@ args = parser.parse_args()
 EXPR = args.expr
 
 if __name__ == "__main__":
+    prepare_for_latex()
     if EXPR == "benchmarks":
         plotVpirBenchmarks()
     elif EXPR == "performance":
