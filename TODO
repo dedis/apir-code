@@ -1,6 +1,0 @@
-* Code
-  - parallelize server in both VPIR and PIR
-
-* Experiments
-  - Check constants in toml files
-  - store bandwidth
