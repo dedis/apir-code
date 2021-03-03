@@ -100,7 +100,7 @@ func main() {
 	}
 
 	// get and store db info
-	lc.runDBInfo()
+	lc.retrieveDBInfo()
 
 	// start correct client
 	var c client.Client
@@ -127,6 +127,7 @@ func main() {
 		for {
 			var id string
 			fmt.Scanln(&id)
+			t := time.Now()
 			if id == "" {
 				log.Fatal("id not provided")
 			}
@@ -166,11 +167,12 @@ func main() {
 				log.Fatalf("error armor-encoding the key: %v", err)
 			}
 			fmt.Println(armored)
+			fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
 		}
 	}
 }
 
-func (lc *localClient) runDBInfo() {
+func (lc *localClient) retrieveDBInfo() {
 	subCtx, cancel := context.WithTimeout(lc.ctx, time.Second)
 	defer cancel()
 

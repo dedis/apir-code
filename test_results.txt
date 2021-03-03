@@ -1,9 +1,0 @@
-Total time MultiBitVectorOneMbPIR: 494.06ms
-Total time MultiBitMatrixOneMbPIR: 758.55ms
-Total time DPFMultiBitVectorPIR: 488.5ms
-Total time MultiBitVectorOneMbVPIR: 44276.59ms
-Total time MultiBitMatrixOneMbVPIR: 23815.14ms
-Total time DPFMultiBitVectorVPIR: 50775.7ms
-Total time DPFMultiBitMatrixVPIR: 24474.1ms
-PASS
-ok  	github.com/si-co/vpir-code	127.352s

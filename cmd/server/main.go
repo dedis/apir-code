@@ -56,15 +56,11 @@ func main() {
 	}
 	addr := config.Addresses[*sid]
 
-	// generate db
-	log.Println("Starting to read in the DB data")
-	sksDir := filepath.Join("data", pgp.SksDestinationFolder)
-	filePath := filepath.Join(sksDir, "sks-000.pgp")
-	db, err := database.GenerateRealKeyDB([]string{filePath}, constants.ChunkBytesLength, true)
+	// load the db
+	db, err := loadPgpDB()
 	if err != nil {
-		log.Fatalf("impossible to generate real keys db: %v", err)
+		log.Fatalf("impossible to construct real keys db: %v", err)
 	}
-	log.Println("DB generated")
 
 	// run server with TLS
 	cfg := &tls.Config{
@@ -135,4 +131,23 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	log.Printf("answer size in bytes: %d", len(a))
 
 	return &proto.QueryResponse{Answer: a}, nil
+}
+
+func loadPgpDB() (*database.DB, error) {
+	log.Println("Starting to read in the DB data")
+	sksDir := filepath.Join("data", pgp.SksParsedFolder)
+	rgx := `sks-000\.pgp`
+	// change to below to get only the full db
+	//rgx := `sks-[0-9]{3}\.pgp`
+	files, err := pgp.GetFilesThatMatch(sksDir, rgx)
+	if err != nil {
+		return nil, err
+	}
+	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, false)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("DB loaded")
+
+	return db, nil
 }

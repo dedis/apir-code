@@ -220,18 +220,6 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 	return z, nil
 }
 
-// PowerVectorWithOne returns vector (1, alpha, ..., alpha^(length))
-func PowerVectorWithOne(alpha Element, length int) []Element {
-	a := make([]Element, length+1)
-	a[0] = One()
-	a[1] = alpha
-	for i := 2; i < len(a); i++ {
-		a[i].Mul(&a[i-1], &alpha)
-	}
-
-	return a
-}
-
 // RandomVectorPointers returns a vector composed of length random pointers
 // to field elements
 func RandomVectorPointers(rnd io.Reader, length int) ([]*Element, error) {
@@ -268,24 +256,6 @@ func RandomVector(rnd io.Reader, length int) ([]Element, error) {
 	return zs, nil
 }
 
-func RandomVectors(rnd io.Reader, vectorLen, blockLen int) ([][]Element, error) {
-	bytesLength := (vectorLen*blockLen + 1) * Bytes
-	bytes := make([]byte, bytesLength)
-	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
-		return nil, err
-	}
-	zs := make([][]Element, vectorLen)
-	pos := 0
-	for i := 0; i < vectorLen; i++ {
-		zs[i] = make([]Element, blockLen)
-		for j := 0; j < blockLen; j++ {
-			zs[i][j].SetBytes(bytes[pos : pos+Bytes])
-			pos += Bytes
-		}
-	}
-	return zs, nil
-}
-
 // ZeroVector returns a vector of zero elements
 func ZeroVector(length int) []Element {
 	zeroVector := make([]Element, length)
@@ -299,16 +269,20 @@ func ZeroVector(length int) []Element {
 // VectorToBytes extracts bytes from a vector of field elements.  Assume that
 // only 15 bytes worth of data are embedded in each field element and therefore
 // strips the initial zero from each byte.
-func VectorToBytes(in []Element) []byte {
-	// TODO: preallocate array for efficiency
-	out := make([]byte, 0, len(in)*(Bytes-1))
-	for _, e := range in {
-		fieldBytes := e.Bytes()
-		// strip first zero
-		out = append(out, fieldBytes[1:]...)
+func VectorToBytes(in interface{}) []byte {
+	switch vec := in.(type) {
+	case []Element:
+		elemSize := Bytes - 1
+		out := make([]byte, len(vec)*elemSize)
+		for i, e := range vec {
+			fieldBytes := e.Bytes()
+			// strip first zero and copy to the output
+			copy(out[i*elemSize:(i+1)*elemSize], fieldBytes[1:])
+		}
+		return out
+	default:
+		return nil
 	}
-
-	return out
 }
 
 // One returns 1 (in montgommery form)

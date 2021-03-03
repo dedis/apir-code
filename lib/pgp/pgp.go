@@ -24,7 +24,7 @@ const (
 	keySizeLimit          = eightKiB
 	SksParsedFullFileName = "sks-full.pgp"
 	SksOriginalFolder     = "sks-original"
-	SksDestinationFolder  = "sks"
+	SksParsedFolder       = "sks"
 )
 
 // Key defines a PGP item after processing and saving into a binary file
@@ -145,7 +145,7 @@ func GetFilesThatMatch(dir string, rgx string) ([]string, error) {
 	files := make([]string, 0)
 	for _, file := range allFiles {
 		if re.MatchString(file.Name()) {
-			files = append(files, file.Name())
+			files = append(files, filepath.Join(dir, file.Name()))
 		}
 	}
 	return files, nil

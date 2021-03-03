@@ -30,7 +30,7 @@ func parseSksDump() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = pgp.WriteKeysOnDisk(pgp.SksDestinationFolder, m)
+	err = pgp.WriteKeysOnDisk(pgp.SksParsedFolder, m)
 	if err != nil {
 		log.Fatal(err)
 	}
