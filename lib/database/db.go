@@ -11,7 +11,7 @@ import (
 )
 
 type DB struct {
-	Entries [][]field.Element
+	Entries []field.Element
 	Info
 }
 
@@ -33,10 +33,7 @@ type Info struct {
 }
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
-	entries := make([][]field.Element, numRows)
-	for i := 0; i < numRows; i++ {
-		entries[i] = field.ZeroVector(numColumns * blockSize)
-	}
+	entries := field.ZeroVector(numRows * numColumns * blockSize)
 	return &DB{Entries: entries,
 		Info: Info{NumColumns: numColumns,
 			NumRows:   numRows,
@@ -46,18 +43,14 @@ func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
 }
 
 func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
-	var err error
-	entries := make([][]field.Element, numRows)
 	numColumns := dbLen / (8 * field.Bytes * numRows * blockLen)
 	// handle very small db
 	if numColumns == 0 {
 		numColumns = 1
 	}
-	for i := 0; i < numRows; i++ {
-		entries[i], err = field.RandomVector(rnd, numColumns*blockLen)
-		if err != nil {
-			log.Fatal(err)
-		}
+	entries, err := field.RandomVector(rnd, numRows*numColumns*blockLen)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return &DB{Entries: entries,
 		Info: Info{NumColumns: numColumns,
@@ -69,18 +62,15 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 
 func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) *DB {
 	var tmp field.Element
-	entries := make([][]field.Element, numRows)
+	entries := make([]field.Element, dbLen)
 	numColumns := dbLen / numRows
-	for i := 0; i < numRows; i++ {
-		entries[i] = make([]field.Element, numColumns)
-		for j := 0; j < numColumns; j++ {
-			tmp.SetRandom(rnd)
-			tmpb := tmp.Bytes()[len(tmp.Bytes())-1]
-			if tmpb>>7 == 1 {
-				entries[i][j].SetOne()
-			} else {
-				entries[i][j].SetZero()
-			}
+	for i := 0; i < dbLen; i++ {
+		tmp.SetRandom(rnd)
+		tmpb := tmp.Bytes()[len(tmp.Bytes())-1]
+		if tmpb>>7 == 1 {
+			entries[i].SetOne()
+		} else {
+			entries[i].SetZero()
 		}
 	}
 	return &DB{Entries: entries, Info: Info{NumColumns: numColumns, NumRows: numRows, BlockSize: 0}}

@@ -10,7 +10,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-const numKeysToDBLengthRatio float32 = 0.1
+const numKeysToDBLengthRatio float32 = 0.2
 
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
@@ -55,7 +55,7 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 		}
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
-		copy(db.Entries[k/numColumns][(k%numColumns)*blockLen:(k%numColumns+1)*blockLen], elements)
+		copy(db.Entries[k*blockLen:(k+1)*blockLen], elements)
 	}
 
 	return db, nil

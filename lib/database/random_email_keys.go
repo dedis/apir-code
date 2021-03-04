@@ -64,7 +64,7 @@ func GenerateRandomKeyDB(path string, chunkLength, numRows, numColumns int) (*DB
 		}
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
-		copy(db.Entries[k/numColumns][(k%numColumns)*blockLen:(k%numColumns+1)*blockLen], elements)
+		copy(db.Entries[k*blockLen:(k+1)*blockLen], elements)
 	}
 
 	return db, nil
