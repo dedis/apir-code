@@ -2,6 +2,7 @@ package database
 
 import (
 	"bytes"
+	"fmt"
 	"math"
 	"sort"
 
@@ -21,22 +22,26 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	// all the servers end up with an identical hash table.
 	sortById(keys)
 
+	var numColumns, numRows int
 	// decide on the length of the hash table
 	numBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
+	fmt.Println("Before:", numBlocks)
 	if rebalanced {
 		utils.IncreaseToNextSquare(&numBlocks)
 	}
+	fmt.Println("After:", numBlocks)
 	ht, err := makeHashTable(keys, numBlocks)
 
 	// get the maximum byte length of the values in the hashTable
 	// +1 takes into account the padding 0x80 that is always added.
 	maxBytes := utils.MaxBytesLength(ht) + 1
 	blockLen := int(math.Ceil(float64(maxBytes) / float64(elementLength)))
-	numColumns := numBlocks
-	numRows := 1
 	if rebalanced {
 		numColumns = int(math.Sqrt(float64(numBlocks)))
 		numRows = numColumns
+	} else {
+		numColumns = numBlocks
+		numRows = 1
 	}
 
 	// create all zeros db

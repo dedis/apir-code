@@ -42,16 +42,16 @@ func getCPUTime() float64 {
 		return -1
 	}
 	s, u := rusage.Stime, rusage.Utime // system and user time
-	return iiToMS(int64(s.Sec), int64(s.Usec)) + iiToS(int64(u.Sec), int64(u.Usec))
+	return iiToMS(int64(s.Sec), int64(s.Usec)) + iiToMS(int64(u.Sec), int64(u.Usec))
 }
 
-// Converts to seconds
 // sec is in seconds, usec in microseconds
-func iiToS(sec int64, usec int64) float64 {
-	return float64(sec) + float64(usec)/1000000.0
-}
-
 // Converts to milliseconds
 func iiToMS(sec int64, usec int64) float64 {
 	return float64(sec)*1000.0 + float64(usec)/1000.0
+}
+
+// Converts to seconds
+func iiToS(sec int64, usec int64) float64 {
+	return float64(sec) + float64(usec)/1000000.0
 }
