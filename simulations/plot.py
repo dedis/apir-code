@@ -227,28 +227,29 @@ def plotVpirPerformance():
     ax.spines['right'].set_visible(False)
 
     # ax2.spines['right'].set_linestyle((0, (5, 10)))
-    # ax2.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
 
-    for i, scheme in enumerate(schemes[:int(len(schemes)/2)]):
+    for i, scheme in enumerate(schemes[:int(len(schemes))]):
         Xs, Ys = [], []
         stats = allStats(resultFolder + scheme)
         for dbSize in sorted(stats.keys()):
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            print(bw, cpu)
+            print("%d, %.2f" % (bw, cpu))
             Xs.append(GB/bw)
             Ys.append(1000/cpu)
 
         print(Xs)
         print(Ys)
-        ax.plot(Xs, Ys, color=colors[i % 2], marker=markers[0], linestyle=linestyles[0], label=labels[i])
+        ax.plot(Xs, Ys, color=colors[i % 2], marker=markers[0], linestyle=linestyles[int(i/2)], label=labels[i])
 
-    plt.legend()
+    plt.legend(loc='upper left')
     # plt.legend(bbox_to_anchor=(0.95, 0.7), loc='center right',
     #            ncol=1, borderaxespad=0.)
     plt.tight_layout()
-    # plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
-    plt.show()
+    plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
+    # plt.show()
 
 
 # def plotVpirPerformance():
