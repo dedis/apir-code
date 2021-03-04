@@ -76,6 +76,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	return m
 }
 
+// processing multiple rows by iterating over them
 func processRows(rows []field.Element, blockLen int, qZ []field.Element, qO []field.Element, wg *sync.WaitGroup, output []field.Element) {
 	numElementsInRow := len(qO)
 	for i := 0; i < len(rows)/numElementsInRow; i++ {

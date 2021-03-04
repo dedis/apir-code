@@ -21,6 +21,7 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	// all the servers end up with an identical hash table.
 	sortById(keys)
 
+	var numColumns, numRows int
 	// decide on the length of the hash table
 	numBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
 	if rebalanced {
@@ -32,11 +33,12 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	// +1 takes into account the padding 0x80 that is always added.
 	maxBytes := utils.MaxBytesLength(ht) + 1
 	blockLen := int(math.Ceil(float64(maxBytes) / float64(elementLength)))
-	numColumns := numBlocks
-	numRows := 1
 	if rebalanced {
 		numColumns = int(math.Sqrt(float64(numBlocks)))
 		numRows = numColumns
+	} else {
+		numColumns = numBlocks
+		numRows = 1
 	}
 
 	// create all zeros db
@@ -44,14 +46,14 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 
 	// embed data into field elements
 	for k, v := range ht {
-		// Pad the block to be a multiple of blockLen
-		v = PadBlock(v, blockLen)
+		// Pad the block to be a multiple of elementLength
+		v = PadBlock(v, elementLength)
 		// create empty element vector of a fixed length
-		elements := make([]field.Element, 0)
+		elements := make([]field.Element, len(v)/elementLength)
 		// embed all the bytes
 		for j := 0; j < len(v); j += elementLength {
 			e := new(field.Element).SetBytes(v[j : j+elementLength])
-			elements = append(elements, *e)
+			elements[j/elementLength] = *e
 		}
 		// store in db last block and automatically pad since we start
 		// with an all zeros db
