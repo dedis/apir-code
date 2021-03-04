@@ -128,9 +128,9 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		if db.BlockSize == constants.SingleBitBlockLength {
-			require.Equal(t, db.Entries[i/db.NumColumns][i%db.NumColumns:i%db.NumColumns+1], res)
+			require.Equal(t, db.Entries[i:i+1], res)
 		} else {
-			require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
+			require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize], res)
 		}
 	}
 	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
@@ -152,7 +152,7 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize], res)
+		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize], res)
 	}
 
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())

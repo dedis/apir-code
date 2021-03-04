@@ -54,7 +54,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		ch := make(chan []field.Element, numCores*(db.BlockSize+1))
 		colPerChunk := divideAndCeil(db.NumColumns, numCores)
 		for j := 0; j < db.NumColumns; j += colPerChunk {
-			begin, end = computeChunkIndices(j, colPerChunk, db.NumColumns, db.BlockSize)
+			colPerChunk, begin, end = computeChunkIndices(j, colPerChunk, db.NumColumns, db.BlockSize)
 			go processRowChunk(db.Entries[begin:end], db.BlockSize, qZeroBase[j:j+colPerChunk], qOne[begin:end], ch)
 			numWorkers++
 		}
@@ -65,9 +65,10 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		var wg sync.WaitGroup
 		rowsPerCore := divideAndCeil(db.NumRows, numCores)
 		for j := 0; j < db.NumRows; j += rowsPerCore {
-			begin, end = computeChunkIndices(j, rowsPerCore, db.NumRows, db.BlockSize)
+			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.NumRows, db.BlockSize)
 			wg.Add(1)
-			go processRows(db.Entries[begin*db.NumColumns: end*db.NumColumns], db.BlockSize, qZeroBase, qOne, &wg, m[begin:end])
+			go processRows(db.Entries[begin*db.NumColumns:end*db.NumColumns], db.BlockSize, qZeroBase, qOne, &wg,
+				m[j*(db.BlockSize+1):(j+rowsPerCore)*(db.BlockSize+1)])
 		}
 		wg.Wait()
 	}
@@ -124,12 +125,12 @@ func multiplyAndTag(elements []field.Element, blockLen int, tagBase []field.Elem
 	return append(sum, sumTag)
 }
 
-func computeChunkIndices(ind, step, max, multiplier int) (int, int) {
+func computeChunkIndices(ind, step, max, multiplier int) (int, int, int) {
 	// avoiding overflow when colPerChunk does not divide db.Columns evenly
 	if ind+step > max {
 		step = max - ind
 	}
-	return ind*multiplier, (ind+step)*multiplier
+	return step, ind * multiplier, (ind + step) * multiplier
 }
 
 func divideAndCeil(dividend, divisor int) int {
