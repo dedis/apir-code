@@ -52,7 +52,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		numWorkers := 0
 		// channel to pass the ch from the routines back
 		ch := make(chan []field.Element, numCores*(db.BlockSize+1))
-		colPerChunk := divideAndCeil(db.NumColumns, numCores)
+		colPerChunk := divideAndRoundUp(db.NumColumns, numCores)
 		for j := 0; j < db.NumColumns; j += colPerChunk {
 			colPerChunk, begin, end = computeChunkIndices(j, colPerChunk, db.NumColumns, db.BlockSize)
 			go processRowChunk(db.Entries[begin:end], db.BlockSize, qZeroBase[j:j+colPerChunk], qOne[begin:end], ch)
@@ -63,7 +63,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		close(ch)
 	} else {
 		var wg sync.WaitGroup
-		rowsPerCore := divideAndCeil(db.NumRows, numCores)
+		rowsPerCore := divideAndRoundUp(db.NumRows, numCores)
 		for j := 0; j < db.NumRows; j += rowsPerCore {
 			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.NumRows, db.BlockSize)
 			wg.Add(1)
@@ -80,7 +80,7 @@ func processRows(rows []field.Element, blockLen int, qZ []field.Element, qO []fi
 	numElementsInRow := len(qO)
 	for i := 0; i < len(rows)/numElementsInRow; i++ {
 		res := multiplyAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], blockLen, qZ, qO)
-		copy(output[i*blockLen:(i+1)*blockLen], res)
+		copy(output[i*(blockLen+1):(i+1)*(blockLen+1)], res)
 	}
 	wg.Done()
 }
@@ -133,6 +133,6 @@ func computeChunkIndices(ind, step, max, multiplier int) (int, int, int) {
 	return step, ind * multiplier, (ind + step) * multiplier
 }
 
-func divideAndCeil(dividend, divisor int) int {
+func divideAndRoundUp(dividend, divisor int) int {
 	return int(math.Ceil(float64(dividend) / float64(divisor)))
 }
