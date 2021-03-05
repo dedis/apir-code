@@ -32,14 +32,6 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		return a
 	}
 
-	// parse the query
-	qZeroBase := make([]field.Element, db.NumColumns)
-	qOne := make([]field.Element, db.NumColumns*db.BlockSize)
-	for j := 0; j < db.NumColumns; j++ {
-		qZeroBase[j] = q[j*(db.BlockSize+1)]
-		copy(qOne[j*db.BlockSize:(j+1)*db.BlockSize], q[j*(db.BlockSize+1)+1:(j+1)*(db.BlockSize+1)])
-	}
-
 	// multithreading
 	numCores := runtime.NumCPU()
 	//numCores := 2
@@ -79,9 +71,9 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 
 // processing multiple rows by iterating over them
 func processRows(rows []field.Element, blockLen, numColumns int, q []field.Element, wg *sync.WaitGroup, output []field.Element) {
-	numElementsInRow := (blockLen) * numColumns
+	numElementsInRow := blockLen * numColumns
 	for i := 0; i < len(rows)/numElementsInRow; i++ {
-		res := multiplyAndTagQ(rows[i*numElementsInRow:(i+1)*numElementsInRow], blockLen, q)
+		res := multiplyAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], blockLen, q)
 		copy(output[i*(blockLen+1):(i+1)*(blockLen+1)], res)
 	}
 	wg.Done()
@@ -89,7 +81,7 @@ func processRows(rows []field.Element, blockLen, numColumns int, q []field.Eleme
 
 // processing a chunk of a database row
 func processRowChunk(chunk []field.Element, blockLen int, q []field.Element, reply chan<- []field.Element) {
-	reply <- multiplyAndTagQ(chunk, blockLen, q)
+	reply <- multiplyAndTag(chunk, blockLen, q)
 }
 
 // combine the results of processing a row by different routines
@@ -106,7 +98,7 @@ func combineChunkResults(nw int, resLen int, workerReplies <-chan []field.Elemen
 
 // multiplyAndTag multiplies db entries with the elements
 // from the client query and computes a tag over each block
-func multiplyAndTagQ(elements []field.Element, blockLen int, q []field.Element) []field.Element {
+func multiplyAndTag(elements []field.Element, blockLen int, q []field.Element) []field.Element {
 	var prodTag, prod field.Element
 	sumTag := field.Zero()
 	sum := field.ZeroVector(blockLen)
@@ -121,29 +113,6 @@ func multiplyAndTagQ(elements []field.Element, blockLen int, q []field.Element) 
 			sum[b].Add(&sum[b], &prod)
 			// compute block tag
 			prodTag.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)+1+b])
-			sumTag.Add(&sumTag, &prodTag)
-		}
-	}
-	return append(sum, sumTag)
-}
-
-// multiplyAndTag multiplies db entries with the elements
-// from the client query and computes a tag over each block
-func multiplyAndTag(elements []field.Element, blockLen int, tagBase []field.Element, messageBase []field.Element) []field.Element {
-	var prodTag, prod field.Element
-	sumTag := field.Zero()
-	sum := field.ZeroVector(blockLen)
-	for j := 0; j < len(elements)/blockLen; j++ {
-		for b := 0; b < blockLen; b++ {
-			if elements[j*blockLen+b].IsZero() {
-				// no need to multiply if the element value is zero
-				continue
-			}
-			// compute message
-			prod.Mul(&elements[j*blockLen+b], &tagBase[j])
-			sum[b].Add(&sum[b], &prod)
-			// compute block tag
-			prodTag.Mul(&elements[j*blockLen+b], &messageBase[j*blockLen+b])
 			sumTag.Add(&sumTag, &prodTag)
 		}
 	}
