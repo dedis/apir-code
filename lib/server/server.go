@@ -55,7 +55,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		colPerChunk := divideAndRoundUp(db.NumColumns, numCores)
 		for j := 0; j < db.NumColumns; j += colPerChunk {
 			colPerChunk, begin, end = computeChunkIndices(j, colPerChunk, db.NumColumns, db.BlockSize)
-			go processRowChunk(db.Entries[begin:end], db.BlockSize, qZeroBase[j:j+colPerChunk], qOne[begin:end], ch)
+			go processRowChunkQ(db.Entries[begin:end], db.BlockSize, q[j*(db.BlockSize+1):(j+colPerChunk)*(db.BlockSize+1)], ch)
 			numWorkers++
 		}
 		result := combineChunkResults(numWorkers, db.BlockSize+1, ch)
@@ -88,6 +88,11 @@ func processRows(rows []field.Element, blockLen int, qZ []field.Element, qO []fi
 }
 
 // processing a chunk of a database row
+func processRowChunkQ(chunk []field.Element, blockLen int, q []field.Element, reply chan<- []field.Element) {
+	reply <- multiplyAndTagQ(chunk, blockLen, q)
+}
+
+// processing a chunk of a database row
 func processRowChunk(chunk []field.Element, blockLen int, qZ []field.Element, qO []field.Element, reply chan<- []field.Element) {
 	reply <- multiplyAndTag(chunk, blockLen, qZ, qO)
 }
@@ -102,6 +107,29 @@ func combineChunkResults(nw int, resLen int, workerReplies <-chan []field.Elemen
 		}
 	}
 	return product
+}
+
+// multiplyAndTag multiplies db entries with the elements
+// from the client query and computes a tag over each block
+func multiplyAndTagQ(elements []field.Element, blockLen int, q []field.Element) []field.Element {
+	var prodTag, prod field.Element
+	sumTag := field.Zero()
+	sum := field.ZeroVector(blockLen)
+	for j := 0; j < len(elements)/blockLen; j++ {
+		for b := 0; b < blockLen; b++ {
+			if elements[j*blockLen+b].IsZero() {
+				// no need to multiply if the element value is zero
+				continue
+			}
+			// compute message
+			prod.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)])
+			sum[b].Add(&sum[b], &prod)
+			// compute block tag
+			prodTag.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)+1+b])
+			sumTag.Add(&sumTag, &prodTag)
+		}
+	}
+	return append(sum, sumTag)
 }
 
 // multiplyAndTag multiplies db entries with the elements
