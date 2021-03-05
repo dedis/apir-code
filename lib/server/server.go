@@ -1,12 +1,13 @@
 package server
 
 import (
-	cst "github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"math"
 	"runtime"
 	"sync"
+
+	cst "github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -45,7 +46,6 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// compute the matrix-vector inner products
 	// addition and multiplication of elements
 	// in DB(2^128)^b are executed component-wise
-	m := make([]field.Element, db.NumRows*(db.BlockSize+1))
 	// we have to traverse column by column
 	var begin, end int
 	if db.NumRows == 1 {
@@ -59,9 +59,10 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 			numWorkers++
 		}
 		result := combineChunkResults(numWorkers, db.BlockSize+1, ch)
-		copy(m, result)
 		close(ch)
+		return result
 	} else {
+		m := make([]field.Element, db.NumRows*(db.BlockSize+1))
 		var wg sync.WaitGroup
 		rowsPerCore := divideAndRoundUp(db.NumRows, numCores)
 		for j := 0; j < db.NumRows; j += rowsPerCore {
@@ -71,9 +72,9 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 				m[j*(db.BlockSize+1):(j+rowsPerCore)*(db.BlockSize+1)])
 		}
 		wg.Wait()
-	}
 
-	return m
+		return m
+	}
 }
 
 // processing multiple rows by iterating over them
