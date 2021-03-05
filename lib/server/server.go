@@ -55,7 +55,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		colPerChunk := divideAndRoundUp(db.NumColumns, numCores)
 		for j := 0; j < db.NumColumns; j += colPerChunk {
 			colPerChunk, begin, end = computeChunkIndices(j, colPerChunk, db.NumColumns, db.BlockSize)
-			go processRowChunkQ(db.Entries[begin:end], db.BlockSize, q[j*(db.BlockSize+1):(j+colPerChunk)*(db.BlockSize+1)], ch)
+			go processRowChunk(db.Entries[begin:end], db.BlockSize, q[j*(db.BlockSize+1):(j+colPerChunk)*(db.BlockSize+1)], ch)
 			numWorkers++
 		}
 		result := combineChunkResults(numWorkers, db.BlockSize+1, ch)
@@ -68,7 +68,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		for j := 0; j < db.NumRows; j += rowsPerCore {
 			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.NumRows, db.BlockSize)
 			wg.Add(1)
-			go processRows(db.Entries[begin*db.NumColumns:end*db.NumColumns], db.BlockSize, qZeroBase, qOne, &wg,
+			go processRows(db.Entries[begin*db.NumColumns:end*db.NumColumns], db.BlockSize, db.NumColumns, q, &wg,
 				m[j*(db.BlockSize+1):(j+rowsPerCore)*(db.BlockSize+1)])
 		}
 		wg.Wait()
@@ -78,23 +78,18 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 }
 
 // processing multiple rows by iterating over them
-func processRows(rows []field.Element, blockLen int, qZ []field.Element, qO []field.Element, wg *sync.WaitGroup, output []field.Element) {
-	numElementsInRow := len(qO)
+func processRows(rows []field.Element, blockLen, numColumns int, q []field.Element, wg *sync.WaitGroup, output []field.Element) {
+	numElementsInRow := (blockLen) * numColumns
 	for i := 0; i < len(rows)/numElementsInRow; i++ {
-		res := multiplyAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], blockLen, qZ, qO)
+		res := multiplyAndTagQ(rows[i*numElementsInRow:(i+1)*numElementsInRow], blockLen, q)
 		copy(output[i*(blockLen+1):(i+1)*(blockLen+1)], res)
 	}
 	wg.Done()
 }
 
 // processing a chunk of a database row
-func processRowChunkQ(chunk []field.Element, blockLen int, q []field.Element, reply chan<- []field.Element) {
+func processRowChunk(chunk []field.Element, blockLen int, q []field.Element, reply chan<- []field.Element) {
 	reply <- multiplyAndTagQ(chunk, blockLen, q)
-}
-
-// processing a chunk of a database row
-func processRowChunk(chunk []field.Element, blockLen int, qZ []field.Element, qO []field.Element, reply chan<- []field.Element) {
-	reply <- multiplyAndTag(chunk, blockLen, qZ, qO)
 }
 
 // combine the results of processing a row by different routines
