@@ -58,7 +58,7 @@ func convertBlock(out []field.Element, in []byte) {
 	var buf [16]byte
 	for i := 0; i < len(out); i++ {
 		//prfL.Encrypt(in, in)
-		encryptAes128(&keyL[0], &buf[0], &in[0])
+		aes128MMO(&keyL[0], &buf[0], &in[0])
 		out[i].SetFixedLengthBytes(buf)
 		in[i/256]++
 	}
@@ -66,11 +66,11 @@ func convertBlock(out []field.Element, in []byte) {
 
 func prg(seed, s0, s1 *byte) (byte, byte) {
 	//prfL.Encrypt(s0, seed)
-	encryptAes128(&keyL[0], s0, seed)
+	aes128MMO(&keyL[0], s0, seed)
 	t0 := getT(s0)
 	clr(s0)
 	//prfR.Encrypt(s1, seed)
-	encryptAes128(&keyR[0], s1, seed)
+	aes128MMO(&keyR[0], s1, seed)
 	t1 := getT(s1)
 	clr(s1)
 	return t0, t1
@@ -245,7 +245,7 @@ func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint6
 	if lvl == stop {
 		ss := bs[lvl][0]
 		*ss = *s
-		//encryptAes128(&keyL[0], &ss[0], &ss[0])
+		//aes128MMO(&keyL[0], &ss[0], &ss[0])
 		if blockLength != len(k.FinalCW) {
 			panic("dpf: blockLength != len(k.FinalCW)")
 		}
@@ -258,7 +258,7 @@ func evalFullRecursiveFlatten(k DPFkey, s *block, t byte, lvl uint64, stop uint6
 		for j := uint64(0); j < uint64(len(k.FinalCW)); j++ {
 			// convertBlock part
 			//prfL.Encrypt(in, in)
-			encryptAes128(&keyL[0], &buf[0], &ss[0])
+			aes128MMO(&keyL[0], &buf[0], &ss[0])
 			out[startBlock+j].SetFixedLengthBytes(buf)
 			//ss[0]++
 			ss[j/uint64(256)]++
