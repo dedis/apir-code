@@ -319,7 +319,6 @@ func (lc *localClient) runExperiment() {
 func parseFlags() *flags {
 	f := new(flags)
 
-	flag.StringVar(&f.scheme, "scheme", "", "dpf for DPF-based and IT for information-theoretic")
 	flag.StringVar(&f.logFile, "log", "", "write log to file instead of stdout/stderr")
 	flag.BoolVar(&f.profiling, "prof", false, "Write pprof file")
 	flag.BoolVar(&f.realApplication, "app", true, "Run key server client or client used for experiments")
