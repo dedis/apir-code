@@ -1,12 +1,26 @@
 package field
 
 import (
-	"encoding/hex"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
+func BenchmarkSetFixedBytes(b *testing.B) {
+	rng := utils.RandomPRG()
+	var buf [16]byte
+	rng.Read(buf[:])
+
+	z := new(Element)
+
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		z.SetFixedLengthBytes(buf)
+	}
+}
+
+/*
 func TestBytes(t *testing.T) {
 	s := "1f000000000000000000000000000096"
 	x, err := hex.DecodeString(s)
@@ -30,6 +44,7 @@ func TestAdd(t *testing.T) {
 
 	require.Equal(t, "00000000000000000000000000000002", res.HexString())
 }
+*/
 
 //func TestSquare(t *testing.T) {
 //var g, g2, gd, g3, g4, g4_b Element

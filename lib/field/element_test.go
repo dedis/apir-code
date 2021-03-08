@@ -16,8 +16,6 @@
 
 package field
 
-import "testing"
-
 //import (
 //	"crypto/rand"
 //	"math/big"
@@ -149,17 +147,17 @@ var benchResElement Element
 //	}
 //}
 //
-func BenchmarkElementMul(b *testing.B) {
-	x := Element{
-		4,
-		0,
-	}
-	benchResElement.SetOne()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		benchResElement.Mul(&benchResElement, &x)
-	}
-}
+//func BenchmarkElementMul(b *testing.B) {
+//x := Element{
+//4,
+//0,
+//}
+//benchResElement.SetOne()
+//b.ResetTimer()
+//for i := 0; i < b.N; i++ {
+//benchResElement.Mul(&benchResElement, &x)
+//}
+//}
 
 //func BenchmarkElementCmp(b *testing.B) {
 //	x := Element{
