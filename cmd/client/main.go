@@ -30,6 +30,8 @@ type localClient struct {
 	flags      *flags
 	dbInfo     *database.Info
 	vpirClient client.Client
+
+	statsLogger *log.Logger
 }
 
 type flags struct {
@@ -48,8 +50,9 @@ func newLocalClient() *localClient {
 			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
 			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
 		},
-		prg:   utils.RandomPRG(),
-		flags: parseFlags(),
+		prg:         utils.RandomPRG(),
+		flags:       parseFlags(),
+		statsLogger: log.New(os.Stdout, "stat:", 0),
 	}
 
 	// enable profiling if needed
