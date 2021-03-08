@@ -12,7 +12,6 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -105,58 +104,51 @@ func main() {
 	// start correct client
 	lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 
-	if !lc.flags.realApplication {
-		lc.runExperiment()
-	}
-
 	// get id and compute corresponding hash
-	if lc.flags.realApplication {
-		log.Printf("running key server client")
-		for {
-			var id string
-			fmt.Scanln(&id)
-			t := time.Now()
-			if id == "" {
-				log.Fatal("id not provided")
-			}
-
-			// compute hash key for id
-			hashKey := database.HashToIndex(id, lc.dbInfo.NumRows*lc.dbInfo.NumColumns)
-			log.Printf("id: %s, hashKey: %d", id, hashKey)
-
-			// query given hash key
-			queries, err := c.QueryBytes(hashKey, len(lc.connections))
-			if err != nil {
-				log.Fatalf("error when executing query: %v", err)
-			}
-
-			// send queries to servers
-			answers := lc.runQueries(queries)
-
-			// reconstruct block
-			resultField, err := c.ReconstructBytes(answers)
-			if err != nil {
-				log.Fatalf("error during reconstruction: %v", err)
-			}
-
-			// return result bytes
-			result := field.VectorToBytes(resultField)
-
-			// unpad result
-			result = database.UnPadBlock(result)
-
-			// get a key from the block with the id of the search
-			retrievedKey, err := pgp.RecoverKeyFromBlock(result, id)
-			if err != nil {
-				log.Fatalf("error retrieving key from the block: %v", err)
-			}
-			armored, err := pgp.ArmorKey(retrievedKey)
-			if err != nil {
-				log.Fatalf("error armor-encoding the key: %v", err)
-			}
-			fmt.Println(armored)
-			fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
+	for {
+		var id string
+		fmt.Scanln(&id)
+		t := time.Now()
+		if id == "" {
+			log.Fatal("id not provided")
 		}
+
+		// compute hash key for id
+		hashKey := database.HashToIndex(id, lc.dbInfo.NumRows*lc.dbInfo.NumColumns)
+		log.Printf("id: %s, hashKey: %d", id, hashKey)
+
+		// query given hash key
+		queries, err := lc.vpirClient.QueryBytes(hashKey, len(lc.connections))
+		if err != nil {
+			log.Fatalf("error when executing query: %v", err)
+		}
+
+		// send queries to servers
+		answers := lc.runQueries(queries)
+
+		// reconstruct block
+		resultField, err := lc.vpirClient.ReconstructBytes(answers)
+		if err != nil {
+			log.Fatalf("error during reconstruction: %v", err)
+		}
+
+		// return result bytes
+		result := field.VectorToBytes(resultField)
+
+		// unpad result
+		result = database.UnPadBlock(result)
+
+		// get a key from the block with the id of the search
+		retrievedKey, err := pgp.RecoverKeyFromBlock(result, id)
+		if err != nil {
+			log.Fatalf("error retrieving key from the block: %v", err)
+		}
+		armored, err := pgp.ArmorKey(retrievedKey)
+		if err != nil {
+			log.Fatalf("error armor-encoding the key: %v", err)
+		}
+		fmt.Println(armored)
+		fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
 	}
 }
 
@@ -277,51 +269,11 @@ func equalDBInfo(info []*database.Info) bool {
 	return true
 }
 
-func (lc *localClient) runExperiment() {
-	// TODO: use separate logger experiments outputs
-	// TODO: repeat the experiment multiple times using a
-	// configurable parameter
-	log.Printf("running client for micro-benchmarks")
-
-	numBlocks := lc.dbInfo.NumColumns * lc.dbInfo.NumRows
-
-	// save in csv file
-	// TODO: use log for this?
-	fmt.Println("query,reconstruct,total_client")
-
-	// create main monitor for CPU time
-	totalTimer := monitor.NewMonitor()
-	m := monitor.NewMonitor()
-
-	for i := 0; i < numBlocks; i++ {
-		// query given block
-		m.Reset()
-		queries, err := lc.vpirClient.QueryBytes(i, len(lc.connections))
-		fmt.Printf("%.3f,", m.RecordAndReset())
-		if err != nil {
-			log.Fatal("error when executing query")
-		}
-
-		// send queries to servers and get answers
-		answers := lc.runQueries(queries)
-
-		// reconstruct, we don't use the actual result
-		m.Reset()
-		_, err = lc.vpirClient.ReconstructBytes(answers)
-		fmt.Printf("%.3f,", m.RecordAndReset())
-		if err != nil {
-			log.Fatalf("error during reconstruction: %v", err)
-		}
-	}
-	fmt.Printf("%.3f\n", totalTimer.Record())
-}
-
 func parseFlags() *flags {
 	f := new(flags)
 
 	flag.StringVar(&f.logFile, "log", "", "write log to file instead of stdout/stderr")
 	flag.BoolVar(&f.profiling, "prof", false, "Write pprof file")
-	flag.BoolVar(&f.realApplication, "app", true, "Run key server client or client used for experiments")
 	flag.Parse()
 
 	return f

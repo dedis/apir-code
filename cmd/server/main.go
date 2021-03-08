@@ -77,7 +77,7 @@ func main() {
 	)
 
 	// select correct server
-	s = server.NewIT(db)
+	s := server.NewIT(db)
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{Server: s})
