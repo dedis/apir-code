@@ -137,7 +137,7 @@ func loadPgpDB() (*database.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("DB loaded")
+	log.Println("DB loaded with files", files)
 
 	return db, nil
 }
