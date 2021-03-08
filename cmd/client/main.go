@@ -58,6 +58,10 @@ func newLocalClient() *localClient {
 		defer utils.StopProfiling()
 	}
 
+	// set logs
+	log.SetOutput(os.Stdout)
+	log.SetPrefix(fmt.Sprintf("[Client] "))
+
 	// load configs
 	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
@@ -70,19 +74,6 @@ func newLocalClient() *localClient {
 
 func main() {
 	lc := newLocalClient()
-
-	// set logs
-	// TODO: move somewhere else, but mind the defer
-	log.SetOutput(os.Stdout)
-	log.SetPrefix(fmt.Sprintf("[Client] "))
-	if len(lc.flags.logFile) > 0 {
-		f, err := os.Create(lc.flags.logFile)
-		if err != nil {
-			log.Fatal("Could not open file: ", err)
-		}
-		defer f.Close()
-		log.SetOutput(f)
-	}
 
 	// load servers certificates
 	creds, err := utils.LoadServersCertificates()
@@ -143,10 +134,12 @@ func main() {
 		if err != nil {
 			log.Fatalf("error retrieving key from the block: %v", err)
 		}
+
 		armored, err := pgp.ArmorKey(retrievedKey)
 		if err != nil {
 			log.Fatalf("error armor-encoding the key: %v", err)
 		}
+
 		fmt.Println(armored)
 		fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
 	}
@@ -272,7 +265,6 @@ func equalDBInfo(info []*database.Info) bool {
 func parseFlags() *flags {
 	f := new(flags)
 
-	flag.StringVar(&f.logFile, "log", "", "write log to file instead of stdout/stderr")
 	flag.BoolVar(&f.profiling, "prof", false, "Write pprof file")
 	flag.Parse()
 
