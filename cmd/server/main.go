@@ -78,16 +78,7 @@ func main() {
 	)
 
 	// select correct server
-	var s server.Server
-	switch *schemePtr {
-	case "dpf":
-		s = server.NewDPF(db)
-	case "it":
-		s = server.NewIT(db)
-	default:
-		log.Fatal("undefined scheme type")
-	}
-	log.Printf("scheme: %s", *schemePtr)
+	s = server.NewIT(db)
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{Server: s})

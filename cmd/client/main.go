@@ -103,19 +103,7 @@ func main() {
 	lc.retrieveDBInfo()
 
 	// start correct client
-	var c client.Client
-	switch lc.flags.scheme {
-	case "dpf":
-		c = client.NewDPF(lc.prg, lc.dbInfo)
-	case "it":
-		c = client.NewIT(lc.prg, lc.dbInfo)
-	case "pir":
-		c = client.NewPIR(lc.prg, lc.dbInfo)
-	default:
-		log.Fatal("undefined scheme type")
-	}
-	lc.vpirClient = c
-	log.Printf("scheme: %s", lc.flags.scheme)
+	lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 
 	if !lc.flags.realApplication {
 		lc.runExperiment()
