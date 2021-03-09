@@ -84,11 +84,12 @@ func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
 	// Leaves
 	indexSalt := make([]byte, 4)
 	for i := range data {
+		ib := indexToBytes(i)
 		if salt {
 			binary.BigEndian.PutUint32(indexSalt, uint32(i))
-			nodes[i+branchesLen] = hash.Hash(data[i], indexSalt[:])
+			nodes[i+branchesLen] = hash.Hash(data[i], ib, indexSalt[:])
 		} else {
-			nodes[i+branchesLen] = hash.Hash(data[i])
+			nodes[i+branchesLen] = hash.Hash(data[i], ib)
 		}
 	}
 	for i := len(data) + branchesLen; i < len(nodes); i++ {
@@ -117,4 +118,14 @@ func (t *MerkleTree) Root() []byte {
 // Salt returns the true if the values in this Merkle tree are salted.
 func (t *MerkleTree) Salt() bool {
 	return t.salt
+}
+
+// indexToBytes convert a data index in bytes representaiton
+func indexToBytes(i int) []byte {
+	if i > math.MaxUint32 {
+		panic("index too big")
+	}
+	b := make([]byte, 4)
+	binary.LittleEndian.PutUint32(b, uint32(i))
+	return b
 }

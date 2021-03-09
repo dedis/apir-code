@@ -57,12 +57,13 @@ func VerifyProofUsing(data []byte, salt bool, proof *Proof, root []byte, hashTyp
 
 func generateProofHash(data []byte, salt bool, proof *Proof, hashType HashType) []byte {
 	var proofHash []byte
+	ib := indexToBytes(int(proof.Index))
 	if salt {
 		indexSalt := make([]byte, 4)
 		binary.BigEndian.PutUint32(indexSalt, uint32(proof.Index))
-		proofHash = hashType.Hash(data, indexSalt)
+		proofHash = hashType.Hash(data, ib, indexSalt)
 	} else {
-		proofHash = hashType.Hash(data)
+		proofHash = hashType.Hash(data, ib)
 	}
 	index := proof.Index + (1 << uint(len(proof.Hashes)))
 
