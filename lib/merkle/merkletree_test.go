@@ -23,6 +23,7 @@ func BenchmarkNew(b *testing.B) {
 		blocks[i] = b
 	}
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		// generate tree
 		_, err := New(blocks)
