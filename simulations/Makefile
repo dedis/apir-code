@@ -13,3 +13,5 @@ performance:
     		$(MAKE) -s run_simul config=vpirMultiVectorBlockDPF.toml; \
     		$(MAKE) -s run_simul config=pirMatrix.toml; \
     		$(MAKE) -s run_simul config=pirDPF.toml; \
+    		$(MAKE) -s run_simul config=merkleMatrix.toml; \
+    		$(MAKE) -s run_simul config=merkleDPF.toml; \
