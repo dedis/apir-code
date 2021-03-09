@@ -9,6 +9,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func BenchmarkMerkleTree(b *testing.B) {
+	b.ReportAllocs()
+	rng := utils.RandomPRG()
+	dbLen := 100000
+	numRows := 1
+	blockLen := 160
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CreateRandomMultiBitMerkle(rng, dbLen, numRows, blockLen)
+	}
+}
+
 func TestMerkleTree(t *testing.T) {
 	rng := utils.RandomPRG()
 	dbLen := 100000
