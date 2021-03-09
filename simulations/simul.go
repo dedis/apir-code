@@ -130,7 +130,11 @@ func main() {
 				db = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
 			}
 		} else if s.Primitive[:3] == "pir" {
-			dbBytes = database.CreateRandomMultiBitBytes(dbPRG, dbLen, nRows, blockLen)
+			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
+				dbBytes := database.CreateRandomMultiBitMerkle(dbPRG, dbLen, nRows, blockLen)
+			} else {
+				dbBytes = database.CreateRandomMultiBitBytes(dbPRG, dbLen, nRows, blockLen)
+			}
 		}
 
 		// run experiment
@@ -140,9 +144,9 @@ func main() {
 			results = vpirIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "vpir-dpf" {
 			results = vpirDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		} else if s.Primitive == "pir-it" {
+		} else if s.Primitive == "pir-it" || s.Primitive == "pir-it-merkle" {
 			results = pirIT(dbBytes, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		} else if s.Primitive == "pir-dpf" {
+		} else if s.Primitive == "pir-dpf" || s.Primitive == "pir-dpf-merkle" {
 			results = pirDPF(dbBytes, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else {
 			log.Fatal("unknown primitive type")
@@ -311,5 +315,10 @@ func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
 }
 
 func (s *Simulation) validSimulation() bool {
-	return s.Primitive == "vpir-it" || s.Primitive == "vpir-dpf" || s.Primitive == "pir-it" || s.Primitive == "pir-dpf"
+	return s.Primitive == "vpir-it" ||
+		s.Primitive == "vpir-dpf" ||
+		s.Primitive == "pir-it" ||
+		s.Primitive == "pir-dpf" ||
+		s.Primitive == "pir-it-merkle" ||
+		s.Primitive == "pir-dpf-merkle"
 }
