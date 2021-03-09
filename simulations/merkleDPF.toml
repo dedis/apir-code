@@ -1,0 +1,5 @@
+Name = "merkleDPF"
+Primitive = "pir-dpf-merkle"
+NumRows = 1
+BlockLength = 256
+ElementBitSize = 8
