@@ -131,7 +131,7 @@ func main() {
 			}
 		} else if s.Primitive[:3] == "pir" {
 			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
-				dbBytes := database.CreateRandomMultiBitMerkle(dbPRG, dbLen, nRows, blockLen)
+				dbBytes = database.CreateRandomMultiBitMerkle(dbPRG, dbLen, nRows, blockLen)
 			} else {
 				dbBytes = database.CreateRandomMultiBitBytes(dbPRG, dbLen, nRows, blockLen)
 			}
