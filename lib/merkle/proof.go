@@ -99,7 +99,11 @@ func DecodeProof(p []byte) *Proof {
 }
 
 func EncodeProof(p *Proof) []byte {
-	out := make([]byte, 0)
+	// out length is 4 bytes for numHashes, number of bytes for the hashes
+	// and 8 bytes for encoded index
+	// TODO: specify what 32 is
+	outLen := 4 + len(p.Hashes)*32 + 8
+	out := make([]byte, 0, outLen)
 
 	// encode number of hashes
 	numHashes := uint32(len(p.Hashes))

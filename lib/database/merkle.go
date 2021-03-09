@@ -36,6 +36,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	proofLen := 0
 	b := 0
 	for i := range entries {
+		// TODO: preallocate capacity
 		e := make([]byte, 0)
 		for j := 0; j < blocksPerRow; j++ {
 			p, err := tree.GenerateProof(blocks[b])

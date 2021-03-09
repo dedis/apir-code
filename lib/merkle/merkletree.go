@@ -89,12 +89,14 @@ func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
 		//binary.BigEndian.PutUint32(indexSalt, uint32(i))
 		//nodes[i+branchesLen] = hash.Hash(data[i], ib, indexSalt[:])
 		//} else {
+		//ib := append(data[i], ib...)
 		nodes[i+branchesLen] = hash.Hash(data[i], ib)
 		//}
 	}
 	for i := len(data) + branchesLen; i < len(nodes); i++ {
 		nodes[i] = make([]byte, hash.HashLength())
 	}
+
 	// Branches
 	for i := branchesLen - 1; i > 0; i-- {
 		nodes[i] = hash.Hash(nodes[i*2], nodes[i*2+1])
