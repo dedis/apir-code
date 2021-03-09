@@ -42,7 +42,7 @@ func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
 
 	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MultiBitMatrixOneMbPIR")
+	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MultiBitMatrixOneMbMerkle")
 }
 
 func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
