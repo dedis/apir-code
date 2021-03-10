@@ -203,7 +203,7 @@ func pirDPF(db *database.Bytes, elemBitSize int, numBitsToRetrieve int, nRepeat 
 	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
 }
 
-func retrieveBlocks(c client.Client, ss []server.Server, totalBlocks, retrieveBlocks, nRepeat int) []*Chunk {
+func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetrieveBlocks, nRepeat int) []*Chunk {
 	// seed non-cryptographic randomness
 	rand.Seed(time.Now().UnixNano())
 
@@ -217,12 +217,12 @@ func retrieveBlocks(c client.Client, ss []server.Server, totalBlocks, retrieveBl
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = &Chunk{
-			CPU:       make([]*Block, retrieveBlocks),
-			Bandwidth: make([]*Block, retrieveBlocks),
+			CPU:       make([]*Block, numRetrieveBlocks),
+			Bandwidth: make([]*Block, numRetrieveBlocks),
 		}
 		// pick a random block index to start the retrieval
-		startIndex = rand.Intn(totalBlocks - retrieveBlocks)
-		for i := 0; i < retrieveBlocks; i++ {
+		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
+		for i := 0; i < numRetrieveBlocks; i++ {
 			results[j].CPU[i] = &Block{
 				Query:       0,
 				Answers:     make([]float64, len(ss)),
