@@ -14,23 +14,18 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	entries := make([][]byte, numRows)
 	numBlocks := dbLen / (8 * blockLen)
 	// generate random blocks
-	//randomBlocks := make([]byte, numBlocks*blockLen)
-	//if _, err := rnd.Read(randomBlocks); err != nil {
-	//log.Fatal(err)
-	//}
+	randomBlocks := make([]byte, numBlocks*blockLen)
+	if _, err := rnd.Read(randomBlocks); err != nil {
+		log.Fatal(err)
+	}
 
 	blocks := make([][]byte, numBlocks)
-
 	for i := range blocks {
 		// generate random block
-		b := make([]byte, blockLen)
-		if _, err := rnd.Read(b); err != nil {
-			log.Fatal(err)
-		}
-		blocks[i] = b
-
-		//		blocks[i] = randomBlocks[i*blockLen : (i+1)*blockLen]
+		blocks[i] = make([]byte, blockLen)
+		copy(blocks[i], randomBlocks[i*blockLen : (i+1)*blockLen])
 	}
+
 	// generate tree
 	tree, err := merkle.New(blocks)
 	if err != nil {
