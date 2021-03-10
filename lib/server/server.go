@@ -1,7 +1,6 @@
 package server
 
 import (
-	"math"
 	"runtime"
 	"sync"
 
@@ -9,6 +8,7 @@ import (
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -49,7 +49,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		numWorkers := 0
 		// channel to pass the ch from the routines back
 		ch := make(chan []field.Element, numCores*(db.BlockSize+1))
-		colPerChunk := divideAndRoundUp(db.NumColumns, numCores)
+		colPerChunk := utils.DivideAndRoundUp(db.NumColumns, numCores)
 		for j := 0; j < db.NumColumns; j += colPerChunk {
 			colPerChunk, begin, end = computeChunkIndices(j, colPerChunk, db.NumColumns, db.BlockSize)
 			go processRowChunk(db.Entries[begin:end], db.BlockSize, q[j*(db.BlockSize+1):(j+colPerChunk)*(db.BlockSize+1)], ch)
@@ -61,7 +61,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	} else {
 		m := make([]field.Element, db.NumRows*(db.BlockSize+1))
 		var wg sync.WaitGroup
-		rowsPerCore := divideAndRoundUp(db.NumRows, numCores)
+		rowsPerCore := utils.DivideAndRoundUp(db.NumRows, numCores)
 		for j := 0; j < db.NumRows; j += rowsPerCore {
 			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.NumRows, db.BlockSize)
 			wg.Add(1)
@@ -130,10 +130,6 @@ func computeChunkIndices(ind, step, max, multiplier int) (int, int, int) {
 		step = max - ind
 	}
 	return step, ind * multiplier, (ind + step) * multiplier
-}
-
-func divideAndRoundUp(dividend, divisor int) int {
-	return int(math.Ceil(float64(dividend) / float64(divisor)))
 }
 
 /*

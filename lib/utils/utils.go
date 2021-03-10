@@ -14,6 +14,11 @@ func MaxBytesLength(in map[int][]byte) int {
 	return max
 }
 
+// Divides dividend by divisor and rounds up the result
+func DivideAndRoundUp(dividend, divisor int) int {
+	return int(math.Ceil(float64(dividend) / float64(divisor)))
+}
+
 // Increase num to the next perfect square.
 // If the square root is a whole number, do not modify anything.
 // Otherwise, return the square of the square root + 1.
