@@ -35,7 +35,7 @@ func main() {
 	answer(q, db, *workers)
 	t := time.Now()
 	elapsed := t.Sub(start) / time.Millisecond
-	fmt.Printf("%d,%dms\n", *workers, elapsed)
+	fmt.Printf("%d,%d\n", *workers, elapsed)
 }
 
 // Answer computes the answer for the given query
