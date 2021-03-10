@@ -64,6 +64,13 @@ func (t *MerkleTree) GenerateProof(data []byte) (*Proof, error) {
 	return newProof(hashes, index), nil
 }
 
+// EncodedProofLength returns the byte length of the proof for a piece of data.
+// 4 bytes are for how many hashes are in the path, 8 bytes for embedding the index
+// in the tree (see proof.go for details).
+func (t *MerkleTree) EncodedProofLength() int {
+	return int(math.Ceil(math.Log2(float64(len(t.data)))))*t.hash.HashLength() + 4 + 8
+}
+
 // New creates a new Merkle tree using the provided raw data and default hash type.  Salting is not used.
 // data must contain at least one element for it to be valid.
 func New(data [][]byte) (*MerkleTree, error) {

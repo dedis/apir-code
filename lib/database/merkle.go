@@ -31,7 +31,6 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 
 		//		blocks[i] = randomBlocks[i*blockLen : (i+1)*blockLen]
 	}
-
 	// generate tree
 	tree, err := merkle.New(blocks)
 	if err != nil {
@@ -40,33 +39,31 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 
 	// generate db
 	blocksPerRow := numBlocks / numRows
-	proofLen := 0
+	proofLen := tree.EncodedProofLength()
+	columnLen := blockLen + proofLen
 	b := 0
 	for i := range entries {
-		// TODO: preallocate capacity
-		e := make([]byte, 0)
+		e := make([]byte, columnLen * blocksPerRow)
 		for j := 0; j < blocksPerRow; j++ {
 			p, err := tree.GenerateProof(blocks[b])
 			encodedProof := merkle.EncodeProof(p)
 			if err != nil {
 				log.Fatalf("error while generating proof for block %v: %v", b, err)
 			}
-			e = append(e, append(blocks[b], encodedProof...)...)
-			proofLen = len(encodedProof) // always same length
+			copy(e[j*columnLen:(j+1)*columnLen], append(blocks[b], encodedProof...))
 			b++
 		}
 		entries[i] = e
 	}
-	root := tree.Root()
 
 	m := &Bytes{
 		Entries: entries,
 		Info: Info{
 			NumRows:    numRows,
 			NumColumns: dbLen / (8 * numRows * blockLen),
-			BlockSize:  blockLen + proofLen,
+			BlockSize:  columnLen,
 			PIRType:    "merkle",
-			Root:       root,
+			Root:       tree.Root(),
 			ProofLen:   proofLen,
 		},
 	}

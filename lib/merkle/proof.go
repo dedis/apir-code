@@ -17,6 +17,11 @@ import (
 	"encoding/binary"
 )
 
+const (
+	indexByteSize = 8
+	numHashesByteSize = 4
+)
+
 // Proof is a proof of a Merkle tree
 type Proof struct {
 	Hashes [][]byte
@@ -102,24 +107,27 @@ func EncodeProof(p *Proof) []byte {
 	// out length is 4 bytes for numHashes, number of bytes for the hashes
 	// and 8 bytes for encoded index
 	// TODO: specify what 32 is
-	outLen := 4 + len(p.Hashes)*32 + 8
-	out := make([]byte, 0, outLen)
+	outLen := numHashesByteSize + len(p.Hashes)*32 + indexByteSize
+	out := make([]byte, outLen)
 
 	// encode number of hashes
 	numHashes := uint32(len(p.Hashes))
-	b := make([]byte, 4)
+	b := make([]byte, numHashesByteSize)
 	binary.LittleEndian.PutUint32(b, numHashes)
-	out = append(out, b...)
+	//out = append(out, b...)
+	copy(out[:numHashesByteSize], b)
 
 	// encode hashes
-	for _, h := range p.Hashes {
-		out = append(out, h...)
+	for i, h := range p.Hashes {
+		//out = append(out, h...)
+		copy(out[numHashesByteSize+i*len(h):numHashesByteSize+(i+1)*len(h)], h)
 	}
 
 	// encode index
-	b1 := make([]byte, 8)
+	b1 := make([]byte, indexByteSize)
 	binary.LittleEndian.PutUint64(b1, p.Index)
-	out = append(out, b1...)
+	copy(out[len(out)-indexByteSize:], b1)
+	//out = append(out, b1...)
 
 	return out
 }
