@@ -19,7 +19,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	//log.Fatal(err)
 	//}
 
-	//blocks := make([][]byte, numBlocks)
+	blocks := make([][]byte, numBlocks)
 
 	for i := range blocks {
 		// generate random block
