@@ -147,7 +147,7 @@ func answerPIR(q []byte, db *database.Bytes) []byte {
 	for i := 0; i < db.NumRows; i++ {
 		sum := make([]byte, bs)
 		for j := 0; j < db.NumColumns; j++ {
-			if q[j] == byte(1) {
+			if (q[j/8]>>(j%8))&1 == byte(1) {
 				fastxor.Bytes(sum, sum, db.Entries[i*rs+j*bs:i*rs+(j+1)*bs])
 			}
 		}

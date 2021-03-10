@@ -71,7 +71,8 @@ func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
 
 func (c *PIR) secretShare(numServers int) ([][]byte, error) {
 	// length of query vector
-	vectorLen := c.dbInfo.NumColumns
+	// one query bit per column
+	vectorLen := c.dbInfo.NumColumns / 8 + 1
 
 	// create query vectors for all the servers
 	vectors := make([][]byte, numServers)
@@ -87,20 +88,15 @@ func (c *PIR) secretShare(numServers int) ([][]byte, error) {
 	}
 
 	// perform secret sharing
-	sum := make([]byte, c.dbInfo.NumColumns)
-	for j := 0; j < c.dbInfo.NumColumns; j++ {
-		// assign k - 1 random bits for this column
-		sum[j] = byte(0)
-		for k := 0; k < numServers-1; k++ {
-			vectors[k][j] = rand[j+k] & 1
-			sum[j] ^= vectors[k][j]
-		}
-		if j == c.state.iy {
-			vectors[numServers-1][j] ^= byte(1)
-		}
+	// find the byte corresponding to the retrieval bit
+	// what value this byte should get
+	index := c.state.iy / 8
+	value := 1 << (c.state.iy % 8)
+	vectors[numServers-1][index] = byte(value)
+	for k := 0; k < numServers-1; k++ {
+		copy(vectors[k], rand[k*vectorLen:(k+1)*vectorLen])
+		fastxor.Bytes(vectors[numServers-1], vectors[numServers-1], vectors[k])
 	}
-
-	fastxor.Bytes(vectors[numServers-1], vectors[numServers-1], sum)
 
 	return vectors, nil
 }

@@ -45,6 +45,20 @@ func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
 	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MultiBitMatrixOneMbMerkle")
 }
 
+func TestDPFMultiBitVectorMerkle(t *testing.T) {
+	dbLen := oneMB
+	blockLen := testBlockLength * field.Bytes
+	elemBitSize := 8
+	numBlocks := dbLen / (elemBitSize * blockLen)
+	nRows := 1
+
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
+
+	retrieveBlocksDPFMerkle(t, xof, db, numBlocks, "DPFMultiBitVectorMerkle")
+}
+
 func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
 	c := client.NewPIR(rnd, &db.Info)
 	s0 := server.NewPIR(db)
