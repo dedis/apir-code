@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 )
@@ -37,18 +36,5 @@ func (s *PIR) AnswerBytes(q []byte) ([]byte, error) {
 
 // Answer computes the answer for the given query
 func (s *PIR) Answer(q []byte) []byte {
-	bs := s.db.BlockSize
-	m := make([]byte, s.db.NumRows*bs)
-	// we have to traverse column by column
-	for i := 0; i < s.db.NumRows; i++ {
-		sum := make([]byte, bs)
-		for j := 0; j < s.db.NumColumns; j++ {
-			if q[j] == byte(1) {
-				fastxor.Bytes(sum, sum, s.db.Entries[i][j*bs:(j+1)*bs])
-			}
-		}
-		copy(m[i*bs:(i+1)*bs], sum)
-	}
-
-	return m
+	return answerPIR(q, s.db)
 }

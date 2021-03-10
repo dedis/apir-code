@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -17,7 +18,11 @@ type Server interface {
 	DBInfo() *database.Info
 }
 
-// Answer computes the answer for the given query
+/*
+%%	VPIR primitives
+*/
+
+// Answer computes the VPIR answer for the given query
 func answer(q []field.Element, db *database.DB) []field.Element {
 	// Doing simplified scheme if block consists of a single bit
 	if db.BlockSize == cst.SingleBitBlockLength {
@@ -129,4 +134,25 @@ func computeChunkIndices(ind, step, max, multiplier int) (int, int, int) {
 
 func divideAndRoundUp(dividend, divisor int) int {
 	return int(math.Ceil(float64(dividend) / float64(divisor)))
+}
+
+/*
+%%	PIR primitives
+*/
+func answerPIR(q []byte, db *database.Bytes) []byte {
+	bs := db.BlockSize
+	m := make([]byte, db.NumRows*bs)
+	rs := db.NumColumns * bs
+	// we have to traverse column by column
+	for i := 0; i < db.NumRows; i++ {
+		sum := make([]byte, bs)
+		for j := 0; j < db.NumColumns; j++ {
+			if q[j] == byte(1) {
+				fastxor.Bytes(sum, sum, db.Entries[i*rs+j*bs:i*rs+(j+1)*bs])
+			}
+		}
+		copy(m[i*bs:(i+1)*bs], sum)
+	}
+
+	return m
 }

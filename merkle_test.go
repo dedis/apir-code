@@ -61,7 +61,7 @@ func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, num
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize-db.ProofLen], res)
+		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize-db.ProofLen], res)
 	}
 
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
@@ -83,7 +83,7 @@ func retrieveBlocksDPFMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, nu
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.Equal(t, db.Entries[i/db.NumColumns][(i%db.NumColumns)*db.BlockSize:(i%db.NumColumns+1)*db.BlockSize-db.ProofLen], res)
+		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize-db.ProofLen], res)
 	}
 
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())

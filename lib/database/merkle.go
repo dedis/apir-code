@@ -11,7 +11,6 @@ import (
 // blockLen is the number of byte in a block, as byte is viewd as an element in this
 // case
 func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
-	entries := make([][]byte, numRows)
 	numBlocks := dbLen / (8 * blockLen)
 	// generate random blocks
 	randomBlocks := make([]byte, numBlocks*blockLen)
@@ -23,7 +22,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	for i := range blocks {
 		// generate random block
 		blocks[i] = make([]byte, blockLen)
-		copy(blocks[i], randomBlocks[i*blockLen : (i+1)*blockLen])
+		copy(blocks[i], randomBlocks[i*blockLen:(i+1)*blockLen])
 	}
 
 	// generate tree
@@ -33,30 +32,27 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	}
 
 	// generate db
-	blocksPerRow := numBlocks / numRows
+	numColumns := numBlocks / numRows
 	proofLen := tree.EncodedProofLength()
-	columnLen := blockLen + proofLen
+	blockLen = blockLen + proofLen
+	entries := make([]byte, numRows*numColumns*blockLen)
 	b := 0
-	for i := range entries {
-		e := make([]byte, columnLen * blocksPerRow)
-		for j := 0; j < blocksPerRow; j++ {
-			p, err := tree.GenerateProof(blocks[b])
-			encodedProof := merkle.EncodeProof(p)
-			if err != nil {
-				log.Fatalf("error while generating proof for block %v: %v", b, err)
-			}
-			copy(e[j*columnLen:(j+1)*columnLen], append(blocks[b], encodedProof...))
-			b++
+	for i := 0; i < numRows*numColumns*blockLen; i += blockLen {
+		p, err := tree.GenerateProof(blocks[b])
+		if err != nil {
+			log.Fatalf("error while generating proof for block %v: %v", b, err)
 		}
-		entries[i] = e
+		encodedProof := merkle.EncodeProof(p)
+		copy(entries[i:i+blockLen], append(blocks[b], encodedProof...))
+		b++
 	}
 
 	m := &Bytes{
 		Entries: entries,
 		Info: Info{
 			NumRows:    numRows,
-			NumColumns: dbLen / (8 * numRows * blockLen),
-			BlockSize:  columnLen,
+			NumColumns: numColumns,
+			BlockSize:  blockLen,
 			PIRType:    "merkle",
 			Root:       tree.Root(),
 			ProofLen:   proofLen,

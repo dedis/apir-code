@@ -5,10 +5,8 @@ import (
 	"encoding/gob"
 	"math/bits"
 
-	"github.com/lukechampine/fastxor"
-	"github.com/si-co/vpir-code/lib/database"
-
 	"github.com/dimakogan/dpf-go/dpf"
+	"github.com/si-co/vpir-code/lib/database"
 )
 
 // DPF-based server for classical PIR scheme working in GF(2).
@@ -55,20 +53,6 @@ func (s *PIRdpf) AnswerBytes(q []byte) ([]byte, error) {
 
 // Answer computes the answer for the given query
 func (s *PIRdpf) Answer(key dpf.DPFkey) []byte {
-	bs := s.db.BlockSize
 	q := dpf.EvalFull(key, uint64(bits.Len(uint(s.db.NumColumns)-1)))
-
-	m := make([]byte, s.db.NumRows*bs)
-	// we have to traverse column by column
-	for i := 0; i < s.db.NumRows; i++ {
-		sum := make([]byte, bs)
-		for j := 0; j < s.db.NumColumns; j++ {
-			if (q[j/8]>>(j%8))&1 == byte(1) {
-				fastxor.Bytes(sum, sum, s.db.Entries[i][j*bs:(j+1)*bs])
-			}
-		}
-		copy(m[i*bs:(i+1)*bs], sum)
-	}
-
-	return m
+	return answerPIR(q, s.db)
 }
