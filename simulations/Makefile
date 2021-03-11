@@ -15,7 +15,3 @@ performance:
 	$(MAKE) -s run_simul config=pirDPF.toml; \
 	$(MAKE) -s run_simul config=merkleMatrix.toml; \
 	$(MAKE) -s run_simul config=merkleDPF.toml; \
-
-merkle:
-	$(MAKE) -s run_simul config=merkleMatrix.toml; \
-	$(MAKE) -s run_simul config=merkleDPF.toml; \
