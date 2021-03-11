@@ -28,12 +28,12 @@ type MerkleTree struct {
 	// hash is a pointer to the hashing struct
 	hash HashType
 	// data is the data from which the Merkle tree is created
-	data map[string]uint64
+	data map[string]uint32
 	// nodes are the leaf and branch nodes of the Merkle tree
 	nodes [][]byte
 }
 
-func (t *MerkleTree) indexOf(input []byte) (uint64, error) {
+func (t *MerkleTree) indexOf(input []byte) (uint32, error) {
 	if i, ok := t.data[hex.EncodeToString(input)]; ok {
 		return i, nil
 	}
@@ -54,8 +54,8 @@ func (t *MerkleTree) GenerateProof(data []byte) (*Proof, error) {
 	hashes := make([][]byte, proofLen)
 
 	cur := 0
-	minI := uint64(math.Pow(2, float64(1))) - 1
-	for i := index + uint64(len(t.nodes)/2); i > minI; i /= 2 {
+	minI := uint32(math.Pow(2, float64(1))) - 1
+	for i := index + uint32(len(t.nodes)/2); i > minI; i /= 2 {
 		hashes[cur] = t.nodes[i^1]
 		cur++
 	}
@@ -66,7 +66,7 @@ func (t *MerkleTree) GenerateProof(data []byte) (*Proof, error) {
 // 4 bytes are for how many hashes are in the path, 8 bytes for embedding the index
 // in the tree (see proof.go for details).
 func (t *MerkleTree) EncodedProofLength() int {
-	return int(math.Ceil(math.Log2(float64(len(t.data)))))*t.hash.HashLength() + 4 + 8
+	return int(math.Ceil(math.Log2(float64(len(t.data)))))*t.hash.HashLength() + numHashesByteSize + indexByteSize
 }
 
 // New creates a new Merkle tree using the provided raw data and default hash type.  Salting is not used.
@@ -85,7 +85,7 @@ func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
 	branchesLen := int(math.Exp2(math.Ceil(math.Log2(float64(len(data))))))
 
 	// map with the original data to easily loop up the index
-	md := make(map[string]uint64)
+	md := make(map[string]uint32)
 	// We pad our data length up to the power of 2
 	nodes := make([][]byte, branchesLen+len(data)+(branchesLen-len(data)))
 	// Leaves
@@ -98,7 +98,7 @@ func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
 		//} else {
 		//ib := append(data[i], ib...)
 		nodes[i+branchesLen] = hash.Hash(data[i], ib)
-		md[hex.EncodeToString(data[i])] = uint64(i)
+		md[hex.EncodeToString(data[i])] = uint32(i)
 		//}
 	}
 	for i := len(data) + branchesLen; i < len(nodes); i++ {
@@ -135,7 +135,7 @@ func indexToBytes(i int) []byte {
 	if i > math.MaxUint32 {
 		panic("index too big")
 	}
-	b := make([]byte, 4)
+	b := make([]byte, indexByteSize)
 	binary.LittleEndian.PutUint32(b, uint32(i))
 	return b
 }

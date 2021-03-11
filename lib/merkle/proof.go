@@ -18,18 +18,18 @@ import (
 )
 
 const (
-	indexByteSize = 8
+	indexByteSize = 4
 	numHashesByteSize = 4
 )
 
 // Proof is a proof of a Merkle tree
 type Proof struct {
 	Hashes [][]byte
-	Index  uint64
+	Index  uint32
 }
 
 // newProof generates a Merkle proof
-func newProof(hashes [][]byte, index uint64) *Proof {
+func newProof(hashes [][]byte, index uint32) *Proof {
 	return &Proof{
 		Hashes: hashes,
 		Index:  index,
@@ -64,8 +64,8 @@ func generateProofHash(data []byte, salt bool, proof *Proof, hashType HashType) 
 	var proofHash []byte
 	ib := indexToBytes(int(proof.Index))
 	if salt {
-		indexSalt := make([]byte, 4)
-		binary.BigEndian.PutUint32(indexSalt, uint32(proof.Index))
+		indexSalt := make([]byte, indexByteSize)
+		binary.BigEndian.PutUint32(indexSalt, proof.Index)
 		proofHash = hashType.Hash(data, ib, indexSalt)
 	} else {
 		proofHash = hashType.Hash(data, ib)
@@ -85,7 +85,7 @@ func generateProofHash(data []byte, salt bool, proof *Proof, hashType HashType) 
 
 func DecodeProof(p []byte) *Proof {
 	// number of hashes
-	numHashes := binary.LittleEndian.Uint32(p[0:])
+	numHashes := binary.LittleEndian.Uint32(p[:numHashesByteSize])
 
 	// hashes
 	hashLength := uint32(32) // sha256
@@ -95,7 +95,7 @@ func DecodeProof(p []byte) *Proof {
 	}
 
 	// index
-	index := binary.LittleEndian.Uint64(p[len(p)-8:])
+	index := binary.LittleEndian.Uint32(p[len(p)-indexByteSize:])
 
 	return &Proof{
 		Hashes: hashes,
@@ -125,7 +125,7 @@ func EncodeProof(p *Proof) []byte {
 
 	// encode index
 	b1 := make([]byte, indexByteSize)
-	binary.LittleEndian.PutUint64(b1, p.Index)
+	binary.LittleEndian.PutUint32(b1, p.Index)
 	copy(out[len(out)-indexByteSize:], b1)
 	//out = append(out, b1...)
 

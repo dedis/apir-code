@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 
@@ -152,7 +153,7 @@ func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]by
 		if err != nil {
 			return block, err
 		}
-		data := block[:dbInfo.BlockSize-dbInfo.ProofLen]
+		data := block[:len(block)-dbInfo.ProofLen]
 
 		// check Merkle proof
 		encodedProof := block[dbInfo.BlockSize-dbInfo.ProofLen:]
