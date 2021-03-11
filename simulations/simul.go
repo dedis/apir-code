@@ -141,13 +141,17 @@ func main() {
 		var results []*Chunk
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		if s.Primitive == "vpir-it" {
+			log.Printf("db info: %#v", db.Info)
 			results = vpirIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "vpir-dpf" {
+			log.Printf("db info: %#v", db.Info)
 			results = vpirDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "pir-it" || s.Primitive == "pir-it-merkle" {
+			log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "pir-dpf" || s.Primitive == "pir-dpf-merkle" {
+			log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirDPF(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else {
