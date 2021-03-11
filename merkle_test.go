@@ -66,14 +66,17 @@ func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, num
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
-		queries := c.Query(i, 2)
+		queries, err := c.QueryBytes(i, 2)
+		require.NoError(t, err)
 
-		a0 := s0.Answer(queries[0])
-		a1 := s1.Answer(queries[1])
+		a0, err := s0.AnswerBytes(queries[0])
+		require.NoError(t, err)
+		a1, err := s1.AnswerBytes(queries[1])
+		require.NoError(t, err)
 
 		answers := [][]byte{a0, a1}
 
-		res, err := c.Reconstruct(answers)
+		res, err := c.ReconstructBytes(answers)
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize-db.ProofLen], res)
 	}
@@ -88,14 +91,17 @@ func retrieveBlocksDPFMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, nu
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
-		fssKeys := c.Query(i, 2)
+		fssKeys, err := c.QueryBytes(i, 2)
+		require.NoError(t, err)
 
-		a0 := s0.Answer(fssKeys[0])
-		a1 := s1.Answer(fssKeys[1])
+		a0, err := s0.AnswerBytes(fssKeys[0])
+		require.NoError(t, err)
+		a1, err := s1.AnswerBytes(fssKeys[1])
+		require.NoError(t, err)
 
 		answers := [][]byte{a0, a1}
 
-		res, err := c.Reconstruct(answers)
+		res, err := c.ReconstructBytes(answers)
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize-db.ProofLen], res)
 	}
