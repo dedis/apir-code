@@ -105,9 +105,11 @@ def plotVpirPerformance():
     GB = 1e9
     MB = 1e6
     colors = ['darkred', 'darkblue', 'darkorange', 'darkgreen']
-    schemes = ["vpirMultiMatrixBlock.json", "pirMatrix.json", "merkleMatrix.json", "vpirMultiVectorBlockDPF.json",
-               "pirDPF.json", "merkleDPF.json"]
-    labels = ["VPIR matrix", "PIR matrix", "Merkle matrix", "VPIR DPF", "PIR DPF", "Merkle DPF"]
+    schemes = ["vpirMultiMatrixBlock.json", "merkleMatrix.json", "pirMatrix.json", "vpirMultiVectorBlockDPF.json",
+               "merkleDPF.json", "pirDPF.json"]
+    labels = ["VPIR matrix", "Merkle matrix", "PIR matrix", "VPIR DPF", "Merkle DPF", "PIR DPF"]
+    # schemes = ["vpirMultiMatrixBlock.json", "pirMatrix.json", "vpirMultiVectorBlockDPF.json", "pirDPF.json",]
+    # labels = ["VPIR matrix", "PIR matrix", "VPIR DPF", "PIR DPF"]
 
     fig, ax = plt.subplots()
     ax.set_ylabel('Requests/second')
@@ -128,15 +130,15 @@ def plotVpirPerformance():
         for dbSize in sorted(stats.keys()):
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            table[dbSize].append((1000/cpu, MB/bw))
+            table[dbSize].append((cpu, bw/1000))
             # print("%.2f & %d & " % (1000/cpu, GB/bw), end="")
             Xs.append(GB/bw)
             Ys.append(1000/cpu)
-            ax.annotate(str(int(int(dbSize)/(8*MB)))+"MB", xy=(GB/bw, 1000/cpu), xytext=(-20, 5), color=colors[int(i/2)], textcoords='offset points')
+            ax.annotate(str(int(int(dbSize)/(8*MB)))+"MB", xy=(GB/bw, 1000/cpu), xytext=(-20, 5), color=colors[int(i/(len(schemes)/2))], textcoords='offset points')
 
         # print(Xs)
         # print(Ys)
-        ax.plot(Xs, Ys, color=colors[int(i/2)], marker=markers[0], linestyle=linestyles[i%2], label=labels[i])
+        ax.plot(Xs, Ys, color=colors[int(i/(len(schemes)/2))], marker=markers[0], linestyle=linestyles[i%int(len(schemes)/2)], label=labels[i])
 
     for size, values in table.items():
         print(str(int(int(size)/(8*MB)))+"\\,MB", end=" ")
@@ -145,16 +147,18 @@ def plotVpirPerformance():
                 print("& %d & %d " % (round(value[0]), round(value[1])), end="")
             elif value[0] < 5 and value[1] > 5:
                 print("& %.2f & %d " % (value[0], value[1]), end="")
+            elif value[0] > 5 and value[1] < 5:
+                print("& %d & %.2f " % (value[0], value[1]), end="")
             else:
-                print("& %.2f & %.1f " % (value[0], value[1]), end="")
+                print("& %.2f & %.2f " % (value[0], value[1]), end="")
         print("\\\\")
 
     ax.legend(loc='lower center')
     # ax.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left",
     #           mode="expand", borderaxespad=0, ncol=4)
     plt.tight_layout()
-    # plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
-    plt.show()
+    plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
+    # plt.show()
 
 
 # def plotVpirPerformance():
