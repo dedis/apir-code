@@ -1,8 +1,6 @@
 package client
 
 import (
-	"bytes"
-	"encoding/gob"
 	"io"
 	"log"
 	"math/bits"
@@ -36,19 +34,7 @@ func NewPIRdpf(rnd io.Reader, info *database.Info) *PIRdpf {
 // server
 func (c *PIRdpf) QueryBytes(index, numServers int) ([][]byte, error) {
 	queries := c.Query(index, numServers)
-
-	// encode all the queries in bytes
-	out := make([][]byte, len(queries))
-	for i, q := range queries {
-		var buf bytes.Buffer
-		enc := gob.NewEncoder(&buf)
-		if err := enc.Encode(q); err != nil {
-			return nil, err
-		}
-		out[i] = buf.Bytes()
-	}
-
-	return out, nil
+	return [][]byte{[]byte(queries[0]), []byte(queries[1])}, nil
 }
 
 // Query outputs numServers query for index i
