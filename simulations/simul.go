@@ -145,9 +145,11 @@ func main() {
 		} else if s.Primitive == "vpir-dpf" {
 			results = vpirDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "pir-it" || s.Primitive == "pir-it-merkle" {
-			results = pirIT(dbBytes, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
+			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else if s.Primitive == "pir-dpf" || s.Primitive == "pir-dpf-merkle" {
-			results = pirDPF(dbBytes, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
+			results = pirDPF(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		} else {
 			log.Fatal("unknown primitive type")
 		}
@@ -167,7 +169,7 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
-func vpirIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+func vpirIT(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	cl := client.NewIT(prg, &db.Info)
 	servers := makeITServers(db)
@@ -176,7 +178,7 @@ func vpirIT(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int
 	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
 }
 
-func vpirDPF(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+func vpirDPF(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	cl := client.NewDPF(prg, &db.Info)
 	servers := makeDPFServers(db)
@@ -185,20 +187,20 @@ func vpirDPF(db *database.DB, elemBitSize int, numBitsToRetrieve int, nRepeat in
 	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
 }
 
-func pirIT(db *database.Bytes, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	cl := client.NewPIR(prg, &db.Info)
 	servers := makePIRITServers(db)
-	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
+	numBlocksToRetrieve := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
 
 	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
 }
 
-func pirDPF(db *database.Bytes, elemBitSize int, numBitsToRetrieve int, nRepeat int) []*Chunk {
+func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	cl := client.NewPIRdpf(prg, &db.Info)
 	servers := makePIRDPFServers(db)
-	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
+	numBlocksToRetrieve := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
 
 	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
 }
