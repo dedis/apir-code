@@ -126,6 +126,7 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 
 func (s *vpirServer) ServerStop(ctx context.Context, r *proto.ServerStopRequest) (
 	*proto.ServerStopResponse, error) {
+	log.Println("exiting")
 	defer os.Exit(0)
 
 	return &proto.ServerStopResponse{}, nil
