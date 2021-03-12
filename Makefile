@@ -14,8 +14,8 @@ run_server: $(PROTO_PB)
 
 run_client: $(PROTO_PB)
 	cd cmd/client && go build -race
-	go run cmd/client/main.go 
-	#go run cmd/client/main.go -id=$(id) -scheme=$(scheme)
+	#go run cmd/client/main.go 
+	go run cmd/client/main.go -id=$(id)
 
 test: $(PROTO_PB)
 	go test

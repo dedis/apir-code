@@ -106,7 +106,7 @@ func main() {
 		lc.flags.id = id
 	}
 
-	lc.retrieveKeyGivenId(id)
+	lc.retrieveKeyGivenId(lc.flags.id)
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) {
