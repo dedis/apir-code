@@ -16,7 +16,7 @@ cd ../../
 echo "" > results/real.csv
 
 # run servers
-for f in {1..30}; do
+for f in {1..10}; do
   env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=$f 2>&1 > /dev/null &
   pid0=$!
   env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f 2>&1 > /dev/null &
