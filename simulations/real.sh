@@ -17,10 +17,9 @@ echo "" > simulations/results/real.csv
 
 # run servers
 for f in {1..10}; do
-  env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=$f 2>&1 > /dev/null &
-  pid0=$!
-  env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f 2>&1 > /dev/null &
-  pid1=$!
+  echo "running with $f files"
+  env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=$f &
+  env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f &
 
   # run client
   time=$(go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
@@ -29,6 +28,9 @@ for f in {1..10}; do
   echo "$f,$time" >> simulations/results/real.csv
 
   # kill servers
-  kill $(jobs -p)
+  kill -9 $(jobs -p) > /dev/null
   wait $!
+  echo "sleeping..."
+  sleep 300
+  echo "done"
 done
