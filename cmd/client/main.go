@@ -107,6 +107,7 @@ func main() {
 	}
 
 	lc.retrieveKeyGivenId(lc.flags.id)
+	lc.stopServers()
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) {
@@ -149,6 +150,30 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 
 	fmt.Println(armored)
 	fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
+}
+
+func (lc *localClient) stopServers() {
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Second)
+	defer cancel()
+
+	wg := sync.WaitGroup{}
+	resCh := make(chan *database.Info, len(lc.connections))
+	for _, conn := range lc.connections {
+		wg.Add(1)
+		go func(conn *grpc.ClientConn) {
+			c := proto.NewVPIRClient(conn)
+			q := &proto.ServerStopRequest{}
+			_, err := c.ServerStop(subCtx, q, lc.callOptions...)
+			if err != nil {
+				log.Fatalf("could not send database info request to %s: %v",
+					conn.Target(), err)
+			}
+			log.Printf("sent server stop request to %s", conn.Target())
+			wg.Done()
+		}(conn)
+	}
+	wg.Wait()
+	close(resCh)
 }
 
 func (lc *localClient) retrieveDBInfo() {
