@@ -20,3 +20,7 @@ pid1=$!
 
 # run client
 env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2 
+
+# kill servers
+kill $pid0
+kill $pid1
