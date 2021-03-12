@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/nikirill/go-crypto/openpgp/armor"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,6 +14,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/nikirill/go-crypto/openpgp/armor"
 
 	"github.com/nikirill/go-crypto/openpgp"
 )
@@ -132,6 +133,19 @@ func WriteKeysOnDisk(dir string, entities map[string]*openpgp.Entity) error {
 func GetSksOriginalDumpFiles(dir string) ([]string, error) {
 	sksRgx := `sks-dump-[0-9]{4}\.pgp`
 	return GetFilesThatMatch(dir, sksRgx)
+}
+
+// GetAllFiles returns all the filenames from the directory
+func GetAllFiles(dir string) ([]string, error) {
+	allFiles, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	files := make([]string, 0)
+	for _, file := range allFiles {
+		files = append(files, filepath.Join(dir, file.Name()))
+	}
+	return files, nil
 }
 
 // GetFilesThatMatch returns the filenames from the directory which

@@ -25,6 +25,7 @@ import (
 func main() {
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
+	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	flag.Parse()
@@ -56,7 +57,7 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// load the db
-	db, err := loadPgpDB()
+	db, err := loadPgpDB(*filesNumber)
 	if err != nil {
 		log.Fatalf("impossible to construct real keys db: %v", err)
 	}
@@ -123,16 +124,19 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	return &proto.QueryResponse{Answer: a}, nil
 }
 
-func loadPgpDB() (*database.DB, error) {
+func loadPgpDB(filesNumber int) (*database.DB, error) {
 	log.Println("Starting to read in the DB data")
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)
-	rgx := `sks-000\.pgp`
-	// change to below to get only the full db
-	//rgx := `sks-[0-9]{3}\.pgp`
-	files, err := pgp.GetFilesThatMatch(sksDir, rgx)
+	//rgx := `sks-000\.pgp`
+	//// change to below to get only the full db
+	////rgx := `sks-[0-9]{3}\.pgp`
+	files, err := pgp.GetAllFiles(sksDir)
 	if err != nil {
 		return nil, err
 	}
+	// take only filesNumber files
+	files = files[:filesNumber]
+
 	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, false)
 	if err != nil {
 		return nil, err
