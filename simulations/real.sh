@@ -13,7 +13,7 @@ go build -race
 cd ../../
 
 # initialize results file
-echo "" > results/real.csv
+echo "" > simulations/results/real.csv
 
 # run servers
 for f in {1..10}; do
@@ -26,7 +26,7 @@ for f in {1..10}; do
   time = $(env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
 
   # save value
-  echo "$f,$time" >> results/real.csv
+  echo "$f,$time" >> simulations/results/real.csv
 
   # kill servers
   kill $pid0
