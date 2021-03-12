@@ -12,15 +12,23 @@ go build -race
 # move to root
 cd ../../
 
+# initialize results file
+echo "" > results/real.csv
+
 # run servers
-env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=1 2>&1 > /dev/null &
-pid0=$!
-env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=1 2>&1 > /dev/null &
-pid1=$!
+for f in {1..30}; do
+  env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=$f 2>&1 > /dev/null &
+  pid0=$!
+  env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f 2>&1 > /dev/null &
+  pid1=$!
 
-# run client
-env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2 
+  # run client
+  time = $(env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ": " -f2)
 
-# kill servers
-kill $pid0
-kill $pid1
+  # save value
+  echo "$f,$time" >> results/real.csv
+
+  # kill servers
+  kill $pid0
+  kill $pid1
+done
