@@ -23,12 +23,12 @@ for f in {1..10}; do
   pid1=$!
 
   # run client
-  time=$(env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
+  time=$(go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
 
   # save value
   echo "$f,$time" >> simulations/results/real.csv
 
   # kill servers
-  kill $pid0
-  kill $pid1
+  kill $(jobs -p)
+  wait $!
 done
