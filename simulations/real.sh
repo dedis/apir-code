@@ -13,10 +13,10 @@ go build -race
 cd ../../
 
 # run servers
-env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=1 > /dev/null &
+env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=1 > /dev/null 2>&1 &
 pid0=$!
-env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=1 > /dev/null &
+env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=1 > /dev/null 2>&1 &
 pid1=$!
 
 # run client
-env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com
+env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall"
