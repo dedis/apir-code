@@ -28,9 +28,7 @@ for f in {1..10}; do
   echo "$f,$time" >> simulations/results/real.csv
 
   # kill servers
-  kill -9 $(jobs -p) > /dev/null
-  wait $!
   echo "sleeping..."
-  sleep 300
+  sleep 60
   echo "done"
 done
