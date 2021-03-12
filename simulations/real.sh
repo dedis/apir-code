@@ -23,7 +23,7 @@ for f in {1..10}; do
   pid1=$!
 
   # run client
-  time = $(env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ": " -f2)
+  time = $(env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
 
   # save value
   echo "$f,$time" >> results/real.csv
