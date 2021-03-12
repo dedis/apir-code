@@ -35,10 +35,8 @@ type localClient struct {
 }
 
 type flags struct {
-	scheme          string
-	realApplication bool
-	logFile         string
-	profiling       bool
+	id        string
+	profiling bool
 }
 
 func newLocalClient() *localClient {
@@ -99,53 +97,58 @@ func main() {
 	lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 
 	// get id and compute corresponding hash
-	for {
+	if lc.flags.id == "" {
 		var id string
 		fmt.Scanln(&id)
-		t := time.Now()
 		if id == "" {
 			log.Fatal("id not provided")
 		}
-
-		// compute hash key for id
-		hashKey := database.HashToIndex(id, lc.dbInfo.NumRows*lc.dbInfo.NumColumns)
-		log.Printf("id: %s, hashKey: %d", id, hashKey)
-
-		// query given hash key
-		queries, err := lc.vpirClient.QueryBytes(hashKey, len(lc.connections))
-		if err != nil {
-			log.Fatalf("error when executing query: %v", err)
-		}
-
-		// send queries to servers
-		answers := lc.runQueries(queries)
-
-		// reconstruct block
-		resultField, err := lc.vpirClient.ReconstructBytes(answers)
-		if err != nil {
-			log.Fatalf("error during reconstruction: %v", err)
-		}
-
-		// return result bytes
-		result := field.VectorToBytes(resultField)
-
-		// unpad result
-		result = database.UnPadBlock(result)
-
-		// get a key from the block with the id of the search
-		retrievedKey, err := pgp.RecoverKeyFromBlock(result, id)
-		if err != nil {
-			log.Fatalf("error retrieving key from the block: %v", err)
-		}
-
-		armored, err := pgp.ArmorKey(retrievedKey)
-		if err != nil {
-			log.Fatalf("error armor-encoding the key: %v", err)
-		}
-
-		fmt.Println(armored)
-		fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
+		lc.flags.id = id
 	}
+
+	lc.retrieveKeyGivenId(id)
+}
+
+func (lc *localClient) retrieveKeyGivenId(id string) {
+	t := time.Now()
+	// compute hash key for id
+	hashKey := database.HashToIndex(id, lc.dbInfo.NumRows*lc.dbInfo.NumColumns)
+	log.Printf("id: %s, hashKey: %d", id, hashKey)
+
+	// query given hash key
+	queries, err := lc.vpirClient.QueryBytes(hashKey, len(lc.connections))
+	if err != nil {
+		log.Fatalf("error when executing query: %v", err)
+	}
+
+	// send queries to servers
+	answers := lc.runQueries(queries)
+
+	// reconstruct block
+	resultField, err := lc.vpirClient.ReconstructBytes(answers)
+	if err != nil {
+		log.Fatalf("error during reconstruction: %v", err)
+	}
+
+	// return result bytes
+	result := field.VectorToBytes(resultField)
+
+	// unpad result
+	result = database.UnPadBlock(result)
+
+	// get a key from the block with the id of the search
+	retrievedKey, err := pgp.RecoverKeyFromBlock(result, id)
+	if err != nil {
+		log.Fatalf("error retrieving key from the block: %v", err)
+	}
+
+	armored, err := pgp.ArmorKey(retrievedKey)
+	if err != nil {
+		log.Fatalf("error armor-encoding the key: %v", err)
+	}
+
+	fmt.Println(armored)
+	fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
 }
 
 func (lc *localClient) retrieveDBInfo() {
@@ -268,7 +271,8 @@ func equalDBInfo(info []*database.Info) bool {
 func parseFlags() *flags {
 	f := new(flags)
 
-	flag.BoolVar(&f.profiling, "prof", false, "Write pprof file")
+	flag.BoolVar(&f.profiling, "prof", false, "write pprof file")
+	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
 	flag.Parse()
 
 	return f
