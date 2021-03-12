@@ -19,4 +19,4 @@ env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=1 2>&1 > /dev/null &
 pid1=$!
 
 # run client
-env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall"
+env GOGC=$GOGC go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2 
