@@ -107,7 +107,7 @@ func main() {
 	}
 
 	lc.retrieveKeyGivenId(lc.flags.id)
-	lc.stopServers()
+	//	lc.stopServers()
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) {
