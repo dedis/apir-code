@@ -18,10 +18,8 @@ echo "" > simulations/results/real.csv
 # run servers
 for f in {1..10}; do
   echo "running with $f files"
-  env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=$f &
-  pid0=$!
-  env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f &
-  pid1=$!
+  env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=$f & pid0=$!
+  env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f & pid1=$!
 
   # run client
   #time=$(go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
