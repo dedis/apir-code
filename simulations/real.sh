@@ -19,7 +19,9 @@ echo "" > simulations/results/real.csv
 for f in {1..10}; do
   echo "running with $f files"
   env GOGC=$GOGC go run cmd/server/main.go -id=0 -files=$f &
+  pid0=$!
   env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f &
+  pid1=$!
 
   # run client
   #time=$(go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
@@ -29,7 +31,8 @@ for f in {1..10}; do
   #echo "$f,$time" >> simulations/results/real.csv
 
   # send sigterm to servers and trigger graceful stop
-  kill $(jobs -p) > /dev/null
+  kill $pid0
+  kill $pid1
   echo "sleeping to let server gracefully stops..."
   sleep 120
   echo "done with $f files"

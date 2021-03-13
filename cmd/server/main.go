@@ -112,6 +112,7 @@ func main() {
 	case err := <-errCh:
 		log.Fatalf("failed to serve: %v", err)
 	case <-sigCh:
+		fmt.Println("here")
 		rpcServer.GracefulStop()
 		lis.Close()
 		log.Println("clean shutdown of server done")
