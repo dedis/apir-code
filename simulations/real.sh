@@ -29,8 +29,8 @@ for f in {1..10}; do
   #echo "$f,$time" >> simulations/results/real.csv
 
   # send sigterm to servers and trigger graceful stop
-  kill -9 $(jobs -p) > /dev/null
-  echo "sleeping..."
+  kill $(jobs -p) > /dev/null
+  echo "sleeping to let server gracefully stops..."
   sleep 60
   echo "done with $f files"
 done
