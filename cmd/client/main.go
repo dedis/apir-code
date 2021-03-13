@@ -165,7 +165,7 @@ func (lc *localClient) stopServers() {
 			q := &proto.ServerStopRequest{}
 			_, err := c.ServerStop(subCtx, q, lc.callOptions...)
 			if err != nil {
-				log.Fatalf("could not send database info request to %s: %v",
+				log.Fatalf("could not send server stop request to %s: %v",
 					conn.Target(), err)
 			}
 			log.Printf("sent server stop request to %s", conn.Target())
