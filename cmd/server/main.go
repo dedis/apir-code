@@ -94,7 +94,6 @@ func main() {
 	go func() {
 		s := <-sigCh
 		log.Printf("got signal %v, attempting graceful shutdown", s)
-		cancel()
 		rpcServer.GracefulStop()
 		wg.Done()
 	}()
