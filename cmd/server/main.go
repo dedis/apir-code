@@ -111,7 +111,7 @@ func main() {
 	select {
 	case err := <-errCh:
 		log.Fatalf("failed to serve: %v", err)
-	case <-stopCh:
+	case <-sigCh:
 		rpcServer.GracefulStop()
 		lis.Close()
 		log.Println("clean shutdown of server done")
