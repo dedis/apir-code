@@ -31,6 +31,6 @@ for f in {1..10}; do
   # send sigterm to servers and trigger graceful stop
   kill $(jobs -p) > /dev/null
   echo "sleeping to let server gracefully stops..."
-  sleep 60
+  sleep 120
   echo "done with $f files"
 done

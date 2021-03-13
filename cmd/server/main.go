@@ -103,6 +103,7 @@ func main() {
 		log.Fatalf("failed to serve: %v", err)
 	}
 	wg.Wait()
+	lis.Close()
 	log.Println("clean shutdown of server done")
 }
 
