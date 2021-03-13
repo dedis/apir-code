@@ -22,13 +22,15 @@ for f in {1..10}; do
   env GOGC=$GOGC go run cmd/server/main.go -id=1 -files=$f &
 
   # run client
-  time=$(go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
+  #time=$(go run cmd/client/main.go -id=alex.braulio@varidi.com | grep "Wall" | cut -d ":" -f2)
+  go run cmd/client/main.go -id=alex.braulio@varidi.com
 
   # save value
-  echo "$f,$time" >> simulations/results/real.csv
+  #echo "$f,$time" >> simulations/results/real.csv
 
-  # kill servers
+  # send sigterm to servers and trigger graceful stop
+  kill -9 $(jobs -p) > /dev/null
   echo "sleeping..."
   sleep 60
-  echo "done"
+  echo "done with $f files"
 done
