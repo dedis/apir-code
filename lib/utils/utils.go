@@ -14,9 +14,9 @@ func MaxBytesLength(in map[int][]byte) int {
 	return max
 }
 
-// Divides dividend by divisor and rounds up the result
-func DivideAndRoundUp(dividend, divisor int) int {
-	return int(math.Ceil(float64(dividend) / float64(divisor)))
+// Divides dividend by divisor and rounds up the result to the nearest multiple
+func DivideAndRoundUpToMultiple(dividend, divisor, multiple int) int {
+	return int(math.Ceil(float64(dividend) / float64(divisor * multiple))) * multiple
 }
 
 // Increase num to the next perfect square.

@@ -157,8 +157,8 @@ def plotVpirPerformance():
     # ax.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left",
     #           mode="expand", borderaxespad=0, ncol=4)
     plt.tight_layout()
-    plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
-    # plt.show()
+    # plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
+    plt.show()
 
 
 # def plotVpirPerformance():

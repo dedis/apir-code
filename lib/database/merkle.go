@@ -43,7 +43,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	var wg sync.WaitGroup
 	var end int
 	numCores := runtime.NumCPU()
-	chunkLen := utils.DivideAndRoundUp(numRows*numColumns, numCores)
+	chunkLen := utils.DivideAndRoundUpToMultiple(numRows*numColumns, numCores, 1)
 	for i := 0; i < numRows*numColumns; i += chunkLen {
 		end = i + chunkLen
 		if end > numRows*numColumns {
