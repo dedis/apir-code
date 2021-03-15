@@ -57,17 +57,13 @@ func TestRetrieveRealKeysITMatrix(t *testing.T) {
 }
 
 func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
-	var err error
-	var j int
-	var retrievedKey *openpgp.Entity
-
 	numKeys := 100
 
 	rand.Seed(time.Now().UnixNano())
 	//totalTimer := monitor.NewMonitor()
 	start := time.Now()
 	for i := 0; i < numKeys; i++ {
-		j = rand.Intn(len(realKeys))
+		j := rand.Intn(len(realKeys))
 		fmt.Println(pgp.PrimaryEmail(realKeys[j]))
 		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
 		result = database.UnPadBlock(result)
