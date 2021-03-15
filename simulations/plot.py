@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 import argparse
 
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
 from utils import *
 
 resultFolder = "results/"
-width = 0.3
 
 # styles
-markers = ['.', 'x', 'd', 's']
+markers = ['.', '*', 'd', 's']
 linestyles = ['-', '--', ':', '-.']
-patterns = ['', '.', '//']
+patterns = ['', '//', '.']
+
+GB = 1e9
+MB = 1e6
 
 
 def plotVpirBenchmarksBarBw():
@@ -88,7 +92,7 @@ def plotVpirBenchmarks():
     ax.set_xlabel("DB size [KB]")
     ax.set_xticks(Xs + width * (len(schemes) - 1) / 2)
     ax.set_xticklabels(dbSizes)
-    ax.legend(bars, labels, fontsize=12)
+    ax.legend(bars, labels)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     # ax.spines['left'].set_visible(False)
@@ -101,19 +105,71 @@ def plotVpirBenchmarks():
     # plt.show()
 
 
-def plotVpirPerformance():
-    GB = 1e9
-    MB = 1e6
-    colors = ['darkred', 'darkblue', 'darkorange', 'darkgreen']
-    schemes = ["vpirMultiMatrixBlock.json", "merkleMatrix.json", "pirMatrix.json", "vpirMultiVectorBlockDPF.json",
-               "merkleDPF.json", "pirDPF.json"]
-    labels = ["VPIR matrix", "Merkle matrix", "PIR matrix", "VPIR DPF", "Merkle DPF", "PIR DPF"]
-    # schemes = ["vpirMultiMatrixBlock.json", "pirMatrix.json", "vpirMultiVectorBlockDPF.json", "pirDPF.json",]
-    # labels = ["VPIR matrix", "PIR matrix", "VPIR DPF", "PIR DPF"]
+def plotVpirPerformanceBars():
+    colors = ['dimgray', 'darkgray', 'silver']
+    schemes = ["pirMatrix.json", "merkleMatrix.json", "vpirMultiMatrixBlock.json",
+               "pirDPF.json", "merkleDPF.json", "vpirMultiVectorBlockDPF.json"]
+    schemeLabels = ["PIR", "Merkle", "VPIR"]
+    optimizationLabels = ["Matrix", "DPF"]
 
     fig, ax = plt.subplots()
-    ax.set_ylabel('Requests/second')
-    ax.set_xlabel('Requests/GB')
+    ax.set_ylabel('Ratio to PIR Matrix request latency')
+    ax.set_xlabel('Database size [MB]')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.set_yscale('log')
+    ax.yaxis.grid(True)
+
+    width = 0.15
+    pirMatrixStats = allStats(resultFolder + schemes[0])
+    dbSizes = sorted([int(size / 8000000) for size in pirMatrixStats.keys()])
+    baseline = pirMatrixStats[dbSizes[0] * 8000000]['client']['cpu']['mean'] + \
+               pirMatrixStats[dbSizes[0] * 8000000]['server']['cpu']['mean']
+    Xs = np.arange(len(dbSizes))
+    bars = [[]] * len(schemes)
+
+    for i, scheme in enumerate(schemes):
+        stats = allStats(resultFolder + scheme)
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            Y = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            # Yerr = stats[dbSize]['client']['cpu']['std'] + stats[dbSize]['server']['cpu']['std']
+            # bars[i] = ax.bar(j + i * width, Y, width, yerr=Yerr, color=colors[i % 3], hatch=patterns[int(i / 3)])
+            bars[i] = ax.bar(j + i * width, Y / baseline, width, color=colors[i % 3], hatch=patterns[int(i / 3)])
+            ax.annotate(rounder(Y / baseline),
+                        xy=(j + i * width, Y / baseline),
+                        xytext=(2, 0),  # 5 points vertical offset
+                        rotation=50,
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+
+    ax.set_xticks(Xs + width * (len(schemes) - 1) / 2)
+    ax.set_xticklabels(dbSizes)
+
+    handles = []
+    for i, label in enumerate(schemeLabels):
+        handles.append(mpatches.Patch(color=colors[i], label=label))
+    for i, label in enumerate(optimizationLabels):
+        handles.append(mpatches.Patch(facecolor='white', edgecolor='black', hatch=patterns[i], label=label))
+
+    ax.legend(handles=handles, loc='upper left')
+    # ax.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left",
+    #           mode="expand", borderaxespad=0, ncol=4)
+    plt.tight_layout()
+    plt.savefig('multi_performance_bar_normalized.eps', format='eps', dpi=300, transparent=True)
+    # plt.show()
+
+
+def plotVpirPerformanceLines():
+    colors = ['darkred', 'darkgreen', 'darkblue', 'darkorange']
+    schemes = ["pirMatrix.json", "merkleMatrix.json", "vpirMultiMatrixBlock.json",
+               "pirDPF.json", "merkleDPF.json", "vpirMultiVectorBlockDPF.json"]
+    # schemes = ["merkleMatrix.json", "vpirMultiMatrixBlock.json",
+    #            "merkleDPF.json", "vpirMultiVectorBlockDPF.json"]
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel('Requests/s')
+    ax.set_ylabel('Requests/GB')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
@@ -121,47 +177,91 @@ def plotVpirPerformance():
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.yaxis.grid(True)
+    ax.xaxis.grid(True)
+    ax.invert_xaxis()
+    # ax.invert_yaxis()
 
     table = defaultdict(list)
+    dbSizes = [str(int(int(size) / (8 * MB))) + "MB" for size in allStats(resultFolder + schemes[0]).keys()]
 
     for i, scheme in enumerate(schemes):
         Xs, Ys = [], []
         stats = allStats(resultFolder + scheme)
-        for dbSize in sorted(stats.keys()):
+        for j, dbSize in enumerate(sorted(stats.keys())):
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            table[dbSize].append((cpu, bw/1000))
-            # print("%.2f & %d & " % (1000/cpu, GB/bw), end="")
-            Xs.append(GB/bw)
-            Ys.append(1000/cpu)
-            ax.annotate(str(int(int(dbSize)/(8*MB)))+"MB", xy=(GB/bw, 1000/cpu), xytext=(-20, 5), color=colors[int(i/(len(schemes)/2))], textcoords='offset points')
+            table[dbSize].append((cpu, bw / 1000))
+            Xs.append(1000 / cpu)
+            Ys.append(GB / bw)
+            # ax.annotate(str(int(int(dbSize) / (8 * MB))) + "MB", xy=(1000/cpu, GB/bw), xytext=(-20, 5),
+            #             color=colors[i % int(len(schemes) / 2)], textcoords='offset points')
+            ax.plot(Xs[-1], Ys[-1], color=colors[i % int(len(schemes) / 2)], marker=markers[j])
 
-        # print(Xs)
-        # print(Ys)
-        ax.plot(Xs, Ys, color=colors[int(i/(len(schemes)/2))], marker=markers[0], linestyle=linestyles[i%int(len(schemes)/2)], label=labels[i])
+        ax.plot(Xs, Ys, color=colors[i % int(len(schemes) / 2)],
+                linestyle=linestyles[int(i / (len(schemes) / 2))])
+        # ax.annotate("",
+        #             xy=(Xs[-1], Ys[-1]),
+        #             xytext=(5, 5),
+        #             arrowprops=dict(arrowstyle="->", color=colors[i % int(len(schemes) / 2)]))
 
-    for size, values in table.items():
-        print(str(int(int(size)/(8*MB)))+"\\,MB", end=" ")
-        for value in values:
-            if value[0] > 5 and value[1] > 5:
-                print("& %d & %d " % (round(value[0]), round(value[1])), end="")
-            elif value[0] < 5 and value[1] > 5:
-                print("& %.2f & %d " % (value[0], value[1]), end="")
-            elif value[0] > 5 and value[1] < 5:
-                print("& %d & %.2f " % (value[0], value[1]), end="")
-            else:
-                print("& %.2f & %.2f " % (value[0], value[1]), end="")
-        print("\\\\")
+    print_latex_table(table, int(len(schemes) / 2))
 
-    ax.legend(loc='lower center')
-    # ax.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left",
-    #           mode="expand", borderaxespad=0, ncol=4)
+    schemeLabels = ["PIR", "Merkle", "VPIR"]
+    optimizationLabels = ["Matrix", "DPF"]
+    handles = []
+    for i, label in enumerate(schemeLabels):
+        handles.append(mpatches.Patch(color=colors[i], label=label))
+    for i, label in enumerate(optimizationLabels):
+        handles.append(mlines.Line2D([], [], color='black',
+                                     linestyle=linestyles[i], label=label))
+    for i, size in enumerate(dbSizes):
+        handles.append(mlines.Line2D([], [], color='black',
+                                     marker=markers[i], label=size))
+    ax.legend(handles=handles, loc='center right')
+
+    # ax.annotate('Worse',
+    #              xytext=(0.5, 1200),
+    #              xy=(0.1, 1000),
+    #              arrowprops={'facecolor': 'black', 'shrink': 0.05})
+
+    # ax.legend(handles=handles, bbox_to_anchor=(0, 1.08, 1, 0.2), loc="lower left",
+    #           mode="expand", borderaxespad=0, fancybox=True, ncol=3)
     plt.tight_layout()
     # plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
     plt.show()
 
 
-# def plotVpirPerformance():
+def print_latex_table(results, numApproaches):
+    for size, values in results.items():
+        print(str(int(int(size) / (8 * MB))) + "\\,MB", end=" ")
+        for i, value in enumerate(values):
+            print("& %s & %s " % (rounder2(value[0]), rounder2(value[1])), end="")
+            # we need to compute the overhead
+            if i % numApproaches == numApproaches - 1:
+                print("& %s-%s " % (rounder2(value[0] / values[i - 1][0]), rounder2(value[0] / values[i - 2][0])),
+                      end="")
+                print("& %s-%s " % (rounder2(value[1] / values[i - 1][1]), rounder2(value[1] / values[i - 2][1])),
+                      end="")
+        print("\\\\")
+
+
+def rounder(x):
+    if x > 3:
+        return f'{x:.0f}'
+    # elif x > 1:
+    #     return f'{x:.1f}'
+    else:
+        return f'{x:.1f}'
+
+
+def rounder2(x):
+    if x > 5:
+        return f'{round(x):,.0f}'
+    else:
+        return f'{round(x, 1):,.1f}'
+
+
+# def plotVpirPerformanceRatio():
 #     colors = ['darkred', 'darkblue', 'darkorange', 'darkgreen']
 #     devcolors = ['mistyrose', 'ghostwhite', 'papayawhip', 'honeydew']
 #     schemes = ["vpirMultiMatrixBlock.json", "vpirMultiVectorBlockDPF.json", "pirMatrix.json", "pirDPF.json"]
@@ -222,10 +322,10 @@ args = parser.parse_args()
 EXPR = args.expr
 
 if __name__ == "__main__":
-    prepare_for_latex()
+    # prepare_for_latex()
     if EXPR == "benchmarks":
         plotVpirBenchmarks()
     elif EXPR == "performance":
-        plotVpirPerformance()
+        plotVpirPerformanceLines()
     else:
         print("Unknown experiment: choose between benchmarks and performance")
