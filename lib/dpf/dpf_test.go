@@ -2,6 +2,7 @@ package dpf
 
 import (
 	"fmt"
+	"log"
 	"math/bits"
 	"testing"
 
@@ -35,6 +36,7 @@ func TestEvalFull(t *testing.T) {
 	dpfTimer := monitor.NewMonitor()
 	time := float64(0)
 	for i := 0; i < numBlocks; i++ {
+		log.Println("DPF block:", i)
 		key0, _ := Gen(uint64(i), beta, uint64(bits.Len(uint(db.NumColumns)-1)))
 
 		q := make([]field.Element, db.NumColumns*(db.BlockSize+1))
@@ -58,6 +60,7 @@ func TestEvalFull(t *testing.T) {
 	aesTimer := monitor.NewMonitor()
 	time = 0
 	for i := 0; i < aesBlocks; i++ {
+		log.Println("AES block:", i)
 		aesTimer.Reset()
 		aes128MMO(&keyL[0], &dst[0], &src[0])
 		time += aesTimer.RecordAndReset()
@@ -66,6 +69,8 @@ func TestEvalFull(t *testing.T) {
 	totalTime = time
 	fmt.Printf("Total CPU time per %d AES blocks: %fms\n", aesBlocks, totalTime)
 	fmt.Printf("Throughput: %f GB/s\n", float64(aesBlocks)/(totalTime*0.001))
+
+	// Field operations
 }
 
 /*
