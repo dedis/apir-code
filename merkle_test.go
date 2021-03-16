@@ -54,7 +54,7 @@ func TestDPFMultiBitVectorMerkle(t *testing.T) {
 
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
-	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
 
 	retrieveBlocksDPFMerkle(t, xof, db, numBlocks, "DPFMultiBitVectorMerkle")
 }

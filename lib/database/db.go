@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/binary"
+	"github.com/ldsec/lattigo/bfv"
 	"io"
 	"log"
 
@@ -19,18 +20,28 @@ type Info struct {
 	NumRows    int
 	NumColumns int
 	BlockSize  int
-
-	// embedding info
-	IDLength  int
-	KeyLength int
-
 	// PIR type: classical, merkle, signature
 	PIRType string
 
-	// Only for Merkle-tree based approach
+	*Merkle
+	*DataEmbedding
+	*LatticeParam
+}
+
+// Data embedding info
+type DataEmbedding struct {
+	IDLength  int
+	KeyLength int
+}
+
+// The info needed for the Merkle-tree based approach
+type Merkle struct {
 	Root     []byte
 	ProofLen int
 }
+
+// Lattice parameters for the single-server setting
+type LatticeParam bfv.Parameters
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
 	entries := field.ZeroVector(numRows * numColumns * blockSize)
