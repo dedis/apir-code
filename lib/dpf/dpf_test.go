@@ -38,6 +38,19 @@ func BenchmarkEvalFull(bench *testing.B) {
 	}
 }
 
+func BenchmarkAES(b *testing.B) {
+	prfkeyL := []byte{36, 156, 50, 234, 92, 230, 49, 9, 174, 170, 205, 160, 98, 236, 29, 243}
+	keyL := make([]uint32, 11*4)
+	expandKeyAsm(&prfkeyL[0], &keyL[0])
+	dst := new(block)
+	src := new(block)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		aes128MMO(&keyL[0], &dst[0], &src[0])
+	}
+}
+
 /*
 func BenchmarkXor16(bench *testing.B) {
 	a := new(block)
