@@ -37,8 +37,8 @@ func TestEvalFull(t *testing.T) {
 	for i := 0; i < numBlocks; i++ {
 		key0, _ := Gen(uint64(i), beta, uint64(bits.Len(uint(db.NumColumns)-1)))
 
-		dpfTimer.Reset()
 		q := make([]field.Element, db.NumColumns*(db.BlockSize+1))
+		dpfTimer.Reset()
 		EvalFullFlatten(key0, uint64(bits.Len(uint(db.NumColumns)-1)), db.BlockSize+1, q)
 		time += dpfTimer.RecordAndReset()
 	}
