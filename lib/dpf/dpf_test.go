@@ -1,13 +1,74 @@
 package dpf
 
 import (
+	"fmt"
 	"math/bits"
 	"testing"
 
+	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
+func TestEvalFull(t *testing.T) {
+	// EvalFull
+	dbLen := 8000000000 // 1GB
+	blockLen := 16
+	elemSize := 128
+	numBlocks := dbLen / (elemSize * blockLen)
+	nRows := 1
+
+	db := database.CreateRandomMultiBitDB(utils.RandomPRG(), dbLen, nRows, blockLen)
+
+	alpha, err := new(field.Element).SetRandom(utils.RandomPRG())
+	if err != nil {
+		panic(err)
+	}
+
+	beta := make([]field.Element, blockLen+1)
+	beta[0] = field.One()
+	for i := 1; i < len(beta); i++ {
+		beta[i].Mul(&beta[i-1], alpha)
+	}
+
+	dpfTimer := monitor.NewMonitor()
+	time := float64(0)
+	for i := 0; i < numBlocks; i++ {
+		key0, _ := Gen(uint64(i), beta, uint64(bits.Len(uint(db.NumColumns)-1)))
+
+		dpfTimer.Reset()
+		q := make([]field.Element, db.NumColumns*(db.BlockSize+1))
+		EvalFullFlatten(key0, uint64(bits.Len(uint(db.NumColumns)-1)), db.BlockSize+1, q)
+		time += dpfTimer.RecordAndReset()
+	}
+
+	totalTime := time
+	fmt.Printf("Total CPU time per %d queries: %fms\n", numBlocks, totalTime)
+	fmt.Printf("Throughput: %f GB/s\n", float64(numBlocks)/(totalTime*0.001))
+
+	// AES
+	prfkeyL := []byte{36, 156, 50, 234, 92, 230, 49, 9, 174, 170, 205, 160, 98, 236, 29, 243}
+	keyL := make([]uint32, 11*4)
+	expandKeyAsm(&prfkeyL[0], &keyL[0])
+	dst := new(block)
+	src := new(block)
+
+	aesBlocks := dbLen / (8 * 16) // 16 bytes block
+	aesTimer := monitor.NewMonitor()
+	time = 0
+	for i := 0; i < aesBlocks; i++ {
+		aesTimer.Reset()
+		aes128MMO(&keyL[0], &dst[0], &src[0])
+		time += aesTimer.RecordAndReset()
+	}
+
+	totalTime = time
+	fmt.Printf("Total CPU time per %d AES blocks: %fms\n", aesBlocks, totalTime)
+	fmt.Printf("Throughput: %f GB/s\n", float64(aesBlocks)/(totalTime*0.001))
+}
+
+/*
 func BenchmarkEvalFull(bench *testing.B) {
 	// db parameters
 	blockSize := 16
