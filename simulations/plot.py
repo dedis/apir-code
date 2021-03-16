@@ -179,7 +179,7 @@ def plotVpirPerformanceLines():
     ax.yaxis.grid(True)
     ax.xaxis.grid(True)
     ax.invert_xaxis()
-    # ax.invert_yaxis()
+    ax.invert_yaxis()
 
     table = defaultdict(list)
     dbSizes = [str(int(int(size) / (8 * MB))) + "MB" for size in allStats(resultFolder + schemes[0]).keys()]
@@ -188,6 +188,8 @@ def plotVpirPerformanceLines():
         Xs, Ys = [], []
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
+            if j != len(stats.keys()) - 1:
+                continue
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
             table[dbSize].append((cpu, bw / 1000))
@@ -199,10 +201,6 @@ def plotVpirPerformanceLines():
 
         ax.plot(Xs, Ys, color=colors[i % int(len(schemes) / 2)],
                 linestyle=linestyles[int(i / (len(schemes) / 2))])
-        # ax.annotate("",
-        #             xy=(Xs[-1], Ys[-1]),
-        #             xytext=(5, 5),
-        #             arrowprops=dict(arrowstyle="->", color=colors[i % int(len(schemes) / 2)]))
 
     print_latex_table(table, int(len(schemes) / 2))
 
