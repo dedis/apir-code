@@ -38,7 +38,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	numColumns := numBlocks / numRows
 	proofLen := tree.EncodedProofLength()
 	blockLen = blockLen + proofLen
-	entries := make([]byte, numRows * numColumns * blockLen)
+	entries := make([]byte, numRows*numColumns*blockLen)
 	// multithreading
 	var wg sync.WaitGroup
 	var end int
@@ -47,7 +47,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	for i := 0; i < numRows*numColumns; i += chunkLen {
 		end = i + chunkLen
 		if end > numRows*numColumns {
-			end = numRows*numColumns
+			end = numRows * numColumns
 		}
 		wg.Add(1)
 		go assignEntries(entries[i*blockLen:end*blockLen], blocks[i:end], tree, blockLen, &wg)
@@ -61,8 +61,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 			NumColumns: numColumns,
 			BlockSize:  blockLen,
 			PIRType:    "merkle",
-			Root:       tree.Root(),
-			ProofLen:   proofLen,
+			Merkle:     &Merkle{Root: tree.Root(), ProofLen: proofLen},
 		},
 	}
 

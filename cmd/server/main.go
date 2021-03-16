@@ -136,8 +136,6 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 		NumRows:     uint32(dbInfo.NumRows),
 		NumColumns:  uint32(dbInfo.NumColumns),
 		BlockLength: uint32(dbInfo.BlockSize),
-		IdLength:    uint32(dbInfo.IDLength),
-		KeyLength:   uint32(dbInfo.KeyLength),
 	}
 
 	return resp, nil
