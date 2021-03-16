@@ -26,13 +26,17 @@ func TestEvalFull(t *testing.T) {
 	s0 := server.NewDPF(db)
 
 	totalTimer := monitor.NewMonitor()
+	time := float64(0)
 	for i := 0; i < numBlocks; i++ {
 		fssKeys := c.Query(i, 2)
 
+		totalTimer.Reset()
 		_ = s0.Answer(fssKeys[0])
+		time += totalTimer.RecordAndReset()
+
 	}
 
-	totalTime := totalTimer.Record()
+	totalTime := time
 	fmt.Printf("Total CPU time per %d queries: %fms\n", numBlocks, totalTime)
 	fmt.Printf("Throughput: %f GB/s\n", float64(numBlocks)/(totalTime*0.001))
 }
