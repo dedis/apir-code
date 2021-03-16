@@ -46,8 +46,8 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// multithreading
 	numCores := runtime.NumCPU()
 	//numCores := 1
-	// If numRows == 1, the db is vector so we split it by giving columns to workers.
-	// Otherwise, we split by rows and give a chunk of rows to each worker.
+	// If numRows == 1, the db is a vector so we split it by giving columns to workers.
+	// Otherwise, if the db is a matrix, we split by rows and give a chunk of rows to each worker.
 	// The goal is to have a fixed number of workers and start them only once.
 	var begin, end int
 	if db.NumRows == 1 {
@@ -58,7 +58,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		// we need to traverse column by column
 		for j := 0; j < db.NumColumns; j += columnsPerCore {
 			columnsPerCore, begin, end = computeChunkIndices(j, columnsPerCore, db.BlockSize, db.NumColumns)
-			go processColumns(db.Entries[begin:end], db.BlockSize, q[j*(db.BlockSize+1):(j+columnsPerCore)*(db.BlockSize+1)], resultsChan)
+			go processColumns(db.Entries[begin:end], q[j*(db.BlockSize+1):(j+columnsPerCore)*(db.BlockSize+1)], db.BlockSize, resultsChan)
 			numWorkers++
 		}
 		m := combineColumnResults(numWorkers, db.BlockSize+1, resultsChan)
@@ -67,33 +67,33 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 		return m
 	} else {
 		m := make([]field.Element, db.NumRows*(db.BlockSize+1))
-		var wg sync.WaitGroup
+		var workers sync.WaitGroup
 		rowsPerCore := utils.DivideAndRoundUpToMultiple(db.NumRows, numCores, 1)
 		for j := 0; j < db.NumRows; j += rowsPerCore {
 			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.BlockSize, db.NumRows)
-			wg.Add(1)
-			go processRows(db.Entries[begin*db.NumColumns:end*db.NumColumns], db.BlockSize, db.NumColumns, q, &wg,
-				m[j*(db.BlockSize+1):(j+rowsPerCore)*(db.BlockSize+1)])
+			workers.Add(1)
+			go processRows(m[j*(db.BlockSize+1):(j+rowsPerCore)*(db.BlockSize+1)],
+				db.Entries[begin*db.NumColumns:end*db.NumColumns], q, &workers, db.NumColumns, db.BlockSize)
 		}
-		wg.Wait()
+		workers.Wait()
 
 		return m
 	}
 }
 
 // processing multiple rows by iterating over them
-func processRows(rows []field.Element, blockLen, numColumns int, q []field.Element, wg *sync.WaitGroup, output []field.Element) {
+func processRows(output, rows, query []field.Element, wg *sync.WaitGroup, numColumns, blockLen int) {
 	numElementsInRow := blockLen * numColumns
 	for i := 0; i < len(rows)/numElementsInRow; i++ {
-		res := computeMessageAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], blockLen, q)
+		res := computeMessageAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], query, blockLen)
 		copy(output[i*(blockLen+1):(i+1)*(blockLen+1)], res)
 	}
 	wg.Done()
 }
 
 // processing a chunk of a database row
-func processColumns(chunk []field.Element, blockLen int, q []field.Element, reply chan<- []field.Element) {
-	reply <- computeMessageAndTag(chunk, blockLen, q)
+func processColumns(columns, query []field.Element, blockLen int, reply chan<- []field.Element) {
+	reply <- computeMessageAndTag(columns, query, blockLen)
 }
 
 // combine the results of processing a row by different routines
@@ -110,7 +110,7 @@ func combineColumnResults(nWrk int, resLen int, workerReplies <-chan []field.Ele
 
 // computeMessageAndTag multiplies db entries with the elements
 // from the client query and computes a tag over each block
-func computeMessageAndTag(elements []field.Element, blockLen int, q []field.Element) []field.Element {
+func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Element {
 	var prodTag, prod field.Element
 	sumTag := field.Zero()
 	sum := field.ZeroVector(blockLen)
@@ -148,7 +148,7 @@ func answerPIR(q []byte, db *database.Bytes) []byte {
 		for j := 0; j < db.NumColumns; j += columnsPerCore {
 			columnsPerCore, begin, end = computeChunkIndices(j, columnsPerCore, db.BlockSize, db.NumColumns)
 			// We need /8 because q is packed with 1 bit per block
-			go xorColumns(db.Entries[begin:end], db.BlockSize, q[j/8:int(math.Ceil(float64(j+columnsPerCore)/8))], resultsChan)
+			go xorColumns(db.Entries[begin:end], q[j/8:int(math.Ceil(float64(j+columnsPerCore)/8))], db.BlockSize, resultsChan)
 			numWorkers++
 		}
 		m = combineColumnXORs(numWorkers, db.BlockSize, resultsChan)
@@ -156,21 +156,21 @@ func answerPIR(q []byte, db *database.Bytes) []byte {
 		return m
 	} else {
 		//	Matrix db
-		var wg sync.WaitGroup
+		var workers sync.WaitGroup
 		rowsPerCore := utils.DivideAndRoundUpToMultiple(db.NumRows, numCores, 1)
 		for j := 0; j < db.NumRows; j += rowsPerCore {
 			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.BlockSize, db.NumRows)
-			wg.Add(1)
-			go xorRows(db.Entries[begin*db.NumColumns:end*db.NumColumns], db.BlockSize, db.NumColumns, q, &wg, m[begin:end])
+			workers.Add(1)
+			go xorRows(m[begin:end], db.Entries[begin*db.NumColumns:end*db.NumColumns], q, &workers, db.NumColumns, db.BlockSize)
 		}
-		wg.Wait()
+		workers.Wait()
 
 		return m
 	}
 }
 
 // XORs entries and q block by block of size bl
-func xorValues(entries []byte, bl int, q []byte) []byte {
+func xorValues(entries, q []byte, bl int) []byte {
 	sum := make([]byte, bl)
 	for j := 0; j < len(entries)/bl; j++ {
 		if (q[j/8]>>(j%8))&1 == byte(1) {
@@ -181,15 +181,15 @@ func xorValues(entries []byte, bl int, q []byte) []byte {
 }
 
 // XORs columns in the same row
-func xorColumns(columns []byte, blockLen int, q []byte, reply chan<- []byte) {
-	reply <- xorValues(columns, blockLen, q)
+func xorColumns(columns, query []byte, blockLen int, reply chan<- []byte) {
+	reply <- xorValues(columns, query, blockLen)
 }
 
 // XORs all the columns in a row, row by row, and writes the result into output
-func xorRows(rows []byte, blockLen, numColumns int, q []byte, wg *sync.WaitGroup, output []byte) {
+func xorRows(output, rows, query []byte, wg *sync.WaitGroup, numColumns, blockLen int) {
 	numElementsInRow := blockLen * numColumns
 	for i := 0; i < len(rows)/numElementsInRow; i++ {
-		res := xorValues(rows[i*numElementsInRow:(i+1)*numElementsInRow], blockLen, q)
+		res := xorValues(rows[i*numElementsInRow:(i+1)*numElementsInRow], query, blockLen)
 		copy(output[i*blockLen:(i+1)*blockLen], res)
 	}
 	wg.Done()
