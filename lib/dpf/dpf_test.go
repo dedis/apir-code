@@ -13,8 +13,10 @@ import (
 )
 
 func TestEvalFull(t *testing.T) {
+	toSec := 0.001
 	// EvalFull
 	dbLen := 80000000 // 0.01GB
+	gb := float64(dbLen / 8000000000)
 	blockLen := 16
 	elemSize := 128
 	numBlocks := dbLen / (elemSize * blockLen)
@@ -47,7 +49,7 @@ func TestEvalFull(t *testing.T) {
 
 	totalTime := time
 	fmt.Printf("Total CPU time per %d queries: %fms\n", numBlocks, totalTime)
-	fmt.Printf("Throughput: %f GB/s\n", float64(numBlocks)*0.01/(totalTime*0.001))
+	fmt.Printf("Throughput EvalFull: %f GB/s\n", float64(numBlocks)*gb/(totalTime*toSec))
 
 	// AES
 	prfkeyL := []byte{36, 156, 50, 234, 92, 230, 49, 9, 174, 170, 205, 160, 98, 236, 29, 243}
@@ -60,7 +62,6 @@ func TestEvalFull(t *testing.T) {
 	aesTimer := monitor.NewMonitor()
 	time = 0
 	for i := 0; i < aesBlocks; i++ {
-		log.Println("AES block:", i)
 		aesTimer.Reset()
 		aes128MMO(&keyL[0], &dst[0], &src[0])
 		time += aesTimer.RecordAndReset()
@@ -68,9 +69,30 @@ func TestEvalFull(t *testing.T) {
 
 	totalTime = time
 	fmt.Printf("Total CPU time per %d AES blocks: %fms\n", aesBlocks, totalTime)
-	fmt.Printf("Throughput: %f GB/s\n", float64(aesBlocks)*0.01/(totalTime*0.001))
+	fmt.Printf("Throughput AES: %f GB/s\n", float64(aesBlocks)*gb/(totalTime*toSec))
 
 	// Field operations
+	prg := utils.RandomPRG()
+	a, err := new(field.Element).SetRandom(prg)
+	if err != nil {
+		panic(err)
+	}
+	b, err := new(field.Element).SetRandom(prg)
+	if err != nil {
+		panic(err)
+	}
+
+	fieldElements := dbLen / (8 * 16) // 16 bytes per field element (we actuyll embed 15 to avoid overflows)
+	fieldTimer := monitor.NewMonitor()
+	time = 0
+	for i := 0; i < fieldElements; i++ {
+		fieldTimer.Reset()
+		a.Mul(a, b)
+		time += fieldTimer.RecordAndReset()
+	}
+	totalTime = time
+	fmt.Printf("Total CPU time per %d field ops: %fms\n", fieldElements, totalTime)
+	fmt.Printf("Throughput field ops: %f GB/s\n", float64(fieldElements)*gb/(totalTime*toSec))
 }
 
 /*
