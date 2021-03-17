@@ -15,7 +15,7 @@ func TestEvalFull(t *testing.T) {
 	toSec := 0.001
 	// EvalFull
 	dbLen := 80000000 // 0.01GB
-	gb := float64(dbLen / 8000000000)
+	gb := float64(dbLen) / float64(8000000000)
 	blockLen := 16
 	elemSize := 128
 	numBlocks := dbLen / (elemSize * blockLen)
