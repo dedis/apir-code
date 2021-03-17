@@ -2,7 +2,6 @@ package dpf
 
 import (
 	"fmt"
-	"log"
 	"math/bits"
 	"testing"
 
@@ -38,7 +37,6 @@ func TestEvalFull(t *testing.T) {
 	dpfTimer := monitor.NewMonitor()
 	time := float64(0)
 	for i := 0; i < numBlocks; i++ {
-		log.Println("DPF block:", i)
 		key0, _ := Gen(uint64(i), beta, uint64(bits.Len(uint(db.NumColumns)-1)))
 
 		q := make([]field.Element, db.NumColumns*(db.BlockSize+1))
