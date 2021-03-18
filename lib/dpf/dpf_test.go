@@ -90,7 +90,7 @@ func TestEvalFull(t *testing.T) {
 	}
 	totalTime = time
 	fmt.Printf("Total CPU time per %d field ops: %fms\n", fieldElements, totalTime)
-	fmt.Printf("Throughput field ops: %f GB/s\n", *gb/(totalTime*toSec))
+	fmt.Printf("Throughput field ops: %f GB/s\n", gb/(totalTime*toSec))
 }
 
 /*
