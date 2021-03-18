@@ -14,7 +14,7 @@ import (
 func TestEvalFull(t *testing.T) {
 	toSec := 0.001
 	// EvalFull
-	dbLen := 8000000 // 0.001GB
+	dbLen := 80000000 // 0.01GB
 	gb := float64(dbLen) / float64(8000000000)
 	blockLen := 16
 	elemSize := 128
@@ -47,7 +47,7 @@ func TestEvalFull(t *testing.T) {
 
 	totalTime := time
 	fmt.Printf("Total CPU time per %d queries: %fms\n", numBlocks, totalTime)
-	fmt.Printf("Throughput EvalFull: %f GB/s\n", float64(numBlocks)*gb/(totalTime*toSec))
+	fmt.Printf("Throughput EvalFull: %f GB/s\n", gb/(totalTime*toSec))
 
 	// AES
 	prfkeyL := []byte{36, 156, 50, 234, 92, 230, 49, 9, 174, 170, 205, 160, 98, 236, 29, 243}
