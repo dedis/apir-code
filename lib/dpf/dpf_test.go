@@ -11,6 +11,38 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
+func BenchmarkEvalFull(b *testing.B) {
+	// define db data
+	dbLen := 80000000 // 0.01GB
+	blockLen := 16
+	nRows := 1 // use vector for DPF
+
+	db := database.CreateRandomMultiBitDB(utils.RandomPRG(), dbLen, nRows, blockLen)
+
+	// sample random alpha
+	alpha, err := new(field.Element).SetRandom(utils.RandomPRG())
+	if err != nil {
+		panic(err)
+	}
+
+	// compute beta
+	beta := make([]field.Element, blockLen+1)
+	beta[0] = field.One()
+	for i := 1; i < len(beta); i++ {
+		beta[i].Mul(&beta[i-1], alpha)
+	}
+
+	// create a single key
+	key0, _ := Gen(uint64(1), beta, uint64(bits.Len(uint(db.NumColumns)-1)))
+	q := make([]field.Element, db.NumColumns*(db.BlockSize+1))
+
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		EvalFullFlatten(key0, uint64(bits.Len(uint(db.NumColumns)-1)), db.BlockSize+1, q)
+	}
+}
+
 func TestEvalFull(t *testing.T) {
 	toSec := 0.001
 	// EvalFull
