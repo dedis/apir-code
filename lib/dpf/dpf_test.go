@@ -11,6 +11,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
+/*
 func BenchmarkEvalFull(b *testing.B) {
 	// define db data
 	dbLen := 80000000 // 0.01GB
@@ -42,18 +43,18 @@ func BenchmarkEvalFull(b *testing.B) {
 		EvalFullFlatten(key0, uint64(bits.Len(uint(db.NumColumns)-1)), db.BlockSize+1, q)
 	}
 }
+*/
 
 func TestEvalFull(t *testing.T) {
 	toSec := 0.001
-	// EvalFull
-	dbLen := 80000000 // 0.01GB
-	gb := float64(dbLen) / float64(8000000000)
-	blockLen := 16
-	elemSize := 128
-	numBlocks := dbLen / (elemSize * blockLen)
+	databaseBytes := (1 << 30)
+
+  // Number of field elements in each block
+  bytesPerFieldElement := 15
+  blockLen := 16
 	nRows := 1
 
-	db := database.CreateRandomMultiBitDB(utils.RandomPRG(), dbLen, nRows, blockLen)
+	db := database.CreateRandomMultiBitDB(utils.RandomPRG(), databaseBytes*8, nRows, blockLen)
 
 	alpha, err := new(field.Element).SetRandom(utils.RandomPRG())
 	if err != nil {
@@ -66,20 +67,19 @@ func TestEvalFull(t *testing.T) {
 		beta[i].Mul(&beta[i-1], alpha)
 	}
 
-	dpfTimer := monitor.NewMonitor()
+  fmt.Printf("Num columns: %d\n", db.NumColumns)
+  fmt.Printf("Num rows: %d\n", nRows)
 	time := float64(0)
-	for i := 0; i < numBlocks; i++ {
-		key0, _ := Gen(uint64(i), beta, uint64(bits.Len(uint(db.NumColumns)-1)))
+  key0, _ := Gen(7, beta, uint64(bits.Len(uint(db.NumColumns)-1)))
+  q := make([]field.Element, db.NumColumns*(db.BlockSize+1))
 
-		q := make([]field.Element, db.NumColumns*(db.BlockSize+1))
-		dpfTimer.Reset()
-		EvalFullFlatten(key0, uint64(bits.Len(uint(db.NumColumns)-1)), db.BlockSize+1, q)
-		time += dpfTimer.RecordAndReset()
-	}
+	dpfTimer := monitor.NewMonitor()
+  dpfTimer.Reset()
+  EvalFullFlatten(key0, uint64(bits.Len(uint(db.NumColumns)-1)), len(beta), q)
+  totalTime := dpfTimer.RecordAndReset()
 
-	totalTime := time
-	fmt.Printf("Total CPU time per %d queries: %fms\n", numBlocks, totalTime)
-	fmt.Printf("Throughput EvalFull: %f GB/s\n", gb/(totalTime*toSec))
+	fmt.Printf("Total CPU time per %d queries: %fms\n", 1, totalTime)
+	fmt.Printf("Throughput EvalFull: %f GB/s\n", float64(databaseBytes)/(totalTime*toSec)/float64(1<<30))
 
 	// AES
 	prfkeyL := []byte{36, 156, 50, 234, 92, 230, 49, 9, 174, 170, 205, 160, 98, 236, 29, 243}
@@ -88,18 +88,19 @@ func TestEvalFull(t *testing.T) {
 	dst := new(block)
 	src := new(block)
 
-	aesBlocks := dbLen / (8 * 16) // 16 bytes block
+  aesBytesPerBlock := 16
+	aesBlocks := databaseBytes / (aesBytesPerBlock)
 	aesTimer := monitor.NewMonitor()
 	time = 0
+  aesTimer.Reset()
 	for i := 0; i < aesBlocks; i++ {
-		aesTimer.Reset()
 		aes128MMO(&keyL[0], &dst[0], &src[0])
-		time += aesTimer.RecordAndReset()
 	}
+  time += aesTimer.RecordAndReset()
 
 	totalTime = time
 	fmt.Printf("Total CPU time per %d AES blocks: %fms\n", aesBlocks, totalTime)
-	fmt.Printf("Throughput AES: %f GB/s\n", gb/(totalTime*toSec))
+	fmt.Printf("Throughput AES: %f GB/s\n", float64(databaseBytes)/(totalTime*toSec)/float64(1<<30))
 
 	// Field operations
 	prg := utils.RandomPRG()
@@ -112,17 +113,15 @@ func TestEvalFull(t *testing.T) {
 		panic(err)
 	}
 
-	fieldElements := dbLen / (8 * 16) // 16 bytes per field element (we actuyll embed 15 to avoid overflows)
+	fieldElements := databaseBytes / bytesPerFieldElement
 	fieldTimer := monitor.NewMonitor()
-	time = 0
+  fieldTimer.Reset()
 	for i := 0; i < fieldElements; i++ {
-		fieldTimer.Reset()
 		a.Mul(a, b)
-		time += fieldTimer.RecordAndReset()
 	}
-	totalTime = time
+  totalTime = fieldTimer.RecordAndReset()
 	fmt.Printf("Total CPU time per %d field ops: %fms\n", fieldElements, totalTime)
-	fmt.Printf("Throughput field ops: %f GB/s\n", gb/(totalTime*toSec))
+	fmt.Printf("Throughput field ops: %f GB/s\n", float64(databaseBytes)/(totalTime*toSec)/float64(1<<30))
 }
 
 /*
