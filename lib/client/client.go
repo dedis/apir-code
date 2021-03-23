@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 
+	"github.com/cloudflare/circl/group"
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
@@ -21,10 +22,14 @@ type Client interface {
 }
 
 type state struct {
-	ix    int
-	iy    int
+	ix int
+	iy int
+	// for multi-server
 	alpha field.Element
 	a     []field.Element
+	//	for single-server
+	r  group.Scalar
+	Ht []group.Element
 }
 
 // general functions for both IT and DPF-based clients

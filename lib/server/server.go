@@ -44,21 +44,21 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// in DB(2^128)^b are executed component-wise
 
 	// multithreading
-	numCores := runtime.NumCPU()
-	//numCores := 1
+	NGoRoutines := runtime.NumCPU()
+	//NGoRoutines := 1
 	// If numRows == 1, the db is a vector so we split it by giving columns to workers.
 	// Otherwise, if the db is a matrix, we split by rows and give a chunk of rows to each worker.
 	// The goal is to have a fixed number of workers and start them only once.
 	var begin, end int
 	if db.NumRows == 1 {
-		columnsPerCore := utils.DivideAndRoundUpToMultiple(db.NumColumns, numCores, 1)
+		columnsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumColumns, NGoRoutines, 1)
 		// a channel to pass results from the routines back
-		resultsChan := make(chan []field.Element, numCores*(db.BlockSize+1))
+		resultsChan := make(chan []field.Element, NGoRoutines*(db.BlockSize+1))
 		numWorkers := 0
 		// we need to traverse column by column
-		for j := 0; j < db.NumColumns; j += columnsPerCore {
-			columnsPerCore, begin, end = computeChunkIndices(j, columnsPerCore, db.BlockSize, db.NumColumns)
-			go processColumns(db.Entries[begin:end], q[j*(db.BlockSize+1):(j+columnsPerCore)*(db.BlockSize+1)], db.BlockSize, resultsChan)
+		for j := 0; j < db.NumColumns; j += columnsPerRoutine {
+			columnsPerRoutine, begin, end = computeChunkIndices(j, columnsPerRoutine, db.BlockSize, db.NumColumns)
+			go processColumns(db.Entries[begin:end], q[j*(db.BlockSize+1):(j+columnsPerRoutine)*(db.BlockSize+1)], db.BlockSize, resultsChan)
 			numWorkers++
 		}
 		m := combineColumnResults(numWorkers, db.BlockSize+1, resultsChan)
@@ -68,11 +68,11 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	} else {
 		m := make([]field.Element, db.NumRows*(db.BlockSize+1))
 		var workers sync.WaitGroup
-		rowsPerCore := utils.DivideAndRoundUpToMultiple(db.NumRows, numCores, 1)
-		for j := 0; j < db.NumRows; j += rowsPerCore {
-			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.BlockSize, db.NumRows)
+		rowsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumRows, NGoRoutines, 1)
+		for j := 0; j < db.NumRows; j += rowsPerRoutine {
+			rowsPerRoutine, begin, end = computeChunkIndices(j, rowsPerRoutine, db.BlockSize, db.NumRows)
 			workers.Add(1)
-			go processRows(m[j*(db.BlockSize+1):(j+rowsPerCore)*(db.BlockSize+1)],
+			go processRows(m[j*(db.BlockSize+1):(j+rowsPerRoutine)*(db.BlockSize+1)],
 				db.Entries[begin*db.NumColumns:end*db.NumColumns], q, &workers, db.NumColumns, db.BlockSize)
 		}
 		workers.Wait()
@@ -137,18 +137,18 @@ func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Ele
 func answerPIR(q []byte, db *database.Bytes) []byte {
 	m := make([]byte, db.NumRows*db.BlockSize)
 	// multithreading
-	numCores := runtime.NumCPU()
+	NGoRoutines := runtime.NumCPU()
 	var begin, end int
 	// Vector db
 	if db.NumRows == 1 {
-		columnsPerCore := utils.DivideAndRoundUpToMultiple(db.NumColumns, numCores, 8)
+		columnsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumColumns, NGoRoutines, 8)
 		// a channel to pass results from the routines back
-		resultsChan := make(chan []byte, numCores*db.BlockSize)
+		resultsChan := make(chan []byte, NGoRoutines*db.BlockSize)
 		numWorkers := 0
-		for j := 0; j < db.NumColumns; j += columnsPerCore {
-			columnsPerCore, begin, end = computeChunkIndices(j, columnsPerCore, db.BlockSize, db.NumColumns)
+		for j := 0; j < db.NumColumns; j += columnsPerRoutine {
+			columnsPerRoutine, begin, end = computeChunkIndices(j, columnsPerRoutine, db.BlockSize, db.NumColumns)
 			// We need /8 because q is packed with 1 bit per block
-			go xorColumns(db.Entries[begin:end], q[j/8:int(math.Ceil(float64(j+columnsPerCore)/8))], db.BlockSize, resultsChan)
+			go xorColumns(db.Entries[begin:end], q[j/8:int(math.Ceil(float64(j+columnsPerRoutine)/8))], db.BlockSize, resultsChan)
 			numWorkers++
 		}
 		m = combineColumnXORs(numWorkers, db.BlockSize, resultsChan)
@@ -157,9 +157,9 @@ func answerPIR(q []byte, db *database.Bytes) []byte {
 	} else {
 		//	Matrix db
 		var workers sync.WaitGroup
-		rowsPerCore := utils.DivideAndRoundUpToMultiple(db.NumRows, numCores, 1)
-		for j := 0; j < db.NumRows; j += rowsPerCore {
-			rowsPerCore, begin, end = computeChunkIndices(j, rowsPerCore, db.BlockSize, db.NumRows)
+		rowsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumRows, NGoRoutines, 1)
+		for j := 0; j < db.NumRows; j += rowsPerRoutine {
+			rowsPerRoutine, begin, end = computeChunkIndices(j, rowsPerRoutine, db.BlockSize, db.NumRows)
 			workers.Add(1)
 			go xorRows(m[begin:end], db.Entries[begin*db.NumColumns:end*db.NumColumns], q, &workers, db.NumColumns, db.BlockSize)
 		}

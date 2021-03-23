@@ -1,14 +1,16 @@
 package database
 
 import (
+	"crypto"
 	"encoding/binary"
-	"github.com/ldsec/lattigo/bfv"
 	"io"
 	"log"
+	"math"
 
-	"golang.org/x/crypto/blake2b"
-
+	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/crypto/blake2b"
 )
 
 type DB struct {
@@ -23,9 +25,23 @@ type Info struct {
 	// PIR type: classical, merkle, signature
 	PIRType string
 
+	*Auth
 	*Merkle
 	*DataEmbedding
-	*LatticeParam
+	// Lattice parameters for the single-server setting
+	//Lattice *bfv.Parameters
+}
+
+// Authentication information for the single-server setting
+type Auth struct {
+	// The global digest that is a hash of all the row digests. Public.
+	Digest []byte
+	// ECC group and hash algorithm used for digest computation and PIR itself
+	Group group.Group
+	Hash  crypto.Hash
+	// Due to lack of the size functions in the lib API, we store it in the db info
+	ElementSize int
+	ScalarSize int
 }
 
 // Data embedding info
@@ -39,9 +55,6 @@ type Merkle struct {
 	Root     []byte
 	ProofLen int
 }
-
-// Lattice parameters for the single-server setting
-type LatticeParam bfv.Parameters
 
 func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) *DB {
 	entries := field.ZeroVector(numRows * numColumns * blockSize)
@@ -92,4 +105,16 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) *DB {
 func HashToIndex(id string, length int) int {
 	hash := blake2b.Sum256([]byte(id))
 	return int(binary.BigEndian.Uint64(hash[:]) % uint64(length))
+}
+
+func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns int) {
+	utils.IncreaseToNextSquare(&numBlocks)
+	if matrix {
+		numColumns = int(math.Sqrt(float64(numBlocks)))
+		numRows = numColumns
+	} else {
+		numColumns = numBlocks
+		numRows = 1
+	}
+	return
 }
