@@ -62,14 +62,6 @@ func newLocalClient() *localClient {
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
-	// set stats log
-	f, err := os.OpenFile("stats.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatalf("could not open stats.log file: %v", err)
-	}
-	defer f.Close()
-	lc.statsLogger = log.New(f, "stat:", log.Lmsgprefix)
-
 	// load configs
 	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
@@ -96,6 +88,15 @@ func main() {
 		lc.connections[s] = connectToServer(creds, s)
 		defer lc.connections[s].Close()
 	}
+
+	// set stats log
+	// TODO: move somewhere else, but mind the defer
+	f, err := os.OpenFile("stats.log", os.O_RDWR|os.O_CREATE|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatalf("could not open stats.log file: %v", err)
+	}
+	defer f.Close()
+	lc.statsLogger = log.New(f, "stat:", log.Lmsgprefix)
 
 	// get and store db info
 	lc.retrieveDBInfo()
