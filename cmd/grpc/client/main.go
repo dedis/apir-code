@@ -96,7 +96,7 @@ func main() {
 		log.Fatalf("could not open stats.log file: %v", err)
 	}
 	defer f.Close()
-	lc.statsLogger = log.New(f, "stat:", log.Lmsgprefix)
+	lc.statsLogger = log.New(f, "", log.Lmsgprefix)
 
 	// get and store db info
 	lc.retrieveDBInfo()
