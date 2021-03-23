@@ -89,21 +89,12 @@ func main() {
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-	//wg := sync.WaitGroup{}
-	//wg.Add(1)
-	//go func() {
-	//s := <-sigCh
-	//log.Printf("got signal %v, attempting graceful shutdown", s)
-	//rpcServer.GracefulStop()
-	//wg.Done()
-	//}()
 
 	errCh := make(chan error, 1)
 
 	go func() {
 		log.Println("starting grpc server")
 		if err := rpcServer.Serve(lis); err != nil {
-			//log.Fatalf("failed to serve: %v", err)
 			errCh <- err
 		}
 	}()
@@ -112,13 +103,10 @@ func main() {
 	case err := <-errCh:
 		log.Fatalf("failed to serve: %v", err)
 	case <-sigCh:
-		fmt.Println("here")
 		rpcServer.GracefulStop()
 		lis.Close()
 		log.Println("clean shutdown of server done")
 	}
-	//wg.Wait()
-	//lis.Close()
 }
 
 // vpirServer is used to implement VPIR Server protocol.
