@@ -48,9 +48,8 @@ func newLocalClient() *localClient {
 			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
 			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
 		},
-		prg:         utils.RandomPRG(),
-		flags:       parseFlags(),
-		statsLogger: log.New(os.Stdout, "stat:", 0),
+		prg:   utils.RandomPRG(),
+		flags: parseFlags(),
 	}
 
 	// enable profiling if needed
@@ -62,6 +61,14 @@ func newLocalClient() *localClient {
 	// set logs
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
+
+	// set stats log
+	f, err := os.OpenFile("stats.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("could not open stats.log file: %v", err)
+	}
+	defer f.Close()
+	lc.statsLogger = log.New(f, "stat:", 0)
 
 	// load configs
 	config, err := utils.LoadConfig("config.toml")
@@ -107,7 +114,6 @@ func main() {
 	}
 
 	lc.retrieveKeyGivenId(lc.flags.id)
-	//	lc.stopServers()
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) {
@@ -149,7 +155,9 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	}
 
 	fmt.Println(armored)
-	fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
+	elapsedTime := time.Since(t)
+	lc.statsLogger.Print(elapsedTime)
+	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
 }
 
 func (lc *localClient) stopServers() {
@@ -281,9 +289,9 @@ func equalDBInfo(info []*database.Info) bool {
 	for i := range info {
 		if info[0].NumRows != info[i].NumRows ||
 			info[0].NumColumns != info[i].NumColumns ||
-			info[0].BlockSize != info[i].BlockSize ||
-			info[0].IDLength != info[i].IDLength ||
-			info[0].KeyLength != info[i].KeyLength {
+			info[0].BlockSize != info[i].BlockSize {
+			//info[0].IDLength != info[i].IDLength ||
+			//info[0].KeyLength != info[i].KeyLength {
 			return false
 		}
 	}
