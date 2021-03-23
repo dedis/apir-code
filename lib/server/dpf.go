@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"math/bits"
+	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/dpf"
@@ -11,12 +12,17 @@ import (
 )
 
 type DPF struct {
-	db        *database.DB
-	serverNum byte
+	db    *database.DB
+	cores int
 }
 
-func NewDPF(db *database.DB) *DPF {
-	return &DPF{db: db}
+// use variadic argument for cores to achieve backward compatibility
+func NewDPF(db *database.DB, cores ...int) *DPF {
+	if len(cores) == 0 {
+		return &DPF{db: db, cores: runtime.NumCPU()}
+	}
+
+	return &DPF{db: db, cores: cores[0]}
 }
 
 func (s *DPF) DBInfo() *database.Info {
@@ -48,5 +54,5 @@ func (s *DPF) AnswerBytes(q []byte) ([]byte, error) {
 func (s *DPF) Answer(key dpf.DPFkey) []field.Element {
 	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
 	dpf.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns)-1)), s.db.BlockSize+1, q)
-	return answer(q, s.db)
+	return answer(q, s.db, s.cores)
 }

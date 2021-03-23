@@ -27,7 +27,9 @@ import (
 func main() {
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
+	experiment := flag.Bool("experiment", false, "run setting for experiments")
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
+	cores := flag.Int("cores", -1, "number of cores to use")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	flag.Parse()
@@ -89,21 +91,12 @@ func main() {
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-	//wg := sync.WaitGroup{}
-	//wg.Add(1)
-	//go func() {
-	//s := <-sigCh
-	//log.Printf("got signal %v, attempting graceful shutdown", s)
-	//rpcServer.GracefulStop()
-	//wg.Done()
-	//}()
 
 	errCh := make(chan error, 1)
 
 	go func() {
 		log.Println("starting grpc server")
 		if err := rpcServer.Serve(lis); err != nil {
-			//log.Fatalf("failed to serve: %v", err)
 			errCh <- err
 		}
 	}()
@@ -112,13 +105,10 @@ func main() {
 	case err := <-errCh:
 		log.Fatalf("failed to serve: %v", err)
 	case <-sigCh:
-		fmt.Println("here")
 		rpcServer.GracefulStop()
 		lis.Close()
 		log.Println("clean shutdown of server done")
 	}
-	//wg.Wait()
-	//lis.Close()
 }
 
 // vpirServer is used to implement VPIR Server protocol.
@@ -165,9 +155,6 @@ func (s *vpirServer) ServerStop(ctx context.Context, r *proto.ServerStopRequest)
 func loadPgpDB(filesNumber int) (*database.DB, error) {
 	log.Println("Starting to read in the DB data")
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)
-	//rgx := `sks-000\.pgp`
-	//// change to below to get only the full db
-	////rgx := `sks-[0-9]{3}\.pgp`
 	files, err := pgp.GetAllFiles(sksDir)
 	if err != nil {
 		return nil, err

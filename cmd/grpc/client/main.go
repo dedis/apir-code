@@ -31,12 +31,17 @@ type localClient struct {
 	dbInfo     *database.Info
 	vpirClient client.Client
 
+	// only for experiments
 	statsLogger *log.Logger
 }
 
 type flags struct {
 	id        string
 	profiling bool
+
+	// only for experiments
+	experiment bool
+	cores      int
 }
 
 func newLocalClient() *localClient {
@@ -48,9 +53,8 @@ func newLocalClient() *localClient {
 			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
 			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
 		},
-		prg:         utils.RandomPRG(),
-		flags:       parseFlags(),
-		statsLogger: log.New(os.Stdout, "stat:", 0),
+		prg:   utils.RandomPRG(),
+		flags: parseFlags(),
 	}
 
 	// enable profiling if needed
@@ -90,6 +94,17 @@ func main() {
 		defer lc.connections[s].Close()
 	}
 
+	// set stats log
+	// TODO: move somewhere else, but mind the defer
+	if lc.flags.experiment {
+		f, err := os.OpenFile("stats_client.log", os.O_RDWR|os.O_CREATE|os.O_CREATE, 0666)
+		if err != nil {
+			log.Fatalf("could not open stats.log file: %v", err)
+		}
+		defer f.Close()
+		lc.statsLogger = log.New(f, "", log.Lmsgprefix)
+	}
+
 	// get and store db info
 	lc.retrieveDBInfo()
 
@@ -107,7 +122,6 @@ func main() {
 	}
 
 	lc.retrieveKeyGivenId(lc.flags.id)
-	//	lc.stopServers()
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) {
@@ -149,7 +163,12 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	}
 
 	fmt.Println(armored)
-	fmt.Printf("Wall-clock time to retrieve the key: %v\n", time.Since(t))
+
+	elapsedTime := time.Since(t)
+	if lc.flags.experiment {
+		lc.statsLogger.Printf("%d,%f", lc.flags.cores, elapsedTime.Seconds())
+	}
+	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
 }
 
 func (lc *localClient) stopServers() {
@@ -281,9 +300,9 @@ func equalDBInfo(info []*database.Info) bool {
 	for i := range info {
 		if info[0].NumRows != info[i].NumRows ||
 			info[0].NumColumns != info[i].NumColumns ||
-			info[0].BlockSize != info[i].BlockSize ||
-			info[0].IDLength != info[i].IDLength ||
-			info[0].KeyLength != info[i].KeyLength {
+			info[0].BlockSize != info[i].BlockSize {
+			//info[0].IDLength != info[i].IDLength ||
+			//info[0].KeyLength != info[i].KeyLength {
 			return false
 		}
 	}
@@ -296,6 +315,8 @@ func parseFlags() *flags {
 
 	flag.BoolVar(&f.profiling, "prof", false, "write pprof file")
 	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
+	flag.BoolVar(&f.experiment, "experiment", false, "run for exempriments")
+	flag.IntVar(&f.cores, "cores", -1, "num of cores used for exepriment")
 	flag.Parse()
 
 	return f

@@ -7,6 +7,7 @@ require (
 	github.com/cloudflare/circl v1.0.1-0.20210315192536-3977848c88c6
 	github.com/dimakogan/dpf-go v0.0.0-20210127221207-b1d9b62bab9b
 	github.com/golang/protobuf v1.5.1
+	github.com/ldsec/lattigo v1.3.0 // indirect
 	github.com/ldsec/lattigo/v2 v2.1.1
 	github.com/lukechampine/fastxor v0.0.0-20200124170337-07dbf569dfe7
 	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691

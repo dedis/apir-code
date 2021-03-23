@@ -22,8 +22,10 @@
 .*.swp
 
 # Binaries
-cmd/client/client
-cmd/server/server
+cmd/grpc/client/client
+cmd/grpc/server/server
+cmd/aws/client/client
+cmd/aws/server/server
 data/parser
 
 # log files
