@@ -19,7 +19,7 @@ func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Byt
 	}
 	return &Bytes{Entries: entries,
 		Info: Info{NumColumns: numColumns,
-			NumRows: numRows,
+			NumRows:   numRows,
 			BlockSize: blockLen,
 		},
 	}
