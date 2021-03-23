@@ -24,7 +24,7 @@ type Server interface {
 */
 
 // Answer computes the VPIR answer for the given query
-func answer(q []field.Element, db *database.DB) []field.Element {
+func answer(q []field.Element, db *database.DB, cores int) []field.Element {
 	// Doing simplified scheme if block consists of a single bit
 	if db.BlockSize == cst.SingleBitBlockLength {
 		a := make([]field.Element, db.NumRows)
@@ -44,7 +44,7 @@ func answer(q []field.Element, db *database.DB) []field.Element {
 	// in DB(2^128)^b are executed component-wise
 
 	// multithreading
-	numCores := runtime.NumCPU()
+	numCores := cores
 	//numCores := 1
 	// If numRows == 1, the db is a vector so we split it by giving columns to workers.
 	// Otherwise, if the db is a matrix, we split by rows and give a chunk of rows to each worker.

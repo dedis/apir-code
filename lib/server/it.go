@@ -58,5 +58,5 @@ func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
 
 // Answer computes the answer for the given query
 func (s *IT) Answer(q []field.Element) []field.Element {
-	return answer(q, s.db)
+	return answer(q, s.db, s.cores)
 }
