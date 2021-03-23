@@ -63,12 +63,12 @@ func newLocalClient() *localClient {
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// set stats log
-	f, err := os.OpenFile("stats.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("stats.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatalf("could not open stats.log file: %v", err)
 	}
 	defer f.Close()
-	lc.statsLogger = log.New(f, "stat:", 0)
+	lc.statsLogger = log.New(f, "stat:", log.Lmsgprefix)
 
 	// load configs
 	config, err := utils.LoadConfig("config.toml")
@@ -156,7 +156,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 
 	fmt.Println(armored)
 	elapsedTime := time.Since(t)
-	lc.statsLogger.Print(elapsedTime)
+	lc.statsLogger.Print("test" + elapsedTime.String())
 	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
 }
 
