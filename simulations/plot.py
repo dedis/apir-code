@@ -20,7 +20,7 @@ MB = 1e6
 
 def plotVpirBenchmarksBarBw():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-bit", "Multi-bit", "Multi-bit Block"]
+    labels = ["Single-bit (§ 4.1)", "Multi-bit (§ 4.3)", "Multi-bit Block (§ 4.3)"]
 
     Xs = np.arange(len(schemes))
     width = 0.35
