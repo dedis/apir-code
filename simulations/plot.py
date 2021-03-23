@@ -106,40 +106,44 @@ def plotVpirBenchmarks():
 
 
 def plotVpirPerformanceBars():
-    colors = ['dimgray', 'darkgray', 'silver']
+    colors = ['dimgray', 'darkgray', 'lightgrey']
     schemes = ["pirMatrix.json", "merkleMatrix.json", "vpirMultiMatrixBlock.json",
                "pirDPF.json", "merkleDPF.json", "vpirMultiVectorBlockDPF.json"]
     schemeLabels = ["PIR", "Merkle", "VPIR"]
     optimizationLabels = ["Matrix", "DPF"]
 
     fig, ax = plt.subplots()
-    ax.set_ylabel('Ratio to PIR Matrix request latency')
+    ax.set_ylabel('Ratio to PIR Matrix latency', color='darkred')
     ax.set_xlabel('Database size [MB]')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
     ax.set_yscale('log')
-    ax.yaxis.grid(True)
+    # ax.yaxis.grid(True)
 
     width = 0.15
-    pirMatrixStats = allStats(resultFolder + schemes[0])
-    dbSizes = sorted([int(size / 8000000) for size in pirMatrixStats.keys()])
-    baseline = pirMatrixStats[dbSizes[0] * 8000000]['client']['cpu']['mean'] + \
-               pirMatrixStats[dbSizes[0] * 8000000]['server']['cpu']['mean']
+    dbSizes = sorted([int(size / 8000000) for size in allStats(resultFolder + schemes[0]).keys()])
     Xs = np.arange(len(dbSizes))
     bars = [[]] * len(schemes)
 
+    # each db size is normalized by PIR matrix latency of that db size
+    baselines = defaultdict(int)
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
             Y = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            if i == 0:
+                baselines[dbSize] = Y
             # Yerr = stats[dbSize]['client']['cpu']['std'] + stats[dbSize]['server']['cpu']['std']
             # bars[i] = ax.bar(j + i * width, Y, width, yerr=Yerr, color=colors[i % 3], hatch=patterns[int(i / 3)])
-            bars[i] = ax.bar(j + i * width, Y / baseline, width, color=colors[i % 3], hatch=patterns[int(i / 3)])
-            ax.annotate(rounder(Y / baseline),
-                        xy=(j + i * width, Y / baseline),
-                        xytext=(2, 0),  # 5 points vertical offset
-                        rotation=50,
+            if i != 0:
+                bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color=colors[i % 3], hatch=patterns[int(i / 3)])
+            else:
+                bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color='darkred', hatch=patterns[int(i / 3)])
+            ax.annotate(rounder(Y / baselines[dbSize]),
+                        xy=(j + i * width, Y / baselines[dbSize]),
+                        xytext=(0, 0),  # 5 points vertical offset
+                        rotation=45,
                         textcoords="offset points",
                         ha='center', va='bottom')
 
@@ -152,11 +156,12 @@ def plotVpirPerformanceBars():
     for i, label in enumerate(optimizationLabels):
         handles.append(mpatches.Patch(facecolor='white', edgecolor='black', hatch=patterns[i], label=label))
 
-    ax.legend(handles=handles, loc='upper left')
-    # ax.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left",
-    #           mode="expand", borderaxespad=0, ncol=4)
+    # ax.legend(handles=handles, loc='upper left', ncol=2)
+    # ax.legend(handles=handles, bbox_to_anchor=(0.01, 1.2, 0.39, 0.1), loc="upper left",
+    ax.legend(handles=handles, bbox_to_anchor=(0.01, 1.08, 0.94, 0.1), loc="upper left",
+              mode="expand", borderaxespad=0, ncol=5)
     plt.tight_layout()
-    plt.savefig('multi_performance_bar_normalized.eps', format='eps', dpi=300, transparent=True)
+    plt.savefig('multi_performance_bar_cpu.eps', format='eps', dpi=300, transparent=True)
     # plt.show()
 
 
@@ -181,18 +186,18 @@ def plotVpirPerformanceLines():
     ax.invert_xaxis()
     ax.invert_yaxis()
 
-    table = defaultdict(list)
+    cpuTable = defaultdict(list)
+    bwTable = defaultdict(list)
     dbSizes = [str(int(int(size) / (8 * MB))) + "MB" for size in allStats(resultFolder + schemes[0]).keys()]
 
     for i, scheme in enumerate(schemes):
         Xs, Ys = [], []
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
-            if j != len(stats.keys()) - 1:
-                continue
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            table[dbSize].append((cpu, bw / 1000))
+            cpuTable[dbSize].append(cpu)
+            bwTable[dbSize].append(bw / 1000)
             Xs.append(1000 / cpu)
             Ys.append(GB / bw)
             # ax.annotate(str(int(int(dbSize) / (8 * MB))) + "MB", xy=(1000/cpu, GB/bw), xytext=(-20, 5),
@@ -202,7 +207,7 @@ def plotVpirPerformanceLines():
         ax.plot(Xs, Ys, color=colors[i % int(len(schemes) / 2)],
                 linestyle=linestyles[int(i / (len(schemes) / 2))])
 
-    print_latex_table(table, int(len(schemes) / 2))
+    print_latex_table(cpuTable, int(len(schemes) / 2))
 
     schemeLabels = ["PIR", "Merkle", "VPIR"]
     optimizationLabels = ["Matrix", "DPF"]
@@ -226,20 +231,17 @@ def plotVpirPerformanceLines():
     #           mode="expand", borderaxespad=0, fancybox=True, ncol=3)
     plt.tight_layout()
     # plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
-    plt.show()
+    # plt.show()
 
 
 def print_latex_table(results, numApproaches):
     for size, values in results.items():
         print(str(int(int(size) / (8 * MB))) + "\\,MB", end=" ")
         for i, value in enumerate(values):
-            print("& %s & %s " % (rounder2(value[0]), rounder2(value[1])), end="")
-            # we need to compute the overhead
-            if i % numApproaches == numApproaches - 1:
-                print("& %s-%s " % (rounder2(value[0] / values[i - 1][0]), rounder2(value[0] / values[i - 2][0])),
-                      end="")
-                print("& %s-%s " % (rounder2(value[1] / values[i - 1][1]), rounder2(value[1] / values[i - 2][1])),
-                      end="")
+            print("& %s " % rounder2(value), end="")
+            # we need to compute the overhead over the baseline that is always at position i%numApproaches==0
+            if i % numApproaches != 0:
+                print("& %s " % rounder2(value / values[int(i / numApproaches) * numApproaches]), end="")
         print("\\\\")
 
 
@@ -320,10 +322,11 @@ args = parser.parse_args()
 EXPR = args.expr
 
 if __name__ == "__main__":
-    # prepare_for_latex()
+    prepare_for_latex()
     if EXPR == "benchmarks":
         plotVpirBenchmarks()
     elif EXPR == "performance":
-        plotVpirPerformanceLines()
+        # plotVpirPerformanceLines()
+        plotVpirPerformanceBars()
     else:
         print("Unknown experiment: choose between benchmarks and performance")
