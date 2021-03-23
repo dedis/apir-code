@@ -11,8 +11,7 @@ import (
 )
 
 type DPF struct {
-	db        *database.DB
-	serverNum byte
+	db *database.DB
 }
 
 func NewDPF(db *database.DB) *DPF {
