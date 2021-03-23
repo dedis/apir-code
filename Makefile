@@ -9,13 +9,12 @@ lint:
 	golint ./...
 
 run_server: $(PROTO_PB)
-	cd cmd/server && go build -race
-	go run cmd/server/main.go -id=$(id) -files=$(files)
+	cd cmd/grpc/server && go build -race
+	go run cmd/grpc/server/main.go -id=$(id) -files=$(files)
 
 run_client: $(PROTO_PB)
-	cd cmd/client && go build -race
-	#go run cmd/client/main.go 
-	go run cmd/client/main.go -id=$(id)
+	cd cmd/grpc/client && go build -race
+	go run cmd/grpc/client/main.go -id=$(id)
 
 test: $(PROTO_PB)
 	go test
