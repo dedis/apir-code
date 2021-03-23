@@ -3,6 +3,8 @@ package server
 import (
 	"bytes"
 	"encoding/gob"
+	"runtime"
+
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -13,14 +15,18 @@ import (
 
 // IT is the server for the information theoretic multi-bit scheme
 type IT struct {
-	db *database.DB
+	db    *database.DB
+	cores int
 }
 
 // NewIT return a server for the information theoretic multi-bit scheme,
 // working both with the vector and the rebalanced representation of the
 // database.
-func NewIT(db *database.DB) *IT {
-	return &IT{db: db}
+func NewIT(db *database.DB, cores ...int) *IT {
+	if len(cores) == 0 {
+		return &IT{db: db, cores: runtime.NumCPU()}
+	}
+	return &IT{db: db, cores: cores[0]}
 }
 
 func (s *IT) DBInfo() *database.Info {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"math/bits"
+	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/dpf"
@@ -11,11 +12,17 @@ import (
 )
 
 type DPF struct {
-	db *database.DB
+	db    *database.DB
+	cores int
 }
 
-func NewDPF(db *database.DB) *DPF {
-	return &DPF{db: db}
+// use variadic argument for cores to achieve backward compatibility
+func NewDPF(db *database.DB, cores ...int) *DPF {
+	if len(cores) == 0 {
+		return &DPF{db: db, cores: runtime.NumCPU()}
+	}
+
+	return &DPF{db: db, cores: cores[0]}
 }
 
 func (s *DPF) DBInfo() *database.Info {
