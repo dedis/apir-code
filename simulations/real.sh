@@ -16,8 +16,8 @@ cd ../../
 for cores in {1..8}; do
   echo "running with $cores cores"
   # run servers
-  go run cmd/server/main.go -id=0 -files=1 -experiment -cores=$cores & pid0=$!
-  go run cmd/server/main.go -id=1 -files=1 -experiment -cores=$cores & pid1=$!
+  go run cmd/grpc/server/main.go -id=0 -files=1 -experiment -cores=$cores & pid0=$!
+  go run cmd/grpc/server/main.go -id=1 -files=1 -experiment -cores=$cores & pid1=$!
 
   # wait for server to setup
   sleep 30
@@ -25,7 +25,7 @@ for cores in {1..8}; do
   # repeat experiment 20 times
   for i in {1..50}; do
     # run client
-    go run cmd/client/main.go -id=alex.braulio@varidi.com -experiment -cores=$cores
+    go run cmd/grpc/client/main.go -id=alex.braulio@varidi.com -experiment -cores=$cores
 
   # send sigterm to servers and trigger graceful stop
   kill -TERM "$pid0"
