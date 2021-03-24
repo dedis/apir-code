@@ -82,7 +82,7 @@ func main() {
 
 	// select correct server
 	var s server.Server
-	if *cores != -1 {
+	if *cores != -1 && *experiment {
 		s = server.NewIT(db, *cores)
 	} else {
 		s = server.NewIT(db)
