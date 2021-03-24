@@ -5,12 +5,18 @@ export GOGC=8000
 cd ../cmd/grpc/server
 go build -race
 
+# go back to simultion directory
+cd - > /dev/null
+
 # build client
 cd ../cmd/grpc/client
 go build -race
 
+# go back to simultion directory
+cd - > /dev/null
+
 # move to root
-cd ../../
+cd ../
 
 # run servers
 for cores in {1..8}; do
@@ -26,6 +32,7 @@ for cores in {1..8}; do
   for i in {1..50}; do
     # run client
     go run cmd/grpc/client/main.go -id=alex.braulio@varidi.com -experiment -cores=$cores
+  done
 
   # send sigterm to servers and trigger graceful stop
   kill -TERM "$pid0"
