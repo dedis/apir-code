@@ -36,7 +36,6 @@ func main() {
 
 	// start profiling
 	if *prof {
-		fmt.Println("here")
 		utils.StartProfiling(fmt.Sprintf("server-%v.prof", *sid))
 		defer utils.StopProfiling()
 	}
