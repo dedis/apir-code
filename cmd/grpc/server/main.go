@@ -27,9 +27,9 @@ import (
 func main() {
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
-	//experiment := flag.Bool("experiment", false, "run setting for experiments")
+	experiment := flag.Bool("experiment", false, "run setting for experiments")
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
-	//cores := flag.Int("cores", -1, "number of cores to use")
+	cores := flag.Int("cores", -1, "number of cores to use")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	flag.Parse()
@@ -81,7 +81,12 @@ func main() {
 	)
 
 	// select correct server
-	s := server.NewIT(db)
+	var s server.Server
+	if *cores != -1 {
+		s = server.NewIT(db, *cores)
+	} else {
+		s = server.NewIT(db)
+	}
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{Server: s})
