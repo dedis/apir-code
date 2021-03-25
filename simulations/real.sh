@@ -34,7 +34,7 @@ for cores in {1..8}; do
   echo "##### iteration $i running with $cores cores #####"
     # run client
     cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores
-    sleep 2
+    sleep 5
   done
 
   # send sigterm to servers and trigger graceful stop
