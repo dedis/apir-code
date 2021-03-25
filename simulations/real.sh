@@ -1,5 +1,5 @@
 #!/bin/bash
-#export GOGC=8000
+export GOGC=8000
 
 # build server
 cd ../cmd/grpc/server
@@ -27,7 +27,7 @@ for cores in {1..8}; do
   cmd/grpc/server/server -id=1 -files=1 -experiment -cores=$cores & pid1=$!
 
   # wait for server to setup
-  sleep 30
+  sleep 2
   
   # repeat experiment 10 times
   for i in {1..10}; do
@@ -40,6 +40,6 @@ for cores in {1..8}; do
   kill -TERM "$pid0"
   kill -TERM "$pid1"
   echo "sleeping to let server gracefully stops..."
-  sleep 120
+  sleep 5
   echo "##### done with $cores #####"
 done
