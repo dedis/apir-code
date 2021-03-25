@@ -23,8 +23,8 @@ for cores in {1..8}; do
   echo "##### running with $cores cores #####"
 
   # run servers
-  go run cmd/grpc/server/main.go -id=0 -files=1 -experiment -cores=$cores & pid0=$!
-  go run cmd/grpc/server/main.go -id=1 -files=1 -experiment -cores=$cores & pid1=$!
+  cmd/grpc/server/server -id=0 -files=1 -experiment -cores=$cores & pid0=$!
+  cmd/grpc/server/server -id=1 -files=1 -experiment -cores=$cores & pid1=$!
 
   # wait for server to setup
   sleep 30
@@ -33,7 +33,7 @@ for cores in {1..8}; do
   for i in {1..10}; do
   echo "##### iteration $i running with $cores cores #####"
     # run client
-    go run cmd/grpc/client/main.go -id=alex.braulio@varidi.com -experiment -cores=$cores
+    cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores
   done
 
   # send sigterm to servers and trigger graceful stop
