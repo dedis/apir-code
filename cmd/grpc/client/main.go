@@ -172,7 +172,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 }
 
 func (lc *localClient) stopServers() {
-	subCtx, cancel := context.WithTimeout(lc.ctx, time.Second)
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Minute)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
@@ -196,7 +196,7 @@ func (lc *localClient) stopServers() {
 }
 
 func (lc *localClient) retrieveDBInfo() {
-	subCtx, cancel := context.WithTimeout(lc.ctx, time.Second)
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Minute)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
