@@ -30,7 +30,7 @@ for cores in {1..8}; do
   sleep 2
   
   # repeat experiment 10 times
-  for i in {1 2}; do
+  for i in {1..2}; do
   echo "##### iteration $i running with $cores cores #####"
     # run client
     cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores
