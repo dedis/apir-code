@@ -208,6 +208,7 @@ def plotVpirPerformanceLines():
                 linestyle=linestyles[int(i / (len(schemes) / 2))])
 
     print_latex_table(cpuTable, int(len(schemes) / 2))
+    print_latex_table(bwTable, int(len(schemes) / 2))
 
     schemeLabels = ["PIR", "Merkle", "VPIR"]
     optimizationLabels = ["Matrix", "DPF"]
@@ -326,7 +327,7 @@ if __name__ == "__main__":
     if EXPR == "benchmarks":
         plotVpirBenchmarks()
     elif EXPR == "performance":
-        # plotVpirPerformanceLines()
+        plotVpirPerformanceLines()
         plotVpirPerformanceBars()
     else:
         print("Unknown experiment: choose between benchmarks and performance")
