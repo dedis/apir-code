@@ -172,7 +172,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 }
 
 func (lc *localClient) stopServers() {
-	subCtx, cancel := context.WithTimeout(lc.ctx, time.Minute)
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
@@ -196,7 +196,7 @@ func (lc *localClient) stopServers() {
 }
 
 func (lc *localClient) retrieveDBInfo() {
-	subCtx, cancel := context.WithTimeout(lc.ctx, time.Minute)
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
@@ -246,7 +246,7 @@ func dbInfo(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption) 
 }
 
 func (lc *localClient) runQueries(queries [][]byte) [][]byte {
-	subCtx, cancel := context.WithTimeout(lc.ctx, time.Minute)
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
