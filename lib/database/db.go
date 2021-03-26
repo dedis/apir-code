@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/cloudflare/circl/group"
+	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
@@ -28,8 +29,8 @@ type Info struct {
 	*Auth
 	*Merkle
 	*DataEmbedding
-	// Lattice parameters for the single-server setting
-	//Lattice *bfv.Parameters
+	//Lattice parameters for the single-server data retrieval
+	LatParams *bfv.Parameters
 }
 
 // Authentication information for the single-server setting

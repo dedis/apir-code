@@ -12,23 +12,23 @@ import (
 )
 
 // Single-server tag retrieval scheme
-type Single struct {
+type DH struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
 }
 
-// NewSingle returns an instance of a client for
+// NewDH returns an instance of a DH-based client for
 // the single-server tag retrieval scheme
-func NewSingle(rnd io.Reader, info *database.Info) *Single {
-	return &Single{
+func NewDH(rnd io.Reader, info *database.Info) *DH {
+	return &DH{
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
 	}
 }
 
-func (c *Single) QueryBytes(index int) ([]byte, error) {
+func (c *DH) QueryBytes(index int) ([]byte, error) {
 	g := c.dbInfo.Group
 	//Sample two random scalars
 	r, t := g.RandomScalar(c.rnd), g.RandomScalar(c.rnd)
@@ -88,7 +88,7 @@ func (c *Single) QueryBytes(index int) ([]byte, error) {
 	return encodedQuery, nil
 }
 
-func (c *Single) ReconstructBytes(a []byte, db *database.Elliptic) (interface{}, error) {
+func (c *DH) ReconstructBytes(a []byte, db *database.Elliptic) (interface{}, error) {
 	g := c.dbInfo.Group
 	// get row digests from the end of the answer
 	digSize := c.dbInfo.ElementSize
@@ -96,7 +96,8 @@ func (c *Single) ReconstructBytes(a []byte, db *database.Elliptic) (interface{},
 	digests := a[len(a)-digestsSize:]
 	// check that row digests hash to the global one
 	hasher := c.dbInfo.Hash.New()
-	if !bytes.Equal(hasher.Sum(digests), c.dbInfo.Digest) {
+	hasher.Write(digests)
+	if !bytes.Equal(hasher.Sum(nil), c.dbInfo.Digest) {
 		return nil, errors.New("received row digests and the global digests do not match")
 	}
 
@@ -141,7 +142,7 @@ func generateBlindedElements(begin, end int, blinding group.Scalar, info *databa
 	replyTo <- elements
 }
 
-// A hack function (due to lack of API) to return a copy of a scalar
+// A hack function (due to lack of lib API) to return a copy of a scalar
 func copyScalar(scalar group.Scalar, g group.Group) group.Scalar {
 	data, err := scalar.MarshalBinary()
 	if err != nil {

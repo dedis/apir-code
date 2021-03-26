@@ -49,13 +49,15 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, g group.Group, dbLen, blockLe
 	}
 	// global digest
 	hasher := h.New()
+	hasher.Write(digests)
+
 	return &Elliptic{Entries: entries,
 		Digests: digests,
 		Info: Info{NumColumns: numColumns,
 			NumRows:   numRows,
 			BlockSize: blockLen,
 			Auth: &Auth{
-				Digest:      hasher.Sum(digests),
+				Digest:      hasher.Sum(nil),
 				Group:       g,
 				Hash:        h,
 				ElementSize: elementSize,

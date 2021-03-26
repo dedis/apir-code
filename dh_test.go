@@ -17,7 +17,7 @@ import (
 func TestSingleMatrixOneMb(t *testing.T) {
 	dbLen := 8000000
 	dbPRG := utils.RandomPRG()
-	blockLen := testBlockLength
+	blockLen := 16
 	ecg := group.P256
 	db := database.CreateRandomEllipticWithDigest(dbPRG, ecg, dbLen, blockLen, true)
 
@@ -27,15 +27,13 @@ func TestSingleMatrixOneMb(t *testing.T) {
 }
 
 func retrieveBlocksSingle(t *testing.T, rnd io.Reader, db *database.Elliptic, testName string) {
-	c := client.NewSingle(rnd, &db.Info)
-	s := server.NewSingle(db)
+	c := client.NewDH(rnd, &db.Info)
+	s := server.NewDH(db)
 
 	totalTimer := monitor.NewMonitor()
-	for i := 0; i < db.NumRows*db.NumColumns; i++ {
-	//for i := 0; i < 10; i++ {
-		if i % 100 == 0 {
-			fmt.Printf("%d ", i)
-		}
+	//for i := 0; i < db.NumRows*db.NumColumns; i++ {
+	for i := 0; i < 10; i++ {
+		fmt.Printf("%d ", i)
 		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
 
@@ -46,5 +44,5 @@ func retrieveBlocksSingle(t *testing.T, rnd io.Reader, db *database.Elliptic, te
 		require.NoError(t, err)
 	}
 
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+	fmt.Printf("\nTotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 }

@@ -5,30 +5,35 @@ import (
 
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
-type Single struct {
+// A DH server for the single-server DL-based tag retrieval
+type DH struct {
 	db *database.Elliptic
 }
 
-func NewSingle(db *database.Elliptic) *Single {
-	return &Single{db: db}
+func NewDH(db *database.Elliptic) *DH {
+	return &DH{db: db}
 }
 
-func (s *Single) AnswerBytes(q []byte) ([]byte, error) {
+func (s *DH) AnswerBytes(q []byte) ([]byte, error) {
 	query, err := database.UnmarshalGroupElements(q, s.db.Group, s.db.ElementSize)
 	if err != nil {
 		return nil, err
 	}
 
 	NGoRoutines := runtime.NumCPU()
-	rowsPerRoutine := utils.DivideAndRoundUpToMultiple(s.db.NumRows, NGoRoutines, 1)
+	// make sure that we do not need up with routines processing 0 elements
+	if NGoRoutines > s.db.NumRows {
+		NGoRoutines = s.db.NumRows
+	}
+	rowsPerRoutine := s.db.NumRows / NGoRoutines
 	replies := make([]chan []group.Element, NGoRoutines)
 	var begin, end int
 	for i := 0; i < NGoRoutines; i++ {
 		begin, end = i*rowsPerRoutine, (i+1)*rowsPerRoutine
-		if end >= s.db.NumRows {
+		// make the last routine take all the left-over (from division) rows
+		if i == NGoRoutines-1 {
 			end = s.db.NumRows
 		}
 		replyChan := make(chan []group.Element, rowsPerRoutine)
@@ -54,7 +59,7 @@ func (s *Single) AnswerBytes(q []byte) ([]byte, error) {
 	return encoded, nil
 }
 
-func (s *Single) processRows(begin, end int, input []group.Element, replyTo chan<- []group.Element) {
+func (s *DH) processRows(begin, end int, input []group.Element, replyTo chan<- []group.Element) {
 	// one tag per row
 	tags := make([]group.Element, end-begin)
 	for i := begin; i < end; i++ {

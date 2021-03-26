@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/cloudflare/circl/group"
+	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
@@ -27,9 +28,11 @@ type state struct {
 	// for multi-server
 	alpha field.Element
 	a     []field.Element
-	//	for single-server
+	//	for single-server (DH)
 	r  group.Scalar
 	Ht []group.Element
+	// Lattice secret key
+	key *bfv.SecretKey
 }
 
 // general functions for both IT and DPF-based clients
