@@ -4,9 +4,11 @@ package client
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/gob"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
+	"math"
 )
 
 type Lattice struct {
@@ -29,7 +31,7 @@ func NewLattice(info *database.Info) *Lattice {
 	}
 }
 
-func (c *Lattice) QueryBytes(index int, db *database.Ring) ([]byte, error) {
+func (c *Lattice) QueryBytes(index int) ([]byte, error) {
 	params := c.dbInfo.LatParams
 	encoder := bfv.NewEncoder(params)
 
@@ -45,39 +47,7 @@ func (c *Lattice) QueryBytes(index int, db *database.Ring) ([]byte, error) {
 		key: sk,
 	}
 
-	encQuery := genQuery(params, index, encoder, encryptor)
-
-	//// Debugging
-	//plainMask := make([]*bfv.PlaintextMul, c.dbInfo.NumColumns)
-	//// Plaintext masks: plainmask[i] = encode([0, ..., 0, 1_i, 0, ..., 0])
-	//// (zero with a 1 at the i-th position).
-	//for i := range plainMask {
-	//	maskCoeffs := make([]uint64, params.N())
-	//	maskCoeffs[i] = 1
-	//	plainMask[i] = bfv.NewPlaintextMul(params)
-	//	encoder.EncodeUintMul(maskCoeffs, plainMask[i])
-	//}
-	//
-	//decryptor := bfv.NewDecryptor(params, c.state.key)
-	//evaluator := bfv.NewEvaluator(params)
-	//for j := 0; j < c.dbInfo.NumColumns; j++ {
-	//	//for j := 0; j < 1; j++ {
-	//	tmp := bfv.NewCiphertext(params, 1)
-	//	// 1) Multiplication of the query with the plaintext mask
-	//	evaluator.Mul(encQuery, plainMask[j], tmp)
-	//	// 2) Inner sum (populate all the slots with the sum of all the slots)
-	//	evaluator.InnerSum(tmp, rtk, tmp)
-	//	fmt.Printf("%d ", encoder.DecodeUintNew(decryptor.DecryptNew(tmp))[0])
-	//	// 3) Multiplication of 2) with the (i,j)-th plaintext of the db
-	//	fmt.Printf("%d ", encoder.DecodeUintNew(db.Entries[j])[0])
-	//	evaluator.Mul(tmp, db.Entries[j], tmp)
-	//	fmt.Println(encoder.DecodeUintNew(decryptor.DecryptNew(tmp))[0])
-	//	// 4) Add the result of the column multiplication to the final row product
-	//	//evaluator.Add(prodDeg2, tmp, prodDeg2)
-	//}
-	////fmt.Println(encoder.DecodeUintNew(decryptor.DecryptNew(evaluator.RelinearizeNew(prodDeg2, rlt))))
-	//
-	////
+	encQuery := genQuery(params, c.state.iy, encoder, encryptor)
 
 	encodedQuery, err := encodeQuery(encQuery, rtk)
 	if err != nil {
@@ -87,7 +57,7 @@ func (c *Lattice) QueryBytes(index int, db *database.Ring) ([]byte, error) {
 	return encodedQuery, nil
 }
 
-func (c *Lattice) ReconstructBytes(a []byte) ([]uint64, error) {
+func (c *Lattice) ReconstructBytes(a []byte) ([][]byte, error) {
 	var err error
 	params := c.dbInfo.LatParams
 	encoder := bfv.NewEncoder(params)
@@ -95,19 +65,29 @@ func (c *Lattice) ReconstructBytes(a []byte) ([]uint64, error) {
 	ciphertextSize := len(a)/c.dbInfo.NumRows
 
 	ctx := new(bfv.Ciphertext)
-	var m []uint64
+	var coeffs []uint64
+	tmp := make([]byte, 8)
+	column := make([][]byte, c.dbInfo.NumRows)
+	dataSize := int(math.Log2(float64(params.T()))) / 8
+	j := 0
 	for i := 0; i < len(a); i += ciphertextSize {
 		err = ctx.UnmarshalBinary(a[i:i+ciphertextSize])
 		if err != nil {
 			return nil, err
 		}
-		m = encoder.DecodeUintNew(decryptor.DecryptNew(ctx))
-		if i / ciphertextSize == c.state.ix {
-			return m, nil
+		coeffs = encoder.DecodeUintNew(decryptor.DecryptNew(ctx))
+		column[j] = make([]byte, 0, dataSize*int(params.N()))
+		for _, coeff := range coeffs {
+			binary.BigEndian.PutUint64(tmp, coeff)
+			column[j] = append(column[j], tmp[len(tmp)-dataSize:]...)
 		}
+		j++
+		//if i / ciphertextSize == c.state.ix {
+		//	return m, nil
+		//}
 	}
 
-	return nil, nil
+	return column, nil
 }
 
 func genQuery(params *bfv.Parameters, queryIndex int, encoder bfv.Encoder, encryptor bfv.Encryptor) *bfv.Ciphertext {

@@ -3,6 +3,7 @@ package database
 import (
 	"crypto"
 	"encoding/binary"
+	"github.com/si-co/vpir-code/lib/utils"
 	"io"
 	"log"
 
@@ -18,17 +19,12 @@ type Elliptic struct {
 
 // blockLen must be the number of scalars in a block
 func CreateRandomEllipticWithDigest(rnd io.Reader, g group.Group, dbLen, blockLen int, rebalanced bool) *Elliptic {
-	// Obtaining the scalar and element sizes for the group
-	rndScalar, _ := g.RandomScalar(rnd).MarshalBinary()
-	rndElement, _ := g.RandomElement(rnd).MarshalBinaryCompress()
-	scalarSize := len(rndScalar)
-	elementSize := len(rndElement)
-	h := crypto.BLAKE2b_256
-
+	elementSize, scalarSize := getElementAndScalarSizes(g)
 	preSquareNumBlocks := dbLen / (8 * scalarSize * blockLen)
 	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
 
-	// fill out the db with random scalars and
+	h := crypto.BLAKE2b_256
+	// fill out the db with scalars and
 	// compute the db digest.
 	entries := make([]group.Scalar, numRows*numColumns*blockLen)
 	digests := make([]byte, 0, numRows*h.Size())
@@ -65,6 +61,66 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, g group.Group, dbLen, blockLe
 			},
 		},
 	}
+}
+
+func CreateEllipticWithDigestFromData(data []byte, info *Info) *Elliptic {
+	var err error
+	g := group.P256
+	elementSize, scalarSize := getElementAndScalarSizes(g)
+	numRows, numColumns := info.NumRows, info.NumColumns
+	blockLen := len(data) / (numRows * numColumns * scalarSize)
+
+	h := crypto.BLAKE2b_256
+	// fill out the db with scalars and
+	// compute the db digest.
+	entries := make([]group.Scalar, numRows*numColumns*blockLen)
+	digests := make([]byte, 0, numRows*h.Size())
+	for i := 0; i < numRows; i++ {
+		d := g.Identity()
+		for j := 0; j < numColumns; j++ {
+			for l := 0; l < blockLen; l++ {
+				// get scalar from the data
+				s := g.NewScalar()
+				err = s.UnmarshalBinary(data[(i*numColumns*blockLen+j*blockLen+l)*scalarSize : (i*numColumns*blockLen+j*blockLen+l+1)*scalarSize])
+				if err != nil {
+					log.Fatal(err)
+				}
+				entries[i*numColumns*blockLen+j*blockLen+l] = s
+				d.Add(d, CommitScalarToIndex(entries[i*numColumns*blockLen+j*blockLen+l], uint64(j), uint64(l), g))
+			}
+		}
+		tmp, err := d.MarshalBinaryCompress()
+		if err != nil {
+			log.Fatal(err)
+		}
+		digests = append(digests, tmp...)
+	}
+	// global digest
+	hasher := h.New()
+	hasher.Write(digests)
+
+	return &Elliptic{Entries: entries,
+		Digests: digests,
+		Info: Info{NumColumns: numColumns,
+			NumRows:   numRows,
+			BlockSize: blockLen,
+			Auth: &Auth{
+				Digest:      hasher.Sum(nil),
+				Group:       g,
+				Hash:        h,
+				ElementSize: elementSize,
+				ScalarSize:  scalarSize,
+			},
+		},
+	}
+}
+
+func getElementAndScalarSizes(g group.Group) (int, int) {
+	// Obtaining the scalar and element sizes for the group
+	rnd := utils.RandomPRG()
+	rndScalar, _ := g.RandomScalar(rnd).MarshalBinary()
+	rndElement, _ := g.RandomElement(rnd).MarshalBinaryCompress()
+	return len(rndElement), len(rndScalar)
 }
 
 // Take the indices (j, l) and hash them to get a group element

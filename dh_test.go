@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSingleMatrixOneMb(t *testing.T) {
+func TestDHMatrixOneMb(t *testing.T) {
 	dbLen := 8000000
 	dbPRG := utils.RandomPRG()
 	blockLen := 16
@@ -23,10 +23,10 @@ func TestSingleMatrixOneMb(t *testing.T) {
 
 	prg := utils.RandomPRG()
 
-	retrieveBlocksSingle(t, prg, db, "SingleMatrixOneMB")
+	retrieveBlocksDH(t, prg, db, "SingleMatrixOneMB")
 }
 
-func retrieveBlocksSingle(t *testing.T, rnd io.Reader, db *database.Elliptic, testName string) {
+func retrieveBlocksDH(t *testing.T, rnd io.Reader, db *database.Elliptic, testName string) {
 	c := client.NewDH(rnd, &db.Info)
 	s := server.NewDH(db)
 
@@ -37,11 +37,11 @@ func retrieveBlocksSingle(t *testing.T, rnd io.Reader, db *database.Elliptic, te
 		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
 
-		a, err := s.AnswerBytes(query)
+		_, err = s.AnswerBytes(query)
 		require.NoError(t, err)
 
-		_, err = c.ReconstructBytes(a, db)
-		require.NoError(t, err)
+		//_, err = c.ReconstructBytes(a, nil)
+		//require.NoError(t, err)
 	}
 
 	fmt.Printf("\nTotalCPU time %s: %.1fms\n", testName, totalTimer.Record())

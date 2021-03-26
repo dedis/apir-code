@@ -14,14 +14,15 @@ type Ring struct {
 	Info
 }
 
-func CreateRandomRingDB(rnd io.Reader, dbLen int, rebalanced bool) *Ring {
+func CreateRandomRingDB(rnd io.Reader, dbLen int, rebalanced bool) (*Ring, []byte) {
 	// setting lattice parameters (N = 2^13 = 8192, t = 2^16)
 	params := bfv.DefaultParams[bfv.PN13QP218].WithT(65537)
 	encoder := bfv.NewEncoder(params)
 
+	blockLen := 1
 	coeffSize := int(math.Log2(float64(params.T()))) / 8
-	blockLen := coeffSize * int(params.N())
-	numBlocks := dbLen / (8 * blockLen)
+	elemSize := coeffSize * int(params.N())
+	numBlocks := dbLen / (8 * elemSize)
 	// handle very small db
 	if numBlocks == 0 {
 		numBlocks = 1
@@ -37,7 +38,7 @@ func CreateRandomRingDB(rnd io.Reader, dbLen int, rebalanced bool) *Ring {
 	}
 
 	// read random bytes for filling out the entries
-	randInput := make([]byte, numBlocks*blockLen)
+	randInput := make([]byte, numBlocks*elemSize)
 	if _, err := rnd.Read(randInput); err != nil {
 		log.Fatal(err)
 	}
@@ -60,5 +61,5 @@ func CreateRandomRingDB(rnd io.Reader, dbLen int, rebalanced bool) *Ring {
 			BlockSize: blockLen,
 			LatParams: params,
 		},
-	}
+	}, randInput
 }

@@ -8,7 +8,6 @@ import (
 
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Single-server tag retrieval scheme
@@ -43,12 +42,12 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 
 	// multithreading
 	NGoRoutines := runtime.NumCPU()
-	columnsPerRoutine := utils.DivideAndRoundUpToMultiple(c.dbInfo.NumColumns, NGoRoutines, 1)
+	columnsPerRoutine := c.dbInfo.NumColumns / NGoRoutines
 	replies := make([]chan []group.Element, NGoRoutines)
 	var begin, end int
 	for i := 0; i < NGoRoutines; i++ {
 		begin, end = i*columnsPerRoutine, (i+1)*columnsPerRoutine
-		if end >= c.dbInfo.NumColumns {
+		if i == NGoRoutines-1 {
 			end = c.dbInfo.NumColumns
 		}
 		replyChan := make(chan []group.Element, columnsPerRoutine*c.dbInfo.BlockSize)
@@ -88,7 +87,7 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 	return encodedQuery, nil
 }
 
-func (c *DH) ReconstructBytes(a []byte, db *database.Elliptic) (interface{}, error) {
+func (c *DH) ReconstructBytes(a []byte, m [][]byte) (interface{}, error) {
 	g := c.dbInfo.Group
 	// get row digests from the end of the answer
 	digSize := c.dbInfo.ElementSize
@@ -106,12 +105,17 @@ func (c *DH) ReconstructBytes(a []byte, db *database.Elliptic) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
+	scalarSize := c.dbInfo.ScalarSize
+	ml := g.NewScalar()
 	for i := 0; i < c.dbInfo.NumRows; i++ {
 		// multiply all the block elements
 		sum := g.Identity()
 		for l := 0; l < c.dbInfo.BlockSize; l++ {
 			h := g.NewElement()
-			ml := db.Entries[i*c.dbInfo.NumColumns*c.dbInfo.BlockSize+c.state.iy*c.dbInfo.BlockSize+l]
+			err = ml.UnmarshalBinary(m[i][l*scalarSize:(l+1)*scalarSize])
+			if err != nil {
+				return nil, err
+			}
 			h.Mul(c.state.Ht[l], ml)
 			sum.Add(sum, h)
 		}
