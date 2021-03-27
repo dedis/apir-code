@@ -137,9 +137,11 @@ def plotVpirPerformanceBars():
             # Yerr = stats[dbSize]['client']['cpu']['std'] + stats[dbSize]['server']['cpu']['std']
             # bars[i] = ax.bar(j + i * width, Y, width, yerr=Yerr, color=colors[i % 3], hatch=patterns[int(i / 3)])
             if i != 0:
-                bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color=colors[i % 3], hatch=patterns[int(i / 3)])
+                bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color=colors[i % 3],
+                                 hatch=patterns[int(i / 3)])
             else:
-                bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color='darkred', hatch=patterns[int(i / 3)])
+                bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color='darkred',
+                                 hatch=patterns[int(i / 3)])
             ax.annotate(rounder(Y / baselines[dbSize]),
                         xy=(j + i * width, Y / baselines[dbSize]),
                         xytext=(0, 0),  # 5 points vertical offset
@@ -207,8 +209,8 @@ def plotVpirPerformanceLines():
         ax.plot(Xs, Ys, color=colors[i % int(len(schemes) / 2)],
                 linestyle=linestyles[int(i / (len(schemes) / 2))])
 
-    print_latex_table(cpuTable, int(len(schemes) / 2))
-    print_latex_table(bwTable, int(len(schemes) / 2))
+    print_latex_table_separate(cpuTable, int(len(schemes) / 2))
+    print_latex_table_separate(bwTable, int(len(schemes) / 2))
 
     schemeLabels = ["PIR", "Merkle", "VPIR"]
     optimizationLabels = ["Matrix", "DPF"]
@@ -235,7 +237,20 @@ def plotVpirPerformanceLines():
     # plt.show()
 
 
-def print_latex_table(results, numApproaches):
+def plotSingle():
+    schemes = ["computationalPir.json", "computationalVpir.json"]
+    labels = ["w/o integrity", "w/ integrity"]
+    table = defaultdict(list)
+    for i, scheme in enumerate(schemes):
+        stats = allStats(resultFolder + scheme)
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            table[dbSize].append((cpu/1000, bw / MB))
+    print_latex_table_joint(table, 2)
+
+
+def print_latex_table_separate(results, numApproaches):
     for size, values in results.items():
         print(str(int(int(size) / (8 * MB))) + "\\,MB", end=" ")
         for i, value in enumerate(values):
@@ -243,6 +258,17 @@ def print_latex_table(results, numApproaches):
             # we need to compute the overhead over the baseline that is always at position i%numApproaches==0
             if i % numApproaches != 0:
                 print("& %s " % rounder2(value / values[int(i / numApproaches) * numApproaches]), end="")
+        print("\\\\")
+
+
+def print_latex_table_joint(results, numApproaches):
+    for size, values in results.items():
+        print(str(int(int(size) / (8 * MB))) + "\\,MB", end=" ")
+        for i, value in enumerate(values):
+            print("& %s & %s " % (rounder2(value[0]), rounder2(value[1])), end="")
+            # compute overhead
+            if i % numApproaches == numApproaches - 1:
+                print("& %s & %s " % (rounder2(value[0] / values[i-1][0]), rounder2(value[1] / values[i-1][1])), end="")
         print("\\\\")
 
 
@@ -329,5 +355,7 @@ if __name__ == "__main__":
     elif EXPR == "performance":
         plotVpirPerformanceLines()
         plotVpirPerformanceBars()
+    elif EXPR == "single":
+        plotSingle()
     else:
         print("Unknown experiment: choose between benchmarks and performance")

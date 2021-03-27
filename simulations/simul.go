@@ -123,38 +123,54 @@ func main() {
 		dbPRG := utils.RandomPRG()
 		db := new(database.DB)
 		dbBytes := new(database.Bytes)
-		if s.Primitive[:4] == "vpir" {
+		dbRing := new(database.Ring)
+		dbElliptic := new(database.Elliptic)
+		var data []byte
+		switch s.Primitive[:3] {
+		case "vpi":
 			if s.BlockLength == constants.SingleBitBlockLength {
 				db = database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
 			} else {
 				db = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
 			}
-		} else if s.Primitive[:3] == "pir" {
+		case "pir":
 			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
 				dbBytes = database.CreateRandomMultiBitMerkle(dbPRG, dbLen, nRows, blockLen)
 			} else {
 				dbBytes = database.CreateRandomMultiBitBytes(dbPRG, dbLen, nRows, blockLen)
+			}
+		case "cmp":
+			dbRing, data = database.CreateRandomRingDB(dbPRG, dbLen, true)
+			if s.Primitive[len(s.Primitive)-4:] == "vpir" {
+				dbElliptic = database.CreateEllipticWithDigestFromData(data, &dbRing.Info)
 			}
 		}
 
 		// run experiment
 		var results []*Chunk
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
-		if s.Primitive == "vpir-it" {
+		switch s.Primitive {
+		case "vpir-it":
 			log.Printf("db info: %#v", db.Info)
 			results = vpirIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		} else if s.Primitive == "vpir-dpf" {
+		case "vpir-dpf":
 			log.Printf("db info: %#v", db.Info)
 			results = vpirDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		} else if s.Primitive == "pir-it" || s.Primitive == "pir-it-merkle" {
+		case "pir-it", "pir-it-merkle":
 			log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		} else if s.Primitive == "pir-dpf" || s.Primitive == "pir-dpf-merkle" {
+		case "pir-dpf", "pir-dpf-merkle":
 			log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirDPF(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		} else {
+		case "cmp-pir":
+			log.Printf("db info: %#v", dbRing.Info)
+			results = pirLattice(dbRing, s.Repetitions)
+		case "cmp-vpir":
+			log.Printf("db info: %#v", dbRing.Info)
+			results = pirLatticeWithEllipticTag(dbRing, dbElliptic, s.Repetitions)
+		default:
 			log.Fatal("unknown primitive type")
 		}
 		experiment.Results[dbLen] = results
@@ -273,6 +289,141 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 	return results
 }
 
+func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
+	// seed non-cryptographic randomness
+	rand.Seed(time.Now().UnixNano())
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	c := client.NewLattice(&db.Info)
+	s := server.NewLattice(db)
+
+	var index int
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = &Chunk{
+			CPU:       make([]*Block, 1),
+			Bandwidth: make([]*Block, 1),
+		}
+		// pick a random block index to start the retrieval
+		index = rand.Intn(db.NumRows * db.NumColumns)
+		for i := 0; i < 1; i++ {
+			results[j].CPU[i] = &Block{
+				Query:       0,
+				Answers:     make([]float64, 1),
+				Reconstruct: 0,
+			}
+			results[j].Bandwidth[i] = &Block{
+				Query:       0,
+				Answers:     make([]float64, 1),
+				Reconstruct: 0,
+			}
+
+			m.Reset()
+			query, err := c.QueryBytes(index + i)
+			if err != nil {
+				log.Fatal(err)
+			}
+			results[j].CPU[i].Query = m.RecordAndReset()
+			results[j].Bandwidth[i].Query = float64(len(query))
+
+			// get servers answers
+			answer, err := s.AnswerBytes(query)
+			if err != nil {
+				log.Fatal(err)
+			}
+			results[j].CPU[i].Answers[0] = m.RecordAndReset()
+			results[j].Bandwidth[i].Answers[0] = float64(len(answer))
+
+			_, err = c.ReconstructBytes(answer)
+			if err != nil {
+				log.Fatal(err)
+			}
+			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			results[j].Bandwidth[i].Reconstruct = 0
+		}
+	}
+	return results
+}
+
+func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepeat int) []*Chunk {
+	// seed non-cryptographic randomness
+	rand.Seed(time.Now().UnixNano())
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	prg := utils.RandomPRG()
+	cl := client.NewLattice(&dbr.Info)
+	sl := server.NewLattice(dbr)
+	ce := client.NewDH(prg, &dbe.Info)
+	se := server.NewDH(dbe)
+
+	var index int
+	var err error
+	var queryL, queryE, answerL, answerE []byte
+	var column [][]byte
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = &Chunk{
+			CPU:       make([]*Block, 1),
+			Bandwidth: make([]*Block, 1),
+		}
+		// pick a random block index to start the retrieval
+		index = rand.Intn(dbr.NumRows * dbr.NumColumns)
+		results[j].CPU[0] = &Block{
+			Query:       0,
+			Answers:     make([]float64, 1),
+			Reconstruct: 0,
+		}
+		results[j].Bandwidth[0] = &Block{
+			Query:       0,
+			Answers:     make([]float64, 1),
+			Reconstruct: 0,
+		}
+
+		m.Reset()
+		queryL, err = cl.QueryBytes(index)
+		if err != nil {
+			log.Fatal(err)
+		}
+		queryE, err = ce.QueryBytes(index)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Query = m.RecordAndReset()
+		results[j].Bandwidth[0].Query += float64(len(queryL) + len(queryE))
+
+		// get servers answers
+		answerL, err = sl.AnswerBytes(queryL)
+		if err != nil {
+			log.Fatal(err)
+		}
+		answerE, err = se.AnswerBytes(queryE)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Answers[0] = m.RecordAndReset()
+		results[j].Bandwidth[0].Answers[0] = float64(len(answerL) + len(answerE))
+
+		column, err = cl.ReconstructBytes(answerL)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = ce.ReconstructBytes(answerE, column)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		results[j].Bandwidth[0].Reconstruct = 0
+	}
+
+	return results
+}
+
 // Converts number of bits to retrieve into the number of db blocks
 func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	if blockSize == constants.SingleBitBlockLength {
@@ -326,5 +477,7 @@ func (s *Simulation) validSimulation() bool {
 		s.Primitive == "pir-it" ||
 		s.Primitive == "pir-dpf" ||
 		s.Primitive == "pir-it-merkle" ||
-		s.Primitive == "pir-dpf-merkle"
+		s.Primitive == "pir-dpf-merkle" ||
+		s.Primitive == "cmp-pir" ||
+		s.Primitive == "cmp-vpir"
 }
