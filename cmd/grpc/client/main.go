@@ -63,7 +63,7 @@ func newLocalClient() *localClient {
 		defer utils.StopProfiling()
 	}
 
-	// set logs
+	// set logs to stdout
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
@@ -94,7 +94,7 @@ func main() {
 		defer lc.connections[s].Close()
 	}
 
-	// set stats log
+	// set stats log only for experiments
 	// TODO: move somewhere else, but mind the defer
 	if lc.flags.experiment {
 		f, err := os.OpenFile("stats_client.log", os.O_RDWR|os.O_CREATE|os.O_CREATE, 0666)
@@ -105,13 +105,16 @@ func main() {
 		lc.statsLogger = log.New(f, "", log.Lmsgprefix)
 	}
 
-	// get and store db info
+	// get and store db info.
+	// This function queries the servers for the database information.
+	// In the Keyd PoC application, we will hardcode the database
+	// information in the client.
 	lc.retrieveDBInfo()
 
-	// start correct client
+	// start correct client, which can be either IT or DPF.
 	lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 
-	// get id and compute corresponding hash
+	// get id
 	if lc.flags.id == "" {
 		var id string
 		fmt.Scanln(&id)
@@ -121,6 +124,7 @@ func main() {
 		lc.flags.id = id
 	}
 
+	// retrieve the key corresponding to the id
 	lc.retrieveKeyGivenId(lc.flags.id)
 }
 
@@ -169,30 +173,6 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 		lc.statsLogger.Printf("%d,%f", lc.flags.cores, elapsedTime.Seconds())
 	}
 	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
-}
-
-func (lc *localClient) stopServers() {
-	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
-	defer cancel()
-
-	wg := sync.WaitGroup{}
-	resCh := make(chan *database.Info, len(lc.connections))
-	for _, conn := range lc.connections {
-		wg.Add(1)
-		go func(conn *grpc.ClientConn) {
-			c := proto.NewVPIRClient(conn)
-			q := &proto.ServerStopRequest{}
-			_, err := c.ServerStop(subCtx, q, lc.callOptions...)
-			if err != nil {
-				log.Fatalf("could not send server stop request to %s: %v",
-					conn.Target(), err)
-			}
-			log.Printf("sent server stop request to %s", conn.Target())
-			wg.Done()
-		}(conn)
-	}
-	wg.Wait()
-	close(resCh)
 }
 
 func (lc *localClient) retrieveDBInfo() {

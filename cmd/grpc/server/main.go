@@ -173,14 +173,6 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	return &proto.QueryResponse{Answer: a}, nil
 }
 
-func (s *vpirServer) ServerStop(ctx context.Context, r *proto.ServerStopRequest) (
-	*proto.ServerStopResponse, error) {
-	log.Println("exiting")
-	defer os.Exit(0)
-
-	return &proto.ServerStopResponse{}, nil
-}
-
 func loadPgpDB(filesNumber int) (*database.DB, error) {
 	log.Println("Starting to read in the DB data")
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)

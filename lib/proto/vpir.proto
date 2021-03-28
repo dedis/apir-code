@@ -7,7 +7,6 @@ option go_package = "github.com/si-co/vpir-code/lib/proto;proto";
 service VPIR {
         rpc DatabaseInfo (DatabaseInfoRequest) returns (DatabaseInfoResponse) {}
 	rpc Query (QueryRequest) returns (QueryResponse) {}
-        rpc ServerStop (ServerStopRequest) returns (ServerStopResponse) {}
 }
 
 message QueryRequest {
@@ -27,7 +26,3 @@ message DatabaseInfoResponse {
         uint32 idLength = 4;
         uint32 keyLength = 5;
 }
-
-message ServerStopRequest {}
-
-message ServerStopResponse {}

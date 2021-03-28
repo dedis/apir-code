@@ -19,7 +19,6 @@ const _ = grpc.SupportPackageIsVersion7
 type VPIRClient interface {
 	DatabaseInfo(ctx context.Context, in *DatabaseInfoRequest, opts ...grpc.CallOption) (*DatabaseInfoResponse, error)
 	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error)
-	ServerStop(ctx context.Context, in *ServerStopRequest, opts ...grpc.CallOption) (*ServerStopResponse, error)
 }
 
 type vPIRClient struct {
@@ -48,22 +47,12 @@ func (c *vPIRClient) Query(ctx context.Context, in *QueryRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *vPIRClient) ServerStop(ctx context.Context, in *ServerStopRequest, opts ...grpc.CallOption) (*ServerStopResponse, error) {
-	out := new(ServerStopResponse)
-	err := c.cc.Invoke(ctx, "/proto.VPIR/ServerStop", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // VPIRServer is the server API for VPIR service.
 // All implementations must embed UnimplementedVPIRServer
 // for forward compatibility
 type VPIRServer interface {
 	DatabaseInfo(context.Context, *DatabaseInfoRequest) (*DatabaseInfoResponse, error)
 	Query(context.Context, *QueryRequest) (*QueryResponse, error)
-	ServerStop(context.Context, *ServerStopRequest) (*ServerStopResponse, error)
 	mustEmbedUnimplementedVPIRServer()
 }
 
@@ -76,9 +65,6 @@ func (UnimplementedVPIRServer) DatabaseInfo(context.Context, *DatabaseInfoReques
 }
 func (UnimplementedVPIRServer) Query(context.Context, *QueryRequest) (*QueryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
-}
-func (UnimplementedVPIRServer) ServerStop(context.Context, *ServerStopRequest) (*ServerStopResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ServerStop not implemented")
 }
 func (UnimplementedVPIRServer) mustEmbedUnimplementedVPIRServer() {}
 
@@ -129,24 +115,6 @@ func _VPIR_Query_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	return interceptor(ctx, in, info, handler)
 }
 
-func _VPIR_ServerStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ServerStopRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VPIRServer).ServerStop(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.VPIR/ServerStop",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VPIRServer).ServerStop(ctx, req.(*ServerStopRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _VPIR_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.VPIR",
 	HandlerType: (*VPIRServer)(nil),
@@ -158,10 +126,6 @@ var _VPIR_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Query",
 			Handler:    _VPIR_Query_Handler,
-		},
-		{
-			MethodName: "ServerStop",
-			Handler:    _VPIR_ServerStop_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
