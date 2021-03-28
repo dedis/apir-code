@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"runtime"
 
@@ -86,6 +87,7 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("tag: %d\n", len(encodedQuery))
 
 	return encodedQuery, nil
 }
