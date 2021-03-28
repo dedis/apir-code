@@ -15,7 +15,7 @@ import (
 // as byte is viewed as an element in this case
 func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	numBlocks := dbLen / (8 * blockLen)
-	// generate random blocks blocks
+	// generate random numBlocks blocks
 	data := make([]byte, numBlocks*blockLen)
 	if _, err := rnd.Read(data); err != nil {
 		log.Fatal(err)
@@ -39,6 +39,7 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	proofLen := tree.EncodedProofLength()
 	blockLen = blockLen + proofLen
 	entries := make([]byte, numRows*numColumns*blockLen)
+
 	// multithreading
 	var wg sync.WaitGroup
 	var end int

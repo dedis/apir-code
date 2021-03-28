@@ -23,12 +23,14 @@ type Info struct {
 	NumRows    int
 	NumColumns int
 	BlockSize  int
+
 	// PIR type: classical, merkle, signature
 	PIRType string
 
 	*Auth
 	*Merkle
 	*DataEmbedding
+
 	//Lattice parameters for the single-server data retrieval
 	LatParams *bfv.Parameters
 }
@@ -42,7 +44,7 @@ type Auth struct {
 	Hash  crypto.Hash
 	// Due to lack of the size functions in the lib API, we store it in the db info
 	ElementSize int
-	ScalarSize int
+	ScalarSize  int
 }
 
 // Data embedding info
@@ -73,14 +75,16 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) *DB {
 	if numColumns == 0 {
 		numColumns = 1
 	}
+
 	entries, err := field.RandomVector(rnd, numRows*numColumns*blockLen)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return &DB{Entries: entries,
-		Info: Info{NumColumns: numColumns,
-			NumRows:   numRows,
-			BlockSize: blockLen,
+		Info: Info{
+			NumColumns: numColumns,
+			NumRows:    numRows,
+			BlockSize:  blockLen,
 		},
 	}
 }
