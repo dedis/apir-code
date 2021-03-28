@@ -1,5 +1,9 @@
 # Verifiable PIR
 
+### Verifiable PIR taxonomy
+
+### Keyd workflow
+
 ### Code organization
 The lib folder is organized as follows.
   * [lib/client](lib/client): contains all the logic for the client operations
