@@ -13,6 +13,12 @@ The current priorities for the implementation are:
      for Keyd.
 
 ### Verifiable PIR taxonomy
+The repository contains different verifiable PIR schemes. Keyd will be based
+either on the multi-bit DPF-based scheme or on the multi-bit matrix-based
+scheme. These are called `dpf` and `it` schemes in the code, respectively. In
+particular, both [lib/client](lib/client) and [lib/server](lib/server) contain
+files `dpf.go` and `it.go` which contains the logic for the verifiable PIR
+schemes on which we build Keyd.
 
 ### Keyd workflow
 
@@ -36,14 +42,18 @@ The [lib](lib) folder is organized as follows.
   * [lib/merkle](lib/merkle): is the library for the Merkle tree. This VPIR
       approach is not used by Keyd and therefore this folder can be safely
       ignored.
-  * [lib/monitor](lib/monitor): implements a CPU time timer.
+  * [lib/monitor](lib/monitor): implements a CPU time timer, used only for tests
+      and evaluation.
   * [lib/pgp](lib/pgp): contains the logic to parse the SKS dump (PGP keys
       dump). 
   * [lib/proto](lib/proto): contains the gRPC logic.
   * [lib/server](lib/server): same structure as [lib/client](lib/client).
   * [lib/utils](lib/utils): contains various utils.
 
-The [cmd](cmd) folder is organized as follows.
+The [cmd](cmd) folder is organized in two distinct folders, [cmd/grpc](cmd/grpc)
+and [cmd/aws](cmd/aws). The former implements the gRPC logic, the latter is to
+be considered useless now, since AWS Lambda is not a viable solution to deploy
+Keyd. 
 
 The file [config.toml](config.toml) contains the configurations for the
 client-server logic. Right now, it contains only IP addresses and ports of the
@@ -53,6 +63,11 @@ The [data](data) folder contains the data used by Keyd. In particular, it
 contains the files of the SKS dump, i.e. the set of PGP keys. These files are
 available on the shared Google Drive.
 
-The test of the (V)PIR schemes are specified
+The test of the (V)PIR schemes are specified in the `*_test.go` files. 
+The test relative to Keyd and its underlying cryptographic primitives are in
+[key_test.go](key_test.go) and [vpir_test.go](vpir_test.go).
+
+[scripts](scripts) and [simulations](simulations) contains useful scripts and
+code for the evaluation of the cryptographic schemes. 
 
 
