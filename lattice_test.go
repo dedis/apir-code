@@ -43,7 +43,7 @@ func retrieveBlocksLattice(t *testing.T, db *database.Ring, testName string) {
 }
 
 func TestLatticeWithDHTag(t *testing.T) {
-	dbLen := 8000000
+	dbLen := 80000000
 	dbPRG := utils.RandomPRG()
 	dbRing, data := database.CreateRandomRingDB(dbPRG, dbLen, true)
 	dbElliptic := database.CreateEllipticWithDigestFromData(data, &dbRing.Info)
@@ -57,7 +57,7 @@ func TestLatticeWithDHTag(t *testing.T) {
 	//encoder := bfv.NewEncoder(dbRing.LatParams)
 	totalTimer := monitor.NewMonitor()
 	//for i := 0; i < dbRing.NumRows*dbRing.NumColumns; i++ {
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 1; i++ {
 		fmt.Printf("%d ", i)
 
 		queryL, err := cL.QueryBytes(i)

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
+	"fmt"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
 	"math"
@@ -113,6 +114,7 @@ func encodeQuery(ct *bfv.Ciphertext, rtk *bfv.RotationKeys) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("ctx: %d, rtk: %d\n", len(ect), len(ertk))
 
 	// Encode the keys as struct with gob
 	buf := new(bytes.Buffer)
