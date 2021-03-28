@@ -48,7 +48,8 @@ func (c *DPF) QueryBytes(index, numServers int) ([][]byte, error) {
 	return out, nil
 }
 
-// Query ...
+// Query takes as input the index of the entry to be retrieved and the number
+// of servers (= 2 in the DPF case). It returns the two DPF keys.
 func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
@@ -64,10 +65,10 @@ func (c *DPF) Query(index, numServers int) []dpf.DPFkey {
 	return []dpf.DPFkey{key0, key1}
 }
 
-// ReconstructBytes returns []field.Element
+// ReconstructBytes decodes the answers from the servers and reconstruct the
+// entry, returned as []field.Element
 func (c *DPF) ReconstructBytes(a [][]byte) (interface{}, error) {
 	answer, err := decodeAnswer(a)
-
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,8 @@ func (c *DPF) ReconstructBytes(a [][]byte) (interface{}, error) {
 	return c.Reconstruct(answer)
 }
 
-// Reconstruct ..
+// Reconstruct takes as input the answers from the client and returns the
+// reconstructed entry after the appropriate integrity check.
 func (c *DPF) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 	return reconstruct(answers, c.dbInfo, c.state)
 }

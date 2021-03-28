@@ -62,7 +62,7 @@ func TestMerkleTree(t *testing.T) {
 			proofLen = len(encodedProof) // always same length
 
 			// first verification here
-			verified, err := merkle.VerifyProof(blocks[b], false, p, root)
+			verified, err := merkle.VerifyProof(blocks[b], p, root)
 			require.NoError(t, err)
 			require.True(t, verified)
 
@@ -78,7 +78,7 @@ func TestMerkleTree(t *testing.T) {
 			data := entireBlock[:blockLen]
 			encodedProof := entireBlock[blockLen:]
 			proof := merkle.DecodeProof(encodedProof)
-			verified, err := merkle.VerifyProof(data, false, proof, root)
+			verified, err := merkle.VerifyProof(data, proof, root)
 			require.NoError(t, err)
 			require.True(t, verified)
 		}

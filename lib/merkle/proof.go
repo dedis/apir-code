@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	indexByteSize = 4
+	indexByteSize     = 4
 	numHashesByteSize = 4
 )
 
@@ -42,8 +42,8 @@ func newProof(hashes [][]byte, index uint32) *Proof {
 // against historical trees without having to instantiate them.
 //
 // This returns true if the proof is verified, otherwise false.
-func VerifyProof(data []byte, salt bool, proof *Proof, root []byte) (bool, error) {
-	return VerifyProofUsing(data, salt, proof, root, NewSHA256())
+func VerifyProof(data []byte, proof *Proof, root []byte) (bool, error) {
+	return VerifyProofUsing(data, proof, root, NewSHA256())
 }
 
 // VerifyProofUsing verifies a Merkle tree proof for a piece of data using the provided hash type.
@@ -52,24 +52,18 @@ func VerifyProof(data []byte, salt bool, proof *Proof, root []byte) (bool, error
 // against historical trees without having to instantiate them.
 //
 // This returns true if the proof is verified, otherwise false.
-func VerifyProofUsing(data []byte, salt bool, proof *Proof, root []byte, hashType HashType) (bool, error) {
-	proofHash := generateProofHash(data, salt, proof, hashType)
+func VerifyProofUsing(data []byte, proof *Proof, root []byte, hashType HashType) (bool, error) {
+	proofHash := generateProofHash(data, proof, hashType)
 	if bytes.Equal(root, proofHash) {
 		return true, nil
 	}
 	return false, nil
 }
 
-func generateProofHash(data []byte, salt bool, proof *Proof, hashType HashType) []byte {
+func generateProofHash(data []byte, proof *Proof, hashType HashType) []byte {
 	var proofHash []byte
 	ib := indexToBytes(int(proof.Index))
-	if salt {
-		indexSalt := make([]byte, indexByteSize)
-		binary.BigEndian.PutUint32(indexSalt, proof.Index)
-		proofHash = hashType.Hash(data, ib, indexSalt)
-	} else {
-		proofHash = hashType.Hash(data, ib)
-	}
+	proofHash = hashType.Hash(data, ib)
 	index := proof.Index + (1 << uint(len(proof.Hashes)))
 
 	for _, hash := range proof.Hashes {

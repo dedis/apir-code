@@ -20,9 +20,11 @@ type PIRdpf struct {
 // NewPIRdpf returns a new client for the DPF-base multi-bit classical PIR
 // scheme
 func NewPIRdpf(rnd io.Reader, info *database.Info) *PIRdpf {
+	// classical PIR protocols are implemented only for multi-bit
 	if info.BlockSize == cst.SingleBitBlockLength {
 		panic("single-bit classical PIR protocol not implemented")
 	}
+
 	return &PIRdpf{
 		rnd:    rnd,
 		dbInfo: info,
@@ -37,7 +39,8 @@ func (c *PIRdpf) QueryBytes(index, numServers int) ([][]byte, error) {
 	return [][]byte{[]byte(queries[0]), []byte(queries[1])}, nil
 }
 
-// Query outputs numServers query for index i
+// Query outputs the queries, i.e. DPF keys, for index i. The DPF
+// implementation assumes two servers.
 func (c *PIRdpf) Query(index, numServers int) []dpf.DPFkey {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")

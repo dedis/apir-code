@@ -1,5 +1,8 @@
 package main
 
+// Test suite for the PoC application with real PGP keys. All the tests run
+// locally, the networking logic is not tested here.
+
 import (
 	"fmt"
 	"math/rand"
@@ -18,9 +21,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestRetrieveRealKeysDPFVector tests the retrieval of real PGP keys using
+// the DPF-based multi-bit scheme. With DPF, the database is always represented
+// as a vector.
 func TestRetrieveRealKeysDPFVector(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	// get file paths for key dump
 	filePaths := getDBFilePaths()
-	// Generate db from sks key dump
+
+	// generate db from sks key dump
 	db, err := database.GenerateRealKeyDB(filePaths, constants.ChunkBytesLength, false)
 	require.NoError(t, err)
 	numBlocks := db.NumColumns * db.NumRows
@@ -29,17 +40,24 @@ func TestRetrieveRealKeysDPFVector(t *testing.T) {
 	realKeys, err := pgp.LoadAndParseKeys(filePaths)
 	require.NoError(t, err)
 
-	prg := utils.RandomPRG()
 	// client and servers
+	prg := utils.RandomPRG()
 	c := client.NewDPF(prg, &db.Info)
 	servers := makeDPFServers(db)
 
 	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
 }
 
+// TestRetrieveRealKeysITMatrix tests the retrieval of real PGP keys using the
+// matrix-based multi-bit scheme.
 func TestRetrieveRealKeysITMatrix(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	// get file paths for key dump
 	filePaths := getDBFilePaths()
-	// Generate db from sks key dump
+
+	// generate db from sks key dump
 	db, err := database.GenerateRealKeyDB(filePaths, constants.ChunkBytesLength, true)
 	require.NoError(t, err)
 	numBlocks := db.NumColumns * db.NumRows
@@ -48,8 +66,8 @@ func TestRetrieveRealKeysITMatrix(t *testing.T) {
 	realKeys, err := pgp.LoadAndParseKeys(filePaths)
 	require.NoError(t, err)
 
-	prg := utils.RandomPRG()
 	// client and servers
+	prg := utils.RandomPRG()
 	c := client.NewIT(prg, &db.Info)
 	servers := makeITServers(db)
 
@@ -57,28 +75,25 @@ func TestRetrieveRealKeysITMatrix(t *testing.T) {
 }
 
 func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
+	// number of keys to retrieve for the test
 	numKeys := 100
 
-	rand.Seed(time.Now().UnixNano())
-	//totalTimer := monitor.NewMonitor()
 	start := time.Now()
 	for i := 0; i < numKeys; i++ {
 		j := rand.Intn(len(realKeys))
-		fmt.Println(pgp.PrimaryEmail(realKeys[j]))
+		//fmt.Println(pgp.PrimaryEmail(realKeys[j]))
 		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
 		result = database.UnPadBlock(result)
 		// Get a key from the block with the id of the search
-		//retrievedKey, err = pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
-		//require.NoError(t, err)
-		//require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
-		//require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
+		retrievedKey, err := pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
+		require.NoError(t, err)
+		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
+		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
 	}
-	//fmt.Printf("TotalCPU time to retrieve %d real keys: %.1fms\n", numKeys, totalTimer.Record())
 	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
 }
 
 func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
-	var err error
 	// compute hash key for id
 	hashKey := database.HashToIndex(id, dbLenBlocks)
 
@@ -114,7 +129,6 @@ func makeITServers(db *database.DB) []server.Server {
 }
 
 func getDBFilePaths() []string {
-	rand.Seed(time.Now().UnixNano())
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)
 	// get a random chunk of the key dump in the folder
 	filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))

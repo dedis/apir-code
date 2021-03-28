@@ -28,14 +28,18 @@ func NewDH(rnd io.Reader, info *database.Info) *DH {
 	}
 }
 
+// QueryBytes takes as input the index of an entry in the database and returns
+// the query for the server encoded in bytes.
 func (c *DH) QueryBytes(index int) ([]byte, error) {
 	g := c.dbInfo.Group
-	//Sample two random scalars
+
+	// sample two random scalars
 	r, t := g.RandomScalar(c.rnd), g.RandomScalar(c.rnd)
 
 	// initialize state
 	st := &state{}
-	// Compute the position in the db (vector or matrix)
+
+	// compute the position in the db (vector or matrix)
 	// if db is a vector, ix always equals 0
 	st.ix = index / c.dbInfo.NumColumns
 	st.iy = index % c.dbInfo.NumColumns
@@ -45,9 +49,8 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 	NGoRoutines := runtime.NumCPU()
 	columnsPerRoutine := c.dbInfo.NumColumns / NGoRoutines
 	replies := make([]chan []group.Element, NGoRoutines)
-	var begin, end int
 	for i := 0; i < NGoRoutines; i++ {
-		begin, end = i*columnsPerRoutine, (i+1)*columnsPerRoutine
+		begin, end := i*columnsPerRoutine, (i+1)*columnsPerRoutine
 		if i == NGoRoutines-1 {
 			end = c.dbInfo.NumColumns
 		}
@@ -114,7 +117,7 @@ func (c *DH) ReconstructBytes(a []byte, m [][]byte) (interface{}, error) {
 		sum := g.Identity()
 		for l := 0; l < c.dbInfo.BlockSize; l++ {
 			h := g.NewElement()
-			err = ml.UnmarshalBinary(m[i][l*scalarSize:(l+1)*scalarSize])
+			err = ml.UnmarshalBinary(m[i][l*scalarSize : (l+1)*scalarSize])
 			if err != nil {
 				return nil, err
 			}

@@ -1,5 +1,7 @@
 package main
 
+// Test suite for integrated VPIR.
+
 import (
 	"fmt"
 	"io"

@@ -10,17 +10,21 @@ type Bytes struct {
 	Info
 }
 
+// CreateRandomMultiBitBytes return a random bytes database.
 // blockLen must be the number of bytes in a block, as a byte is the element
 func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
+	// sample random entries
 	entries := make([]byte, dbLen/8)
-	numColumns := dbLen / (8 * numRows * blockLen)
 	if _, err := rnd.Read(entries); err != nil {
 		log.Fatal(err)
 	}
+
+	numColumns := dbLen / (8 * numRows * blockLen)
 	return &Bytes{Entries: entries,
-		Info: Info{NumColumns: numColumns,
-			NumRows:   numRows,
-			BlockSize: blockLen,
+		Info: Info{
+			NumColumns: numColumns,
+			NumRows:    numRows,
+			BlockSize:  blockLen,
 		},
 	}
 }

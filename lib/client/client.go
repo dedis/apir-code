@@ -16,28 +16,31 @@ import (
 	"github.com/si-co/vpir-code/lib/merkle"
 )
 
-// Client represents the client instance in both the IT and DPF-based schemes
+// Client represents the client instance in both the IT and DPF-based schemes.
 type Client interface {
 	QueryBytes(int, int) ([][]byte, error)
 	ReconstructBytes([][]byte) (interface{}, error)
 }
 
+// state of the client, used for all the schemes.
 type state struct {
 	ix int
 	iy int
+
 	// for multi-server
 	alpha field.Element
 	a     []field.Element
-	//	for single-server (DH)
-	r  group.Scalar
-	Ht []group.Element
-	// Lattice secret key
-	key *bfv.SecretKey
+
+	// for single-server (DH)
+	r   group.Scalar
+	Ht  []group.Element
+	key *bfv.SecretKey // lattice secret key
 }
 
-// general functions for both IT and DPF-based clients
+// decodeAnswer decodes the gob-encoded answers from the servers and return
+// them as slices of field elements.
 func decodeAnswer(a [][]byte) ([][]field.Element, error) {
-	// servers answers
+	// decode all the answers one by one
 	answer := make([][]field.Element, len(a))
 	for i, ans := range a {
 		buf := bytes.NewBuffer(ans)
@@ -52,21 +55,12 @@ func decodeAnswer(a [][]byte) ([][]field.Element, error) {
 	return answer, nil
 }
 
-func encodeReconstruct(r []field.Element) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(r); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
-}
-
+// generateClientState returns the client state with all the needed settings.
 func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*state, error) {
 	// initialize state
 	st := &state{}
 
-	// sample random alpha using blake2b
+	// sample random alpha
 	if _, err := st.alpha.SetRandom(rnd); err != nil {
 		return nil, err
 	}
@@ -94,9 +88,13 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	return st, nil
 }
 
+// reconstruct takes as input the answers fro mthe servers, the info about the
+// database and the client state to return the reconstructed database entry.
+// The integrity check is performed in this function.
 func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
 	sum := make([][]field.Element, dbInfo.NumRows)
 
+	// single-bit scheme
 	if dbInfo.BlockSize == cst.SingleBitBlockLength {
 		// sum answers as vectors in F^b
 		for i := 0; i < dbInfo.NumRows; i++ {
@@ -105,6 +103,7 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 				sum[i][0].Add(&sum[i][0], &answers[k][i])
 			}
 		}
+		// verify integrity and return database entry if accept
 		for i := 0; i < dbInfo.NumRows; i++ {
 			if i == st.ix {
 				switch {
@@ -123,6 +122,7 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 		}
 	}
 
+	// mutli-bit scheme
 	// sum answers as vectors in F^(b+1)
 	for i := 0; i < dbInfo.NumRows; i++ {
 		sum[i] = make([]field.Element, dbInfo.BlockSize+1)
@@ -132,11 +132,12 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 			}
 		}
 	}
-	var tag, prod field.Element
+
+	var prod field.Element
 	messages := make([]field.Element, dbInfo.BlockSize)
 	for i := 0; i < dbInfo.NumRows; i++ {
 		copy(messages, sum[i][:len(sum[i])-1])
-		tag = sum[i][len(sum[i])-1]
+		tag := sum[i][len(sum[i])-1]
 		// compute reconstructed tag
 		reconstructedTag := field.Zero()
 		for b := 0; b < len(messages); b++ {
@@ -151,6 +152,8 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 	return sum[st.ix][:len(sum[st.ix])-1], nil
 }
 
+// reconstructPIR returns the database entry for the classical PIR schemes.
+// These schemes are used as a baseline for the evaluation of the VPIR schemes.
 func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]byte, error) {
 	switch dbInfo.PIRType {
 	case "classical", "":
@@ -165,7 +168,7 @@ func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]by
 		// check Merkle proof
 		encodedProof := block[dbInfo.BlockSize-dbInfo.ProofLen:]
 		proof := merkle.DecodeProof(encodedProof)
-		verified, err := merkle.VerifyProof(data, false, proof, dbInfo.Root)
+		verified, err := merkle.VerifyProof(data, proof, dbInfo.Root)
 		if err != nil {
 			log.Fatalf("impossible to verify proof: %v", err)
 		}
