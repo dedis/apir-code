@@ -7,7 +7,8 @@
 ### Keyd workflow
 
 ### Code organization
-The lib folder is organized as follows.
+The 
+The [lib](lib) folder is organized as follows.
   * [lib/client](lib/client): contains all the logic for the client operations
     in the different (verifiable) PIR schemes. The file
     [lib/client/client.go](lib/client/client.go) contains the definition of the
@@ -24,9 +25,17 @@ The lib folder is organized as follows.
   * [lib/proto](lib/proto):
   * [lib/server](lib/server): same structure as [lib/client](lib/client).
   * [lib/utils](lib/utils):
-The 
 
-| *Tests* | |
+The [cmd](cmd) folder is organized as follows.
 
-* lib
-  * client: 
+The file [config.toml](config.toml) contains the configurations for the
+client-server logic. Right now, it contains only IP addresses and ports of the
+servers.
+
+The [data](data) folder contains the data used by Keyd. In particular, it
+contains the files of the SKS dump, i.e. the set of PGP keys. These files are
+available on the shared Google Drive.
+
+The test of the (V)PIR schemes are specified
+
+
