@@ -5,10 +5,9 @@ import (
 )
 
 const (
-	//BlockLength          = 16
+	// number of bytes embedded in each field element.
 	ChunkBytesLength     = 15
 	SingleBitBlockLength = 0
-	IDLengthBytes        = 45
 )
 
 var (
