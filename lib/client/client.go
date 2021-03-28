@@ -168,7 +168,7 @@ func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]by
 		// check Merkle proof
 		encodedProof := block[dbInfo.BlockSize-dbInfo.ProofLen:]
 		proof := merkle.DecodeProof(encodedProof)
-		verified, err := merkle.VerifyProof(data, false, proof, dbInfo.Root)
+		verified, err := merkle.VerifyProof(data, proof, dbInfo.Root)
 		if err != nil {
 			log.Fatalf("impossible to verify proof: %v", err)
 		}

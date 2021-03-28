@@ -23,11 +23,11 @@ import (
 
 // MerkleTree is the structure for the Merkle tree.
 type MerkleTree struct {
-	// if salt is true the data values are salted with their index
-	salt bool
 	// hash is a pointer to the hashing struct
 	hash HashType
 	// data is the data from which the Merkle tree is created
+	// data are stored as a map from the actual data encoded to string to
+	// the index of the data in the tree
 	data map[string]uint32
 	// nodes are the leaf and branch nodes of the Merkle tree
 	nodes [][]byte
@@ -69,15 +69,15 @@ func (t *MerkleTree) EncodedProofLength() int {
 	return int(math.Ceil(math.Log2(float64(len(t.data)))))*t.hash.HashLength() + numHashesByteSize + indexByteSize
 }
 
-// New creates a new Merkle tree using the provided raw data and default hash type.  Salting is not used.
+// New creates a new Merkle tree using the provided raw data and default hash type.
 // data must contain at least one element for it to be valid.
 func New(data [][]byte) (*MerkleTree, error) {
-	return NewUsing(data, NewSHA256(), false)
+	return NewUsing(data, NewSHA256())
 }
 
-// NewUsing creates a new Merkle tree using the provided raw data and supplied hash type.  Salting is used if requested.
+// NewUsing creates a new Merkle tree using the provided raw data and supplied hash type.
 // data must contain at least one element for it to be valid.
-func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
+func NewUsing(data [][]byte, hash HashType) (*MerkleTree, error) {
 	if len(data) == 0 {
 		return nil, errors.New("tree must have at least 1 piece of data")
 	}
@@ -89,17 +89,10 @@ func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
 	// We pad our data length up to the power of 2
 	nodes := make([][]byte, branchesLen+len(data)+(branchesLen-len(data)))
 	// Leaves
-	//indexSalt := make([]byte, 4)
 	for i := range data {
 		ib := indexToBytes(i)
-		//if salt {
-		//binary.BigEndian.PutUint32(indexSalt, uint32(i))
-		//nodes[i+branchesLen] = hash.Hash(data[i], ib, indexSalt[:])
-		//} else {
-		//ib := append(data[i], ib...)
 		nodes[i+branchesLen] = hash.Hash(data[i], ib)
 		md[hex.EncodeToString(data[i])] = uint32(i)
-		//}
 	}
 	for i := len(data) + branchesLen; i < len(nodes); i++ {
 		nodes[i] = make([]byte, hash.HashLength())
@@ -111,7 +104,6 @@ func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
 	}
 
 	tree := &MerkleTree{
-		salt:  salt,
 		hash:  hash,
 		nodes: nodes,
 		data:  md,
@@ -123,11 +115,6 @@ func NewUsing(data [][]byte, hash HashType, salt bool) (*MerkleTree, error) {
 // Root returns the Merkle root (hash of the root node) of the tree.
 func (t *MerkleTree) Root() []byte {
 	return t.nodes[1]
-}
-
-// Salt returns the true if the values in this Merkle tree are salted.
-func (t *MerkleTree) Salt() bool {
-	return t.salt
 }
 
 // indexToBytes convert a data index in bytes representaiton
