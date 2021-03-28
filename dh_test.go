@@ -33,9 +33,7 @@ func retrieveBlocksDH(t *testing.T, rnd io.Reader, db *database.Elliptic, testNa
 	s := server.NewDH(db)
 
 	totalTimer := monitor.NewMonitor()
-	//for i := 0; i < db.NumRows*db.NumColumns; i++ {
 	for i := 0; i < 10; i++ {
-		fmt.Printf("%d ", i)
 		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
 
