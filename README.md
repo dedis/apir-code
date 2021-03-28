@@ -21,6 +21,20 @@ files `dpf.go` and `it.go` which contains the logic for the verifiable PIR
 schemes on which we build Keyd.
 
 ### Keyd workflow
+Keyd works with a client and two servers. The input of the system is an email
+address and the output is the public PGP key of the given email address.
+The client client gets the email address and hashes is to identify the index of
+the entry to be retrieved using the verifiable PIR scheme. Several email
+addresses map to the same database entry (which is in fact a column of field
+elements encoding PGP public keys). The client computes the verifiable PIR
+queries using the index and sends the queries to the servers. For this, the
+method `QueryBytes` (implemented by both DPF-based and matrix-based PIR) is
+used. Upon receiving a query, the server compute the appropriate answer using
+the `AnswerBytes` method and send the encoded answer to the client. 
+Upon receiving the two answers the client uses the `ReconstructBytes` function
+to check the correctness of the retrieved answers and reconstruct the database
+entry. Finally, the client scans all the keys in the reconstructed entry and
+returns the correct key with respect to the initial email address.
 
 ### Code organization
 The [lib](lib) folder is organized as follows.
@@ -67,7 +81,5 @@ The test of the (V)PIR schemes are specified in the `*_test.go` files.
 The test relative to Keyd and its underlying cryptographic primitives are in
 [key_test.go](key_test.go) and [vpir_test.go](vpir_test.go).
 
-[scripts](scripts) and [simulations](simulations) contains useful scripts and
+[scripts](scripts) and [simulations](simulations) contain useful scripts and
 code for the evaluation of the cryptographic schemes. 
-
-
