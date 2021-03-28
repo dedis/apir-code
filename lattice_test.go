@@ -1,5 +1,8 @@
 package main
 
+// Test suite for the single-server data retrieval, i.e. the classical PIR part
+// of the single-server VPIR scheme.
+
 import (
 	"fmt"
 	"testing"
@@ -13,7 +16,7 @@ import (
 )
 
 func TestLatticeMatrixOneMb(t *testing.T) {
-	dbLen := 80000000
+	dbLen := 80000000 // specified in bits
 	dbPRG := utils.RandomPRG()
 	db, _ := database.CreateRandomRingDB(dbPRG, dbLen, true)
 
@@ -43,7 +46,7 @@ func retrieveBlocksLattice(t *testing.T, db *database.Ring, testName string) {
 }
 
 func TestLatticeWithDHTag(t *testing.T) {
-	dbLen := 8000000
+	dbLen := 8000000 // specified in bits
 	dbPRG := utils.RandomPRG()
 	dbRing, data := database.CreateRandomRingDB(dbPRG, dbLen, true)
 	dbElliptic := database.CreateEllipticWithDigestFromData(data, &dbRing.Info)
@@ -82,5 +85,4 @@ func TestLatticeWithDHTag(t *testing.T) {
 	}
 
 	fmt.Printf("\nTotalCPU time %s: %.1fms\n", "TestLatticeWithDHTag", totalTimer.Record())
-
 }

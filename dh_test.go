@@ -1,5 +1,8 @@
 package main
 
+// Test suite for the single-server tag retrieval, i.e. the *verifiable* part
+// of the single-server VPIR scheme.
+
 import (
 	"fmt"
 	"io"
@@ -15,14 +18,13 @@ import (
 )
 
 func TestDHMatrixOneMb(t *testing.T) {
-	dbLen := 8000000
+	dbLen := 8000000 // dbLen is specified in bits
 	dbPRG := utils.RandomPRG()
 	blockLen := 16
 	ecg := group.P256
 	db := database.CreateRandomEllipticWithDigest(dbPRG, ecg, dbLen, blockLen, true)
 
 	prg := utils.RandomPRG()
-
 	retrieveBlocksDH(t, prg, db, "SingleMatrixOneMB")
 }
 

@@ -1,5 +1,8 @@
 package main
 
+// Test suite for Merkle tree-based VPIR schemes. Only multi-bit schemes are
+// implemented using this approach.
+
 import (
 	"fmt"
 	"io"
@@ -15,7 +18,10 @@ import (
 )
 
 func TestMultiBitVectorOneMbMerkle(t *testing.T) {
-	dbLen := oneMB
+	dbLen := oneMB // specified in bits
+	// blockLen is computed such that a block contains the same amount of
+	// bytes as in the integrated approach, which uses the finite filed in
+	// /lib/field.
 	blockLen := testBlockLength * field.Bytes
 	nRows := 1
 
@@ -31,6 +37,7 @@ func TestMultiBitVectorOneMbMerkle(t *testing.T) {
 func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
+	// since this scheme works on bytes, the bit size of one element is 8
 	elemBitSize := 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
@@ -52,8 +59,10 @@ func TestDPFMultiBitVectorMerkle(t *testing.T) {
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nRows := 1
 
+	// getXof is defined in vpir_test.go
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
+
 	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
 
 	retrieveBlocksDPFMerkle(t, xof, db, numBlocks, "DPFMultiBitVectorMerkle")

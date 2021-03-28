@@ -1,5 +1,7 @@
 package main
 
+// Test suite for classical PIR, used as baseline for the experiments.
+
 import (
 	"fmt"
 	"io"
