@@ -207,7 +207,7 @@ func loadPgpDBFromDisk(path string) (*database.DB, error) {
 
 	db := &database.DB{}
 	dec := gob.NewDecoder(f)
-	if err = dec.Decode(db); err != nil {
+	if err = dec.Decode(&db); err != nil {
 		return nil, err
 	}
 
