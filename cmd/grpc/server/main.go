@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"log"
@@ -192,7 +193,18 @@ func loadPgpDB(filesNumber int) (*database.DB, error) {
 	return db, nil
 }
 
-func loadPgpDBFromDisk() (*database.DB, error) {
-	// TODO
-	return nil, nil
+func loadPgpDBFromDisk(path string) (*database.DB, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var db *database.DB
+	dec := gob.NewDecoder(f)
+	if err = dec.Decode(db); err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
