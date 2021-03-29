@@ -191,3 +191,8 @@ func loadPgpDB(filesNumber int) (*database.DB, error) {
 
 	return db, nil
 }
+
+func loadPgpDBFromDisk() (*database.DB, error) {
+	// TODO
+	return nil, nil
+}
