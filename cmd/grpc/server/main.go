@@ -73,7 +73,12 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// load the db
-	db, err := loadPgpDB(*filesNumber)
+	fmt.Println(*filesNumber)
+	//db, err := loadPgpDB(*filesNumber)
+	//if err != nil {
+	//log.Fatalf("impossible to construct real keys db: %v", err)
+	//}
+	db, err := loadPgpDBFromDisk("data/database.bin")
 	if err != nil {
 		log.Fatalf("impossible to construct real keys db: %v", err)
 	}
@@ -200,7 +205,7 @@ func loadPgpDBFromDisk(path string) (*database.DB, error) {
 	}
 	defer f.Close()
 
-	var db *database.DB
+	db := &database.DB{}
 	dec := gob.NewDecoder(f)
 	if err = dec.Decode(db); err != nil {
 		return nil, err
