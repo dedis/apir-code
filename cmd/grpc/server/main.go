@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -25,6 +27,7 @@ import (
 )
 
 func main() {
+
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
 	experiment := flag.Bool("experiment", false, "run setting for experiments")
@@ -32,6 +35,7 @@ func main() {
 	cores := flag.Int("cores", -1, "number of cores to use")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
+	pprof := flag.Bool("pprof", false, "Open pprof server")
 	flag.Parse()
 
 	// start profiling
@@ -62,6 +66,13 @@ func main() {
 		}
 		defer f.Close()
 		statsLogger = log.New(f, "", log.Lmsgprefix)
+	}
+
+	if *pprof {
+		go func() {
+			log.Println("starting http server")
+			log.Println(http.ListenAndServe("localhost:6060", nil))
+		}()
 	}
 
 	// configs
