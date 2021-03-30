@@ -150,21 +150,10 @@ func generateDB(root, out string) error {
 		return xerrors.Errorf("failed to generate DB: %v", err)
 	}
 
-	log.Printf("saving the database to '%s', this may take a while...", out)
-
-	file, err := os.Create(out)
+	err = db.SaveDB(out, "vpir")
 	if err != nil {
-		return xerrors.Errorf("failed to create file: %v", err)
+		return xerrors.Errorf("failed to save db: %v", err)
 	}
-
-	enc := gob.NewEncoder(file)
-
-	err = enc.Encode(&db)
-	if err != nil {
-		return xerrors.Errorf("failed to encode db: %v", err)
-	}
-
-	file.Close()
 
 	return nil
 }

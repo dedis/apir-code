@@ -129,9 +129,15 @@ func main() {
 		switch s.Primitive[:3] {
 		case "vpi":
 			if s.BlockLength == constants.SingleBitBlockLength {
-				db = database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
+				db, err = database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
+				if err != nil {
+					panic(err)
+				}
 			} else {
-				db = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
+				db, err = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
+				if err != nil {
+					panic(err)
+				}
 			}
 		case "pir":
 			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
