@@ -284,7 +284,7 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 	bytesLength := n*field.Bytes + 1
 	bytes := make([]byte, bytesLength)
 
-	if err := io.ReadFull(rnd, bytes[:]); err != nil {
+	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
 		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
 

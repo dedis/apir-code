@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"encoding/gob"
 	"flag"
 	"fmt"
 	"log"
@@ -78,9 +77,9 @@ func main() {
 	//if err != nil {
 	//log.Fatalf("impossible to construct real keys db: %v", err)
 	//}
-	db, err := loadPgpDBFromDisk("data/database.bin")
+	db, err := database.LoadDB("data/db", "vpir")
 	if err != nil {
-		log.Fatalf("impossible to construct real keys db: %v", err)
+		log.Fatalf("impossible to load real keys db: %v", err)
 	}
 
 	// run server with TLS
@@ -194,22 +193,6 @@ func loadPgpDB(filesNumber int) (*database.DB, error) {
 		return nil, err
 	}
 	log.Println("DB loaded with files", files)
-
-	return db, nil
-}
-
-func loadPgpDBFromDisk(path string) (*database.DB, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	db := &database.DB{}
-	dec := gob.NewDecoder(f)
-	if err = dec.Decode(&db); err != nil {
-		return nil, err
-	}
 
 	return db, nil
 }
