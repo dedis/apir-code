@@ -30,7 +30,9 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 		a := make([]field.Element, db.NumRows)
 		for i := 0; i < db.NumRows; i++ {
 			for j := 0; j < db.NumColumns; j++ {
-				if db.Entries[i*db.NumColumns+j].Equal(&cst.One) {
+				entry := db.GetEntry(i*db.NumColumns + j)
+
+				if entry.Equal(&cst.One) {
 					a[i].Add(&a[i], &q[j])
 				}
 			}
@@ -54,7 +56,8 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 		// we need to traverse column by column
 		for j := 0; j < db.NumColumns; j += columnsPerRoutine {
 			columnsPerRoutine, begin, end = computeChunkIndices(j, columnsPerRoutine, db.BlockSize, db.NumColumns)
-			go processColumns(db.Entries[begin:end], q[j*(db.BlockSize+1):(j+columnsPerRoutine)*(db.BlockSize+1)], db.BlockSize, resultsChan)
+
+			go processColumns(db.Range(begin, end), q[j*(db.BlockSize+1):(j+columnsPerRoutine)*(db.BlockSize+1)], db.BlockSize, resultsChan)
 			numWorkers++
 		}
 		m := combineColumnResults(numWorkers, db.BlockSize+1, resultsChan)
@@ -68,8 +71,9 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 		for j := 0; j < db.NumRows; j += rowsPerRoutine {
 			rowsPerRoutine, begin, end = computeChunkIndices(j, rowsPerRoutine, db.BlockSize, db.NumRows)
 			workers.Add(1)
+
 			go processRows(m[j*(db.BlockSize+1):(j+rowsPerRoutine)*(db.BlockSize+1)],
-				db.Entries[begin*db.NumColumns:end*db.NumColumns], q, &workers, db.NumColumns, db.BlockSize)
+				db.Range(begin*db.NumColumns, end*db.NumColumns), q, &workers, db.NumColumns, db.BlockSize)
 		}
 		workers.Wait()
 

@@ -8,15 +8,19 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/xerrors"
 )
 
 const numKeysToDBLengthRatio float32 = 0.2
+
+var TotalPadding = 0
 
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
 		return nil, err
 	}
+
 	// Sort the keys by id, higher first, to make sure that
 	// all the servers end up with an identical hash table.
 	sortById(keys)
@@ -42,22 +46,21 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	}
 
 	// create all zeros db
-	db := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
+	db, err := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to create db: %v", err)
+	}
 
 	// embed data into field elements
-	for k, v := range ht {
+	for _, v := range ht {
 		// Pad the block to be a multiple of elementLength
 		v = PadBlock(v, elementLength)
-		// create empty element vector of a fixed length
-		elements := make([]field.Element, len(v)/elementLength)
+
 		// embed all the bytes
 		for j := 0; j < len(v); j += elementLength {
 			e := new(field.Element).SetBytes(v[j : j+elementLength])
-			elements[j/elementLength] = *e
+			db.SetEntry(j/elementLength, *e)
 		}
-		// store in db last block and automatically pad since we start
-		// with an all zeros db
-		copy(db.Entries[k*blockLen:(k+1)*blockLen], elements)
 	}
 
 	return db, nil
@@ -81,6 +84,7 @@ func makeHashTable(keys []*pgp.Key, tableLen int) (map[int][]byte, error) {
 func PadBlock(block []byte, blockLen int) []byte {
 	block = append(block, byte(0x80))
 	zeros := make([]byte, blockLen-(len(block)%blockLen))
+	TotalPadding += len(zeros)
 	return append(block, zeros...)
 }
 

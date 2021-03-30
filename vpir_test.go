@@ -21,6 +21,7 @@ import (
 const (
 	oneMB           = 1048576 * 8
 	oneKB           = 1024 * 8
+	oneB            = 8
 	testBlockLength = 16
 )
 
@@ -34,7 +35,8 @@ func TestMultiBitVectorOneMbVPIR(t *testing.T) {
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
 
-	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	db, err := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	require.NoError(t, err)
 
 	retrieveBlocks(t, xof, db, nRows*nCols, "MultiBitVectorOneMbVPIR")
 }
@@ -47,7 +49,8 @@ func TestSingleBitVectorOneKbVPIR(t *testing.T) {
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
 
-	db := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
+	db, err := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
+	require.NoError(t, err)
 
 	retrieveBlocks(t, xof, db, nRows*nCols, "SingleBitVectorOneMbVPIR")
 }
@@ -63,7 +66,9 @@ func TestMultiBitMatrixOneMbVPIR(t *testing.T) {
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
 
-	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	db, err := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	require.NoError(t, err)
+
 	retrieveBlocks(t, xof, db, numBlocks, "MultiBitMatrixOneMbVPIR")
 }
 
@@ -76,7 +81,8 @@ func TestSingleBitMatrixOneKbVPIR(t *testing.T) {
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
 
-	db := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
+	db, err := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
+	require.NoError(t, err)
 
 	retrieveBlocks(t, xof, db, numBlocks, "SingleBitMatrixOneKbVPIR")
 }
@@ -90,7 +96,8 @@ func TestDPFMultiBitVectorVPIR(t *testing.T) {
 
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
-	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	db, err := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	require.NoError(t, err)
 
 	retrieveBlocksDPF(t, xof, db, numBlocks, "DPFMultiBitVectorVPIR")
 }
@@ -105,7 +112,10 @@ func TestDPFMultiBitMatrixVPIR(t *testing.T) {
 
 	xofDB := getXof(t, "db key")
 	xof := getXof(t, "client key")
-	db := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+
+	db, err := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
+	require.NoError(t, err)
+
 	retrieveBlocksDPF(t, xof, db, numBlocks, "DPFMultiBitMatrixVPIR")
 }
 
@@ -130,9 +140,13 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		if db.BlockSize == constants.SingleBitBlockLength {
-			require.Equal(t, db.Entries[i:i+1], res)
+			elems := db.Range(i, i+1)
+
+			require.Equal(t, elems, res)
 		} else {
-			require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize], res)
+			elems := db.Range(i*db.BlockSize, (i+1)*db.BlockSize)
+
+			require.Equal(t, elems, res)
 		}
 	}
 	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
@@ -154,7 +168,10 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize], res)
+
+		elems := db.Range(i*db.BlockSize, (i+1)*db.BlockSize)
+
+		require.Equal(t, elems, res)
 	}
 
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
