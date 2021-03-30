@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"go.etcd.io/bbolt"
@@ -24,7 +25,7 @@ const infoDbKey = "info"
 
 func NewDB(info Info) (*DB, error) {
 	n := info.BlockSize * info.NumColumns * info.NumRows
-	if info.BlockSize == 0 {
+	if info.BlockSize == constants.SingleBitBlockLength {
 		n = info.NumColumns * info.NumRows
 	}
 
@@ -283,9 +284,7 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 	bytesLength := n*field.Bytes + 1
 	bytes := make([]byte, bytesLength)
 
-	// not sure that getting all random bytes at once is a good idea
-	_, err := io.ReadFull(rnd, bytes[:])
-	if err != nil {
+	if err := io.ReadFull(rnd, bytes[:]); err != nil {
 		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
 
@@ -310,7 +309,7 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
 	numColumns := dbLen / numRows
 
 	// by convention a block size of 0 indicates the single-bit scheme
-	info := Info{NumColumns: numColumns, NumRows: numRows, BlockSize: 0}
+	info := Info{NumColumns: numColumns, NumRows: numRows, BlockSize: constants.SingleBitBlockLength}
 
 	db, err := NewDB(info)
 	if err != nil {
