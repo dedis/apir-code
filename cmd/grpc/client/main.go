@@ -262,6 +262,9 @@ func query(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, q
 	}
 	log.Printf("sent query to %s", conn.Target())
 	log.Printf("query size in bytes %d", len(query))
+	if lc.flags.experiment {
+		lc.statsLogger.Printf("%d,%d", lc.flags.cores, len(query))
+	}
 
 	return answer.GetAnswer()
 }

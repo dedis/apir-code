@@ -47,3 +47,6 @@ __pycache__/
 # aws lambda stuff
 credentials.csv
 main.zip
+
+# encoded db
+data/database.bin
