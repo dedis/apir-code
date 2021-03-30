@@ -2,6 +2,7 @@ package database
 
 import (
 	"bytes"
+	"log"
 	"math"
 	"sort"
 
@@ -13,9 +14,9 @@ import (
 
 const numKeysToDBLengthRatio float32 = 0.2
 
-var TotalPadding = 0
-
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
+	log.Printf("loading keys: %v\n", dataPaths)
+
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
 		return nil, err
@@ -52,14 +53,21 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	}
 
 	// embed data into field elements
-	for _, v := range ht {
+	for k, v := range ht {
 		// Pad the block to be a multiple of elementLength
 		v = PadBlock(v, elementLength)
+		elements := make([]field.Element, len(v)/elementLength)
 
 		// embed all the bytes
 		for j := 0; j < len(v); j += elementLength {
 			e := new(field.Element).SetBytes(v[j : j+elementLength])
-			db.SetEntry(j/elementLength, *e)
+			elements[j/elementLength] = *e
+		}
+		for m := k * blockLen; k < (k+1)*blockLen; m++ {
+			if m-k*blockLen >= len(elements) {
+				break
+			}
+			db.SetEntry(m, elements[m-k*blockLen])
 		}
 	}
 
@@ -84,7 +92,6 @@ func makeHashTable(keys []*pgp.Key, tableLen int) (map[int][]byte, error) {
 func PadBlock(block []byte, blockLen int) []byte {
 	block = append(block, byte(0x80))
 	zeros := make([]byte, blockLen-(len(block)%blockLen))
-	TotalPadding += len(zeros)
 	return append(block, zeros...)
 }
 

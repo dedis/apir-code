@@ -24,6 +24,9 @@ const infoDbKey = "info"
 
 func NewDB(info Info) (*DB, error) {
 	n := info.BlockSize * info.NumColumns * info.NumRows
+	if info.BlockSize == 0 {
+		n = info.NumColumns * info.NumRows
+	}
 
 	return &DB{
 		Info:     info,
@@ -306,6 +309,7 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
 	numColumns := dbLen / numRows
 
+	// by convention a block size of 0 indicates the single-bit scheme
 	info := Info{NumColumns: numColumns, NumRows: numRows, BlockSize: 0}
 
 	db, err := NewDB(info)
