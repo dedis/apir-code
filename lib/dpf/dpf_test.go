@@ -9,6 +9,7 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/utils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEvalFull(t *testing.T) {
@@ -20,7 +21,8 @@ func TestEvalFull(t *testing.T) {
 	blockLen := 16
 	nRows := 1
 
-	db := database.CreateRandomMultiBitDB(utils.RandomPRG(), databaseBytes*8, nRows, blockLen)
+	db, err := database.CreateRandomMultiBitDB(utils.RandomPRG(), databaseBytes*8, nRows, blockLen)
+	require.NoError(t, err)
 
 	alpha, err := new(field.Element).SetRandom(utils.RandomPRG())
 	if err != nil {
