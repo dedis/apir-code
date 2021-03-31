@@ -78,9 +78,14 @@ func main() {
 	//log.Fatalf("impossible to construct real keys db: %v", err)
 	//}
 	db, err := database.LoadMMapDB("data/mmap.d/")
+	// db, err := loadPgpDB(*filesNumber)
 	if err != nil {
-		log.Fatalf("impossible to load real keys db: %v", err)
+		log.Fatalf("impossible to construct real keys db: %v", err)
 	}
+	//db, err := database.LoadDB("data/db", "vpir")
+	//if err != nil {
+	//log.Fatalf("impossible to load real keys db: %v", err)
+	//}
 
 	// run server with TLS
 	cfg := &tls.Config{
