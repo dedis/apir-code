@@ -72,7 +72,13 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// load the db
-	db, err := loadPgpDB(*filesNumber)
+	fmt.Println(*filesNumber)
+	//db, err := loadPgpDB(*filesNumber)
+	//if err != nil {
+	//log.Fatalf("impossible to construct real keys db: %v", err)
+	//}
+	db, err := database.LoadMMapDB("data/mmap.d/")
+	// db, err := loadPgpDB(*filesNumber)
 	if err != nil {
 		log.Fatalf("impossible to construct real keys db: %v", err)
 	}

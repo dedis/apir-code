@@ -7,6 +7,7 @@ require (
 	github.com/bwesterb/go-ristretto v1.2.0 // indirect
 	github.com/cloudflare/circl v1.0.1-0.20210315192536-3977848c88c6
 	github.com/dimakogan/dpf-go v0.0.0-20210127221207-b1d9b62bab9b
+	github.com/edsrzf/mmap-go v1.0.0
 	github.com/golang/protobuf v1.5.1
 	github.com/ldsec/lattigo/v2 v2.1.1
 	github.com/lukechampine/fastxor v0.0.0-20210322201628-b664bed5a5cc
