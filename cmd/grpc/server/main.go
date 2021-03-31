@@ -77,7 +77,7 @@ func main() {
 	//if err != nil {
 	//log.Fatalf("impossible to construct real keys db: %v", err)
 	//}
-	db, err := database.LoadDB("data/db", "vpir")
+	db, err := database.LoadMMapDB("data/mmap.d/")
 	if err != nil {
 		log.Fatalf("impossible to load real keys db: %v", err)
 	}
