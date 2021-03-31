@@ -126,6 +126,8 @@ func main() {
 
 	// retrieve the key corresponding to the id
 	lc.retrieveKeyGivenId(lc.flags.id)
+
+	os.Exit(0)
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) {
