@@ -72,15 +72,14 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// load the db
-	fmt.Println(*filesNumber)
-	//db, err := loadPgpDB(*filesNumber)
-	//if err != nil {
-	//log.Fatalf("impossible to construct real keys db: %v", err)
-	//}
-	db, err := database.LoadDB("data/db", "vpir")
+	db, err := loadPgpDB(*filesNumber)
 	if err != nil {
-		log.Fatalf("impossible to load real keys db: %v", err)
+		log.Fatalf("impossible to construct real keys db: %v", err)
 	}
+	//db, err := database.LoadDB("data/db", "vpir")
+	//if err != nil {
+	//log.Fatalf("impossible to load real keys db: %v", err)
+	//}
 
 	// run server with TLS
 	cfg := &tls.Config{
