@@ -150,7 +150,7 @@ func generateDB(root, out string) error {
 		return xerrors.Errorf("failed to generate DB: %v", err)
 	}
 
-	err = db.SaveDB(out, "vpir")
+	err = db.SaveDBFileSingle(out)
 	if err != nil {
 		return xerrors.Errorf("failed to save db: %v", err)
 	}

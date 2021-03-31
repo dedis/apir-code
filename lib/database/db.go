@@ -8,8 +8,11 @@ import (
 	"io"
 	"log"
 	"math"
+	"os"
+	"path/filepath"
 
 	"github.com/cloudflare/circl/group"
+	mmap "github.com/edsrzf/mmap-go"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
@@ -38,6 +41,7 @@ func NewDB(info Info) (*DB, error) {
 type DB struct {
 	Info
 	inMemory []field.Element
+	mmap     mmap.MMap
 }
 
 func (d *DB) SetEntry(i int, el field.Element) {
@@ -48,6 +52,64 @@ type saveInfo struct {
 	Info Info
 	// the list of chunks, with start/end indexes for each chunk
 	Chunks [][2]int
+}
+
+func (d *DB) SaveDBFileSingle(root string) error {
+	infoPath := filepath.Join(root, "info")
+
+	chunkSize := 1e7
+
+	infoFile, err := os.Create(infoPath)
+	if err != nil {
+		return xerrors.Errorf("failed to create info file: %v", err)
+	}
+
+	enc := gob.NewEncoder(infoFile)
+
+	err = enc.Encode(&d.Info)
+	if err != nil {
+		infoFile.Close()
+		return xerrors.Errorf("failed to encode info: %v", err)
+	}
+
+	infoFile.Close()
+
+	log.Println("info file saved")
+
+	outFile, err := os.Create(filepath.Join(root, "data"))
+	if err != nil {
+		return xerrors.Errorf("failed to create data file: %v", err)
+	}
+
+	// result := make([]byte, 8*2*len(d.inMemory))
+
+	for i := 0; i < len(d.inMemory); i += int(chunkSize) {
+		n := int(chunkSize)
+
+		if i+int(chunkSize) >= len(d.inMemory) {
+			n = len(d.inMemory) - i
+		}
+
+		log.Println("saving chunk", i, i+n)
+
+		result := make([]byte, n*8*2)
+
+		for k := 0; k < n; k++ {
+			binary.LittleEndian.PutUint64(result[k*8*2:k*8*2+8], d.inMemory[k+i][0])
+			binary.LittleEndian.PutUint64(result[k*8*2+8:k*8*2+8+8], d.inMemory[k+i][1])
+		}
+
+		_, err = outFile.Write(result)
+		if err != nil {
+			return xerrors.Errorf("failed to write bytes: %v", err)
+		}
+
+		outFile.Sync()
+	}
+
+	outFile.Close()
+
+	return nil
 }
 
 func (d *DB) SaveDB(path string, bucket string) error {
@@ -134,6 +196,38 @@ func (d *DB) SaveDB(path string, bucket string) error {
 	return nil
 }
 
+func LoadMMapDB(path string) (*DB, error) {
+	infoFile, err := os.OpenFile(filepath.Join(path, "info"), os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to open info: %v", err)
+	}
+
+	dec := gob.NewDecoder(infoFile)
+	info := Info{}
+
+	err = dec.Decode(&info)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to decode info: %v", err)
+	}
+
+	f, err := os.OpenFile(filepath.Join(path, "data"), os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to read file: %v", err)
+	}
+
+	mmap, err := mmap.Map(f, mmap.RDONLY, 0)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to map: %v", err)
+	}
+
+	db := DB{
+		Info: info,
+		mmap: mmap,
+	}
+
+	return &db, nil
+}
+
 func LoadDB(path, bucket string) (*DB, error) {
 	db, err := bbolt.Open(path, 0666, nil)
 	if err != nil {
@@ -144,6 +238,8 @@ func LoadDB(path, bucket string) (*DB, error) {
 
 	var elements []field.Element
 	var info Info
+	saveInfo := saveInfo{}
+	var n int
 
 	err = db.View(func(t *bbolt.Tx) error {
 
@@ -151,16 +247,24 @@ func LoadDB(path, bucket string) (*DB, error) {
 		buf := bytes.NewBuffer(res)
 		dec := gob.NewDecoder(buf)
 
-		saveInfo := saveInfo{}
-
 		err := dec.Decode(&saveInfo)
 		if err != nil {
 			return xerrors.Errorf("failed to decode info: %v", err)
 		}
 
 		info = saveInfo.Info
-		n := info.BlockSize * info.NumColumns * info.NumRows
+		n = info.BlockSize * info.NumColumns * info.NumRows
 
+		return nil
+	})
+
+	if err != nil {
+		return nil, xerrors.Errorf("failed to read info: %v", err)
+	}
+
+	key := make([]byte, 8)
+
+	err = db.View(func(t *bbolt.Tx) error {
 		elements = make([]field.Element, n)
 
 		for _, i := range saveInfo.Chunks {
@@ -168,7 +272,6 @@ func LoadDB(path, bucket string) (*DB, error) {
 
 			chunk := make([]field.Element, end-start)
 
-			key := make([]byte, 8)
 			binary.LittleEndian.PutUint64(key, uint64(start))
 
 			res := t.Bucket([]byte(bucket)).Get(key)
@@ -188,7 +291,7 @@ func LoadDB(path, bucket string) (*DB, error) {
 	})
 
 	if err != nil {
-		return nil, xerrors.Errorf("failed to read db: %v", err)
+		return nil, xerrors.Errorf("failed to read chunks: %v", err)
 	}
 
 	result := DB{
@@ -200,7 +303,12 @@ func LoadDB(path, bucket string) (*DB, error) {
 }
 
 func (d *DB) GetEntry(i int) field.Element {
-	return d.inMemory[i]
+	memIndex := i * 8 * 2
+
+	return field.Element{
+		binary.LittleEndian.Uint64(d.mmap[memIndex : memIndex+8]),
+		binary.LittleEndian.Uint64(d.mmap[memIndex+8 : memIndex+16]),
+	}
 }
 
 func (d *DB) Range(begin, end int) []field.Element {
