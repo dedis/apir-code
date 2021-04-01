@@ -172,7 +172,12 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 
 	elapsedTime := time.Since(t)
 	if lc.flags.experiment {
-		lc.statsLogger.Printf("%d,%f", lc.flags.cores, elapsedTime.Seconds())
+		// query bw
+		bw := 0
+		for q := range queries {
+			bw += len(q)
+		}
+		lc.statsLogger.Printf("%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
 	}
 	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
 }
