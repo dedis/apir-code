@@ -98,7 +98,7 @@ func main() {
 	// set stats log only for experiments
 	// TODO: move somewhere else, but mind the defer
 	if lc.flags.experiment {
-		f, err := os.OpenFile("stats_client.log", os.O_RDWR|os.O_CREATE|os.O_CREATE, 0666)
+		f, err := os.OpenFile("stats_client.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("could not open stats.log file: %v", err)
 		}

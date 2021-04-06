@@ -56,7 +56,7 @@ func main() {
 	var statsLogger *log.Logger
 	if *experiment {
 		fileName := fmt.Sprintf("stats_server-%v.log", *sid)
-		f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_CREATE, 0666)
+		f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("could not open stats.log file: %v", err)
 		}
