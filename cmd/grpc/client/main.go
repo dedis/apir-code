@@ -127,6 +127,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	if err != nil {
 		log.Fatalf("error when executing query: %v", err)
 	}
+	log.Printf("done with queries computation")
 
 	// send queries to servers
 	answers := lc.runQueries(queries)
@@ -136,6 +137,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	if err != nil {
 		log.Fatalf("error during reconstruction: %v", err)
 	}
+	log.Printf("done with block reconstruction")
 
 	// return result bytes
 	result := field.VectorToBytes(resultField)
@@ -148,6 +150,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	if err != nil {
 		log.Fatalf("error retrieving key from the block: %v", err)
 	}
+	log.Printf("PGP key retrieved from block")
 
 	armored, err := pgp.ArmorKey(retrievedKey)
 	if err != nil {

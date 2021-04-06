@@ -60,16 +60,15 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// load the db
-	fmt.Println(*filesNumber)
-	//db, err := loadPgpDB(*filesNumber)
-	//if err != nil {
-	//log.Fatalf("impossible to construct real keys db: %v", err)
-	//}
-	db, err := database.LoadMMapDB("data/mmap.d/")
-	// db, err := loadPgpDB(*filesNumber)
+	db, err := loadPgpDB(*filesNumber, true)
 	if err != nil {
 		log.Fatalf("impossible to construct real keys db: %v", err)
 	}
+	//db, err := database.LoadMMapDB("data/mmap.d/")
+	// db, err := loadPgpDB(*filesNumber)
+	//if err != nil {
+	//log.Fatalf("impossible to construct real keys db: %v", err)
+	//}
 	//db, err := database.LoadDB("data/db", "vpir")
 	//if err != nil {
 	//log.Fatalf("impossible to load real keys db: %v", err)
@@ -169,7 +168,7 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	return &proto.QueryResponse{Answer: a}, nil
 }
 
-func loadPgpDB(filesNumber int) (*database.DB, error) {
+func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 	log.Println("Starting to read in the DB data")
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)
 	files, err := pgp.GetAllFiles(sksDir)
@@ -179,7 +178,7 @@ func loadPgpDB(filesNumber int) (*database.DB, error) {
 	// take only filesNumber files
 	files = files[:filesNumber]
 
-	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, false)
+	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
 	if err != nil {
 		return nil, err
 	}
