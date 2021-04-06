@@ -61,19 +61,26 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// load the db
-	db, err := loadPgpDB(*filesNumber, true)
-	if err != nil {
-		log.Fatalf("impossible to construct real keys db: %v", err)
-	}
-	//db, err := database.LoadMMapDB("data/mmap.d/")
-	// db, err := loadPgpDB(*filesNumber)
-	//if err != nil {
-	//log.Fatalf("impossible to construct real keys db: %v", err)
-	//}
+	var db *database.DB
+	switch *vpirScheme {
+	case "it":
+		db, err = loadPgpDB(*filesNumber, true)
+		if err != nil {
+			log.Fatalf("impossible to construct real keys db: %v", err)
+		}
 	//db, err := database.LoadDB("data/db", "vpir")
 	//if err != nil {
 	//log.Fatalf("impossible to load real keys db: %v", err)
 	//}
+	case "dpf":
+		// mmap db is vector for the moment
+		db, err = database.LoadMMapDB("data/mmap.d/")
+		if err != nil {
+			log.Fatalf("impossible to construct real keys db: %v", err)
+		}
+	default:
+		log.Fatal("unknow vpir scheme")
+	}
 
 	// run server with TLS
 	cfg := &tls.Config{
