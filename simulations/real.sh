@@ -23,6 +23,7 @@ cd ../
 
 # run servers
 for scheme in it dpf; do
+  echo "##### running with $scheme scheme #####"
   for cores in {1..8}; do
     echo "##### running with $cores cores #####"
 
