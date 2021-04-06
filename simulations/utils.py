@@ -3,6 +3,8 @@ import numpy as np
 import json
 import matplotlib as mpl
 import math
+import re
+import sys
 
 from collections import defaultdict
 
@@ -17,6 +19,36 @@ def allStats(file):
         }
     return s
 
+def parseLog(file):
+    stats = []
+    with open(file, "r") as f:
+        for line in f:
+            if "stats" in line:
+                # parse log
+                stats.append(line.replace("\n", "").partition("stats,")[2].split(","))
+    # get cores used in test
+    cores = set()
+    for s in stats:
+        cores.add(s[0])
+
+    # order stats by core
+    statsByCores = {int(i): {} for i in cores}
+    for s in stats:
+        # client
+        cores = int(s[0])
+        if len(s) == 3:
+            if 'queries' not in statsByCores[cores]:
+                statsByCores[int(s[0])]['queries'] = [int(s[1])]
+                statsByCores[int(s[0])]['latency'] = [float(s[2])]
+            else:
+                statsByCores[int(s[0])]['queries'].append(int(s[1]))
+                statsByCores[int(s[0])]['latency'].append(float(s[2]))
+        else:
+            if 'answer' not in statsByCores[cores]:
+                statsByCores[int(s[0])]['answer'] = [int(s[1])]
+            else: 
+                statsByCores[int(s[0])]['answer'].append(int(s[1]))
+    return statsByCores
 
 def parseResults(file):
     # parse results
@@ -51,6 +83,11 @@ def stats(data):
     s['bw']['std'] = np.std(data['Bandwidth'])
     return s
 
+def meanFromDict(data):
+    stats = dict()
+    for d in data:
+        stats[d]= int(np.mean(data[d]))
+    return stats
 
 def prepare_for_latex():
     # parameters for Latex

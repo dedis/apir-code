@@ -17,7 +17,6 @@ patterns = ['', '//', '.']
 GB = 1e9
 MB = 1e6
 
-
 def plotVpirBenchmarksBarBw():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     labels = ["Single-bit (§ 4.1)", "Multi-bit (§ 4.3)", "Multi-bit Block (§ 4.3)"]
@@ -249,6 +248,64 @@ def plotSingle():
             table[dbSize].append((cpu/1000, bw / MB))
     print_latex_table_joint(table, 2)
 
+def plotReal():
+    logServers = ["stats_server-0.log", "stats_server-1.log"]
+    statsServers = []
+    for l in logServers:
+        statsServers.append(parseLog(resultFolder + l))
+
+    # get answers bandwidth per core
+    answers = dict()
+    for s in statsServers:
+        for serverStat in s:
+            if serverStat not in answers:
+                answers[serverStat] = s[serverStat]["answer"]
+            else:
+                for a in s[serverStat]["answer"]:
+                    answers[serverStat].append(a)
+
+    statsClient = parseLog(resultFolder + "stats_client.log")
+    queries = dict()
+    latencies = dict()
+    for c in statsClient:
+        if c not in queries:
+            queries[c] = statsClient[c]["queries"]
+            latencies[c] = statsClient[c]["latency"]
+        else:
+            for q in c["queries"]:
+                queries[c].append(c)
+            for l in c["latency"]:
+                queries[c].append(l)
+
+    # take means
+    answersMean = meanFromDict(answers)
+    queriesMean = meanFromDict(queries)
+    latencyMean = meanFromDict(latencies)
+
+    # compute price
+    costs = dict()
+    for cores in answers:
+        price = int(1*cores + answersMean[cores] * 0.010 + queriesMean[cores] * 0.010)/1000
+        costs[price] = latencyMean[cores]
+   
+    # plot
+    x, y = [], []
+    for k in sorted(costs): 
+        x.append(k)
+        y.append(costs[k])
+
+    plt.style.use('grayscale')
+    fig, ax = plt.subplots()
+    color = 'black'
+    ax.set_ylabel("Latency [s]", color=color)
+    ax.set_xlabel("Cost [\$]", color=color)
+    ax.tick_params(axis='y', labelcolor=color)
+    ax.plot(x, y, label = "AMD")
+    ax.legend()
+    plt.tight_layout()
+    #plt.show()
+    plt.savefig('real.eps', format='eps', dpi=300, transparent=True)
+
 
 def print_latex_table_separate(results, numApproaches):
     for size, values in results.items():
@@ -343,7 +400,12 @@ def rounder2(x):
 
 # -----------Argument Parser-------------
 parser = argparse.ArgumentParser()
-parser.add_argument("-e", "--expr", type=str, help="experiment to plot: benchmarks, performance", required=True)
+parser.add_argument(
+        "-e", 
+        "--expr", 
+        type=str, 
+        help="experiment to plot: benchmarks, performance, single, real", 
+        required=True)
 
 args = parser.parse_args()
 EXPR = args.expr
@@ -357,5 +419,7 @@ if __name__ == "__main__":
         plotVpirPerformanceBars()
     elif EXPR == "single":
         plotSingle()
+    elif EXPR == "real":
+        plotReal()
     else:
         print("Unknown experiment: choose between benchmarks and performance")
