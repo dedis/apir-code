@@ -30,9 +30,6 @@ type localClient struct {
 	flags      *flags
 	dbInfo     *database.Info
 	vpirClient client.Client
-
-	// only for experiments
-	statsLogger *log.Logger
 }
 
 type flags struct {
@@ -93,17 +90,6 @@ func main() {
 	for _, s := range lc.config.Addresses {
 		lc.connections[s] = connectToServer(creds, s)
 		defer lc.connections[s].Close()
-	}
-
-	// set stats log only for experiments
-	// TODO: move somewhere else, but mind the defer
-	if lc.flags.experiment {
-		f, err := os.OpenFile("stats_client.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalf("could not open stats.log file: %v", err)
-		}
-		defer f.Close()
-		lc.statsLogger = log.New(f, "", log.Lmsgprefix)
 	}
 
 	// get and store db info.
@@ -178,7 +164,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 		for _, q := range queries {
 			bw += len(q)
 		}
-		lc.statsLogger.Printf("%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
+		log.Printf("stats,%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
 	}
 	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
 }

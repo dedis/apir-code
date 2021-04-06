@@ -52,18 +52,6 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	// set stats log
-	var statsLogger *log.Logger
-	if *experiment {
-		fileName := fmt.Sprintf("stats_server-%v.log", *sid)
-		f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalf("could not open stats.log file: %v", err)
-		}
-		defer f.Close()
-		statsLogger = log.New(f, "", log.Lmsgprefix)
-	}
-
 	// configs
 	config, err := utils.LoadConfig("config.toml")
 	if err != nil {
@@ -112,10 +100,9 @@ func main() {
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{
-		Server:      s,
-		experiment:  *experiment,
-		cores:       *cores,
-		statsLogger: statsLogger,
+		Server:     s,
+		experiment: *experiment,
+		cores:      *cores,
 	})
 	log.Printf("is listening at %s", addr)
 
@@ -147,9 +134,8 @@ type vpirServer struct {
 	Server server.Server // both IT and DPF-based server
 
 	// only for experiments
-	experiment  bool
-	cores       int
-	statsLogger *log.Logger
+	experiment bool
+	cores      int
 }
 
 func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
@@ -177,7 +163,7 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	answerLen := len(a)
 	log.Printf("answer size in bytes: %d", answerLen)
 	if s.experiment {
-		s.statsLogger.Printf("%d,%d", s.cores, answerLen)
+		log.Printf("stats,%d,%d", s.cores, answerLen)
 	}
 
 	return &proto.QueryResponse{Answer: a}, nil
