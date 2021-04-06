@@ -1,6 +1,9 @@
 #!/bin/bash
 export GOGC=8000
 
+# remove stats log
+rm ../stats*
+
 # build server
 cd ../cmd/grpc/server
 go build -race
