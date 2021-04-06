@@ -1,8 +1,11 @@
 #!/bin/bash
-export GOGC=8000
+export GOGC=300
 
-# remove stats log
+# remove stats log and create new files
 rm stats*
+touch stats_server-0.log
+touch stats_server-1.log
+touch stats_client.log
 
 # build server
 cd ../cmd/grpc/server
@@ -34,8 +37,7 @@ for cores in {1..8}; do
   
   # repeat experiment 10 times
   for i in {1..2}; do
-  echo "##### iteration $i running with $cores cores #####"
-    # run client
+    echo "##### iteration $i running with $cores cores #####"
     cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores >> stats_client.log
     sleep 5
   done
