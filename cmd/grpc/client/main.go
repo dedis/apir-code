@@ -56,6 +56,7 @@ func newLocalClient() *localClient {
 		prg:   utils.RandomPRG(),
 		flags: parseFlags(),
 	}
+	log.Printf("cleint flags: %v", lc.flags)
 
 	// enable profiling if needed
 	if lc.flags.profiling {
