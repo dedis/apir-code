@@ -3,9 +3,6 @@ export GOGC=300
 
 # remove stats log and create new files
 rm stats*
-touch stats_server-0.log
-touch stats_server-1.log
-touch stats_client.log
 
 # build server
 cd ../cmd/grpc/server
@@ -29,8 +26,8 @@ for cores in {1..8}; do
   echo "##### running with $cores cores #####"
 
   # run servers
-  cmd/grpc/server/server -id=0 -files=1 -experiment -cores=$cores >> stats_server-0.log & pid0=$!
-  cmd/grpc/server/server -id=1 -files=1 -experiment -cores=$cores >> stats_server-1.log & pid1=$!
+  cmd/grpc/server/server -id=0 -files=1 -experiment -cores=$cores >> simulations/stats_server-0.log & pid0=$!
+  cmd/grpc/server/server -id=1 -files=1 -experiment -cores=$cores >> simulations/stats_server-1.log & pid1=$!
 
   # wait for server to setup
   sleep 2
@@ -38,7 +35,7 @@ for cores in {1..8}; do
   # repeat experiment 10 times
   for i in {1..2}; do
     echo "##### iteration $i running with $cores cores #####"
-    cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores >> stats_client.log
+    cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores >> simulations/stats_client.log
     sleep 5
   done
 
