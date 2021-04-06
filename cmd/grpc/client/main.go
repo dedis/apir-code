@@ -175,7 +175,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	if lc.flags.experiment {
 		// query bw
 		bw := 0
-		for q := range queries {
+		for _, q := range queries {
 			bw += len(q)
 		}
 		lc.statsLogger.Printf("%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
