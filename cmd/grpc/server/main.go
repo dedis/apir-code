@@ -30,6 +30,7 @@ func main() {
 	experiment := flag.Bool("experiment", false, "run setting for experiments")
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
 	cores := flag.Int("cores", -1, "number of cores to use")
+	vpirScheme := flag.String("scheme", "", "vpir scheme to use: it or dpf")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	flag.Parse()
@@ -91,10 +92,21 @@ func main() {
 
 	// select correct server
 	var s server.Server
-	if *cores != -1 && *experiment {
-		s = server.NewIT(db, *cores)
-	} else {
-		s = server.NewIT(db)
+	switch *vpirScheme {
+	case "it":
+		if *cores != -1 && *experiment {
+			s = server.NewIT(db, *cores)
+		} else {
+			s = server.NewIT(db)
+		}
+	case "dpf":
+		if *cores != -1 && *experiment {
+			s = server.NewIT(db, *cores)
+		} else {
+			s = server.NewIT(db)
+		}
+	default:
+		log.Fatal("unknow VPIR type")
 	}
 
 	// start server
