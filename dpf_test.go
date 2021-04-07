@@ -14,7 +14,7 @@ import (
 func TestDPFBandwidth(t *testing.T) {
 	logN := uint64(28)
 	index := uint64(1)
-	blockSize := 64
+	blockSize := 128
 
 	// classical PIR
 	key0, key1 := dpfgo.Gen(index, logN)
@@ -43,6 +43,7 @@ func sizeVpirDPFKey(a, b dpf.DPFkey) int {
 	out := 2
 	// Bytes     []byte
 	out += len(a.Bytes) + len(b.Bytes)
+	fmt.Println("Bytes length:", len(a.Bytes)+len(b.Bytes))
 	// FinalCW   []field.Element
 	out += 16*len(a.FinalCW) + 16*len(b.FinalCW)
 
