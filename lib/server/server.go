@@ -27,17 +27,34 @@ type Server interface {
 func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element {
 	// Doing simplified scheme if block consists of a single bit
 	if db.BlockSize == cst.SingleBitBlockLength {
-		a := make([]field.Element, db.NumRows)
+		// make sure that we do not need up with routines processing 0 elements
+		if NGoRoutines > db.NumColumns {
+			NGoRoutines = db.NumColumns
+		}
+		columnsPerRoutine := db.NumColumns / NGoRoutines
+		replies := make([]chan field.Element, NGoRoutines)
+		m := make([]field.Element, db.NumRows)
+		var begin, end int
 		for i := 0; i < db.NumRows; i++ {
-			for j := 0; j < db.NumColumns; j++ {
-				entry := db.GetEntry(i*db.NumColumns + j)
-
-				if entry.Equal(&cst.One) {
-					a[i].Add(&a[i], &q[j])
+			for j := 0; j < NGoRoutines; j++ {
+				begin, end = j*columnsPerRoutine, (j+1)*columnsPerRoutine
+				// make the last routine take all the left-over (from division) columns
+				if j == NGoRoutines-1 {
+					end = db.NumColumns
 				}
+				replyChan := make(chan field.Element, 1)
+				replies[i] = replyChan
+				go processSingleBitColumns(begin, end, db, q, replyChan)
+			}
+
+			m[i].SetZero()
+			for j, reply := range replies {
+				element := <-reply
+				m[i].Add(&m[i], &element)
+				close(replies[j])
 			}
 		}
-		return a
+		return m
 	}
 
 	// %%% Logic %%%
@@ -129,6 +146,19 @@ func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Ele
 		}
 	}
 	return append(sum, sumTag)
+}
+
+// Processing of columns for a database where each field element
+// encodes just a single bit
+func processSingleBitColumns(begin, end int, db *database.DB, q []field.Element, replyTo chan<- field.Element) {
+	reply := field.Zero()
+	for j := begin; j < end; j++ {
+		entry := db.GetEntry(j)
+		if entry.Equal(&cst.One) {
+			reply.Add(&reply, &q[j])
+		}
+	}
+	replyTo <- reply
 }
 
 /*
