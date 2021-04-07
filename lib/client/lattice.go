@@ -6,10 +6,10 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"fmt"
+	"math"
+
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
-	"math"
 )
 
 type Lattice struct {
@@ -63,7 +63,7 @@ func (c *Lattice) ReconstructBytes(a []byte) ([][]byte, error) {
 	params := c.dbInfo.LatParams
 	encoder := bfv.NewEncoder(params)
 	decryptor := bfv.NewDecryptor(params, c.state.key)
-	ciphertextSize := len(a)/c.dbInfo.NumRows
+	ciphertextSize := len(a) / c.dbInfo.NumRows
 
 	ctx := new(bfv.Ciphertext)
 	var coeffs []uint64
@@ -72,7 +72,7 @@ func (c *Lattice) ReconstructBytes(a []byte) ([][]byte, error) {
 	dataSize := int(math.Log2(float64(params.T()))) / 8
 	j := 0
 	for i := 0; i < len(a); i += ciphertextSize {
-		err = ctx.UnmarshalBinary(a[i:i+ciphertextSize])
+		err = ctx.UnmarshalBinary(a[i : i+ciphertextSize])
 		if err != nil {
 			return nil, err
 		}
@@ -114,7 +114,6 @@ func encodeQuery(ct *bfv.Ciphertext, rtk *bfv.RotationKeys) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("ctx: %d, rtk: %d\n", len(ect), len(ertk))
 
 	// Encode the keys as struct with gob
 	buf := new(bytes.Buffer)
