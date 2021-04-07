@@ -1,5 +1,5 @@
 Name = "merkleMatrix"
 Primitive = "pir-it-merkle"
 NumRows = 0 # every NumRows != 1 indicate matrix
-BlockLength = 128
+BlockLength = 1024
 ElementBitSize = 8
