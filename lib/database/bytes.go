@@ -25,6 +25,7 @@ func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Byt
 			NumColumns: numColumns,
 			NumRows:    numRows,
 			BlockSize:  blockLen,
+			Merkle:     &Merkle{ProofLen: 0}, // only for tests compatibility
 		},
 	}
 }
