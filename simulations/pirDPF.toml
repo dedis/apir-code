@@ -1,5 +1,5 @@
 Name = "pirDPF"
 Primitive = "pir-dpf"
 NumRows = 1
-BlockLength = 256
+BlockLength = 128
 ElementBitSize = 8
