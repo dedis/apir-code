@@ -52,7 +52,7 @@ func TestSingleBitVectorOneKbVPIR(t *testing.T) {
 	db, err := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
 	require.NoError(t, err)
 
-	retrieveBlocks(t, xof, db, nRows*nCols, "SingleBitVectorOneMbVPIR")
+	retrieveBlocks(t, xof, db, nRows*nCols, "SingleBitVectorOneKbVPIR")
 }
 
 func TestMultiBitMatrixOneMbVPIR(t *testing.T) {

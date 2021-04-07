@@ -417,19 +417,26 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
 	numColumns := dbLen / numRows
 
 	// by convention a block size of 0 indicates the single-bit scheme
-	info := Info{NumColumns: numColumns, NumRows: numRows, BlockSize: constants.SingleBitBlockLength}
+	info := Info{
+		NumColumns: numColumns,
+		NumRows: numRows,
+		BlockSize: 1,
+	}
 
 	db, err := NewDB(info)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to create db: %v", err)
 	}
 
+	bytes := make([]byte, dbLen)
+	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
+		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
+	}
+
 	for i := 0; i < dbLen; i++ {
 		element := field.Element{}
-		element.SetRandom(rnd)
 
-		tmpb := element.Bytes()[len(element.Bytes())-1]
-		if tmpb>>7 == 1 {
+		if bytes[i]>>7 == 1 {
 			element.SetOne()
 		} else {
 			element.SetZero()
