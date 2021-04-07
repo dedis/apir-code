@@ -14,8 +14,8 @@ markers = ['.', '*', 'd', 's']
 linestyles = ['-', '--', ':', '-.']
 patterns = ['', '//', '.']
 
-GB = 1e9
-MB = 1e6
+GB = pow(1024,3)
+MB = pow(1024,2)
 
 def plotVpirBenchmarksBarBw():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
@@ -219,6 +219,7 @@ def plotVpirPerformanceLines():
                 linestyle=linestyles[int(i / (len(schemes) / 2))])
 
     print_latex_table_separate(cpuTable, int(len(schemes) / 2))
+    print("")
     print_latex_table_separate(bwTable, int(len(schemes) / 2))
 
     schemeLabels = ["No integrity", "Merkle", "VPIR"]
@@ -242,8 +243,8 @@ def plotVpirPerformanceLines():
     # ax.legend(handles=handles, bbox_to_anchor=(0, 1.08, 1, 0.2), loc="lower left",
     #           mode="expand", borderaxespad=0, fancybox=True, ncol=3)
     plt.tight_layout()
-    plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
-    plt.show()
+    #plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
+    #plt.show()
 
 
 def plotSingle():
@@ -319,12 +320,12 @@ def plotReal():
 
 def print_latex_table_separate(results, numApproaches):
     for size, values in results.items():
-        print(str(int(int(size) / (8 * MB))) + "\\,MB", end=" ")
+        print(str(int(int(size) / (8 * MB))) + "\\,MiB", end=" ")
         for i, value in enumerate(values):
             print("& %s " % rounder2(value), end="")
             # we need to compute the overhead over the baseline that is always at position i%numApproaches==0
             if i % numApproaches != 0:
-                print("& %s " % rounder2(value / values[int(i / numApproaches) * numApproaches]), end="")
+                print("& %s$\\times$ " % rounder2(value / values[int(i / numApproaches) * numApproaches]), end="")
         print("\\\\")
 
 
@@ -425,8 +426,8 @@ if __name__ == "__main__":
     if EXPR == "benchmarks":
         plotVpirBenchmarks()
     elif EXPR == "performance":
-        # plotVpirPerformanceLines()
-        plotVpirPerformanceBars()
+        plotVpirPerformanceLines()
+        #plotVpirPerformanceBars()
     elif EXPR == "single":
         plotSingle()
     elif EXPR == "real":
