@@ -39,6 +39,7 @@ type flags struct {
 	// only for experiments
 	experiment bool
 	cores      int
+	scheme     string
 }
 
 func newLocalClient() *localClient {
@@ -98,7 +99,12 @@ func main() {
 	lc.retrieveDBInfo()
 
 	// start correct client, which can be either IT or DPF.
-	lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
+	switch lc.flags.scheme {
+	case "it":
+		lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
+	case "dpf":
+		lc.vpirClient = client.NewDPF(lc.prg, lc.dbInfo)
+	}
 
 	// get id
 	if lc.flags.id == "" {
@@ -293,6 +299,7 @@ func parseFlags() *flags {
 	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
 	flag.BoolVar(&f.experiment, "experiment", false, "run for exempriments")
 	flag.IntVar(&f.cores, "cores", -1, "num of cores used for exepriment")
+	flag.StringVar(&f.scheme, "scheme", "", "scheme to use: IT or DPF")
 	flag.Parse()
 
 	return f

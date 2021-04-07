@@ -30,6 +30,7 @@ func main() {
 	experiment := flag.Bool("experiment", false, "run setting for experiments")
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
 	cores := flag.Int("cores", -1, "number of cores to use")
+	vpirScheme := flag.String("scheme", "", "vpir scheme to use: it or dpf")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	flag.Parse()
@@ -60,19 +61,26 @@ func main() {
 	addr := config.Addresses[*sid]
 
 	// load the db
-	db, err := loadPgpDB(*filesNumber, true)
-	if err != nil {
-		log.Fatalf("impossible to construct real keys db: %v", err)
-	}
-	//db, err := database.LoadMMapDB("data/mmap.d/")
-	// db, err := loadPgpDB(*filesNumber)
-	//if err != nil {
-	//log.Fatalf("impossible to construct real keys db: %v", err)
-	//}
+	var db *database.DB
+	switch *vpirScheme {
+	case "it":
+		db, err = loadPgpDB(*filesNumber, true)
+		if err != nil {
+			log.Fatalf("impossible to construct real keys db: %v", err)
+		}
 	//db, err := database.LoadDB("data/db", "vpir")
 	//if err != nil {
 	//log.Fatalf("impossible to load real keys db: %v", err)
 	//}
+	case "dpf":
+		// mmap db is vector for the moment
+		db, err = database.LoadMMapDB("data/mmap.d/")
+		if err != nil {
+			log.Fatalf("impossible to construct real keys db: %v", err)
+		}
+	default:
+		log.Fatal("unknow vpir scheme")
+	}
 
 	// run server with TLS
 	cfg := &tls.Config{
@@ -91,10 +99,21 @@ func main() {
 
 	// select correct server
 	var s server.Server
-	if *cores != -1 && *experiment {
-		s = server.NewIT(db, *cores)
-	} else {
-		s = server.NewIT(db)
+	switch *vpirScheme {
+	case "it":
+		if *cores != -1 && *experiment {
+			s = server.NewIT(db, *cores)
+		} else {
+			s = server.NewIT(db)
+		}
+	case "dpf":
+		if *cores != -1 && *experiment {
+			s = server.NewIT(db, *cores)
+		} else {
+			s = server.NewIT(db)
+		}
+	default:
+		log.Fatal("unknow VPIR type")
 	}
 
 	// start server
