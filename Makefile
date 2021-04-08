@@ -10,11 +10,11 @@ lint:
 
 run_server: $(PROTO_PB)
 	cd cmd/grpc/server && go build -race
-	go run cmd/grpc/server/main.go -id=$(id) -files=$(files) 
+	go run cmd/grpc/server/main.go -id=$(id) -files=$(files) -scheme=$(scheme)
 
 run_client: $(PROTO_PB)
 	cd cmd/grpc/client && go build -race
-	go run cmd/grpc/client/main.go -id=$(id)
+	go run cmd/grpc/client/main.go -id=$(id) -scheme=$(scheme)
 
 test: $(PROTO_PB)
 	go test
