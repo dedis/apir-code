@@ -282,6 +282,9 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 			// get servers answers
 			answers := make([][]byte, len(ss))
 			for k := range ss {
+				// TODO: shouldn't we add a m.Reset() here? It
+				// is probably nothing, but we want to measure
+				// *exactly* AnswerBytes
 				answers[k], err = ss[k].AnswerBytes(queries[k])
 				results[j].CPU[i].Answers[k] = m.RecordAndReset()
 				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
@@ -290,6 +293,9 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 				}
 			}
 
+			// TODO: shouldn't we add a m.Reset() here? It
+			// is probably nothing, but we want to measure
+			// *exactly* AnswerBytes
 			_, err = c.ReconstructBytes(answers)
 			results[j].CPU[i].Reconstruct = m.RecordAndReset()
 			results[j].Bandwidth[i].Reconstruct = 0
@@ -339,6 +345,7 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 
 			m.Reset()
 			query, err := c.QueryBytes(index + i)
+			// TODO: shouldn't we test for error after taking the time?
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -346,6 +353,9 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 			results[j].Bandwidth[i].Query = float64(len(query))
 
 			// get servers answers
+			// TODO: shouldn't we add a m.Reset() here? It
+			// is probably nothing, but we want to measure
+			// *exactly* AnswerBytes
 			answer, err := s.AnswerBytes(query)
 			if err != nil {
 				log.Fatal(err)
