@@ -1,0 +1,10 @@
+# Configuration for gRPC-based application
+
+[servers]
+  [servers.0]
+  ip = 10.90.36.31
+  port = 50050
+
+  [servers.1]
+  ip = 10.90.36.33
+  port = 50051
