@@ -45,6 +45,9 @@ type Simulation struct {
 }
 
 func main() {
+	// seed non-cryptographic randomness
+	rand.Seed(time.Now().UnixNano())
+
 	// tracing
 	f, err := os.Create("trace.out")
 	if err != nil {
@@ -239,8 +242,6 @@ func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepe
 }
 
 func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetrieveBlocks, nRepeat int) []*Chunk {
-	// seed non-cryptographic randomness
-	rand.Seed(time.Now().UnixNano())
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
@@ -312,8 +313,6 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 }
 
 func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
-	// seed non-cryptographic randomness
-	rand.Seed(time.Now().UnixNano())
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
@@ -375,8 +374,6 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 }
 
 func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepeat int) []*Chunk {
-	// seed non-cryptographic randomness
-	rand.Seed(time.Now().UnixNano())
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
