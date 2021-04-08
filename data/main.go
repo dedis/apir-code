@@ -129,7 +129,7 @@ func splitFullDumpIntoChunks(path, out string) error {
 	return nil
 }
 
-func generateDB(rebalanced bool, root, out string) error {
+func generateDB(root, out string, rebalanced bool) error {
 	filesInfo, err := ioutil.ReadDir(root)
 	if err != nil {
 		return xerrors.Errorf("failed to read files: %v", err)
