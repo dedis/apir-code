@@ -1,8 +1,8 @@
 #!/bin/bash
-export GOGC=300
+export GOGC=8000
 
 # remove stats log and create new files
-rm stats*
+rm results/stats*
 
 # build server
 cd ../cmd/grpc/server
