@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"syscall"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -81,6 +82,9 @@ func main() {
 	default:
 		log.Fatal("unknow vpir scheme")
 	}
+
+	// GC after db creation
+	runtime.GC()
 
 	// run server with TLS
 	cfg := &tls.Config{
