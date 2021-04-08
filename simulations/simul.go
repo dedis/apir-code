@@ -297,6 +297,9 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 				log.Fatal(err)
 			}
 		}
+
+		// GC after each repetition
+		runtime.GC()
 	}
 
 	return results
