@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"runtime"
 	"runtime/pprof"
 	"runtime/trace"
 	"time"
@@ -152,6 +153,9 @@ func main() {
 			}
 		}
 
+		// GC after DB creation
+		runtime.GC()
+
 		// run experiment
 		var results []*Chunk
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
@@ -180,6 +184,9 @@ func main() {
 			log.Fatal("unknown primitive type")
 		}
 		experiment.Results[dbLen] = results
+
+		// GC at the end of the iteration
+		runtime.GC()
 	}
 
 	// print results
