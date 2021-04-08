@@ -14,65 +14,66 @@ markers = ['.', '*', 'd', 's']
 linestyles = ['-', '--', ':', '-.']
 patterns = ['', '//', '.']
 
-GB = pow(1024,3)
-MB = pow(1024,2)
+GB = pow(1024, 3)
+MB = pow(1024, 2)
+KB = 1024
 
-def plotVpirBenchmarksBarBw():
-    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-bit (§ 4.1)", "Multi-bit (§ 4.3)", "Multi-bit Block (§ 4.3)"]
 
-    Xs = np.arange(len(schemes))
-    width = 0.35
-    Ys, Yerr = [], []
-    for scheme in schemes:
-        stats = allStats(resultFolder + scheme)
-        largestDbSize = sorted(stats.keys())[-1]
-        Ys.append(stats[largestDbSize]['client']['cpu']['mean'] + stats[largestDbSize]['server']['cpu']['mean'])
-        Yerr.append(stats[largestDbSize]['client']['cpu']['std'] + stats[largestDbSize]['server']['cpu']['std'])
-
-    plt.style.use('grayscale')
-    fig, ax1 = plt.subplots()
-    color = 'black'
-    ax1.set_ylabel("CPU time [ms]", color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
-    ax1.set_xticks(Xs + width / 2)
-    ax1.set_xticklabels(labels)
-    ax1.bar(Xs, Ys, width, label="CPU", color=color, yerr=Yerr)
-    plt.yscale('log')
-    ax1.legend(fontsize=12)
-
-    Ys, Yerr = [], []
-    for scheme in schemes:
-        stats = allStats(resultFolder + scheme)
-        largestDbSize = sorted(stats.keys())[-1]
-        Ys.append(
-            stats[largestDbSize]['client']['bw']['mean'] / 1000 + stats[largestDbSize]['server']['bw']['mean'] / 1000)
-        Yerr.append(
-            stats[largestDbSize]['client']['bw']['std'] / 1000 + stats[largestDbSize]['server']['bw']['std'] / 1000)
-
-    color = 'grey'
-    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    ax2.set_ylabel("Bandwidth [KB]")
-    ax2.bar(Xs + width, Ys, width, label="Bandwidth", color=color, yerr=Yerr)
-    ax2.legend(loc=5, fontsize=12)
-
-    # fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.yscale('log')
-    plt.title("Retrieval of 256B of data from 125KB DB")
-    plt.savefig('cpu_bw.eps', format='eps', dpi=300)
-    # plt.show()
+# def plotVpirBenchmarksBarBw():
+#     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
+#     labels = ["Single-bit (§4.1)", "Multi-bit (§4.3)", "Multi-bit Block (§4.3)"]
+#
+#     Xs = np.arange(len(schemes))
+#     width = 0.35
+#     Ys, Yerr = [], []
+#     for scheme in schemes:
+#         stats = allStats(resultFolder + scheme)
+#         largestDbSize = sorted(stats.keys())[-1]
+#         Ys.append(stats[largestDbSize]['client']['cpu']['mean'] + stats[largestDbSize]['server']['cpu']['mean'])
+#         Yerr.append(stats[largestDbSize]['client']['cpu']['std'] + stats[largestDbSize]['server']['cpu']['std'])
+#
+#     plt.style.use('grayscale')
+#     fig, ax1 = plt.subplots()
+#     color = 'black'
+#     ax1.set_ylabel("CPU time [ms]", color=color)
+#     ax1.tick_params(axis='y', labelcolor=color)
+#     ax1.set_xticks(Xs + width / 2)
+#     ax1.set_xticklabels(labels)
+#     ax1.bar(Xs, Ys, width, label="CPU", color=color, yerr=Yerr)
+#     plt.yscale('log')
+#
+#     Ys, Yerr = [], []
+#     for scheme in schemes:
+#         stats = allStats(resultFolder + scheme)
+#         largestDbSize = sorted(stats.keys())[-1]
+#         Ys.append(
+#             stats[largestDbSize]['client']['bw']['mean'] / KB + stats[largestDbSize]['server']['bw']['mean'] / KB)
+#         Yerr.append(
+#             stats[largestDbSize]['client']['bw']['std'] / KB + stats[largestDbSize]['server']['bw']['std'] / KB)
+#
+#     color = 'grey'
+#     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+#     ax2.set_ylabel("Bandwidth [KB]")
+#     ax2.bar(Xs + width, Ys, width, label="Bandwidth", color=color, yerr=Yerr)
+#     ax2.legend(loc=5, fontsize=12)
+#
+#     # fig.tight_layout()  # otherwise the right y-label is slightly clipped
+#     plt.yscale('log')
+#     plt.title("Retrieval of 256B of data from 125KB DB")
+#     plt.savefig('cpu_bw.eps', format='eps', dpi=300)
+#     # plt.show()
 
 
 def plotVpirBenchmarks():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-bit", "Multi-bit", "Block"]
+    labels = ["Single-bit (§4.1)", "Multi-bit (§4.3)", "Multi-bit Block (§4.3)"]
     colors = ['black', 'grey', 'lightgrey']
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
 
     width = 0.15
-    dbSizes = sorted([int(size / 8000) for size in allStats(resultFolder + schemes[0]).keys()])
+    dbSizes = sorted([int(size / (8 * KB)) for size in allStats(resultFolder + schemes[0]).keys()])
     Xs = np.arange(len(dbSizes))
     bars = [[]] * len(schemes)
     for i, scheme in enumerate(schemes):
@@ -83,23 +84,21 @@ def plotVpirBenchmarks():
             bars[i] = ax.bar(j + i * width, Y, width, color=colors[i], yerr=Yerr)
             ax.annotate(f'{Y:.1f}',
                         xy=(j + i * width, Y),
-                        xytext=(0, 5),  # 3 points vertical offset
+                        xytext=(0, 5),  # 5 points vertical offset
                         textcoords="offset points",
                         ha='center', va='bottom')
 
     ax.set_ylabel("CPU time [ms]")
-    ax.set_xlabel("DB size [KB]")
+    ax.set_xlabel("DB size [KiB]")
     ax.set_xticks(Xs + width * (len(schemes) - 1) / 2)
     ax.set_xticklabels(dbSizes)
     ax.legend(bars, labels)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    # ax.spines['left'].set_visible(False)
 
     # plt.tick_params(left=False, labelleft=False)
     plt.tight_layout()
     plt.yscale('log')
-    # plt.title("Retrieval of 256B data from a DB of different sizes")
     plt.savefig('multi_benchmarks.eps', format='eps', dpi=300, transparent=True)
     # plt.show()
 
@@ -139,7 +138,7 @@ def plotVpirPerformanceBars():
             # bars[i] = ax.bar(j + i * width, Y, width, yerr=Yerr, color=colors[i % 3], hatch=patterns[int(i / 3)])
             # if i != 0:
             bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color=colors[i % 3],
-                                 hatch=patterns[int(i / 3)])
+                             hatch=patterns[int(i / 3)])
             # else:
             #     bars[i] = ax.bar(j + i * width, Y / baselines[dbSize], width, color='darkred',
             #                      hatch=patterns[int(i / 3)])
@@ -208,7 +207,7 @@ def plotVpirPerformanceLines():
             annotation = str(int(int(dbSize) / (8 * MB))) + "MB"
             if int(dbSize) == 8 * GB:
                 annotation = "1GB"
-            ax.annotate(annotation, xy=(1000/cpu, GB/bw), xytext=(-20, 5),
+            ax.annotate(annotation, xy=(1000 / cpu, GB / bw), xytext=(-20, 5),
                         color=colors[i % int(len(schemes) / 2)], textcoords='offset points')
             ax.plot(Xs[-1], Ys[-1], color=colors[i % int(len(schemes) / 2)], marker=".")
             # ax.annotate(str(int(int(dbSize) / (8 * MB))) + "MB", xy=(1000/cpu, GB/bw), xytext=(-20, 5),
@@ -243,8 +242,8 @@ def plotVpirPerformanceLines():
     # ax.legend(handles=handles, bbox_to_anchor=(0, 1.08, 1, 0.2), loc="lower left",
     #           mode="expand", borderaxespad=0, fancybox=True, ncol=3)
     plt.tight_layout()
-    #plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
-    #plt.show()
+    # plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
+    # plt.show()
 
 
 def plotSingle():
@@ -256,8 +255,9 @@ def plotSingle():
         for j, dbSize in enumerate(sorted(stats.keys())):
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            table[dbSize].append((cpu/1000, bw / MB))
+            table[dbSize].append((cpu / 1000, bw / MB))
     print_latex_table_joint(table, 2)
+
 
 def plotReal():
     logServers = ["stats_server-0.log", "stats_server-1.log"]
@@ -296,12 +296,12 @@ def plotReal():
     # compute price
     costs = dict()
     for cores in answers:
-        price = int(1*cores + answersMean[cores] * 0.010 + queriesMean[cores] * 0.010)/1000
+        price = int(1 * cores + answersMean[cores] * 0.010 + queriesMean[cores] * 0.010) / 1000
         costs[price] = latencyMean[cores]
-   
+
     # plot
     x, y = [], []
-    for k in sorted(costs): 
+    for k in sorted(costs):
         x.append(k)
         y.append(costs[k])
 
@@ -311,10 +311,10 @@ def plotReal():
     ax.set_ylabel("Latency [s]", color=color)
     ax.set_xlabel("Cost [\$]", color=color)
     ax.tick_params(axis='y', labelcolor=color)
-    ax.plot(x, y, label = "AMD")
+    ax.plot(x, y, label="AMD")
     ax.legend()
     plt.tight_layout()
-    #plt.show()
+    # plt.show()
     plt.savefig('real.eps', format='eps', dpi=300, transparent=True)
 
 
@@ -336,7 +336,8 @@ def print_latex_table_joint(results, numApproaches):
             print("& %s & %s " % (rounder2(value[0]), rounder2(value[1])), end="")
             # compute overhead
             if i % numApproaches == numApproaches - 1:
-                print("& %s & %s " % (rounder2(value[0] / values[i-1][0]), rounder2(value[1] / values[i-1][1])), end="")
+                print("& %s & %s " % (rounder2(value[0] / values[i - 1][0]), rounder2(value[1] / values[i - 1][1])),
+                      end="")
         print("\\\\")
 
 
@@ -412,11 +413,11 @@ def rounder2(x):
 # -----------Argument Parser-------------
 parser = argparse.ArgumentParser()
 parser.add_argument(
-        "-e", 
-        "--expr", 
-        type=str, 
-        help="experiment to plot: benchmarks, performance, single, real", 
-        required=True)
+    "-e",
+    "--expr",
+    type=str,
+    help="experiment to plot: benchmarks, performance, single, real",
+    required=True)
 
 args = parser.parse_args()
 EXPR = args.expr
@@ -427,7 +428,7 @@ if __name__ == "__main__":
         plotVpirBenchmarks()
     elif EXPR == "performance":
         plotVpirPerformanceLines()
-        #plotVpirPerformanceBars()
+        # plotVpirPerformanceBars()
     elif EXPR == "single":
         plotSingle()
     elif EXPR == "real":
