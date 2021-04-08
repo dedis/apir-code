@@ -108,9 +108,9 @@ func main() {
 		}
 	case "dpf":
 		if *cores != -1 && *experiment {
-			s = server.NewIT(db, *cores)
+			s = server.NewDPF(db, *cores)
 		} else {
-			s = server.NewIT(db)
+			s = server.NewDPF(db)
 		}
 	default:
 		log.Fatal("unknow VPIR type")
