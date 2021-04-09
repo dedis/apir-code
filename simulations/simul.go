@@ -256,16 +256,8 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 		// pick a random block index to start the retrieval
 		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
 		for i := 0; i < numRetrieveBlocks; i++ {
-			results[j].CPU[i] = &Block{
-				Query:       0,
-				Answers:     make([]float64, len(ss)),
-				Reconstruct: 0,
-			}
-			results[j].Bandwidth[i] = &Block{
-				Query:       0,
-				Answers:     make([]float64, len(ss)),
-				Reconstruct: 0,
-			}
+			results[j].CPU[i] = initBlock(len(ss))
+			results[j].Bandwidth[i] = initBlock(len(ss))
 
 			m.Reset()
 			queries, err := c.QueryBytes(startIndex+i, 2)
@@ -480,6 +472,14 @@ func initChunk(numRetrieveBlocks int) *Chunk {
 	return &Chunk{
 		CPU:       make([]*Block, numRetrieveBlocks),
 		Bandwidth: make([]*Block, numRetrieveBlocks),
+	}
+}
+
+func initBlock(numAnswers int) *Block {
+	return &Block{
+		Query:       0,
+		Answers:     make([]float64, numAnswers),
+		Reconstruct: 0,
 	}
 }
 
