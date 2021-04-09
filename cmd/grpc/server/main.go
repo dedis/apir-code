@@ -160,10 +160,11 @@ func main() {
 
 	// start HTTP server for tests
 	// TODO: remove this in application
+	host, _ := net.SplitHostPort(addr)
 	h := func(w http.ResponseWriter, _ *http.Request) {
 		os.Exit(0)
 	}
-	log.Fatal(http.ListenAndServe(addr, nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", server.IP, "8080"), nil))
 
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
