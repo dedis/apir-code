@@ -23,7 +23,7 @@ for scheme in it dpf; do
     # repeat experiment 20 times
     for i in {1..20}; do
       echo "##### iteration $i running with $cores cores #####"
-      cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores -scheme=$scheme >> simulations/results/stats_client_$scheme.log
+      cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores -scheme=$scheme | tee -a simulations/results/stats_client_$scheme.log
       sleep 5
     done
 

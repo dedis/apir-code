@@ -20,7 +20,7 @@ for scheme in it dpf; do
   for cores in {1..12}; do
     echo "##### running with $cores cores #####"
     # run servers
-    cmd/grpc/server/server -id=$1 -files=1 -experiment -cores=$cores -scheme=$scheme >> simulations/results/stats_server-0_$scheme.log
+    cmd/grpc/server/server -id=$1 -files=1 -experiment -cores=$cores -scheme=$scheme | tee -a simulations/results/stats_server-0_$scheme.log
     wait $!
 
     echo "##### done with $cores #####"
