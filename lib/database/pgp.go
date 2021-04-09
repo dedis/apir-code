@@ -15,7 +15,7 @@ import (
 const numKeysToDBLengthRatio float32 = 0.1
 
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
-	log.Printf("loading keys: %v\n", dataPaths)
+	log.Printf("rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
 
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
