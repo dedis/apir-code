@@ -15,9 +15,16 @@ import (
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/encoding/gzip"
+)
+
+const (
+	configEnvKey = "VPIR_CONFIG"
+
+	defaultConfigFile = "config.toml"
 )
 
 type localClient struct {
@@ -40,6 +47,9 @@ type flags struct {
 	experiment bool
 	cores      int
 	scheme     string
+
+	demo       bool
+	listenAddr string
 }
 
 func newLocalClient() *localClient {
@@ -66,7 +76,12 @@ func newLocalClient() *localClient {
 	log.SetPrefix(fmt.Sprintf("[Client] "))
 
 	// load configs
-	config, err := utils.LoadConfig("config.toml")
+	configPath := os.Getenv(configEnvKey)
+	if configPath == "" {
+		configPath = defaultConfigFile
+	}
+
+	config, err := utils.LoadConfig(configPath)
 	if err != nil {
 		log.Fatalf("could not load the config file: %v", err)
 	}
@@ -78,20 +93,58 @@ func newLocalClient() *localClient {
 func main() {
 	lc := newLocalClient()
 
+	if lc.flags.demo {
+		lc.runDemo()
+		return
+	} else {
+		err := lc.connectToServers()
+		defer lc.closeConnections()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = lc.exec()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	os.Exit(0)
+}
+
+func (lc *localClient) connectToServers() error {
 	// load servers certificates
 	creds, err := utils.LoadServersCertificates()
 	if err != nil {
-		log.Fatalf("could not load servers certificates: %v", err)
+		return xerrors.Errorf("could not load servers certificates: %v", err)
 	}
 
 	// connect to servers and store connections
 	// TODO: move somewhere else, but mind the defer
 	lc.connections = make(map[string]*grpc.ClientConn)
 	for _, s := range lc.config.Addresses {
-		lc.connections[s] = connectToServer(creds, s)
-		defer lc.connections[s].Close()
+		conn, err := connectToServer(creds, s)
+		if err != nil {
+			return xerrors.Errorf("failed to connect: %v", err)
+		}
+
+		lc.connections[s] = conn
 	}
 
+	return nil
+}
+
+func (lc *localClient) closeConnections() {
+	for _, conn := range lc.connections {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("failed to close conn: %v", err)
+		}
+	}
+}
+
+func (lc *localClient) exec() (string, error) {
 	// get and store db info.
 	// This function queries the servers for the database information.
 	// In the Keyd PoC application, we will hardcode the database
@@ -104,11 +157,14 @@ func main() {
 		lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 	case "dpf":
 		lc.vpirClient = client.NewDPF(lc.prg, lc.dbInfo)
+	default:
+		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
 
 	// get id
 	if lc.flags.id == "" {
 		var id string
+		fmt.Print("please enter the id: ")
 		fmt.Scanln(&id)
 		if id == "" {
 			log.Fatal("id not provided")
@@ -117,13 +173,12 @@ func main() {
 	}
 
 	// retrieve the key corresponding to the id
-	lc.retrieveKeyGivenId(lc.flags.id)
-
-	os.Exit(0)
+	return lc.retrieveKeyGivenId(lc.flags.id)
 }
 
-func (lc *localClient) retrieveKeyGivenId(id string) {
+func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 	t := time.Now()
+
 	// compute hash key for id
 	hashKey := database.HashToIndex(id, lc.dbInfo.NumRows*lc.dbInfo.NumColumns)
 	log.Printf("id: %s, hashKey: %d", id, hashKey)
@@ -131,7 +186,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	// query given hash key
 	queries, err := lc.vpirClient.QueryBytes(hashKey, len(lc.connections))
 	if err != nil {
-		log.Fatalf("error when executing query: %v", err)
+		return "", xerrors.Errorf("error when executing query: %v", err)
 	}
 	log.Printf("done with queries computation")
 
@@ -141,7 +196,7 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	// reconstruct block
 	resultField, err := lc.vpirClient.ReconstructBytes(answers)
 	if err != nil {
-		log.Fatalf("error during reconstruction: %v", err)
+		return "", xerrors.Errorf("error during reconstruction: %v", err)
 	}
 	log.Printf("done with block reconstruction")
 
@@ -154,13 +209,13 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 	// get a key from the block with the id of the search
 	retrievedKey, err := pgp.RecoverKeyFromBlock(result, id)
 	if err != nil {
-		log.Fatalf("error retrieving key from the block: %v", err)
+		return "", xerrors.Errorf("error retrieving key from the block: %v", err)
 	}
 	log.Printf("PGP key retrieved from block")
 
 	armored, err := pgp.ArmorKey(retrievedKey)
 	if err != nil {
-		log.Fatalf("error armor-encoding the key: %v", err)
+		return "", xerrors.Errorf("error armor-encoding the key: %v", err)
 	}
 
 	fmt.Println(armored)
@@ -175,6 +230,8 @@ func (lc *localClient) retrieveKeyGivenId(id string) {
 		log.Printf("stats,%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
 	}
 	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
+
+	return armored, nil
 }
 
 func (lc *localClient) retrieveDBInfo() {
@@ -245,7 +302,7 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	wg.Wait()
 	close(resCh)
 
-	// combinate anwsers of all the servers
+	// combinate answers of all the servers
 	q := make([][]byte, 0)
 	for v := range resCh {
 		q = append(q, v)
@@ -268,14 +325,17 @@ func query(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, q
 	return answer.GetAnswer()
 }
 
-func connectToServer(creds credentials.TransportCredentials, address string) *grpc.ClientConn {
-	conn, err := grpc.Dial(address,
+func connectToServer(creds credentials.TransportCredentials, address string) (*grpc.ClientConn, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, address,
 		grpc.WithTransportCredentials(creds), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("did not connect to %s: %v", address, err)
+		return nil, xerrors.Errorf("did not connect to %s: %v", address, err)
 	}
 
-	return conn
+	return conn, nil
 }
 
 func equalDBInfo(info []*database.Info) bool {
@@ -297,9 +357,11 @@ func parseFlags() *flags {
 
 	flag.BoolVar(&f.profiling, "prof", false, "write pprof file")
 	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
-	flag.BoolVar(&f.experiment, "experiment", false, "run for exempriments")
-	flag.IntVar(&f.cores, "cores", -1, "num of cores used for exepriment")
+	flag.BoolVar(&f.experiment, "experiment", false, "run for experiments")
+	flag.IntVar(&f.cores, "cores", -1, "num of cores used for experiment")
 	flag.StringVar(&f.scheme, "scheme", "", "scheme to use: IT or DPF")
+	flag.BoolVar(&f.demo, "demo", false, "runs as a demo, which exposes a REST API")
+	flag.StringVar(&f.listenAddr, "listen-addr", "", "demo listen address")
 	flag.Parse()
 
 	return f
