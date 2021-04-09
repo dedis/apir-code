@@ -242,7 +242,6 @@ func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepe
 }
 
 func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetrieveBlocks, nRepeat int) []*Chunk {
-
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 
@@ -252,10 +251,8 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 	var startIndex int
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = &Chunk{
-			CPU:       make([]*Block, numRetrieveBlocks),
-			Bandwidth: make([]*Block, numRetrieveBlocks),
-		}
+		results[j] = initChunk(numRetrieveBlocks)
+
 		// pick a random block index to start the retrieval
 		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
 		for i := 0; i < numRetrieveBlocks; i++ {
@@ -477,6 +474,13 @@ func makePIRDPFServers(db *database.Bytes) []server.Server {
 	s0 := server.NewPIRdpf(db)
 	s1 := server.NewPIRdpf(db)
 	return []server.Server{s0, s1}
+}
+
+func initChunk(numRetrieveBlocks int) *Chunk {
+	return &Chunk{
+		CPU:       make([]*Block, numRetrieveBlocks),
+		Bandwidth: make([]*Block, numRetrieveBlocks),
+	}
 }
 
 func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
