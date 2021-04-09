@@ -58,11 +58,13 @@ func (c *IT) Query(index, numServers int) [][]field.Element {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
+
 	var err error
 	c.state, err = generateClientState(index, c.rnd, c.dbInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	vectors, err := c.secretShare(numServers)
 	if err != nil {
 		log.Fatal(err)
