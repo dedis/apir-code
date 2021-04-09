@@ -145,8 +145,6 @@ func generateDB(root, out string, rebalanced bool) error {
 		files = append(files, filepath.Join(root, info.Name()))
 	}
 
-	log.Printf("loading the following files: %v", files)
-
 	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
 	if err != nil {
 		return xerrors.Errorf("failed to generate DB: %v", err)
