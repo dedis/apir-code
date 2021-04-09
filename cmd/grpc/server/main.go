@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -156,6 +157,13 @@ func main() {
 		cores:      *cores,
 	})
 	log.Printf("is listening at %s", addr)
+
+	// start HTTP server for tests
+	// TODO: remove this in application
+	h := func(w http.ResponseWriter, _ *http.Request) {
+		os.Exit(0)
+	}
+	log.Fatal(http.ListenAndServe(addr, nil))
 
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
