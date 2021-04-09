@@ -192,6 +192,7 @@ func main() {
 	case <-sigCh:
 		rpcServer.GracefulStop()
 		lis.Close()
+		srv.Shutdown(context.Background())
 		log.Println("clean shutdown of server done")
 	}
 }
