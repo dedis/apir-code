@@ -158,18 +158,6 @@ func main() {
 	})
 	log.Printf("is listening at %s", addr)
 
-	// start HTTP server for tests
-	// TODO: remove this in application
-	host, _, err := net.SplitHostPort(addr)
-	if err != nil {
-		log.Fatal("impossible to parse addr for HTTP server")
-	}
-	h := func(w http.ResponseWriter, _ *http.Request) {
-		os.Exit(0)
-	}
-	http.HandleFunc("/", h)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", host, "8080"), nil))
-
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
@@ -180,6 +168,22 @@ func main() {
 		if err := rpcServer.Serve(lis); err != nil {
 			errCh <- err
 		}
+	}()
+
+	// start HTTP server for tests
+	// TODO: remove this in application
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		log.Fatal("impossible to parse addr for HTTP server")
+	}
+	h := func(w http.ResponseWriter, _ *http.Request) {
+		sigCh <- os.Interrupt
+	}
+	httpAddr := fmt.Sprintf("%s:%s", host, "8080")
+	srv := &http.Server{Addr: httpAddr}
+	http.HandleFunc("/", h)
+	go func() {
+		srv.ListenAndServe()
 	}()
 
 	select {
