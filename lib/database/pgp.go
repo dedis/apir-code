@@ -12,7 +12,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-const numKeysToDBLengthRatio float32 = 0.2
+const numKeysToDBLengthRatio float32 = 0.1
 
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
 	log.Printf("loading keys: %v\n", dataPaths)
