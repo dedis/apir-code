@@ -18,6 +18,7 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -207,11 +208,58 @@ func main() {
 
 func vpirIT(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
-	cl := client.NewIT(prg, &db.Info)
-	servers := makeITServers(db)
-	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
+	c := client.NewIT(prg, &db.Info)
+	ss := makeITServers(db)
+	numTotalBlocks := db.NumRows * db.NumColumns
+	numRetrieveBlocks := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
-	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	var startIndex int
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = initChunk(numRetrieveBlocks)
+
+		// pick a random block index to start the retrieval
+		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
+		for i := 0; i < numRetrieveBlocks; i++ {
+			results[j].CPU[i] = initBlock(len(ss))
+			results[j].Bandwidth[i] = initBlock(len(ss))
+
+			m.Reset()
+			queries := c.Query(startIndex+i, 2)
+			results[j].CPU[i].Query = m.RecordAndReset()
+			for r := range queries {
+				results[j].Bandwidth[i].Query += lenBytesFieldSlice(queries[r])
+			}
+
+			// get servers answers
+			answers := make([][]field.Element, len(ss))
+			for k := range ss {
+				m.Reset()
+				answers[k] = ss[k].Answer(queries[k])
+				results[j].CPU[i].Answers[k] = m.RecordAndReset()
+				results[j].Bandwidth[i].Answers[k] = lenBytesFieldSlice(answers[k])
+			}
+
+			m.Reset()
+			_, err := c.Reconstruct(answers)
+			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			if err != nil {
+				log.Fatal(err)
+			}
+			results[j].Bandwidth[i].Reconstruct = 0
+		}
+
+		// GC after each repetition
+		runtime.GC()
+	}
+
+	return results
 }
 
 func vpirDPF(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
@@ -446,10 +494,10 @@ func makeDPFServers(db *database.DB) []server.Server {
 	return []server.Server{s0, s1}
 }
 
-func makeITServers(db *database.DB) []server.Server {
+func makeITServers(db *database.DB) []*server.IT {
 	s0 := server.NewIT(db)
 	s1 := server.NewIT(db)
-	return []server.Server{s0, s1}
+	return []*server.IT{s0, s1}
 }
 
 func makePIRITServers(db *database.Bytes) []server.Server {
@@ -477,6 +525,10 @@ func initBlock(numAnswers int) *Block {
 		Answers:     make([]float64, numAnswers),
 		Reconstruct: 0,
 	}
+}
+
+func lenBytesFieldSlice(in []field.Element) float64 {
+	return float64(field.Bytes * len(in))
 }
 
 func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
