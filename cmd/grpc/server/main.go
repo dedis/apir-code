@@ -48,6 +48,9 @@ func main() {
 
 	flag.Parse()
 
+	// TODO: remove
+	fmt.Println(*filesNumber)
+
 	// start profiling
 	if *prof {
 		utils.StartProfiling(fmt.Sprintf("server-%v.prof", *sid))
@@ -95,7 +98,7 @@ func main() {
 	var db *database.DB
 	switch *vpirScheme {
 	case "it":
-		db, err := database.LoadMMapDB("data/data_it/")
+		db, err = database.LoadMMapDB("data/data_it/")
 		if err != nil {
 			log.Fatalf("impossible to load real keys db: %v", err)
 		}
