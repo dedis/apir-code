@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
+	"runtime/pprof"
 	"syscall"
 
 	"github.com/si-co/vpir-code/lib/constants"
@@ -33,12 +35,27 @@ func main() {
 	vpirScheme := flag.String("scheme", "", "vpir scheme to use: it or dpf")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
+	mprof := flag.Bool("mprof", false, "Write memory prof file")
+
 	flag.Parse()
 
 	// start profiling
 	if *prof {
 		utils.StartProfiling(fmt.Sprintf("server-%v.prof", *sid))
 		defer utils.StopProfiling()
+	}
+
+	if *mprof {
+		fn := fmt.Sprintf("server-%v-mem.mprof", *sid)
+		defer func() {
+			f, err := os.Create(fn)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("Writing memory profile")
+			pprof.WriteHeapProfile(f)
+			f.Close()
+		}()
 	}
 
 	// set logs
@@ -81,6 +98,8 @@ func main() {
 	default:
 		log.Fatal("unknow vpir scheme")
 	}
+
+	runtime.GC()
 
 	// run server with TLS
 	cfg := &tls.Config{
