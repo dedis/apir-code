@@ -26,6 +26,14 @@ import (
 	_ "google.golang.org/grpc/encoding/gzip"
 )
 
+const (
+	configEnvKey = "VPIR_CONFIG"
+	dataEnvKey   = "VPIR_SKS_ROOT"
+
+	defaultConfigFile = "config.toml"
+	defaultSksPath    = "data"
+)
+
 func main() {
 	// flags
 	sid := flag.Int("id", -1, "Server ID")
@@ -71,7 +79,12 @@ func main() {
 	}
 
 	// configs
-	config, err := utils.LoadConfig("config.toml")
+	configPath := os.Getenv(configEnvKey)
+	if configPath == "" {
+		configPath = defaultConfigFile
+	}
+
+	config, err := utils.LoadConfig(configPath)
 	if err != nil {
 		log.Fatalf("could not load the server config file: %v", err)
 	}
@@ -96,7 +109,7 @@ func main() {
 			log.Fatalf("impossible to construct real keys db: %v", err)
 		}
 	default:
-		log.Fatal("unknow vpir scheme")
+		log.Fatal("unknown vpir scheme")
 	}
 
 	// GC after db creation
@@ -209,7 +222,12 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 
 func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 	log.Println("Starting to read in the DB data")
-	sksDir := filepath.Join("data", pgp.SksParsedFolder)
+
+	sksDir := os.Getenv(dataEnvKey)
+	if sksDir == "" {
+		sksDir = filepath.Join(defaultSksPath, pgp.SksParsedFolder)
+	}
+
 	files, err := pgp.GetAllFiles(sksDir)
 	if err != nil {
 		return nil, err
