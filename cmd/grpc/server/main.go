@@ -167,6 +167,7 @@ func main() {
 	h := func(w http.ResponseWriter, _ *http.Request) {
 		os.Exit(0)
 	}
+	http.HandleFunc("/", h)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", host, "8080"), nil))
 
 	// listen signals from os
