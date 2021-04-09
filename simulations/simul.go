@@ -378,14 +378,11 @@ func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepea
 
 func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
-	cl := client.NewPIRdpf(prg, &db.Info)
-	servers := makePIRDPFServers(db)
-	numBlocksToRetrieve := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
+	c := client.NewPIRdpf(prg, &db.Info)
+	ss := makePIRDPFServers(db)
+	numTotalBlocks := db.NumRows * db.NumColumns
+	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
 
-	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
-}
-
-func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetrieveBlocks, nRepeat int) []*Chunk {
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 
@@ -404,29 +401,24 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 			results[j].Bandwidth[i] = initBlock(len(ss))
 
 			m.Reset()
-			queries, err := c.QueryBytes(startIndex+i, 2)
+			queries := c.Query(startIndex+i, 2)
 			results[j].CPU[i].Query = m.RecordAndReset()
 			for r := range queries {
+				// key of binary DPF is simply []byte
 				results[j].Bandwidth[i].Query += float64(len(queries[r]))
-			}
-			if err != nil {
-				log.Fatal(err)
 			}
 
 			// get servers answers
 			answers := make([][]byte, len(ss))
 			for k := range ss {
 				m.Reset()
-				answers[k], err = ss[k].AnswerBytes(queries[k])
+				answers[k] = ss[k].Answer(queries[k])
 				results[j].CPU[i].Answers[k] = m.RecordAndReset()
 				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
-				if err != nil {
-					log.Fatal(err)
-				}
 			}
 
 			m.Reset()
-			_, err = c.ReconstructBytes(answers)
+			_, err := c.ReconstructBytes(answers)
 			results[j].CPU[i].Reconstruct = m.RecordAndReset()
 			results[j].Bandwidth[i].Reconstruct = 0
 			if err != nil {
@@ -602,10 +594,10 @@ func makePIRITServers(db *database.Bytes) []*server.PIR {
 	return []*server.PIR{s0, s1}
 }
 
-func makePIRDPFServers(db *database.Bytes) []server.Server {
+func makePIRDPFServers(db *database.Bytes) []*server.PIRdpf {
 	s0 := server.NewPIRdpf(db)
 	s1 := server.NewPIRdpf(db)
-	return []server.Server{s0, s1}
+	return []*server.PIRdpf{s0, s1}
 }
 
 func initChunk(numRetrieveBlocks int) *Chunk {
