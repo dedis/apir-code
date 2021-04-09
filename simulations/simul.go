@@ -258,6 +258,9 @@ func vpirIT(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chu
 
 		// GC after each repetition
 		runtime.GC()
+
+		// sleep after every iteration
+		time.Sleep(2 * time.Second)
 	}
 
 	return results
@@ -315,6 +318,9 @@ func vpirDPF(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Ch
 
 		// GC after each repetition
 		runtime.GC()
+
+		// sleep after every iteration
+		time.Sleep(2 * time.Second)
 	}
 
 	return results
@@ -371,6 +377,9 @@ func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepea
 
 		// GC after each repetition
 		runtime.GC()
+
+		// sleep after every iteration
+		time.Sleep(2 * time.Second)
 	}
 
 	return results
@@ -428,6 +437,9 @@ func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepe
 
 		// GC after each repetition
 		runtime.GC()
+
+		// sleep after every iteration
+		time.Sleep(2 * time.Second)
 	}
 
 	return results
@@ -485,6 +497,9 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 			results[j].CPU[i].Reconstruct = m.RecordAndReset()
 			results[j].Bandwidth[i].Reconstruct = 0
 		}
+
+		// GC after each repetition
+		runtime.GC()
 	}
 	return results
 }
@@ -558,6 +573,9 @@ func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepe
 		}
 		results[j].CPU[0].Reconstruct = m.RecordAndReset()
 		results[j].Bandwidth[0].Reconstruct = 0
+
+		// GC after each repetition
+		runtime.GC()
 	}
 
 	return results
