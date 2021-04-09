@@ -465,17 +465,12 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 
 			m.Reset()
 			query, err := c.QueryBytes(index + i)
-			// TODO: shouldn't we test for error after taking the time?
 			if err != nil {
 				log.Fatal(err)
 			}
 			results[j].CPU[i].Query = m.RecordAndReset()
 			results[j].Bandwidth[i].Query = float64(len(query))
 
-			// get servers answers
-			// TODO: shouldn't we add a m.Reset() here? It
-			// is probably nothing, but we want to measure
-			// *exactly* AnswerBytes
 			answer, err := s.AnswerBytes(query)
 			if err != nil {
 				log.Fatal(err)
