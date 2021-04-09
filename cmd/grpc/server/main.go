@@ -95,17 +95,13 @@ func main() {
 	var db *database.DB
 	switch *vpirScheme {
 	case "it":
-		db, err = loadPgpDB(*filesNumber, true)
+		db, err := database.LoadDB("data/data_it/", "vpir")
 		if err != nil {
-			log.Fatalf("impossible to construct real keys db: %v", err)
+			log.Fatalf("impossible to load real keys db: %v", err)
 		}
-	//db, err := database.LoadDB("data/db", "vpir")
-	//if err != nil {
-	//log.Fatalf("impossible to load real keys db: %v", err)
-	//}
 	case "dpf":
 		// mmap db is vector for the moment
-		db, err = database.LoadMMapDB("data/mmap.d/")
+		db, err = database.LoadMMapDB("data/data_dpf/")
 		if err != nil {
 			log.Fatalf("impossible to construct real keys db: %v", err)
 		}
