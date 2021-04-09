@@ -322,11 +322,58 @@ func vpirDPF(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Ch
 
 func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
-	cl := client.NewPIR(prg, &db.Info)
-	servers := makePIRITServers(db)
-	numBlocksToRetrieve := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
+	c := client.NewPIR(prg, &db.Info)
+	ss := makePIRITServers(db)
+	numTotalBlocks := db.NumRows * db.NumColumns
+	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
 
-	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	var startIndex int
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = initChunk(numRetrieveBlocks)
+
+		// pick a random block index to start the retrieval
+		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
+		for i := 0; i < numRetrieveBlocks; i++ {
+			results[j].CPU[i] = initBlock(len(ss))
+			results[j].Bandwidth[i] = initBlock(len(ss))
+
+			m.Reset()
+			queries := c.Query(startIndex+i, 2)
+			results[j].CPU[i].Query = m.RecordAndReset()
+			for r := range queries {
+				results[j].Bandwidth[i].Query += float64(len(queries[r]))
+			}
+
+			// get servers answers
+			answers := make([][]byte, len(ss))
+			for k := range ss {
+				m.Reset()
+				answers[k] = ss[k].Answer(queries[k])
+				results[j].CPU[i].Answers[k] = m.RecordAndReset()
+				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
+			}
+
+			m.Reset()
+			_, err := c.Reconstruct(answers)
+			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			results[j].Bandwidth[i].Reconstruct = 0
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		// GC after each repetition
+		runtime.GC()
+	}
+
+	return results
 }
 
 func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
@@ -549,10 +596,10 @@ func makeITServers(db *database.DB) []*server.IT {
 	return []*server.IT{s0, s1}
 }
 
-func makePIRITServers(db *database.Bytes) []server.Server {
+func makePIRITServers(db *database.Bytes) []*server.PIR {
 	s0 := server.NewPIR(db)
 	s1 := server.NewPIR(db)
-	return []server.Server{s0, s1}
+	return []*server.PIR{s0, s1}
 }
 
 func makePIRDPFServers(db *database.Bytes) []server.Server {
