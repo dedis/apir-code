@@ -18,16 +18,18 @@ import (
 )
 
 const hundredMb = 104857600
-const usage = `go run main.go -cmd genChunks|genDB -path PATH -out PATH`
+const usage = `go run main.go {-rabalanced} -cmd genChunks|genDB -path PATH -out PATH`
 
 func main() {
 	var cmd string
 	var path string
 	var out string
+	var rebalanced bool
 
 	flag.StringVar(&cmd, "cmd", "", "genChunks|genDB")
 	flag.StringVar(&path, "path", "", "input file")
 	flag.StringVar(&out, "out", "", "output file/folder")
+	flag.BoolVar(&rebalanced, "rebalanced", false, "rebalanced db or not")
 
 	flag.Parse()
 
@@ -44,7 +46,7 @@ func main() {
 			log.Fatalf("failed to split chunks: %v", err)
 		}
 	case "genDB":
-		err := generateDB(path, out)
+		err := generateDB(path, out, rebalanced)
 		if err != nil {
 			log.Fatalf("failed to generate DB: %v", err)
 		}
@@ -127,7 +129,7 @@ func splitFullDumpIntoChunks(path, out string) error {
 	return nil
 }
 
-func generateDB(root, out string) error {
+func generateDB(root, out string, rebalanced bool) error {
 	filesInfo, err := ioutil.ReadDir(root)
 	if err != nil {
 		return xerrors.Errorf("failed to read files: %v", err)
@@ -145,7 +147,7 @@ func generateDB(root, out string) error {
 
 	log.Printf("loading the following files: %v", files)
 
-	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, false)
+	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
 	if err != nil {
 		return xerrors.Errorf("failed to generate DB: %v", err)
 	}

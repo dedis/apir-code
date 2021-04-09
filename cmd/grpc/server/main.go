@@ -99,6 +99,7 @@ func main() {
 		log.Fatal("unknow vpir scheme")
 	}
 
+	// GC after db creation
 	runtime.GC()
 
 	// run server with TLS
