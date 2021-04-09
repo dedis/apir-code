@@ -18,6 +18,7 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/dpf"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
@@ -264,11 +265,59 @@ func vpirIT(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chu
 
 func vpirDPF(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
-	cl := client.NewDPF(prg, &db.Info)
-	servers := makeDPFServers(db)
-	numBlocksToRetrieve := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
+	c := client.NewDPF(prg, &db.Info)
+	ss := makeDPFServers(db)
+	numTotalBlocks := db.NumRows * db.NumColumns
+	numRetrieveBlocks := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
-	return retrieveBlocks(cl, servers, db.NumRows*db.NumColumns, numBlocksToRetrieve, nRepeat)
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	var startIndex int
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = initChunk(numRetrieveBlocks)
+
+		// pick a random block index to start the retrieval
+		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
+		for i := 0; i < numRetrieveBlocks; i++ {
+			results[j].CPU[i] = initBlock(len(ss))
+			results[j].Bandwidth[i] = initBlock(len(ss))
+
+			m.Reset()
+			queries := c.Query(startIndex+i, 2)
+			results[j].CPU[i].Query = m.RecordAndReset()
+			// TODO: len DPF queries
+			for r := range queries {
+				results[j].Bandwidth[i].Query += lenBytesDPFFieldKey(queries[r])
+			}
+
+			// get servers answers
+			answers := make([][]field.Element, len(ss))
+			for k := range ss {
+				m.Reset()
+				answers[k] = ss[k].Answer(queries[k])
+				results[j].CPU[i].Answers[k] = m.RecordAndReset()
+				results[j].Bandwidth[i].Answers[k] = lenBytesFieldSlice(answers[k])
+			}
+
+			m.Reset()
+			_, err := c.Reconstruct(answers)
+			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			results[j].Bandwidth[i].Reconstruct = 0
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		// GC after each repetition
+		runtime.GC()
+	}
+
+	return results
 }
 
 func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
@@ -488,10 +537,10 @@ func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	return numBits / (blockSize * elemSize)
 }
 
-func makeDPFServers(db *database.DB) []server.Server {
+func makeDPFServers(db *database.DB) []*server.DPF {
 	s0 := server.NewDPF(db)
 	s1 := server.NewDPF(db)
-	return []server.Server{s0, s1}
+	return []*server.DPF{s0, s1}
 }
 
 func makeITServers(db *database.DB) []*server.IT {
@@ -529,6 +578,17 @@ func initBlock(numAnswers int) *Block {
 
 func lenBytesFieldSlice(in []field.Element) float64 {
 	return float64(field.Bytes * len(in))
+}
+
+func lenBytesDPFFieldKey(in dpf.DPFkey) float64 {
+	// ServerIdx byte
+	out := float64(1)
+	// Bytes     []byte
+	out += float64(len(in.Bytes))
+	// FinalCW   []field.Element
+	out += lenBytesFieldSlice(in.FinalCW)
+
+	return out
 }
 
 func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
