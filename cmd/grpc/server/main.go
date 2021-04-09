@@ -95,7 +95,7 @@ func main() {
 	var db *database.DB
 	switch *vpirScheme {
 	case "it":
-		db, err := database.LoadDB("data/data_it/", "vpir")
+		db, err := database.LoadMMapDB("data/data_it/", "vpir")
 		if err != nil {
 			log.Fatalf("impossible to load real keys db: %v", err)
 		}
