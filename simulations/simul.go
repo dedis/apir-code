@@ -272,9 +272,7 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 			// get servers answers
 			answers := make([][]byte, len(ss))
 			for k := range ss {
-				// TODO: shouldn't we add a m.Reset() here? It
-				// is probably nothing, but we want to measure
-				// *exactly* AnswerBytes
+				m.Reset()
 				answers[k], err = ss[k].AnswerBytes(queries[k])
 				results[j].CPU[i].Answers[k] = m.RecordAndReset()
 				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
@@ -283,9 +281,7 @@ func retrieveBlocks(c client.Client, ss []server.Server, numTotalBlocks, numRetr
 				}
 			}
 
-			// TODO: shouldn't we add a m.Reset() here? It
-			// is probably nothing, but we want to measure
-			// *exactly* AnswerBytes
+			m.Reset()
 			_, err = c.ReconstructBytes(answers)
 			results[j].CPU[i].Reconstruct = m.RecordAndReset()
 			results[j].Bandwidth[i].Reconstruct = 0
