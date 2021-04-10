@@ -109,26 +109,3 @@ func sortById(keys []*pgp.Key) {
 		return keys[i].ID > keys[j].ID
 	})
 }
-
-//func getNTopValuesFromMap(m map[string]int, n int) {
-//	// Turning the map into this structure
-//	type kv struct {
-//		Key   string
-//		Value int
-//	}
-//
-//	var ss []kv
-//	for k, v := range m {
-//		ss = append(ss, kv{k, v})
-//	}
-//
-//	// Then sorting the slice by value, higher first.
-//	sort.Slice(ss, func(i, j int) bool {
-//		return ss[i].Value > ss[j].Value
-//	})
-//
-//	// Print the x top values
-//	for _, kv := range ss[:n] {
-//		fmt.Printf("%s, %d\n", kv.Key, kv.Value)
-//	}
-//}
