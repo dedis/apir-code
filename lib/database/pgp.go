@@ -63,7 +63,7 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 			e := new(field.Element).SetBytes(v[j : j+elementLength])
 			elements[j/elementLength] = *e
 		}
-		for m := k * blockLen; k < (k+1)*blockLen; m++ {
+		for m := k * blockLen; m < (k+1)*blockLen; m++ {
 			if m-k*blockLen >= len(elements) {
 				break
 			}
@@ -113,20 +113,15 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 
 	// embed data into bytes
 	for k, v := range ht {
-		// Pad the block to be a multiple of bytesLength
 		v = PadBlock(v, byteLengths)
-		elements := make([]byte, len(v)/byteLengths)
-
-		// embed all the bytes
-		for j := 0; j < len(v); j += byteLengths {
-			elements[j/byteLengths] = v[j : j+byteLengths]
-		}
-		for m := k * blockLen; k < (k+1)*blockLen; m++ {
-			if m-k*blockLen >= len(elements) {
-				break
-			}
-			db.Entries[m] = elements[m-k*blockLen]
-		}
+		elements := v
+		copy(db.Entries[k*blockLen:], elements)
+		//for m := k * blockLen; m < (k+1)*blockLen; m++ {
+		//if m-k*blockLen >= len(elements) {
+		//break
+		//}
+		//copy(db.Entries[m:m+byteLengths], elements[m-k*blockLen:m-k*blockLen+byteLengths])
+		//}
 	}
 
 	return db, nil
