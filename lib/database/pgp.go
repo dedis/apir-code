@@ -26,25 +26,15 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	// all the servers end up with an identical hash table.
 	sortById(keys)
 
-	var numColumns, numRows int
 	// decide on the length of the hash table
-	numBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
-	if rebalanced {
-		utils.IncreaseToNextSquare(&numBlocks)
-	}
-	ht, err := makeHashTable(keys, numBlocks)
+	preSquareNumBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
+	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
 
+	ht, err := makeHashTable(keys, numRows*numColumns)
 	// get the maximum byte length of the values in the hashTable
 	// +1 takes into account the padding 0x80 that is always added.
 	maxBytes := utils.MaxBytesLength(ht) + 1
 	blockLen := int(math.Ceil(float64(maxBytes) / float64(elementLength)))
-	if rebalanced {
-		numColumns = int(math.Sqrt(float64(numBlocks)))
-		numRows = numColumns
-	} else {
-		numColumns = numBlocks
-		numRows = 1
-	}
 
 	// create all zeros db
 	db, err := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
@@ -77,51 +67,30 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	log.Printf("Bytes db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
 
-	byteLengths := 16
-
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
 		return nil, err
 	}
-
 	// Sort the keys by id, higher first, to make sure that
 	// all the servers end up with an identical hash table.
 	sortById(keys)
 
-	var numColumns, numRows int
 	// decide on the length of the hash table
-	numBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
-	if rebalanced {
-		utils.IncreaseToNextSquare(&numBlocks)
-	}
-	ht, err := makeHashTable(keys, numBlocks)
+	preSquareNumBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
+	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
 
+	ht, err := makeHashTable(keys, numRows*numColumns)
 	// get the maximum byte length of the values in the hashTable
 	// +1 takes into account the padding 0x80 that is always added.
-	maxBytes := utils.MaxBytesLength(ht) + 1
-	blockLen := int(math.Ceil(float64(maxBytes) / float64(byteLengths)))
-	if rebalanced {
-		numColumns = int(math.Sqrt(float64(numBlocks)))
-		numRows = numColumns
-	} else {
-		numColumns = numBlocks
-		numRows = 1
-	}
+	blockLen := utils.MaxBytesLength(ht) + 1
 
 	// create all zeros db
 	db := CreateZeroMultiBitBytes(numRows, numColumns, blockLen)
 
 	// embed data into bytes
 	for k, v := range ht {
-		v = PadBlock(v, byteLengths)
-		elements := v
-		copy(db.Entries[k*blockLen:], elements)
-		//for m := k * blockLen; m < (k+1)*blockLen; m++ {
-		//if m-k*blockLen >= len(elements) {
-		//break
-		//}
-		//copy(db.Entries[m:m+byteLengths], elements[m-k*blockLen:m-k*blockLen+byteLengths])
-		//}
+		v = PadBlock(v, blockLen)
+		copy(db.Entries[k*blockLen:(k+1)*blockLen], v)
 	}
 
 	return db, nil

@@ -456,8 +456,8 @@ func HashToIndex(id string, length int) int {
 }
 
 func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns int) {
-	utils.IncreaseToNextSquare(&numBlocks)
 	if matrix {
+		utils.IncreaseToNextSquare(&numBlocks)
 		numColumns = int(math.Sqrt(float64(numBlocks)))
 		numRows = numColumns
 	} else {

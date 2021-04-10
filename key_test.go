@@ -166,10 +166,10 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	require.NoError(t, err)
 
 	// return result bytes
-	if _, ok := result.([]field.Element); ok {
+	switch result.(type) {
+	case []field.Element:
 		return field.VectorToBytes(result.([]field.Element))
-	} else {
-		fmt.Println(result)
+	default:
 		return result.([]byte)
 	}
 }
