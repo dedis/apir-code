@@ -249,14 +249,19 @@ def plotVpirPerformanceLines():
 def plotSingle():
     schemes = ["computationalPir.json", "computationalVpir.json"]
     labels = ["w/o integrity", "w/ integrity"]
-    table = defaultdict(list)
+    cpuTable = defaultdict(list)
+    bwTable = defaultdict(list)
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            table[dbSize].append((cpu / 1000, bw / MB))
-    print_latex_table_joint(table, 2)
+            cpuTable[dbSize].append(cpu / 1000)
+            bwTable[dbSize].append(bw/MB)
+
+    print_latex_table_separate(cpuTable, 2)
+    print("")
+    print_latex_table_separate(bwTable, 2)
 
 
 def plotReal():
