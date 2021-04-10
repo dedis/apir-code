@@ -74,6 +74,59 @@ func TestRetrieveRealKeysITMatrix(t *testing.T) {
 	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
 }
 
+// TestRetrieveRealKeysPIRDPFVector tests the retrieval of real PGP keys using
+// the classical PIR DPF-based scheme. With DPF, the database is always
+// represented as a vector.
+func TestRetrieveRealKeysPIRDPFVector(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	// get file paths for key dump
+	filePaths := getDBFilePaths()
+
+	// generate db from sks key dump
+	db, err := database.GenerateRealKeyBytes(filePaths, false)
+	require.NoError(t, err)
+	numBlocks := db.NumColumns * db.NumRows
+
+	// read in the real pgp key values
+	realKeys, err := pgp.LoadAndParseKeys(filePaths)
+	require.NoError(t, err)
+
+	// client and servers
+	prg := utils.RandomPRG()
+	c := client.NewPIRdpf(prg, &db.Info)
+	servers := makePIRDPFServers(db)
+
+	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
+}
+
+// TestRetrieveRealKeysPIRITMatrix tests the retrieval of real PGP keys using
+// the classical PIR matrix-based scheme.
+func TestRetrieveRealKeysPIRITMatrix(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	// get file paths for key dump
+	filePaths := getDBFilePaths()
+
+	// generate db from sks key dump
+	db, err := database.GenerateRealKeyBytes(filePaths, true)
+	require.NoError(t, err)
+	numBlocks := db.NumColumns * db.NumRows
+
+	// read in the real pgp key values
+	realKeys, err := pgp.LoadAndParseKeys(filePaths)
+	require.NoError(t, err)
+
+	// client and servers
+	prg := utils.RandomPRG()
+	c := client.NewPIR(prg, &db.Info)
+	servers := makePIRITServers(db)
+
+	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
+}
+
 func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
 	// number of keys to retrieve for the test
 	numKeys := 100
@@ -113,7 +166,12 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	require.NoError(t, err)
 
 	// return result bytes
-	return field.VectorToBytes(result.([]field.Element))
+	if _, ok := result.([]field.Element); ok {
+		return field.VectorToBytes(result.([]field.Element))
+	} else {
+		fmt.Println(result)
+		return result.([]byte)
+	}
 }
 
 func makeDPFServers(db *database.DB) []server.Server {
@@ -125,6 +183,18 @@ func makeDPFServers(db *database.DB) []server.Server {
 func makeITServers(db *database.DB) []server.Server {
 	s0 := server.NewIT(db)
 	s1 := server.NewIT(db)
+	return []server.Server{s0, s1}
+}
+
+func makePIRDPFServers(db *database.Bytes) []server.Server {
+	s0 := server.NewPIRdpf(db)
+	s1 := server.NewPIRdpf(db)
+	return []server.Server{s0, s1}
+}
+
+func makePIRITServers(db *database.Bytes) []server.Server {
+	s0 := server.NewPIR(db)
+	s1 := server.NewPIR(db)
 	return []server.Server{s0, s1}
 }
 

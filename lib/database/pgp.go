@@ -15,7 +15,7 @@ import (
 const numKeysToDBLengthRatio float32 = 0.1
 
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
-	log.Printf("rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
+	log.Printf("Field db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
 
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
@@ -49,7 +49,7 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	// create all zeros db
 	db, err := CreateZeroMultiBitDB(numRows, numColumns, blockLen)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to create db: %v", err)
+		return nil, xerrors.Errorf("failed to create zero db: %v", err)
 	}
 
 	// embed data into field elements
@@ -68,6 +68,64 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 				break
 			}
 			db.SetEntry(m, elements[m-k*blockLen])
+		}
+	}
+
+	return db, nil
+}
+
+func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
+	log.Printf("Bytes db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
+
+	byteLengths := 16
+
+	keys, err := pgp.LoadKeysFromDisk(dataPaths)
+	if err != nil {
+		return nil, err
+	}
+
+	// Sort the keys by id, higher first, to make sure that
+	// all the servers end up with an identical hash table.
+	sortById(keys)
+
+	var numColumns, numRows int
+	// decide on the length of the hash table
+	numBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
+	if rebalanced {
+		utils.IncreaseToNextSquare(&numBlocks)
+	}
+	ht, err := makeHashTable(keys, numBlocks)
+
+	// get the maximum byte length of the values in the hashTable
+	// +1 takes into account the padding 0x80 that is always added.
+	maxBytes := utils.MaxBytesLength(ht) + 1
+	blockLen := int(math.Ceil(float64(maxBytes) / float64(byteLengths)))
+	if rebalanced {
+		numColumns = int(math.Sqrt(float64(numBlocks)))
+		numRows = numColumns
+	} else {
+		numColumns = numBlocks
+		numRows = 1
+	}
+
+	// create all zeros db
+	db := CreateZeroMultiBitBytes(numRows, numColumns, blockLen)
+
+	// embed data into bytes
+	for k, v := range ht {
+		// Pad the block to be a multiple of bytesLength
+		v = PadBlock(v, byteLengths)
+		elements := make([]byte, len(v)/byteLengths)
+
+		// embed all the bytes
+		for j := 0; j < len(v); j += byteLengths {
+			elements[j/byteLengths] = v[j : j+byteLengths]
+		}
+		for m := k * blockLen; k < (k+1)*blockLen; m++ {
+			if m-k*blockLen >= len(elements) {
+				break
+			}
+			db.Entries[m] = elements[m-k*blockLen]
 		}
 	}
 
