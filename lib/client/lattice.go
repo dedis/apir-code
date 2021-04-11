@@ -8,8 +8,6 @@ import (
 	"encoding/gob"
 	"math"
 
-	"github.com/si-co/vpir-code/lib/monitor"
-
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
 )
@@ -38,7 +36,6 @@ func (c *Lattice) QueryBytes(index int) ([]byte, error) {
 	params := c.dbInfo.LatParams
 	encoder := bfv.NewEncoder(params)
 
-	timer := monitor.NewMonitor()
 	// Key generation
 	kgen := bfv.NewKeyGenerator(params)
 	sk, pk := kgen.GenKeyPair()
