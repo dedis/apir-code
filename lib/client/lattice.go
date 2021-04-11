@@ -6,9 +6,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"fmt"
-	"github.com/si-co/vpir-code/lib/monitor"
 	"math"
+
+	"github.com/si-co/vpir-code/lib/monitor"
 
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
@@ -50,13 +50,10 @@ func (c *Lattice) QueryBytes(index int) ([]byte, error) {
 		iy:  index % c.dbInfo.NumColumns,
 		key: sk,
 	}
-	fmt.Printf("Time to gen keys: %v\n", timer.RecordAndReset())
 
 	encQuery := genQuery(params, c.state.iy, encoder, encryptor)
-	fmt.Printf("Time to gen query: %v\n", timer.RecordAndReset())
 
 	encodedQuery, err := encodeQuery(encQuery, rtk)
-	fmt.Printf("Time to encode query: %v\n", timer.RecordAndReset())
 	if err != nil {
 		return nil, err
 	}
