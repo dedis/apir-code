@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "results_gc/"
+resultFolder = "final_results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
