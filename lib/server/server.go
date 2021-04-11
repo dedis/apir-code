@@ -2,7 +2,6 @@ package server
 
 import (
 	"math"
-	"runtime"
 	"sync"
 
 	"github.com/lukechampine/fastxor"
@@ -164,10 +163,10 @@ func processSingleBitColumns(begin, end int, db *database.DB, q []field.Element,
 /*
 %%	PIR primitives
 */
-func answerPIR(q []byte, db *database.Bytes) []byte {
+func answerPIR(q []byte, db *database.Bytes, cores int) []byte {
 	m := make([]byte, db.NumRows*db.BlockSize)
 	// multithreading
-	NGoRoutines := runtime.NumCPU()
+	NGoRoutines := cores
 	var begin, end int
 	// Vector db
 	if db.NumRows == 1 {
