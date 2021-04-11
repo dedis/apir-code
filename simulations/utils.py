@@ -70,16 +70,16 @@ def parseResults(file):
                     # parse the results of a single block
                     for block in repetition:
                         client[param].append(block['Query'] + block['Reconstruct'])
-                        server[param].append(np.mean(block['Answers']))
+                        server[param].append(np.sum(block['Answers']))
             parsedResults[int(dbSize)] = {"client": client, "server": server}
     return parsedResults
 
 
 def stats(data):
     s = {'cpu': {}, 'bw': {}}
-    s['cpu']['mean'] = np.min(data['CPU'])
+    s['cpu']['mean'] = np.mean(data['CPU'])
     s['cpu']['std'] = np.std(data['CPU'])
-    s['bw']['mean'] = np.min(data['Bandwidth'])
+    s['bw']['mean'] = np.mean(data['Bandwidth'])
     s['bw']['std'] = np.std(data['Bandwidth'])
     return s
 
