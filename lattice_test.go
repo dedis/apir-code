@@ -16,7 +16,7 @@ import (
 )
 
 func TestLatticeMatrixOneMb(t *testing.T) {
-	dbLen := 80000000 // specified in bits
+	dbLen := 838860800 // specified in bits
 	dbPRG := utils.RandomPRG()
 	db, _ := database.CreateRandomRingDB(dbPRG, dbLen, true)
 
@@ -46,7 +46,7 @@ func retrieveBlocksLattice(t *testing.T, db *database.Ring, testName string) {
 }
 
 func TestLatticeWithDHTag(t *testing.T) {
-	dbLen := 8000000 // specified in bits
+	dbLen := 838860800 // specified in bits
 	dbPRG := utils.RandomPRG()
 	dbRing, data := database.CreateRandomRingDB(dbPRG, dbLen, true)
 	dbElliptic := database.CreateEllipticWithDigestFromData(data, &dbRing.Info)

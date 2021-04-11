@@ -66,7 +66,7 @@ KB = 1024
 
 def plotVpirBenchmarks():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-bit (§4.1)", "Multi-bit (§4.3)", "Multi-bit Block (§4.3)"]
+    labels = ["Single-bit (§4.1)", "Single-element (§4.4)", "Block (§4.4)"]
     colors = ['black', 'grey', 'lightgrey']
 
     fig, ax = plt.subplots()
@@ -248,7 +248,7 @@ def plotVpirPerformanceLines():
 
 def plotSingle():
     schemes = ["computationalPir.json", "computationalVpir.json"]
-    labels = ["w/o integrity", "w/ integrity"]
+    labels = ["None", "Atomic"]
     cpuTable = defaultdict(list)
     bwTable = defaultdict(list)
     for i, scheme in enumerate(schemes):
@@ -259,9 +259,9 @@ def plotSingle():
             cpuTable[dbSize].append(cpu / 1000)
             bwTable[dbSize].append(bw/MB)
 
-    print_latex_table_separate(cpuTable, 2)
+    print_latex_table_separate(cpuTable, len(schemes))
     print("")
-    print_latex_table_separate(bwTable, 2)
+    print_latex_table_separate(bwTable, len(schemes))
 
 
 def plotReal():

@@ -446,6 +446,7 @@ func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepe
 }
 
 func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
+	numRetrievedBlocks := 1
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
@@ -457,23 +458,12 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 	var index int
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = &Chunk{
-			CPU:       make([]*Block, 1),
-			Bandwidth: make([]*Block, 1),
-		}
+		results[j] = initChunk(numRetrievedBlocks)
 		// pick a random block index to start the retrieval
 		index = rand.Intn(db.NumRows * db.NumColumns)
-		for i := 0; i < 1; i++ {
-			results[j].CPU[i] = &Block{
-				Query:       0,
-				Answers:     make([]float64, 1),
-				Reconstruct: 0,
-			}
-			results[j].Bandwidth[i] = &Block{
-				Query:       0,
-				Answers:     make([]float64, 1),
-				Reconstruct: 0,
-			}
+		for i := 0; i < numRetrievedBlocks; i++ {
+			results[j].CPU[i] = initBlock(1)
+			results[j].Bandwidth[i] = initBlock(1)
 
 			m.Reset()
 			query, err := c.QueryBytes(index + i)
@@ -505,6 +495,7 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 }
 
 func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepeat int) []*Chunk {
+	numRetrievedBlocks := 1
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
@@ -522,22 +513,11 @@ func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepe
 	var column [][]byte
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = &Chunk{
-			CPU:       make([]*Block, 1),
-			Bandwidth: make([]*Block, 1),
-		}
+		results[j] = initChunk(numRetrievedBlocks)
 		// pick a random block index to start the retrieval
 		index = rand.Intn(dbr.NumRows * dbr.NumColumns)
-		results[j].CPU[0] = &Block{
-			Query:       0,
-			Answers:     make([]float64, 1),
-			Reconstruct: 0,
-		}
-		results[j].Bandwidth[0] = &Block{
-			Query:       0,
-			Answers:     make([]float64, 1),
-			Reconstruct: 0,
-		}
+		results[j].CPU[0] = initBlock(1)
+		results[j].Bandwidth[0] = initBlock(1)
 
 		m.Reset()
 		queryL, err = cl.QueryBytes(index)

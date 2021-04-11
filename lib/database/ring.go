@@ -3,7 +3,6 @@ package database
 import (
 	"encoding/binary"
 	"github.com/ldsec/lattigo/v2/bfv"
-	helpers "github.com/si-co/vpir-code/lib/utils"
 	"io"
 	"log"
 	"math"
@@ -20,31 +19,19 @@ func CreateRandomRingDB(rnd io.Reader, dbLen int, rebalanced bool) (*Ring, []byt
 	encoder := bfv.NewEncoder(params)
 
 	blockLen := 1
-	coeffSize := int(math.Log2(float64(params.T()))) / 8
-	elemSize := coeffSize * int(params.N())
-	numBlocks := dbLen / (8 * elemSize)
-	// handle very small db
-	if numBlocks == 0 {
-		numBlocks = 1
-	}
-	var numColumns, numRows int
-	if rebalanced {
-		helpers.IncreaseToNextSquare(&numBlocks)
-		numColumns = int(math.Sqrt(float64(numBlocks)))
-		numRows = numColumns
-	} else {
-		numColumns = numBlocks
-		numRows = 1
-	}
+	coeffSize := int(math.Log2(float64(params.T()))) / 8 // in bytes
+	elemSize := coeffSize * int(params.N())              // how many bytes a plaintext fits
+	preSquareNumBlocks := int(math.Ceil((float64(dbLen) / 8) / float64(elemSize)))
+	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
 
 	// read random bytes for filling out the entries
-	randInput := make([]byte, numBlocks*elemSize)
+	randInput := make([]byte, numRows*numColumns*elemSize)
 	if _, err := rnd.Read(randInput); err != nil {
 		log.Fatal(err)
 	}
 
 	coefficients := make([]uint64, params.N())
-	entries := make([]*bfv.PlaintextMul, numBlocks)
+	entries := make([]*bfv.PlaintextMul, numRows*numColumns)
 	tmp := make([]byte, 8)
 	for i := range entries {
 		entries[i] = bfv.NewPlaintextMul(params)
