@@ -41,7 +41,7 @@ func main() {
 	experiment := flag.Bool("experiment", false, "run setting for experiments")
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
 	cores := flag.Int("cores", -1, "number of cores to use")
-	vpirScheme := flag.String("scheme", "", "vpir scheme to use: it or dpf")
+	vpirScheme := flag.String("scheme", "", "scheme to use: it, dpf, pir-it or pir-dpf")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	mprof := flag.Bool("mprof", false, "Write memory prof file")
@@ -107,8 +107,18 @@ func main() {
 		if err != nil {
 			log.Fatalf("impossible to construct real keys db: %v", err)
 		}
+	case "pir-it":
+		db, err = loadPgpBytes(*filesNumber, true)
+		if err != nil {
+			log.Fatalf("impossible to construct real keys bytes db: %v", err)
+		}
+	case "pir-dpf":
+		db, err = loadPgpBytes(*filesNumber, false)
+		if err != nil {
+			log.Fatalf("impossible to construct real keys bytes db: %v", err)
+		}
 	default:
-		log.Fatal("unknown vpir scheme")
+		log.Fatal("unknown scheme")
 	}
 
 	// GC after db creation
@@ -239,6 +249,34 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 	log.Println("Starting to read in the DB data")
 
+	// take only filesNumber files
+	files = getSksFiles(filesNumber)
+
+	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("DB loaded with files", files)
+
+	return db, nil
+}
+
+func loadPgpBytes(filesNumber int, rebalanced bool) (*database.DB, error) {
+	log.Println("Starting to read in the DB data")
+
+	// take only filesNumber files
+	files = getSksFiles(filesNumberber)
+
+	db, err := database.GenerateRealKeyBytes(files, rebalanced)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("Bytes loaded with files", files)
+
+	return db, nil
+}
+
+func getSksFiles(filesNumer int) []string {
 	sksDir := os.Getenv(dataEnvKey)
 	if sksDir == "" {
 		sksDir = filepath.Join(defaultSksPath, pgp.SksParsedFolder)
@@ -249,13 +287,5 @@ func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 		return nil, err
 	}
 	// take only filesNumber files
-	files = files[:filesNumber]
-
-	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
-	if err != nil {
-		return nil, err
-	}
-	log.Println("DB loaded with files", files)
-
-	return db, nil
+	return files[:filesNumber]
 }

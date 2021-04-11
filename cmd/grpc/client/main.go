@@ -157,6 +157,10 @@ func (lc *localClient) exec() (string, error) {
 		lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 	case "dpf":
 		lc.vpirClient = client.NewDPF(lc.prg, lc.dbInfo)
+	case "pir-it":
+		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
+	case "pir-dpf":
+		lc.vpirClient = client.NewPIRdpf(lc.prg, lc.dbInfo)
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
@@ -359,7 +363,7 @@ func parseFlags() *flags {
 	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
 	flag.BoolVar(&f.experiment, "experiment", false, "run for experiments")
 	flag.IntVar(&f.cores, "cores", -1, "num of cores used for experiment")
-	flag.StringVar(&f.scheme, "scheme", "", "scheme to use: IT or DPF")
+	flag.StringVar(&f.scheme, "scheme", "", "scheme to use: it, dpf or pit-it, pir-dpf")
 	flag.BoolVar(&f.demo, "demo", false, "runs as a demo, which exposes a REST API")
 	flag.StringVar(&f.listenAddr, "listen-addr", "", "demo listen address")
 	flag.Parse()
