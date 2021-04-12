@@ -6,7 +6,7 @@ rm results/stats*
 
 # build client
 cd ../cmd/grpc/client
-go build -race
+go build 
 
 # go back to simultion directory
 cd - > /dev/null
@@ -17,7 +17,7 @@ cd ../
 # run servers
 for scheme in it dpf; do
   echo "##### running with $scheme scheme #####"
-  for cores in {1..12}; do
+  for cores in {1..24}; do
     echo "##### running with $cores cores #####"
 
     # repeat experiment 20 times
