@@ -224,7 +224,7 @@ def plotReal():
     # costClientDownload = 0.09 / pow(10, 6)
     costClientUpload = 0.0
     costClientDownload = 0.0
-    costOut = 0.09 / pow(10, 6)
+    costOut = 0.09 / pow(10, 9)
     costCore = 0.466/16 # a1.metal
 
     #schemes = ["it", "dpf", "pir-it", "pir-dpf"]
