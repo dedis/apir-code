@@ -204,10 +204,14 @@ func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 	}
 	log.Printf("done with block reconstruction")
 
-	// return result bytes
-	result := field.VectorToBytes(resultField)
-
-	// unpad result
+	var result []byte
+	if lc.flags.scheme == "it" || lc.flags.scheme == "dpf" {
+		// return result bytes
+		result = field.VectorToBytes(resultField)
+	} else {
+		result = resultField.([]byte)
+	}
+	// unpad result in both cases
 	result = database.UnPadBlock(result)
 
 	// get a key from the block with the id of the search
