@@ -43,6 +43,7 @@ def parseLog(file):
             else:
                 statsByCores[int(s[0])]['queries'].append(int(s[1]))
                 statsByCores[int(s[0])]['latency'].append(float(s[2]))
+        # server
         else:
             if 'answer' not in statsByCores[cores]:
                 statsByCores[int(s[0])]['answer'] = [int(s[1])]

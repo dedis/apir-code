@@ -18,52 +18,6 @@ GB = pow(1024, 3)
 MB = pow(1024, 2)
 KB = 1024
 
-
-# def plotVpirBenchmarksBarBw():
-#     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-#     labels = ["Single-bit (§4.1)", "Multi-bit (§4.3)", "Multi-bit Block (§4.3)"]
-#
-#     Xs = np.arange(len(schemes))
-#     width = 0.35
-#     Ys, Yerr = [], []
-#     for scheme in schemes:
-#         stats = allStats(resultFolder + scheme)
-#         largestDbSize = sorted(stats.keys())[-1]
-#         Ys.append(stats[largestDbSize]['client']['cpu']['mean'] + stats[largestDbSize]['server']['cpu']['mean'])
-#         Yerr.append(stats[largestDbSize]['client']['cpu']['std'] + stats[largestDbSize]['server']['cpu']['std'])
-#
-#     plt.style.use('grayscale')
-#     fig, ax1 = plt.subplots()
-#     color = 'black'
-#     ax1.set_ylabel("CPU time [ms]", color=color)
-#     ax1.tick_params(axis='y', labelcolor=color)
-#     ax1.set_xticks(Xs + width / 2)
-#     ax1.set_xticklabels(labels)
-#     ax1.bar(Xs, Ys, width, label="CPU", color=color, yerr=Yerr)
-#     plt.yscale('log')
-#
-#     Ys, Yerr = [], []
-#     for scheme in schemes:
-#         stats = allStats(resultFolder + scheme)
-#         largestDbSize = sorted(stats.keys())[-1]
-#         Ys.append(
-#             stats[largestDbSize]['client']['bw']['mean'] / KB + stats[largestDbSize]['server']['bw']['mean'] / KB)
-#         Yerr.append(
-#             stats[largestDbSize]['client']['bw']['std'] / KB + stats[largestDbSize]['server']['bw']['std'] / KB)
-#
-#     color = 'grey'
-#     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-#     ax2.set_ylabel("Bandwidth [KB]")
-#     ax2.bar(Xs + width, Ys, width, label="Bandwidth", color=color, yerr=Yerr)
-#     ax2.legend(loc=5, fontsize=12)
-#
-#     # fig.tight_layout()  # otherwise the right y-label is slightly clipped
-#     plt.yscale('log')
-#     plt.title("Retrieval of 256B of data from 125KB DB")
-#     plt.savefig('cpu_bw.eps', format='eps', dpi=300)
-#     # plt.show()
-
-
 def plotVpirBenchmarks():
     schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     labels = ["Single-bit (§4.1)", "Single-element (§4.4)", "Block (§4.4)"]
@@ -265,44 +219,57 @@ def plotSingle():
 
 
 def plotReal():
-    logServers = ["stats_server-0.log", "stats_server-1.log"]
-    statsServers = []
-    for l in logServers:
-        statsServers.append(parseLog(resultFolder + l))
+    # define prices
+    costClientUpload = 0.09 / pow(10, 6)
+    costClientDownload = 0.09 / pow(10, 6)
+    costOut = 0.09 / pow(10, 6)
+    costCore = 0.466/16 # a1.metal
 
-    # get answers bandwidth per core
-    answers = dict()
-    for s in statsServers:
-        for serverStat in s:
-            if serverStat not in answers:
-                answers[serverStat] = s[serverStat]["answer"]
+    #schemes = ["it", "dpf", "pir-it", "pir-dpf"]
+    schemes = ["pir-it"]
+
+    for i, scheme in enumerate(schemes):
+        logServers = [
+                "stats_server-0_" + scheme + ".log", 
+                "stats_server-1_" + scheme + ".log"]
+
+        statsServers = []
+        for l in logServers:
+            statsServers.append(parseLog(resultFolder + l))
+
+        # get answers bandwidth per core
+        answers = dict()
+        for core in statsServers[0]:
+                answers[core] = [sum(x) for x in zip(statsServers[0][core]["answer"], statsServers[1][core]["answer"])]
+
+        # get client stats
+        statsClient = parseLog(resultFolder + "stats_client_" + scheme + ".log")
+
+        queries = dict()
+        latencies = dict()
+        for c in statsClient:
+            if c not in queries:
+                queries[c] = statsClient[c]["queries"]
+                latencies[c] = statsClient[c]["latency"]
             else:
-                for a in s[serverStat]["answer"]:
-                    answers[serverStat].append(a)
+                for q in c["queries"]:
+                    queries[c].append(c)
+                for l in c["latency"]:
+                    queries[c].append(l)
 
-    statsClient = parseLog(resultFolder + "stats_client.log")
-    queries = dict()
-    latencies = dict()
-    for c in statsClient:
-        if c not in queries:
-            queries[c] = statsClient[c]["queries"]
-            latencies[c] = statsClient[c]["latency"]
-        else:
-            for q in c["queries"]:
-                queries[c].append(c)
-            for l in c["latency"]:
-                queries[c].append(l)
+        # take means
+        answersMean = meanFromDict(answers)
+        queriesMean = meanFromDict(queries)
+        latencyMean = meanFromDict(latencies)
 
-    # take means
-    answersMean = meanFromDict(answers)
-    queriesMean = meanFromDict(queries)
-    latencyMean = meanFromDict(latencies)
-
-    # compute price
-    costs = dict()
-    for cores in answers:
-        price = int(1 * cores + answersMean[cores] * 0.010 + queriesMean[cores] * 0.010) / 1000
-        costs[price] = latencyMean[cores]
+        # compute price
+        costs = dict()
+        for cores in answers:
+            price = costCore * cores \
+                    + answersMean[cores] * costClientDownload \
+                    + answersMean[cores] * costOut \
+                    + queriesMean[cores] * costClientUpload
+            costs[price] = latencyMean[cores]
 
     # plot
     x, y = [], []
