@@ -237,7 +237,7 @@ def plotReal():
         for l in logServers:
             statsServers.append(parseLog(resultFolder + l))
 
-        # get answers bandwidth per core
+        # combine answers bandwidth
         answers = dict()
         for core in statsServers[0]:
                 answers[core] = [sum(x) for x in zip(statsServers[0][core]["answer"], statsServers[1][core]["answer"])]
