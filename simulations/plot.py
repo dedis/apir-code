@@ -220,13 +220,21 @@ def plotSingle():
 
 def plotReal():
     # define prices
-    costClientUpload = 0.09 / pow(10, 6)
-    costClientDownload = 0.09 / pow(10, 6)
+    # costClientUpload = 0.09 / pow(10, 6)
+    # costClientDownload = 0.09 / pow(10, 6)
+    costClientUpload = 0.0
+    costClientDownload = 0.0
     costOut = 0.09 / pow(10, 6)
     costCore = 0.466/16 # a1.metal
 
     #schemes = ["it", "dpf", "pir-it", "pir-dpf"]
-    schemes = ["pir-it"]
+    #labels = ["Atomic VPIR", "DPF VPIR", "PIR", "PIR DPF"]
+    schemes = ["pir-it", "pir-dpf"]
+    labels = ["PIR", "PIR DPF"]
+
+    fig, ax = plt.subplots()
+    plt.style.use('grayscale')
+    color = 'black'
 
     for i, scheme in enumerate(schemes):
         logServers = [
@@ -248,14 +256,11 @@ def plotReal():
         queries = dict()
         latencies = dict()
         for c in statsClient:
-            if c not in queries:
-                queries[c] = statsClient[c]["queries"]
-                latencies[c] = statsClient[c]["latency"]
-            else:
-                for q in c["queries"]:
-                    queries[c].append(c)
-                for l in c["latency"]:
-                    queries[c].append(l)
+            queries[c] = statsClient[c]["queries"]
+            # artificially add 100ms of RTT between client and servers. Since
+            # request done in parallel, only add 100ms
+            latencies[c] = [0.1 + x for x in statsClient[c]["latency"]]
+
 
         # take means
         answersMean = meanFromDict(answers)
@@ -271,19 +276,16 @@ def plotReal():
                     + queriesMean[cores] * costClientUpload
             costs[price] = latencyMean[cores]
 
-    # plot
-    x, y = [], []
-    for k in sorted(costs):
-        x.append(k)
-        y.append(costs[k])
+        # plot
+        x, y = [], []
+        for k in sorted(costs):
+            x.append(k)
+            y.append(costs[k])
+        ax.plot(x, y, label=labels[i])
 
-    plt.style.use('grayscale')
-    fig, ax = plt.subplots()
-    color = 'black'
     ax.set_ylabel("Latency [s]", color=color)
     ax.set_xlabel("Cost [\$]", color=color)
     ax.tick_params(axis='y', labelcolor=color)
-    ax.plot(x, y, label="AMD")
     ax.legend()
     plt.tight_layout()
     # plt.show()
