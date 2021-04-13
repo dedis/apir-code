@@ -3,7 +3,9 @@ package pgp
 import (
 	"bytes"
 	"io/ioutil"
+	"log"
 	"math/rand"
+	"path/filepath"
 	"testing"
 
 	"github.com/nikirill/go-crypto/openpgp"
@@ -86,4 +88,13 @@ func TestGetEmailAddressFromId(t *testing.T) {
 	// non-valid email
 	email, err = getEmailAddressFromPGPId("Bob <??@bob.bob>", re)
 	require.Error(t, err)
+}
+
+func TestLoadKeysFromDisk(t *testing.T) {
+	sksDir := filepath.Join("../../data", SksParsedFolder)
+	files, err := GetFilesThatMatch(sksDir, SksParsedFullFileName)
+	require.NoError(t, err)
+	keys, err := LoadKeysFromDisk(files)
+	require.NoError(t, err)
+	log.Println(len(keys))
 }
