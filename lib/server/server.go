@@ -1,14 +1,11 @@
 package server
 
 import (
-	"math"
-	"sync"
-
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/utils"
+	"math"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -64,64 +61,60 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 	// Otherwise, if the db is a matrix, we split by rows and give a chunk of rows to each worker.
 	// The goal is to have a fixed number of workers and start them only once.
 	var begin, end int
+	// a channel to pass results from the routines back
+	replies := make([]chan []field.Element, NGoRoutines)
+	// Vector db
 	if db.NumRows == 1 {
-		columnsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumColumns, NGoRoutines, 1)
-		// a channel to pass results from the routines back
-		resultsChan := make(chan []field.Element, NGoRoutines*(db.BlockSize+1))
-		numWorkers := 0
-		// we need to traverse column by column
-		for j := 0; j < db.NumColumns; j += columnsPerRoutine {
-			columnsPerRoutine, begin, end = computeChunkIndices(j, columnsPerRoutine, db.BlockSize, db.NumColumns)
-
-			go processColumns(db.Range(begin, end), q[j*(db.BlockSize+1):(j+columnsPerRoutine)*(db.BlockSize+1)], db.BlockSize, resultsChan)
-			numWorkers++
+		columnsPerRoutine := db.NumColumns / NGoRoutines
+		for i := 0; i < NGoRoutines; i++ {
+			begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
+			replyChan := make(chan []field.Element, db.BlockSize+1)
+			replies[i] = replyChan
+			go processColumns(db.Range(begin*db.BlockSize, end*db.BlockSize), q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
 		}
-		m := combineColumnResults(numWorkers, db.BlockSize+1, resultsChan)
-		close(resultsChan)
-
+		m := make([]field.Element, db.BlockSize+1)
+		for i, reply := range replies {
+			chunk := <-reply
+			for i, elem := range chunk {
+				m[i].Add(&m[i], &elem)
+			}
+			close(replies[i])
+		}
 		return m
 	} else {
-		m := make([]field.Element, db.NumRows*(db.BlockSize+1))
-		var workers sync.WaitGroup
-		rowsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumRows, NGoRoutines, 1)
-		for j := 0; j < db.NumRows; j += rowsPerRoutine {
-			rowsPerRoutine, begin, end = computeChunkIndices(j, rowsPerRoutine, db.BlockSize, db.NumRows)
-			workers.Add(1)
-
-			go processRows(m[j*(db.BlockSize+1):(j+rowsPerRoutine)*(db.BlockSize+1)],
-				db.Range(begin*db.NumColumns, end*db.NumColumns), q, &workers, db.NumColumns, db.BlockSize)
+		//	Matrix db
+		rowsPerRoutine := db.NumRows / NGoRoutines
+		for i := 0; i < NGoRoutines; i++ {
+			begin, end = computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
+			replyChan := make(chan []field.Element, (end-begin)*(db.BlockSize+1))
+			replies[i] = replyChan
+			go processRows(db.Range(begin*db.NumColumns*db.BlockSize, end*db.NumColumns*db.BlockSize), q, db.NumColumns, db.BlockSize, replyChan)
 		}
-		workers.Wait()
-
+		m := make([]field.Element, 0, db.NumRows*(db.BlockSize+1))
+		for i, reply := range replies {
+			chunk := <-reply
+			m = append(m, chunk...)
+			close(replies[i])
+		}
 		return m
 	}
 }
 
 // processing multiple rows by iterating over them
-func processRows(output, rows, query []field.Element, wg *sync.WaitGroup, numColumns, blockLen int) {
+func processRows(rows, query []field.Element, numColumns, blockLen int, reply chan<- []field.Element) {
 	numElementsInRow := blockLen * numColumns
-	for i := 0; i < len(rows)/numElementsInRow; i++ {
+	numRowsToProcess := len(rows) / numElementsInRow
+	sums := make([]field.Element, 0, numRowsToProcess*(blockLen+1))
+	for i := 0; i < numRowsToProcess; i++ {
 		res := computeMessageAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], query, blockLen)
-		copy(output[i*(blockLen+1):(i+1)*(blockLen+1)], res)
+		sums = append(sums, res...)
 	}
-	wg.Done()
+	reply <- sums
 }
 
 // processing a chunk of a database row
 func processColumns(columns, query []field.Element, blockLen int, reply chan<- []field.Element) {
 	reply <- computeMessageAndTag(columns, query, blockLen)
-}
-
-// combine the results of processing a row by different routines
-func combineColumnResults(nWrk int, resLen int, workerReplies <-chan []field.Element) []field.Element {
-	product := make([]field.Element, resLen)
-	for i := 0; i < nWrk; i++ {
-		reply := <-workerReplies
-		for i, elem := range reply {
-			product[i].Add(&product[i], &elem)
-		}
-	}
-	return product
 }
 
 // computeMessageAndTag multiplies db entries with the elements
@@ -169,13 +162,12 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 	replies := make([]chan []byte, NGoRoutines)
 	// Vector db
 	if db.NumRows == 1 {
+		// Divide and multiple by 8 to make sure that
+		// each routine process whole bytes from the query, i.e.,
+		// a byte does not get split between different routines
 		columnsPerRoutine := ((db.NumColumns / NGoRoutines) / 8) * 8
 		for i := 0; i < NGoRoutines; i++ {
-			begin, end = i*columnsPerRoutine, (i+1)*columnsPerRoutine
-			// the last routine takes all the left-overs
-			if i == NGoRoutines-1 {
-				end = db.NumColumns
-			}
+			begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
 			replyChan := make(chan []byte, db.BlockSize)
 			replies[i] = replyChan
 			// We need /8 because q is packed with 1 bit per block
@@ -192,11 +184,7 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 		//	Matrix db
 		rowsPerRoutine := db.NumRows / NGoRoutines
 		for i := 0; i < NGoRoutines; i++ {
-			begin, end = i*rowsPerRoutine, (i+1)*rowsPerRoutine
-			// the last routine takes all the left-overs
-			if i == NGoRoutines-1 {
-				end = db.NumRows
-			}
+			begin, end = computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
 			replyChan := make(chan []byte, (end-begin)*db.BlockSize)
 			replies[i] = replyChan
 			go xorRows(db.Entries[begin*db.NumColumns*db.BlockSize:end*db.NumColumns*db.BlockSize], q, db.NumColumns, db.BlockSize, replyChan)
@@ -242,10 +230,11 @@ func xorRows(rows, query []byte, numColumns, blockLen int, reply chan<- []byte) 
 /*
 %%	Shared helpers
 */
-func computeChunkIndices(ind, step, multiplier, max int) (int, int, int) {
-	// avoiding overflow when colPerChunk does not divide db.Columns evenly
-	if ind+step > max {
-		step = max - ind
+func computeChunkIndices(ind, multiplier, maxIndex, maxValue int) (int, int) {
+	begin, end := ind*multiplier, (ind+1)*multiplier
+	// the last routine takes all the left-overs
+	if ind == maxIndex {
+		end = maxValue
 	}
-	return step, ind * multiplier, (ind + step) * multiplier
+	return begin, end
 }
