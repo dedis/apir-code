@@ -229,8 +229,8 @@ def plotReal():
 
     #schemes = ["it", "dpf", "pir-it", "pir-dpf"]
     #labels = ["Atomic VPIR", "DPF VPIR", "PIR", "PIR DPF"]
-    schemes = ["pir-it", "pir-dpf"]
-    labels = ["PIR", "PIR DPF"]
+    schemes = ["it", "pir-it", "pir-dpf"]
+    labels = ["Atomic VPIR", "PIR", "PIR DPF"]
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
