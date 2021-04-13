@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"runtime"
 	"testing"
+	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
@@ -113,4 +115,43 @@ func retrieveBlocksDPFBytes(t *testing.T, rnd io.Reader, db *database.Bytes, num
 	}
 
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+}
+
+func TestPIRNumberThreads(t *testing.T) {
+	GiB := 1024 * 1024 * 1024 * 8
+	dbLen := 3 * GiB
+	blockLen := 8 * 1024
+	elemBitSize := 8
+	numBlocks := dbLen / (elemBitSize * blockLen)
+	nCols := int(math.Sqrt(float64(numBlocks)))
+	nRows := nCols
+
+	// functions defined in vpir_test.go
+	xofDB := getXof(t, "db key")
+	xof := getXof(t, "client key")
+
+	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
+	for cores := 1; cores <= runtime.NumCPU(); cores++ {
+		c := client.NewPIR(xof, &db.Info)
+		s0 := server.NewPIR(db, cores)
+		s1 := server.NewPIR(db, cores)
+		fmt.Printf("Cores: %d ", cores)
+
+		clock := time.Now()
+		queries, err := c.QueryBytes(88, 2)
+		require.NoError(t, err)
+		//fmt.Printf("query gen: %v  ", time.Since(clock))
+
+		a0, err := s0.AnswerBytes(queries[0])
+		require.NoError(t, err)
+		a1, err := s1.AnswerBytes(queries[1])
+		require.NoError(t, err)
+		//fmt.Printf("two answers: %v  ", time.Since(clock))
+
+		answers := [][]byte{a0, a1}
+
+		_, err = c.ReconstructBytes(answers)
+		require.NoError(t, err)
+		fmt.Printf("Total time: %v  \n", time.Since(clock))
+	}
 }
