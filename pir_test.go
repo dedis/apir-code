@@ -18,7 +18,7 @@ import (
 
 func TestMultiBitVectorOneMbPIR(t *testing.T) {
 	dbLen := oneMB
-	// we want to download the same numer of bytes
+	// we want to download the same number of bytes
 	// as in the field representation
 	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
@@ -83,6 +83,7 @@ func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlo
 		answers := [][]byte{a0, a1}
 
 		res, err := c.ReconstructBytes(answers)
+		//fmt.Println(res)
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize], res)
 	}

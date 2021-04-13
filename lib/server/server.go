@@ -163,37 +163,50 @@ func processSingleBitColumns(begin, end int, db *database.DB, q []field.Element,
 /*
 %%	PIR primitives
 */
-func answerPIR(q []byte, db *database.Bytes, cores int) []byte {
-	m := make([]byte, db.NumRows*db.BlockSize)
-	// multithreading
-	NGoRoutines := cores
+func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 	var begin, end int
+	// a channel to pass results from the routines back
+	replies := make([]chan []byte, NGoRoutines)
 	// Vector db
 	if db.NumRows == 1 {
-		columnsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumColumns, NGoRoutines, 8)
-		// a channel to pass results from the routines back
-		resultsChan := make(chan []byte, NGoRoutines*db.BlockSize)
-		numWorkers := 0
-		for j := 0; j < db.NumColumns; j += columnsPerRoutine {
-			columnsPerRoutine, begin, end = computeChunkIndices(j, columnsPerRoutine, db.BlockSize, db.NumColumns)
+		columnsPerRoutine := ((db.NumColumns / NGoRoutines) / 8) * 8
+		for i := 0; i < NGoRoutines; i++ {
+			begin, end = i*columnsPerRoutine, (i+1)*columnsPerRoutine
+			// the last routine takes all the left-overs
+			if i == NGoRoutines-1 {
+				end = db.NumColumns
+			}
+			replyChan := make(chan []byte, db.BlockSize)
+			replies[i] = replyChan
 			// We need /8 because q is packed with 1 bit per block
-			go xorColumns(db.Entries[begin:end], q[j/8:int(math.Ceil(float64(j+columnsPerRoutine)/8))], db.BlockSize, resultsChan)
-			numWorkers++
+			go xorColumns(db.Entries[begin*db.BlockSize:end*db.BlockSize], q[begin/8:int(math.Ceil(float64(end)/8))], db.BlockSize, replyChan)
 		}
-		m = combineColumnXORs(numWorkers, db.BlockSize, resultsChan)
-		close(resultsChan)
+		m := make([]byte, db.BlockSize)
+		for i, reply := range replies {
+			chunk := <-reply
+			fastxor.Bytes(m, m, chunk)
+			close(replies[i])
+		}
 		return m
 	} else {
 		//	Matrix db
-		var workers sync.WaitGroup
-		rowsPerRoutine := utils.DivideAndRoundUpToMultiple(db.NumRows, NGoRoutines, 1)
-		for j := 0; j < db.NumRows; j += rowsPerRoutine {
-			rowsPerRoutine, begin, end = computeChunkIndices(j, rowsPerRoutine, db.BlockSize, db.NumRows)
-			workers.Add(1)
-			go xorRows(m[begin:end], db.Entries[begin*db.NumColumns:end*db.NumColumns], q, &workers, db.NumColumns, db.BlockSize)
+		rowsPerRoutine := db.NumRows / NGoRoutines
+		for i := 0; i < NGoRoutines; i++ {
+			begin, end = i*rowsPerRoutine, (i+1)*rowsPerRoutine
+			// the last routine takes all the left-overs
+			if i == NGoRoutines-1 {
+				end = db.NumRows
+			}
+			replyChan := make(chan []byte, (end-begin)*db.BlockSize)
+			replies[i] = replyChan
+			go xorRows(db.Entries[begin*db.NumColumns*db.BlockSize:end*db.NumColumns*db.BlockSize], q, db.NumColumns, db.BlockSize, replyChan)
 		}
-		workers.Wait()
-
+		m := make([]byte, 0, db.NumRows*db.BlockSize)
+		for i, reply := range replies {
+			chunk := <-reply
+			m = append(m, chunk...)
+			close(replies[i])
+		}
 		return m
 	}
 }
@@ -215,23 +228,15 @@ func xorColumns(columns, query []byte, blockLen int, reply chan<- []byte) {
 }
 
 // XORs all the columns in a row, row by row, and writes the result into output
-func xorRows(output, rows, query []byte, wg *sync.WaitGroup, numColumns, blockLen int) {
+func xorRows(rows, query []byte, numColumns, blockLen int, reply chan<- []byte) {
 	numElementsInRow := blockLen * numColumns
-	for i := 0; i < len(rows)/numElementsInRow; i++ {
+	numRowsToProcess := len(rows) / numElementsInRow
+	sums := make([]byte, 0, numRowsToProcess*blockLen)
+	for i := 0; i < numRowsToProcess; i++ {
 		res := xorValues(rows[i*numElementsInRow:(i+1)*numElementsInRow], query, blockLen)
-		copy(output[i*blockLen:(i+1)*blockLen], res)
+		sums = append(sums, res...)
 	}
-	wg.Done()
-}
-
-// Waits for column XORs from individual workers and XORs the results together
-func combineColumnXORs(nWrk int, blockLen int, workerReplies <-chan []byte) []byte {
-	sum := make([]byte, blockLen)
-	for i := 0; i < nWrk; i++ {
-		reply := <-workerReplies
-		fastxor.Bytes(sum, sum, reply)
-	}
-	return sum
+	reply <- sums
 }
 
 /*
