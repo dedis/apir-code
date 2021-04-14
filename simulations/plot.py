@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results_new/"
+resultFolder = "final_results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -223,8 +223,8 @@ def plotReal():
     #costPerHour = 0.6854
     costPerMonth = 1
 
-    schemes = ["it", "dpf", "pir-it", "pir-dpf"]
-    labels = ["Atomic Matrix", "Atomic DPF", "None Matrix", "None DPF"]
+    schemes = ["it", "dpf", "merkle-it", "merkle-dpf", "pir-it", "pir-dpf"]
+    labels = ["Atomic", "Merkle", "PIR"]
 
     fig, ax = plt.subplots()
 
@@ -254,43 +254,40 @@ def plotReal():
             latencies[c] = [0.1 + float(x) for x in statsClient[c]["latency"]]
 
 
-        # take means
-        answersMean = meanFromDict(answers)
-        queriesMean = meanFromDict(queries)
+        # take medians
+        #answersMean = meanFromDict(answers)
+        #queriesMean = meanFromDict(queries)
+        ping = 0.375815
         latencyMean = meanFromDict(latencies)
-
-        # compute price
-        costs = dict()
-        for cores in answers:
-            costs[cores] = latencyMean[cores]
+        bestLatency = latencyMean[24] + 0.375815
+        
+        if i % 2 == 0:
+            print(labels[int(i/2)], "&",  rounder2(bestLatency), "&", end=" ")
+        else:
+            print(rounder2(bestLatency), "\\\\") 
 
         
-        bestCores = 24
-        bestLatency = latencyMean[bestCores]
+        # avgPing = 230.128 # ms
+        # keyPerSecond = 1/bestLatency
+        # keyPerDay = keyPerSecond * 60 * 60 * 24
+        # #print(keyPerSecond)
+        # bwPerKey = answersMean[bestCores] + queriesMean[bestCores]
+        # throughput = [x*60*60*24 for x in range(1, 11)]
+        # #cost = [(x/keyPerSecond * costPerHour*8760) for x in throughput]
+        # #cost = [(x/keyPerSecond * costPerMonth*12 * 2) for x in throughput]
+        # #cost = [(x/keyPerSecond * costPerMonth * 2) for x in throughput]
+        # cost = [(x/keyPerDay * costPerMonth * 2) for x in throughput]
 
-        print(labels[i], "&", rounder2(bestLatency), "\\\\")
-        
-        avgPing = 230.128 # ms
-        keyPerSecond = 1/bestLatency
-        keyPerDay = keyPerSecond * 60 * 60 * 24
-        #print(keyPerSecond)
-        bwPerKey = answersMean[bestCores] + queriesMean[bestCores]
-        throughput = [x*60*60*24 for x in range(1, 11)]
-        #cost = [(x/keyPerSecond * costPerHour*8760) for x in throughput]
-        #cost = [(x/keyPerSecond * costPerMonth*12 * 2) for x in throughput]
-        #cost = [(x/keyPerSecond * costPerMonth * 2) for x in throughput]
-        cost = [(x/keyPerDay * costPerMonth * 2) for x in throughput]
-
-        #ax.plot([x/pow(10,6) for x in cost], throughput, label=labels[i])
-        ax.plot([x for x in cost], throughput, label=labels[i])
+        # #ax.plot([x/pow(10,6) for x in cost], throughput, label=labels[i])
+        # ax.plot([x for x in cost], throughput, label=labels[i])
     
-    ax.set_ylabel("Throughput [key/s]")
-    ax.set_xlabel("Cost per year [M\$/year]")
-    ax.tick_params(axis='y')
-    ax.legend()
-    plt.tight_layout()
-    #plt.show()
-    plt.savefig('real.eps', format='eps', dpi=300, transparent=True)
+    # ax.set_ylabel("Throughput [key/s]")
+    # ax.set_xlabel("Cost per year [M\$/year]")
+    # ax.tick_params(axis='y')
+    # ax.legend()
+    # plt.tight_layout()
+    # #plt.show()
+    # plt.savefig('real.eps', format='eps', dpi=300, transparent=True)
 
 
 def print_latex_table_separate(results, numApproaches):
