@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results/"
+resultFolder = "final_results_new/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -227,10 +227,8 @@ def plotReal():
     costOut = 0.09 / pow(10, 9)
     costCore = 0.466/16 # a1.metal
 
-    #schemes = ["it", "dpf", "pir-it", "pir-dpf"]
-    #labels = ["Atomic VPIR", "DPF VPIR", "PIR", "PIR DPF"]
-    schemes = ["it", "pir-it", "pir-dpf"]
-    labels = ["Atomic VPIR", "PIR", "PIR DPF"]
+    schemes = ["it", "dpf", "pir-it", "pir-dpf"]
+    labels = ["Atomic VPIR", "DPF VPIR", "PIR", "PIR DPF"]
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
@@ -270,11 +268,11 @@ def plotReal():
         # compute price
         costs = dict()
         for cores in answers:
-            price = costCore * cores \
-                    + answersMean[cores] * costClientDownload \
-                    + answersMean[cores] * costOut \
-                    + queriesMean[cores] * costClientUpload
-            costs[price] = latencyMean[cores]
+            # price = costCore * cores \
+                    # + answersMean[cores] * costClientDownload \
+                    # + answersMean[cores] * costOut \
+                    # + queriesMean[cores] * costClientUpload
+            costs[cores] = latencyMean[cores]
 
         # plot
         x, y = [], []
@@ -285,6 +283,7 @@ def plotReal():
 
     ax.set_ylabel("Latency [s]", color=color)
     ax.set_xlabel("Cost [\$]", color=color)
+    ax.set_xticks(x)
     ax.tick_params(axis='y', labelcolor=color)
     ax.legend()
     plt.tight_layout()

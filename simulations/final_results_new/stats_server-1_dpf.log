@@ -1,0 +1,2088 @@
+31
+[Server 1] 2021/04/13 19:48:51 Starting to read in the DB data
+[Server 1] 2021/04/13 19:48:51 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 19:49:38 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 19:49:38 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 19:49:38 starting grpc server
+[Server 1] 2021/04/13 19:50:20 got databaseInfo request
+[Server 1] 2021/04/13 19:50:20 got query request
+[Server 1] 2021/04/13 19:51:08 answer size in bytes: 41811
+[Server 1] 2021/04/13 19:51:08 stats,1,41811
+[Server 1] 2021/04/13 19:51:16 got databaseInfo request
+[Server 1] 2021/04/13 19:51:16 got query request
+[Server 1] 2021/04/13 19:52:04 answer size in bytes: 41802
+[Server 1] 2021/04/13 19:52:04 stats,1,41802
+[Server 1] 2021/04/13 19:52:13 got databaseInfo request
+[Server 1] 2021/04/13 19:52:13 got query request
+[Server 1] 2021/04/13 19:53:01 answer size in bytes: 41808
+[Server 1] 2021/04/13 19:53:01 stats,1,41808
+[Server 1] 2021/04/13 19:53:07 got databaseInfo request
+[Server 1] 2021/04/13 19:53:07 got query request
+[Server 1] 2021/04/13 19:53:55 answer size in bytes: 41805
+[Server 1] 2021/04/13 19:53:55 stats,1,41805
+[Server 1] 2021/04/13 19:54:01 got databaseInfo request
+[Server 1] 2021/04/13 19:54:01 got query request
+[Server 1] 2021/04/13 19:54:48 answer size in bytes: 41798
+[Server 1] 2021/04/13 19:54:48 stats,1,41798
+[Server 1] 2021/04/13 19:54:54 got databaseInfo request
+[Server 1] 2021/04/13 19:54:54 got query request
+[Server 1] 2021/04/13 19:55:38 answer size in bytes: 41800
+[Server 1] 2021/04/13 19:55:38 stats,1,41800
+[Server 1] 2021/04/13 19:55:43 got databaseInfo request
+[Server 1] 2021/04/13 19:55:43 got query request
+[Server 1] 2021/04/13 19:56:31 answer size in bytes: 41798
+[Server 1] 2021/04/13 19:56:31 stats,1,41798
+[Server 1] 2021/04/13 19:56:37 got databaseInfo request
+[Server 1] 2021/04/13 19:56:37 got query request
+[Server 1] 2021/04/13 19:57:21 answer size in bytes: 41802
+[Server 1] 2021/04/13 19:57:21 stats,1,41802
+[Server 1] 2021/04/13 19:57:29 got databaseInfo request
+[Server 1] 2021/04/13 19:57:29 got query request
+[Server 1] 2021/04/13 19:58:15 answer size in bytes: 41810
+[Server 1] 2021/04/13 19:58:15 stats,1,41810
+[Server 1] 2021/04/13 19:58:22 got databaseInfo request
+[Server 1] 2021/04/13 19:58:22 got query request
+[Server 1] 2021/04/13 19:59:09 answer size in bytes: 41803
+[Server 1] 2021/04/13 19:59:09 stats,1,41803
+[Server 1] 2021/04/13 19:59:14 got databaseInfo request
+[Server 1] 2021/04/13 19:59:14 got query request
+[Server 1] 2021/04/13 19:59:59 answer size in bytes: 41810
+[Server 1] 2021/04/13 19:59:59 stats,1,41810
+[Server 1] 2021/04/13 20:00:04 got databaseInfo request
+[Server 1] 2021/04/13 20:00:04 got query request
+[Server 1] 2021/04/13 20:00:52 answer size in bytes: 41801
+[Server 1] 2021/04/13 20:00:52 stats,1,41801
+[Server 1] 2021/04/13 20:00:57 got databaseInfo request
+[Server 1] 2021/04/13 20:00:57 got query request
+[Server 1] 2021/04/13 20:01:42 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:01:42 stats,1,41807
+[Server 1] 2021/04/13 20:01:47 got databaseInfo request
+[Server 1] 2021/04/13 20:01:47 got query request
+[Server 1] 2021/04/13 20:02:30 answer size in bytes: 41796
+[Server 1] 2021/04/13 20:02:30 stats,1,41796
+[Server 1] 2021/04/13 20:02:39 got databaseInfo request
+[Server 1] 2021/04/13 20:02:39 got query request
+[Server 1] 2021/04/13 20:03:23 answer size in bytes: 41800
+[Server 1] 2021/04/13 20:03:23 stats,1,41800
+[Server 1] 2021/04/13 20:03:31 got databaseInfo request
+[Server 1] 2021/04/13 20:03:31 got query request
+[Server 1] 2021/04/13 20:04:17 answer size in bytes: 41802
+[Server 1] 2021/04/13 20:04:17 stats,1,41802
+[Server 1] 2021/04/13 20:04:23 got databaseInfo request
+[Server 1] 2021/04/13 20:04:23 got query request
+[Server 1] 2021/04/13 20:05:10 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:05:10 stats,1,41803
+[Server 1] 2021/04/13 20:05:15 got databaseInfo request
+[Server 1] 2021/04/13 20:05:15 got query request
+[Server 1] 2021/04/13 20:06:00 answer size in bytes: 41796
+[Server 1] 2021/04/13 20:06:00 stats,1,41796
+[Server 1] 2021/04/13 20:06:05 got databaseInfo request
+[Server 1] 2021/04/13 20:06:05 got query request
+[Server 1] 2021/04/13 20:06:52 answer size in bytes: 41800
+[Server 1] 2021/04/13 20:06:52 stats,1,41800
+[Server 1] 2021/04/13 20:06:57 got databaseInfo request
+[Server 1] 2021/04/13 20:06:57 got query request
+[Server 1] 2021/04/13 20:07:41 answer size in bytes: 41805
+[Server 1] 2021/04/13 20:07:41 stats,1,41805
+[Server 1] 2021/04/13 20:07:47 clean shutdown of server done
+31
+[Server 1] 2021/04/13 20:07:47 Starting to read in the DB data
+[Server 1] 2021/04/13 20:07:47 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 20:08:40 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 20:08:41 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 20:08:41 starting grpc server
+[Server 1] 2021/04/13 20:09:17 got databaseInfo request
+[Server 1] 2021/04/13 20:09:17 got query request
+[Server 1] 2021/04/13 20:10:01 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:10:01 stats,2,41807
+[Server 1] 2021/04/13 20:10:06 got databaseInfo request
+[Server 1] 2021/04/13 20:10:06 got query request
+[Server 1] 2021/04/13 20:10:50 answer size in bytes: 41801
+[Server 1] 2021/04/13 20:10:50 stats,2,41801
+[Server 1] 2021/04/13 20:10:55 got databaseInfo request
+[Server 1] 2021/04/13 20:10:55 got query request
+[Server 1] 2021/04/13 20:11:42 answer size in bytes: 41799
+[Server 1] 2021/04/13 20:11:42 stats,2,41799
+[Server 1] 2021/04/13 20:11:47 got databaseInfo request
+[Server 1] 2021/04/13 20:11:47 got query request
+[Server 1] 2021/04/13 20:12:29 answer size in bytes: 41806
+[Server 1] 2021/04/13 20:12:29 stats,2,41806
+[Server 1] 2021/04/13 20:12:38 got databaseInfo request
+[Server 1] 2021/04/13 20:12:38 got query request
+[Server 1] 2021/04/13 20:13:20 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:13:20 stats,2,41803
+[Server 1] 2021/04/13 20:13:30 got databaseInfo request
+[Server 1] 2021/04/13 20:13:30 got query request
+[Server 1] 2021/04/13 20:14:13 answer size in bytes: 41799
+[Server 1] 2021/04/13 20:14:13 stats,2,41799
+[Server 1] 2021/04/13 20:14:18 got databaseInfo request
+[Server 1] 2021/04/13 20:14:18 got query request
+[Server 1] 2021/04/13 20:14:59 answer size in bytes: 41805
+[Server 1] 2021/04/13 20:14:59 stats,2,41805
+[Server 1] 2021/04/13 20:15:08 got databaseInfo request
+[Server 1] 2021/04/13 20:15:08 got query request
+[Server 1] 2021/04/13 20:15:51 answer size in bytes: 41792
+[Server 1] 2021/04/13 20:15:51 stats,2,41792
+[Server 1] 2021/04/13 20:15:56 got databaseInfo request
+[Server 1] 2021/04/13 20:15:56 got query request
+[Server 1] 2021/04/13 20:16:37 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:16:37 stats,2,41803
+[Server 1] 2021/04/13 20:16:42 got databaseInfo request
+[Server 1] 2021/04/13 20:16:42 got query request
+[Server 1] 2021/04/13 20:17:28 answer size in bytes: 41791
+[Server 1] 2021/04/13 20:17:28 stats,2,41791
+[Server 1] 2021/04/13 20:17:34 got databaseInfo request
+[Server 1] 2021/04/13 20:17:34 got query request
+[Server 1] 2021/04/13 20:18:16 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:18:16 stats,2,41803
+[Server 1] 2021/04/13 20:18:21 got databaseInfo request
+[Server 1] 2021/04/13 20:18:21 got query request
+[Server 1] 2021/04/13 20:19:05 answer size in bytes: 41805
+[Server 1] 2021/04/13 20:19:05 stats,2,41805
+[Server 1] 2021/04/13 20:19:12 got databaseInfo request
+[Server 1] 2021/04/13 20:19:12 got query request
+[Server 1] 2021/04/13 20:19:53 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:19:53 stats,2,41807
+[Server 1] 2021/04/13 20:19:58 got databaseInfo request
+[Server 1] 2021/04/13 20:19:58 got query request
+[Server 1] 2021/04/13 20:20:37 answer size in bytes: 41798
+[Server 1] 2021/04/13 20:20:37 stats,2,41798
+[Server 1] 2021/04/13 20:20:45 got databaseInfo request
+[Server 1] 2021/04/13 20:20:45 got query request
+[Server 1] 2021/04/13 20:21:31 answer size in bytes: 41793
+[Server 1] 2021/04/13 20:21:31 stats,2,41793
+[Server 1] 2021/04/13 20:21:36 got databaseInfo request
+[Server 1] 2021/04/13 20:21:36 got query request
+[Server 1] 2021/04/13 20:22:19 answer size in bytes: 41798
+[Server 1] 2021/04/13 20:22:19 stats,2,41798
+[Server 1] 2021/04/13 20:22:24 got databaseInfo request
+[Server 1] 2021/04/13 20:22:24 got query request
+[Server 1] 2021/04/13 20:23:08 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:23:08 stats,2,41807
+[Server 1] 2021/04/13 20:23:13 got databaseInfo request
+[Server 1] 2021/04/13 20:23:13 got query request
+[Server 1] 2021/04/13 20:23:53 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:23:53 stats,2,41807
+[Server 1] 2021/04/13 20:24:01 got databaseInfo request
+[Server 1] 2021/04/13 20:24:01 got query request
+[Server 1] 2021/04/13 20:24:42 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:24:42 stats,2,41803
+[Server 1] 2021/04/13 20:24:47 got databaseInfo request
+[Server 1] 2021/04/13 20:24:47 got query request
+[Server 1] 2021/04/13 20:25:32 answer size in bytes: 41795
+[Server 1] 2021/04/13 20:25:32 stats,2,41795
+[Server 1] 2021/04/13 20:25:39 clean shutdown of server done
+31
+[Server 1] 2021/04/13 20:25:40 Starting to read in the DB data
+[Server 1] 2021/04/13 20:25:40 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 20:26:28 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 20:26:28 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 20:26:28 starting grpc server
+[Server 1] 2021/04/13 20:27:09 got databaseInfo request
+[Server 1] 2021/04/13 20:27:09 got query request
+[Server 1] 2021/04/13 20:27:52 answer size in bytes: 41808
+[Server 1] 2021/04/13 20:27:52 stats,3,41808
+[Server 1] 2021/04/13 20:28:03 got databaseInfo request
+[Server 1] 2021/04/13 20:28:03 got query request
+[Server 1] 2021/04/13 20:28:46 answer size in bytes: 41798
+[Server 1] 2021/04/13 20:28:46 stats,3,41798
+[Server 1] 2021/04/13 20:28:51 got databaseInfo request
+[Server 1] 2021/04/13 20:28:51 got query request
+[Server 1] 2021/04/13 20:29:34 answer size in bytes: 41798
+[Server 1] 2021/04/13 20:29:34 stats,3,41798
+[Server 1] 2021/04/13 20:29:40 got databaseInfo request
+[Server 1] 2021/04/13 20:29:40 got query request
+[Server 1] 2021/04/13 20:30:22 answer size in bytes: 41801
+[Server 1] 2021/04/13 20:30:22 stats,3,41801
+[Server 1] 2021/04/13 20:30:27 got databaseInfo request
+[Server 1] 2021/04/13 20:30:27 got query request
+[Server 1] 2021/04/13 20:31:09 answer size in bytes: 41813
+[Server 1] 2021/04/13 20:31:09 stats,3,41813
+[Server 1] 2021/04/13 20:31:14 got databaseInfo request
+[Server 1] 2021/04/13 20:31:14 got query request
+[Server 1] 2021/04/13 20:31:56 answer size in bytes: 41796
+[Server 1] 2021/04/13 20:31:56 stats,3,41796
+[Server 1] 2021/04/13 20:32:01 got databaseInfo request
+[Server 1] 2021/04/13 20:32:01 got query request
+[Server 1] 2021/04/13 20:32:41 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:32:41 stats,3,41803
+[Server 1] 2021/04/13 20:32:46 got databaseInfo request
+[Server 1] 2021/04/13 20:32:46 got query request
+[Server 1] 2021/04/13 20:33:26 answer size in bytes: 41799
+[Server 1] 2021/04/13 20:33:26 stats,3,41799
+[Server 1] 2021/04/13 20:33:32 got databaseInfo request
+[Server 1] 2021/04/13 20:33:32 got query request
+[Server 1] 2021/04/13 20:34:11 answer size in bytes: 41800
+[Server 1] 2021/04/13 20:34:11 stats,3,41800
+[Server 1] 2021/04/13 20:34:16 got databaseInfo request
+[Server 1] 2021/04/13 20:34:16 got query request
+[Server 1] 2021/04/13 20:34:59 answer size in bytes: 41802
+[Server 1] 2021/04/13 20:34:59 stats,3,41802
+[Server 1] 2021/04/13 20:35:04 got databaseInfo request
+[Server 1] 2021/04/13 20:35:04 got query request
+[Server 1] 2021/04/13 20:35:45 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:35:45 stats,3,41803
+[Server 1] 2021/04/13 20:35:50 got databaseInfo request
+[Server 1] 2021/04/13 20:35:50 got query request
+[Server 1] 2021/04/13 20:36:29 answer size in bytes: 41803
+[Server 1] 2021/04/13 20:36:29 stats,3,41803
+[Server 1] 2021/04/13 20:36:34 got databaseInfo request
+[Server 1] 2021/04/13 20:36:34 got query request
+[Server 1] 2021/04/13 20:37:13 answer size in bytes: 41802
+[Server 1] 2021/04/13 20:37:13 stats,3,41802
+[Server 1] 2021/04/13 20:37:24 got databaseInfo request
+[Server 1] 2021/04/13 20:37:24 got query request
+[Server 1] 2021/04/13 20:38:03 answer size in bytes: 41802
+[Server 1] 2021/04/13 20:38:03 stats,3,41802
+[Server 1] 2021/04/13 20:38:09 got databaseInfo request
+[Server 1] 2021/04/13 20:38:09 got query request
+[Server 1] 2021/04/13 20:38:51 answer size in bytes: 41804
+[Server 1] 2021/04/13 20:38:51 stats,3,41804
+[Server 1] 2021/04/13 20:38:57 got databaseInfo request
+[Server 1] 2021/04/13 20:38:57 got query request
+[Server 1] 2021/04/13 20:39:38 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:39:38 stats,3,41807
+[Server 1] 2021/04/13 20:39:43 got databaseInfo request
+[Server 1] 2021/04/13 20:39:43 got query request
+[Server 1] 2021/04/13 20:40:21 answer size in bytes: 41804
+[Server 1] 2021/04/13 20:40:21 stats,3,41804
+[Server 1] 2021/04/13 20:40:29 got databaseInfo request
+[Server 1] 2021/04/13 20:40:29 got query request
+[Server 1] 2021/04/13 20:41:10 answer size in bytes: 41800
+[Server 1] 2021/04/13 20:41:10 stats,3,41800
+[Server 1] 2021/04/13 20:41:17 got databaseInfo request
+[Server 1] 2021/04/13 20:41:17 got query request
+[Server 1] 2021/04/13 20:41:57 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:41:57 stats,3,41807
+[Server 1] 2021/04/13 20:42:02 got databaseInfo request
+[Server 1] 2021/04/13 20:42:02 got query request
+[Server 1] 2021/04/13 20:42:44 answer size in bytes: 41802
+[Server 1] 2021/04/13 20:42:44 stats,3,41802
+[Server 1] 2021/04/13 20:42:49 clean shutdown of server done
+31
+[Server 1] 2021/04/13 20:42:50 Starting to read in the DB data
+[Server 1] 2021/04/13 20:42:50 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 20:43:39 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 20:43:39 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 20:43:39 starting grpc server
+[Server 1] 2021/04/13 20:44:19 got databaseInfo request
+[Server 1] 2021/04/13 20:44:19 got query request
+[Server 1] 2021/04/13 20:45:09 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:45:09 stats,4,41807
+[Server 1] 2021/04/13 20:45:14 got databaseInfo request
+[Server 1] 2021/04/13 20:45:14 got query request
+[Server 1] 2021/04/13 20:45:56 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:45:56 stats,4,41807
+[Server 1] 2021/04/13 20:46:01 got databaseInfo request
+[Server 1] 2021/04/13 20:46:01 got query request
+[Server 1] 2021/04/13 20:46:42 answer size in bytes: 41811
+[Server 1] 2021/04/13 20:46:42 stats,4,41811
+[Server 1] 2021/04/13 20:46:48 got databaseInfo request
+[Server 1] 2021/04/13 20:46:48 got query request
+[Server 1] 2021/04/13 20:47:28 answer size in bytes: 41809
+[Server 1] 2021/04/13 20:47:28 stats,4,41809
+[Server 1] 2021/04/13 20:47:33 got databaseInfo request
+[Server 1] 2021/04/13 20:47:33 got query request
+[Server 1] 2021/04/13 20:48:14 answer size in bytes: 41805
+[Server 1] 2021/04/13 20:48:14 stats,4,41805
+[Server 1] 2021/04/13 20:48:19 got databaseInfo request
+[Server 1] 2021/04/13 20:48:19 got query request
+[Server 1] 2021/04/13 20:49:01 answer size in bytes: 41802
+[Server 1] 2021/04/13 20:49:01 stats,4,41802
+[Server 1] 2021/04/13 20:49:06 got databaseInfo request
+[Server 1] 2021/04/13 20:49:06 got query request
+[Server 1] 2021/04/13 20:49:46 answer size in bytes: 41798
+[Server 1] 2021/04/13 20:49:46 stats,4,41798
+[Server 1] 2021/04/13 20:49:54 got databaseInfo request
+[Server 1] 2021/04/13 20:49:54 got query request
+[Server 1] 2021/04/13 20:50:41 answer size in bytes: 41801
+[Server 1] 2021/04/13 20:50:41 stats,4,41801
+[Server 1] 2021/04/13 20:50:46 got databaseInfo request
+[Server 1] 2021/04/13 20:50:46 got query request
+[Server 1] 2021/04/13 20:51:24 answer size in bytes: 41804
+[Server 1] 2021/04/13 20:51:24 stats,4,41804
+[Server 1] 2021/04/13 20:51:30 got databaseInfo request
+[Server 1] 2021/04/13 20:51:30 got query request
+[Server 1] 2021/04/13 20:52:09 answer size in bytes: 41801
+[Server 1] 2021/04/13 20:52:09 stats,4,41801
+[Server 1] 2021/04/13 20:52:15 got databaseInfo request
+[Server 1] 2021/04/13 20:52:15 got query request
+[Server 1] 2021/04/13 20:52:56 answer size in bytes: 41792
+[Server 1] 2021/04/13 20:52:56 stats,4,41792
+[Server 1] 2021/04/13 20:53:01 got databaseInfo request
+[Server 1] 2021/04/13 20:53:01 got query request
+[Server 1] 2021/04/13 20:53:38 answer size in bytes: 41809
+[Server 1] 2021/04/13 20:53:38 stats,4,41809
+[Server 1] 2021/04/13 20:53:45 got databaseInfo request
+[Server 1] 2021/04/13 20:53:45 got query request
+[Server 1] 2021/04/13 20:54:27 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:54:27 stats,4,41807
+[Server 1] 2021/04/13 20:54:33 got databaseInfo request
+[Server 1] 2021/04/13 20:54:33 got query request
+[Server 1] 2021/04/13 20:55:14 answer size in bytes: 41809
+[Server 1] 2021/04/13 20:55:14 stats,4,41809
+[Server 1] 2021/04/13 20:55:19 got databaseInfo request
+[Server 1] 2021/04/13 20:55:19 got query request
+[Server 1] 2021/04/13 20:56:00 answer size in bytes: 41802
+[Server 1] 2021/04/13 20:56:00 stats,4,41802
+[Server 1] 2021/04/13 20:56:05 got databaseInfo request
+[Server 1] 2021/04/13 20:56:05 got query request
+[Server 1] 2021/04/13 20:56:53 answer size in bytes: 41800
+[Server 1] 2021/04/13 20:56:53 stats,4,41800
+[Server 1] 2021/04/13 20:56:58 got databaseInfo request
+[Server 1] 2021/04/13 20:56:58 got query request
+[Server 1] 2021/04/13 20:57:36 answer size in bytes: 41806
+[Server 1] 2021/04/13 20:57:36 stats,4,41806
+[Server 1] 2021/04/13 20:57:41 got databaseInfo request
+[Server 1] 2021/04/13 20:57:41 got query request
+[Server 1] 2021/04/13 20:58:23 answer size in bytes: 41806
+[Server 1] 2021/04/13 20:58:23 stats,4,41806
+[Server 1] 2021/04/13 20:58:29 got databaseInfo request
+[Server 1] 2021/04/13 20:58:29 got query request
+[Server 1] 2021/04/13 20:59:09 answer size in bytes: 41807
+[Server 1] 2021/04/13 20:59:09 stats,4,41807
+[Server 1] 2021/04/13 20:59:14 got databaseInfo request
+[Server 1] 2021/04/13 20:59:14 got query request
+[Server 1] 2021/04/13 20:59:56 answer size in bytes: 41809
+[Server 1] 2021/04/13 20:59:56 stats,4,41809
+[Server 1] 2021/04/13 21:00:01 clean shutdown of server done
+31
+[Server 1] 2021/04/13 21:00:02 Starting to read in the DB data
+[Server 1] 2021/04/13 21:00:02 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:00:55 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:00:55 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 21:00:55 starting grpc server
+[Server 1] 2021/04/13 21:01:31 got databaseInfo request
+[Server 1] 2021/04/13 21:01:32 got query request
+[Server 1] 2021/04/13 21:02:14 answer size in bytes: 41807
+[Server 1] 2021/04/13 21:02:14 stats,5,41807
+[Server 1] 2021/04/13 21:02:19 got databaseInfo request
+[Server 1] 2021/04/13 21:02:19 got query request
+[Server 1] 2021/04/13 21:03:02 answer size in bytes: 41800
+[Server 1] 2021/04/13 21:03:02 stats,5,41800
+[Server 1] 2021/04/13 21:03:07 got databaseInfo request
+[Server 1] 2021/04/13 21:03:07 got query request
+[Server 1] 2021/04/13 21:03:55 answer size in bytes: 41804
+[Server 1] 2021/04/13 21:03:55 stats,5,41804
+[Server 1] 2021/04/13 21:04:00 got databaseInfo request
+[Server 1] 2021/04/13 21:04:00 got query request
+[Server 1] 2021/04/13 21:04:41 answer size in bytes: 41807
+[Server 1] 2021/04/13 21:04:41 stats,5,41807
+[Server 1] 2021/04/13 21:04:46 got databaseInfo request
+[Server 1] 2021/04/13 21:04:46 got query request
+[Server 1] 2021/04/13 21:05:27 answer size in bytes: 41805
+[Server 1] 2021/04/13 21:05:27 stats,5,41805
+[Server 1] 2021/04/13 21:05:32 got databaseInfo request
+[Server 1] 2021/04/13 21:05:32 got query request
+[Server 1] 2021/04/13 21:06:13 answer size in bytes: 41806
+[Server 1] 2021/04/13 21:06:13 stats,5,41806
+[Server 1] 2021/04/13 21:06:18 got databaseInfo request
+[Server 1] 2021/04/13 21:06:18 got query request
+[Server 1] 2021/04/13 21:06:57 answer size in bytes: 41806
+[Server 1] 2021/04/13 21:06:57 stats,5,41806
+[Server 1] 2021/04/13 21:07:02 got databaseInfo request
+[Server 1] 2021/04/13 21:07:02 got query request
+[Server 1] 2021/04/13 21:07:43 answer size in bytes: 41803
+[Server 1] 2021/04/13 21:07:43 stats,5,41803
+[Server 1] 2021/04/13 21:07:48 got databaseInfo request
+[Server 1] 2021/04/13 21:07:48 got query request
+[Server 1] 2021/04/13 21:08:25 answer size in bytes: 41804
+[Server 1] 2021/04/13 21:08:25 stats,5,41804
+[Server 1] 2021/04/13 21:08:33 got databaseInfo request
+[Server 1] 2021/04/13 21:08:33 got query request
+[Server 1] 2021/04/13 21:09:13 answer size in bytes: 41799
+[Server 1] 2021/04/13 21:09:13 stats,5,41799
+[Server 1] 2021/04/13 21:09:18 got databaseInfo request
+[Server 1] 2021/04/13 21:09:18 got query request
+[Server 1] 2021/04/13 21:09:56 answer size in bytes: 41803
+[Server 1] 2021/04/13 21:09:56 stats,5,41803
+[Server 1] 2021/04/13 21:10:01 got databaseInfo request
+[Server 1] 2021/04/13 21:10:01 got query request
+[Server 1] 2021/04/13 21:10:38 answer size in bytes: 41806
+[Server 1] 2021/04/13 21:10:38 stats,5,41806
+[Server 1] 2021/04/13 21:10:43 got databaseInfo request
+[Server 1] 2021/04/13 21:10:43 got query request
+[Server 1] 2021/04/13 21:11:22 answer size in bytes: 41808
+[Server 1] 2021/04/13 21:11:22 stats,5,41808
+[Server 1] 2021/04/13 21:11:27 got databaseInfo request
+[Server 1] 2021/04/13 21:11:27 got query request
+[Server 1] 2021/04/13 21:12:08 answer size in bytes: 41800
+[Server 1] 2021/04/13 21:12:08 stats,5,41800
+[Server 1] 2021/04/13 21:12:13 got databaseInfo request
+[Server 1] 2021/04/13 21:12:13 got query request
+[Server 1] 2021/04/13 21:12:50 answer size in bytes: 41796
+[Server 1] 2021/04/13 21:12:50 stats,5,41796
+[Server 1] 2021/04/13 21:12:56 got databaseInfo request
+[Server 1] 2021/04/13 21:12:56 got query request
+[Server 1] 2021/04/13 21:13:37 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:13:37 stats,5,41798
+[Server 1] 2021/04/13 21:13:44 got databaseInfo request
+[Server 1] 2021/04/13 21:13:44 got query request
+[Server 1] 2021/04/13 21:14:24 answer size in bytes: 41801
+[Server 1] 2021/04/13 21:14:24 stats,5,41801
+[Server 1] 2021/04/13 21:14:29 got databaseInfo request
+[Server 1] 2021/04/13 21:14:29 got query request
+[Server 1] 2021/04/13 21:15:10 answer size in bytes: 41800
+[Server 1] 2021/04/13 21:15:10 stats,5,41800
+[Server 1] 2021/04/13 21:15:16 got databaseInfo request
+[Server 1] 2021/04/13 21:15:16 got query request
+[Server 1] 2021/04/13 21:15:54 answer size in bytes: 41801
+[Server 1] 2021/04/13 21:15:54 stats,5,41801
+[Server 1] 2021/04/13 21:15:59 got databaseInfo request
+[Server 1] 2021/04/13 21:15:59 got query request
+[Server 1] 2021/04/13 21:16:36 answer size in bytes: 41812
+[Server 1] 2021/04/13 21:16:36 stats,5,41812
+[Server 1] 2021/04/13 21:16:41 clean shutdown of server done
+31
+[Server 1] 2021/04/13 21:16:42 Starting to read in the DB data
+[Server 1] 2021/04/13 21:16:42 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:17:36 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:17:36 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 21:17:36 starting grpc server
+[Server 1] 2021/04/13 21:18:11 got databaseInfo request
+[Server 1] 2021/04/13 21:18:11 got query request
+[Server 1] 2021/04/13 21:18:55 answer size in bytes: 41804
+[Server 1] 2021/04/13 21:18:55 stats,6,41804
+[Server 1] 2021/04/13 21:19:00 got databaseInfo request
+[Server 1] 2021/04/13 21:19:00 got query request
+[Server 1] 2021/04/13 21:19:42 answer size in bytes: 41799
+[Server 1] 2021/04/13 21:19:42 stats,6,41799
+[Server 1] 2021/04/13 21:19:47 got databaseInfo request
+[Server 1] 2021/04/13 21:19:47 got query request
+[Server 1] 2021/04/13 21:20:33 answer size in bytes: 41806
+[Server 1] 2021/04/13 21:20:33 stats,6,41806
+[Server 1] 2021/04/13 21:20:38 got databaseInfo request
+[Server 1] 2021/04/13 21:20:38 got query request
+[Server 1] 2021/04/13 21:21:19 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:21:19 stats,6,41798
+[Server 1] 2021/04/13 21:21:24 got databaseInfo request
+[Server 1] 2021/04/13 21:21:24 got query request
+[Server 1] 2021/04/13 21:22:03 answer size in bytes: 41805
+[Server 1] 2021/04/13 21:22:03 stats,6,41805
+[Server 1] 2021/04/13 21:22:08 got databaseInfo request
+[Server 1] 2021/04/13 21:22:08 got query request
+[Server 1] 2021/04/13 21:22:48 answer size in bytes: 41797
+[Server 1] 2021/04/13 21:22:48 stats,6,41797
+[Server 1] 2021/04/13 21:22:53 got databaseInfo request
+[Server 1] 2021/04/13 21:22:53 got query request
+[Server 1] 2021/04/13 21:23:32 answer size in bytes: 41806
+[Server 1] 2021/04/13 21:23:32 stats,6,41806
+[Server 1] 2021/04/13 21:23:37 got databaseInfo request
+[Server 1] 2021/04/13 21:23:37 got query request
+[Server 1] 2021/04/13 21:24:20 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:24:20 stats,6,41798
+[Server 1] 2021/04/13 21:24:25 got databaseInfo request
+[Server 1] 2021/04/13 21:24:25 got query request
+[Server 1] 2021/04/13 21:25:05 answer size in bytes: 41799
+[Server 1] 2021/04/13 21:25:05 stats,6,41799
+[Server 1] 2021/04/13 21:25:10 got databaseInfo request
+[Server 1] 2021/04/13 21:25:10 got query request
+[Server 1] 2021/04/13 21:25:51 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:25:51 stats,6,41798
+[Server 1] 2021/04/13 21:25:56 got databaseInfo request
+[Server 1] 2021/04/13 21:25:56 got query request
+[Server 1] 2021/04/13 21:26:36 answer size in bytes: 41791
+[Server 1] 2021/04/13 21:26:36 stats,6,41791
+[Server 1] 2021/04/13 21:26:41 got databaseInfo request
+[Server 1] 2021/04/13 21:26:41 got query request
+[Server 1] 2021/04/13 21:27:18 answer size in bytes: 41797
+[Server 1] 2021/04/13 21:27:18 stats,6,41797
+[Server 1] 2021/04/13 21:27:23 got databaseInfo request
+[Server 1] 2021/04/13 21:27:23 got query request
+[Server 1] 2021/04/13 21:28:04 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:28:04 stats,6,41798
+[Server 1] 2021/04/13 21:28:09 got databaseInfo request
+[Server 1] 2021/04/13 21:28:09 got query request
+[Server 1] 2021/04/13 21:28:50 answer size in bytes: 41813
+[Server 1] 2021/04/13 21:28:50 stats,6,41813
+[Server 1] 2021/04/13 21:28:55 got databaseInfo request
+[Server 1] 2021/04/13 21:28:55 got query request
+[Server 1] 2021/04/13 21:29:32 answer size in bytes: 41802
+[Server 1] 2021/04/13 21:29:32 stats,6,41802
+[Server 1] 2021/04/13 21:29:38 got databaseInfo request
+[Server 1] 2021/04/13 21:29:38 got query request
+[Server 1] 2021/04/13 21:30:21 answer size in bytes: 41794
+[Server 1] 2021/04/13 21:30:21 stats,6,41794
+[Server 1] 2021/04/13 21:30:26 got databaseInfo request
+[Server 1] 2021/04/13 21:30:26 got query request
+[Server 1] 2021/04/13 21:31:06 answer size in bytes: 41797
+[Server 1] 2021/04/13 21:31:06 stats,6,41797
+[Server 1] 2021/04/13 21:31:12 got databaseInfo request
+[Server 1] 2021/04/13 21:31:12 got query request
+[Server 1] 2021/04/13 21:31:53 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:31:53 stats,6,41798
+[Server 1] 2021/04/13 21:31:59 got databaseInfo request
+[Server 1] 2021/04/13 21:31:59 got query request
+[Server 1] 2021/04/13 21:32:38 answer size in bytes: 41800
+[Server 1] 2021/04/13 21:32:38 stats,6,41800
+[Server 1] 2021/04/13 21:32:43 got databaseInfo request
+[Server 1] 2021/04/13 21:32:43 got query request
+[Server 1] 2021/04/13 21:33:20 answer size in bytes: 41800
+[Server 1] 2021/04/13 21:33:20 stats,6,41800
+[Server 1] 2021/04/13 21:33:25 clean shutdown of server done
+31
+[Server 1] 2021/04/13 21:33:26 Starting to read in the DB data
+[Server 1] 2021/04/13 21:33:26 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:34:20 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:34:21 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 21:34:21 starting grpc server
+[Server 1] 2021/04/13 21:34:55 got databaseInfo request
+[Server 1] 2021/04/13 21:34:55 got query request
+[Server 1] 2021/04/13 21:35:41 answer size in bytes: 41804
+[Server 1] 2021/04/13 21:35:41 stats,7,41804
+[Server 1] 2021/04/13 21:35:46 got databaseInfo request
+[Server 1] 2021/04/13 21:35:46 got query request
+[Server 1] 2021/04/13 21:36:25 answer size in bytes: 41796
+[Server 1] 2021/04/13 21:36:25 stats,7,41796
+[Server 1] 2021/04/13 21:36:30 got databaseInfo request
+[Server 1] 2021/04/13 21:36:30 got query request
+[Server 1] 2021/04/13 21:37:14 answer size in bytes: 41804
+[Server 1] 2021/04/13 21:37:14 stats,7,41804
+[Server 1] 2021/04/13 21:37:19 got databaseInfo request
+[Server 1] 2021/04/13 21:37:19 got query request
+[Server 1] 2021/04/13 21:37:57 answer size in bytes: 41801
+[Server 1] 2021/04/13 21:37:57 stats,7,41801
+[Server 1] 2021/04/13 21:38:03 got databaseInfo request
+[Server 1] 2021/04/13 21:38:03 got query request
+[Server 1] 2021/04/13 21:38:43 answer size in bytes: 41812
+[Server 1] 2021/04/13 21:38:43 stats,7,41812
+[Server 1] 2021/04/13 21:38:48 got databaseInfo request
+[Server 1] 2021/04/13 21:38:48 got query request
+[Server 1] 2021/04/13 21:39:29 answer size in bytes: 41811
+[Server 1] 2021/04/13 21:39:29 stats,7,41811
+[Server 1] 2021/04/13 21:39:34 got databaseInfo request
+[Server 1] 2021/04/13 21:39:34 got query request
+[Server 1] 2021/04/13 21:40:11 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:40:11 stats,7,41798
+[Server 1] 2021/04/13 21:40:16 got databaseInfo request
+[Server 1] 2021/04/13 21:40:16 got query request
+[Server 1] 2021/04/13 21:40:54 answer size in bytes: 41806
+[Server 1] 2021/04/13 21:40:54 stats,7,41806
+[Server 1] 2021/04/13 21:41:03 got databaseInfo request
+[Server 1] 2021/04/13 21:41:03 got query request
+[Server 1] 2021/04/13 21:41:52 answer size in bytes: 41791
+[Server 1] 2021/04/13 21:41:52 stats,7,41791
+[Server 1] 2021/04/13 21:41:57 got databaseInfo request
+[Server 1] 2021/04/13 21:41:57 got query request
+[Server 1] 2021/04/13 21:42:36 answer size in bytes: 41799
+[Server 1] 2021/04/13 21:42:36 stats,7,41799
+[Server 1] 2021/04/13 21:42:42 got databaseInfo request
+[Server 1] 2021/04/13 21:42:42 got query request
+[Server 1] 2021/04/13 21:43:20 answer size in bytes: 41801
+[Server 1] 2021/04/13 21:43:20 stats,7,41801
+[Server 1] 2021/04/13 21:43:28 got databaseInfo request
+[Server 1] 2021/04/13 21:43:28 got query request
+[Server 1] 2021/04/13 21:44:05 answer size in bytes: 41800
+[Server 1] 2021/04/13 21:44:05 stats,7,41800
+[Server 1] 2021/04/13 21:44:10 got databaseInfo request
+[Server 1] 2021/04/13 21:44:10 got query request
+[Server 1] 2021/04/13 21:44:52 answer size in bytes: 41807
+[Server 1] 2021/04/13 21:44:52 stats,7,41807
+[Server 1] 2021/04/13 21:44:57 got databaseInfo request
+[Server 1] 2021/04/13 21:44:57 got query request
+[Server 1] 2021/04/13 21:45:36 answer size in bytes: 41806
+[Server 1] 2021/04/13 21:45:36 stats,7,41806
+[Server 1] 2021/04/13 21:45:41 got databaseInfo request
+[Server 1] 2021/04/13 21:45:41 got query request
+[Server 1] 2021/04/13 21:46:18 answer size in bytes: 41796
+[Server 1] 2021/04/13 21:46:18 stats,7,41796
+[Server 1] 2021/04/13 21:46:23 got databaseInfo request
+[Server 1] 2021/04/13 21:46:23 got query request
+[Server 1] 2021/04/13 21:47:07 answer size in bytes: 41799
+[Server 1] 2021/04/13 21:47:07 stats,7,41799
+[Server 1] 2021/04/13 21:47:12 got databaseInfo request
+[Server 1] 2021/04/13 21:47:12 got query request
+[Server 1] 2021/04/13 21:47:52 answer size in bytes: 41798
+[Server 1] 2021/04/13 21:47:52 stats,7,41798
+[Server 1] 2021/04/13 21:47:57 got databaseInfo request
+[Server 1] 2021/04/13 21:47:57 got query request
+[Server 1] 2021/04/13 21:48:38 answer size in bytes: 41802
+[Server 1] 2021/04/13 21:48:38 stats,7,41802
+[Server 1] 2021/04/13 21:48:43 got databaseInfo request
+[Server 1] 2021/04/13 21:48:43 got query request
+[Server 1] 2021/04/13 21:49:23 answer size in bytes: 41796
+[Server 1] 2021/04/13 21:49:23 stats,7,41796
+[Server 1] 2021/04/13 21:49:28 got databaseInfo request
+[Server 1] 2021/04/13 21:49:28 got query request
+[Server 1] 2021/04/13 21:50:04 answer size in bytes: 41801
+[Server 1] 2021/04/13 21:50:04 stats,7,41801
+[Server 1] 2021/04/13 21:50:09 clean shutdown of server done
+31
+[Server 1] 2021/04/13 21:50:10 Starting to read in the DB data
+[Server 1] 2021/04/13 21:50:10 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:51:06 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 21:51:06 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 21:51:06 starting grpc server
+[Server 1] 2021/04/13 21:51:39 got databaseInfo request
+[Server 1] 2021/04/13 21:51:39 got query request
+[Server 1] 2021/04/13 21:52:20 answer size in bytes: 41801
+[Server 1] 2021/04/13 21:52:20 stats,8,41801
+[Server 1] 2021/04/13 21:52:25 got databaseInfo request
+[Server 1] 2021/04/13 21:52:25 got query request
+[Server 1] 2021/04/13 21:53:03 answer size in bytes: 41810
+[Server 1] 2021/04/13 21:53:03 stats,8,41810
+[Server 1] 2021/04/13 21:53:09 got databaseInfo request
+[Server 1] 2021/04/13 21:53:09 got query request
+[Server 1] 2021/04/13 21:53:56 answer size in bytes: 41794
+[Server 1] 2021/04/13 21:53:56 stats,8,41794
+[Server 1] 2021/04/13 21:54:01 got databaseInfo request
+[Server 1] 2021/04/13 21:54:01 got query request
+[Server 1] 2021/04/13 21:54:39 answer size in bytes: 41802
+[Server 1] 2021/04/13 21:54:39 stats,8,41802
+[Server 1] 2021/04/13 21:54:46 got databaseInfo request
+[Server 1] 2021/04/13 21:54:46 got query request
+[Server 1] 2021/04/13 21:55:25 answer size in bytes: 41796
+[Server 1] 2021/04/13 21:55:25 stats,8,41796
+[Server 1] 2021/04/13 21:55:31 got databaseInfo request
+[Server 1] 2021/04/13 21:55:31 got query request
+[Server 1] 2021/04/13 21:56:10 answer size in bytes: 41797
+[Server 1] 2021/04/13 21:56:10 stats,8,41797
+[Server 1] 2021/04/13 21:56:19 got databaseInfo request
+[Server 1] 2021/04/13 21:56:19 got query request
+[Server 1] 2021/04/13 21:56:55 answer size in bytes: 41807
+[Server 1] 2021/04/13 21:56:55 stats,8,41807
+[Server 1] 2021/04/13 21:57:01 got databaseInfo request
+[Server 1] 2021/04/13 21:57:01 got query request
+[Server 1] 2021/04/13 21:57:40 answer size in bytes: 41807
+[Server 1] 2021/04/13 21:57:40 stats,8,41807
+[Server 1] 2021/04/13 21:57:50 got databaseInfo request
+[Server 1] 2021/04/13 21:57:50 got query request
+[Server 1] 2021/04/13 21:58:30 answer size in bytes: 41801
+[Server 1] 2021/04/13 21:58:30 stats,8,41801
+[Server 1] 2021/04/13 21:58:35 got databaseInfo request
+[Server 1] 2021/04/13 21:58:35 got query request
+[Server 1] 2021/04/13 21:59:11 answer size in bytes: 41794
+[Server 1] 2021/04/13 21:59:11 stats,8,41794
+[Server 1] 2021/04/13 21:59:20 got databaseInfo request
+[Server 1] 2021/04/13 21:59:20 got query request
+[Server 1] 2021/04/13 21:59:57 answer size in bytes: 41796
+[Server 1] 2021/04/13 21:59:57 stats,8,41796
+[Server 1] 2021/04/13 22:00:05 got databaseInfo request
+[Server 1] 2021/04/13 22:00:05 got query request
+[Server 1] 2021/04/13 22:00:42 answer size in bytes: 41783
+[Server 1] 2021/04/13 22:00:42 stats,8,41783
+[Server 1] 2021/04/13 22:00:50 got databaseInfo request
+[Server 1] 2021/04/13 22:00:50 got query request
+[Server 1] 2021/04/13 22:01:29 answer size in bytes: 41808
+[Server 1] 2021/04/13 22:01:29 stats,8,41808
+[Server 1] 2021/04/13 22:01:36 got databaseInfo request
+[Server 1] 2021/04/13 22:01:36 got query request
+[Server 1] 2021/04/13 22:02:15 answer size in bytes: 41798
+[Server 1] 2021/04/13 22:02:15 stats,8,41798
+[Server 1] 2021/04/13 22:02:20 got databaseInfo request
+[Server 1] 2021/04/13 22:02:20 got query request
+[Server 1] 2021/04/13 22:02:57 answer size in bytes: 41803
+[Server 1] 2021/04/13 22:02:57 stats,8,41803
+[Server 1] 2021/04/13 22:03:02 got databaseInfo request
+[Server 1] 2021/04/13 22:03:02 got query request
+[Server 1] 2021/04/13 22:03:40 answer size in bytes: 41805
+[Server 1] 2021/04/13 22:03:40 stats,8,41805
+[Server 1] 2021/04/13 22:03:47 got databaseInfo request
+[Server 1] 2021/04/13 22:03:47 got query request
+[Server 1] 2021/04/13 22:04:23 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:04:23 stats,8,41806
+[Server 1] 2021/04/13 22:04:29 got databaseInfo request
+[Server 1] 2021/04/13 22:04:29 got query request
+[Server 1] 2021/04/13 22:05:10 answer size in bytes: 41793
+[Server 1] 2021/04/13 22:05:10 stats,8,41793
+[Server 1] 2021/04/13 22:05:15 got databaseInfo request
+[Server 1] 2021/04/13 22:05:15 got query request
+[Server 1] 2021/04/13 22:05:53 answer size in bytes: 41801
+[Server 1] 2021/04/13 22:05:53 stats,8,41801
+[Server 1] 2021/04/13 22:05:58 got databaseInfo request
+[Server 1] 2021/04/13 22:05:58 got query request
+[Server 1] 2021/04/13 22:06:34 answer size in bytes: 41801
+[Server 1] 2021/04/13 22:06:34 stats,8,41801
+[Server 1] 2021/04/13 22:06:39 clean shutdown of server done
+31
+[Server 1] 2021/04/13 22:06:41 Starting to read in the DB data
+[Server 1] 2021/04/13 22:06:41 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:07:28 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:07:28 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 22:07:28 starting grpc server
+[Server 1] 2021/04/13 22:08:10 got databaseInfo request
+[Server 1] 2021/04/13 22:08:10 got query request
+[Server 1] 2021/04/13 22:08:50 answer size in bytes: 41804
+[Server 1] 2021/04/13 22:08:50 stats,9,41804
+[Server 1] 2021/04/13 22:08:56 got databaseInfo request
+[Server 1] 2021/04/13 22:08:56 got query request
+[Server 1] 2021/04/13 22:09:36 answer size in bytes: 41808
+[Server 1] 2021/04/13 22:09:36 stats,9,41808
+[Server 1] 2021/04/13 22:09:41 got databaseInfo request
+[Server 1] 2021/04/13 22:09:41 got query request
+[Server 1] 2021/04/13 22:10:16 answer size in bytes: 41804
+[Server 1] 2021/04/13 22:10:16 stats,9,41804
+[Server 1] 2021/04/13 22:10:30 got databaseInfo request
+[Server 1] 2021/04/13 22:10:30 got query request
+[Server 1] 2021/04/13 22:11:09 answer size in bytes: 41795
+[Server 1] 2021/04/13 22:11:09 stats,9,41795
+[Server 1] 2021/04/13 22:11:14 got databaseInfo request
+[Server 1] 2021/04/13 22:11:14 got query request
+[Server 1] 2021/04/13 22:11:54 answer size in bytes: 41801
+[Server 1] 2021/04/13 22:11:54 stats,9,41801
+[Server 1] 2021/04/13 22:11:59 got databaseInfo request
+[Server 1] 2021/04/13 22:11:59 got query request
+[Server 1] 2021/04/13 22:12:35 answer size in bytes: 41805
+[Server 1] 2021/04/13 22:12:35 stats,9,41805
+[Server 1] 2021/04/13 22:12:46 got databaseInfo request
+[Server 1] 2021/04/13 22:12:46 got query request
+[Server 1] 2021/04/13 22:13:27 answer size in bytes: 41803
+[Server 1] 2021/04/13 22:13:27 stats,9,41803
+[Server 1] 2021/04/13 22:13:32 got databaseInfo request
+[Server 1] 2021/04/13 22:13:32 got query request
+[Server 1] 2021/04/13 22:14:19 answer size in bytes: 41798
+[Server 1] 2021/04/13 22:14:19 stats,9,41798
+[Server 1] 2021/04/13 22:14:24 got databaseInfo request
+[Server 1] 2021/04/13 22:14:24 got query request
+[Server 1] 2021/04/13 22:15:06 answer size in bytes: 41795
+[Server 1] 2021/04/13 22:15:06 stats,9,41795
+[Server 1] 2021/04/13 22:15:11 got databaseInfo request
+[Server 1] 2021/04/13 22:15:11 got query request
+[Server 1] 2021/04/13 22:15:52 answer size in bytes: 41795
+[Server 1] 2021/04/13 22:15:52 stats,9,41795
+[Server 1] 2021/04/13 22:15:57 got databaseInfo request
+[Server 1] 2021/04/13 22:15:57 got query request
+[Server 1] 2021/04/13 22:16:35 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:16:35 stats,9,41806
+[Server 1] 2021/04/13 22:16:45 got databaseInfo request
+[Server 1] 2021/04/13 22:16:45 got query request
+[Server 1] 2021/04/13 22:17:24 answer size in bytes: 41798
+[Server 1] 2021/04/13 22:17:24 stats,9,41798
+[Server 1] 2021/04/13 22:17:29 got databaseInfo request
+[Server 1] 2021/04/13 22:17:29 got query request
+[Server 1] 2021/04/13 22:18:09 answer size in bytes: 41804
+[Server 1] 2021/04/13 22:18:09 stats,9,41804
+[Server 1] 2021/04/13 22:18:18 got databaseInfo request
+[Server 1] 2021/04/13 22:18:18 got query request
+[Server 1] 2021/04/13 22:18:54 answer size in bytes: 41798
+[Server 1] 2021/04/13 22:18:54 stats,9,41798
+[Server 1] 2021/04/13 22:19:02 got databaseInfo request
+[Server 1] 2021/04/13 22:19:02 got query request
+[Server 1] 2021/04/13 22:19:39 answer size in bytes: 41803
+[Server 1] 2021/04/13 22:19:39 stats,9,41803
+[Server 1] 2021/04/13 22:19:46 got databaseInfo request
+[Server 1] 2021/04/13 22:19:46 got query request
+[Server 1] 2021/04/13 22:20:23 answer size in bytes: 41792
+[Server 1] 2021/04/13 22:20:23 stats,9,41792
+[Server 1] 2021/04/13 22:20:28 got databaseInfo request
+[Server 1] 2021/04/13 22:20:28 got query request
+[Server 1] 2021/04/13 22:21:05 answer size in bytes: 41803
+[Server 1] 2021/04/13 22:21:05 stats,9,41803
+[Server 1] 2021/04/13 22:21:10 got databaseInfo request
+[Server 1] 2021/04/13 22:21:10 got query request
+[Server 1] 2021/04/13 22:21:50 answer size in bytes: 41800
+[Server 1] 2021/04/13 22:21:50 stats,9,41800
+[Server 1] 2021/04/13 22:21:55 got databaseInfo request
+[Server 1] 2021/04/13 22:21:55 got query request
+[Server 1] 2021/04/13 22:22:32 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:22:32 stats,9,41806
+[Server 1] 2021/04/13 22:22:39 got databaseInfo request
+[Server 1] 2021/04/13 22:22:39 got query request
+[Server 1] 2021/04/13 22:23:17 answer size in bytes: 41800
+[Server 1] 2021/04/13 22:23:17 stats,9,41800
+[Server 1] 2021/04/13 22:23:22 clean shutdown of server done
+31
+[Server 1] 2021/04/13 22:23:23 Starting to read in the DB data
+[Server 1] 2021/04/13 22:23:23 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:24:11 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:24:11 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 22:24:11 starting grpc server
+[Server 1] 2021/04/13 22:24:52 got databaseInfo request
+[Server 1] 2021/04/13 22:24:52 got query request
+[Server 1] 2021/04/13 22:25:31 answer size in bytes: 41803
+[Server 1] 2021/04/13 22:25:31 stats,10,41803
+[Server 1] 2021/04/13 22:25:48 got databaseInfo request
+[Server 1] 2021/04/13 22:25:48 got query request
+[Server 1] 2021/04/13 22:26:28 answer size in bytes: 41791
+[Server 1] 2021/04/13 22:26:28 stats,10,41791
+[Server 1] 2021/04/13 22:26:33 got databaseInfo request
+[Server 1] 2021/04/13 22:26:33 got query request
+[Server 1] 2021/04/13 22:27:15 answer size in bytes: 41805
+[Server 1] 2021/04/13 22:27:15 stats,10,41805
+[Server 1] 2021/04/13 22:27:20 got databaseInfo request
+[Server 1] 2021/04/13 22:27:20 got query request
+[Server 1] 2021/04/13 22:27:58 answer size in bytes: 41808
+[Server 1] 2021/04/13 22:27:58 stats,10,41808
+[Server 1] 2021/04/13 22:28:04 got databaseInfo request
+[Server 1] 2021/04/13 22:28:04 got query request
+[Server 1] 2021/04/13 22:28:44 answer size in bytes: 41800
+[Server 1] 2021/04/13 22:28:44 stats,10,41800
+[Server 1] 2021/04/13 22:28:49 got databaseInfo request
+[Server 1] 2021/04/13 22:28:49 got query request
+[Server 1] 2021/04/13 22:29:25 answer size in bytes: 41808
+[Server 1] 2021/04/13 22:29:25 stats,10,41808
+[Server 1] 2021/04/13 22:29:44 got databaseInfo request
+[Server 1] 2021/04/13 22:29:44 got query request
+[Server 1] 2021/04/13 22:30:24 answer size in bytes: 41807
+[Server 1] 2021/04/13 22:30:24 stats,10,41807
+[Server 1] 2021/04/13 22:30:29 got databaseInfo request
+[Server 1] 2021/04/13 22:30:29 got query request
+[Server 1] 2021/04/13 22:31:06 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:31:06 stats,10,41806
+[Server 1] 2021/04/13 22:31:14 got databaseInfo request
+[Server 1] 2021/04/13 22:31:14 got query request
+[Server 1] 2021/04/13 22:31:52 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:31:52 stats,10,41806
+[Server 1] 2021/04/13 22:31:57 got databaseInfo request
+[Server 1] 2021/04/13 22:31:57 got query request
+[Server 1] 2021/04/13 22:32:37 answer size in bytes: 41811
+[Server 1] 2021/04/13 22:32:37 stats,10,41811
+[Server 1] 2021/04/13 22:32:42 got databaseInfo request
+[Server 1] 2021/04/13 22:32:42 got query request
+[Server 1] 2021/04/13 22:33:17 answer size in bytes: 41791
+[Server 1] 2021/04/13 22:33:17 stats,10,41791
+[Server 1] 2021/04/13 22:33:27 got databaseInfo request
+[Server 1] 2021/04/13 22:33:27 got query request
+[Server 1] 2021/04/13 22:34:04 answer size in bytes: 41803
+[Server 1] 2021/04/13 22:34:04 stats,10,41803
+[Server 1] 2021/04/13 22:34:10 got databaseInfo request
+[Server 1] 2021/04/13 22:34:10 got query request
+[Server 1] 2021/04/13 22:34:47 answer size in bytes: 41805
+[Server 1] 2021/04/13 22:34:47 stats,10,41805
+[Server 1] 2021/04/13 22:34:53 got databaseInfo request
+[Server 1] 2021/04/13 22:34:53 got query request
+[Server 1] 2021/04/13 22:35:29 answer size in bytes: 41810
+[Server 1] 2021/04/13 22:35:29 stats,10,41810
+[Server 1] 2021/04/13 22:35:37 got databaseInfo request
+[Server 1] 2021/04/13 22:35:37 got query request
+[Server 1] 2021/04/13 22:36:14 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:36:14 stats,10,41806
+[Server 1] 2021/04/13 22:36:19 got databaseInfo request
+[Server 1] 2021/04/13 22:36:19 got query request
+[Server 1] 2021/04/13 22:36:56 answer size in bytes: 41805
+[Server 1] 2021/04/13 22:36:56 stats,10,41805
+[Server 1] 2021/04/13 22:37:01 got databaseInfo request
+[Server 1] 2021/04/13 22:37:01 got query request
+[Server 1] 2021/04/13 22:37:37 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:37:37 stats,10,41806
+[Server 1] 2021/04/13 22:37:42 got databaseInfo request
+[Server 1] 2021/04/13 22:37:42 got query request
+[Server 1] 2021/04/13 22:38:21 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:38:21 stats,10,41806
+[Server 1] 2021/04/13 22:38:28 got databaseInfo request
+[Server 1] 2021/04/13 22:38:28 got query request
+[Server 1] 2021/04/13 22:39:05 answer size in bytes: 41803
+[Server 1] 2021/04/13 22:39:05 stats,10,41803
+[Server 1] 2021/04/13 22:39:10 got databaseInfo request
+[Server 1] 2021/04/13 22:39:10 got query request
+[Server 1] 2021/04/13 22:39:46 answer size in bytes: 41802
+[Server 1] 2021/04/13 22:39:46 stats,10,41802
+[Server 1] 2021/04/13 22:39:52 clean shutdown of server done
+31
+[Server 1] 2021/04/13 22:39:53 Starting to read in the DB data
+[Server 1] 2021/04/13 22:39:53 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:40:45 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:40:45 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 22:40:45 starting grpc server
+[Server 1] 2021/04/13 22:41:22 got databaseInfo request
+[Server 1] 2021/04/13 22:41:22 got query request
+[Server 1] 2021/04/13 22:42:02 answer size in bytes: 41810
+[Server 1] 2021/04/13 22:42:02 stats,11,41810
+[Server 1] 2021/04/13 22:42:08 got databaseInfo request
+[Server 1] 2021/04/13 22:42:08 got query request
+[Server 1] 2021/04/13 22:42:48 answer size in bytes: 41801
+[Server 1] 2021/04/13 22:42:48 stats,11,41801
+[Server 1] 2021/04/13 22:42:53 got databaseInfo request
+[Server 1] 2021/04/13 22:42:53 got query request
+[Server 1] 2021/04/13 22:43:37 answer size in bytes: 41810
+[Server 1] 2021/04/13 22:43:37 stats,11,41810
+[Server 1] 2021/04/13 22:43:42 got databaseInfo request
+[Server 1] 2021/04/13 22:43:42 got query request
+[Server 1] 2021/04/13 22:44:21 answer size in bytes: 41802
+[Server 1] 2021/04/13 22:44:21 stats,11,41802
+[Server 1] 2021/04/13 22:44:26 got databaseInfo request
+[Server 1] 2021/04/13 22:44:26 got query request
+[Server 1] 2021/04/13 22:45:06 answer size in bytes: 41804
+[Server 1] 2021/04/13 22:45:06 stats,11,41804
+[Server 1] 2021/04/13 22:45:11 got databaseInfo request
+[Server 1] 2021/04/13 22:45:11 got query request
+[Server 1] 2021/04/13 22:45:51 answer size in bytes: 41804
+[Server 1] 2021/04/13 22:45:51 stats,11,41804
+[Server 1] 2021/04/13 22:45:56 got databaseInfo request
+[Server 1] 2021/04/13 22:45:56 got query request
+[Server 1] 2021/04/13 22:46:32 answer size in bytes: 41804
+[Server 1] 2021/04/13 22:46:32 stats,11,41804
+[Server 1] 2021/04/13 22:46:37 got databaseInfo request
+[Server 1] 2021/04/13 22:46:38 got query request
+[Server 1] 2021/04/13 22:47:16 answer size in bytes: 41805
+[Server 1] 2021/04/13 22:47:16 stats,11,41805
+[Server 1] 2021/04/13 22:47:23 got databaseInfo request
+[Server 1] 2021/04/13 22:47:23 got query request
+[Server 1] 2021/04/13 22:48:00 answer size in bytes: 41793
+[Server 1] 2021/04/13 22:48:00 stats,11,41793
+[Server 1] 2021/04/13 22:48:08 got databaseInfo request
+[Server 1] 2021/04/13 22:48:08 got query request
+[Server 1] 2021/04/13 22:48:43 answer size in bytes: 41799
+[Server 1] 2021/04/13 22:48:43 stats,11,41799
+[Server 1] 2021/04/13 22:48:52 got databaseInfo request
+[Server 1] 2021/04/13 22:48:52 got query request
+[Server 1] 2021/04/13 22:49:46 answer size in bytes: 41808
+[Server 1] 2021/04/13 22:49:46 stats,11,41808
+[Server 1] 2021/04/13 22:49:51 got databaseInfo request
+[Server 1] 2021/04/13 22:49:51 got query request
+[Server 1] 2021/04/13 22:50:30 answer size in bytes: 41804
+[Server 1] 2021/04/13 22:50:30 stats,11,41804
+[Server 1] 2021/04/13 22:50:35 got databaseInfo request
+[Server 1] 2021/04/13 22:50:35 got query request
+[Server 1] 2021/04/13 22:51:14 answer size in bytes: 41802
+[Server 1] 2021/04/13 22:51:14 stats,11,41802
+[Server 1] 2021/04/13 22:51:19 got databaseInfo request
+[Server 1] 2021/04/13 22:51:19 got query request
+[Server 1] 2021/04/13 22:52:00 answer size in bytes: 41801
+[Server 1] 2021/04/13 22:52:00 stats,11,41801
+[Server 1] 2021/04/13 22:52:05 got databaseInfo request
+[Server 1] 2021/04/13 22:52:05 got query request
+[Server 1] 2021/04/13 22:52:41 answer size in bytes: 41800
+[Server 1] 2021/04/13 22:52:41 stats,11,41800
+[Server 1] 2021/04/13 22:52:46 got databaseInfo request
+[Server 1] 2021/04/13 22:52:46 got query request
+[Server 1] 2021/04/13 22:53:26 answer size in bytes: 41814
+[Server 1] 2021/04/13 22:53:26 stats,11,41814
+[Server 1] 2021/04/13 22:53:31 got databaseInfo request
+[Server 1] 2021/04/13 22:53:31 got query request
+[Server 1] 2021/04/13 22:54:08 answer size in bytes: 41802
+[Server 1] 2021/04/13 22:54:08 stats,11,41802
+[Server 1] 2021/04/13 22:54:15 got databaseInfo request
+[Server 1] 2021/04/13 22:54:15 got query request
+[Server 1] 2021/04/13 22:54:52 answer size in bytes: 41809
+[Server 1] 2021/04/13 22:54:52 stats,11,41809
+[Server 1] 2021/04/13 22:54:57 got databaseInfo request
+[Server 1] 2021/04/13 22:54:57 got query request
+[Server 1] 2021/04/13 22:55:34 answer size in bytes: 41800
+[Server 1] 2021/04/13 22:55:34 stats,11,41800
+[Server 1] 2021/04/13 22:55:43 got databaseInfo request
+[Server 1] 2021/04/13 22:55:43 got query request
+[Server 1] 2021/04/13 22:56:19 answer size in bytes: 41806
+[Server 1] 2021/04/13 22:56:19 stats,11,41806
+[Server 1] 2021/04/13 22:56:26 clean shutdown of server done
+31
+[Server 1] 2021/04/13 22:56:27 Starting to read in the DB data
+[Server 1] 2021/04/13 22:56:27 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:57:14 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 22:57:14 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 22:57:14 starting grpc server
+[Server 1] 2021/04/13 22:57:56 got databaseInfo request
+[Server 1] 2021/04/13 22:57:56 got query request
+[Server 1] 2021/04/13 22:58:37 answer size in bytes: 41811
+[Server 1] 2021/04/13 22:58:37 stats,12,41811
+[Server 1] 2021/04/13 22:58:44 got databaseInfo request
+[Server 1] 2021/04/13 22:58:44 got query request
+[Server 1] 2021/04/13 22:59:23 answer size in bytes: 41799
+[Server 1] 2021/04/13 22:59:23 stats,12,41799
+[Server 1] 2021/04/13 22:59:28 got databaseInfo request
+[Server 1] 2021/04/13 22:59:28 got query request
+[Server 1] 2021/04/13 23:00:11 answer size in bytes: 41802
+[Server 1] 2021/04/13 23:00:11 stats,12,41802
+[Server 1] 2021/04/13 23:00:16 got databaseInfo request
+[Server 1] 2021/04/13 23:00:16 got query request
+[Server 1] 2021/04/13 23:00:55 answer size in bytes: 41801
+[Server 1] 2021/04/13 23:00:55 stats,12,41801
+[Server 1] 2021/04/13 23:01:00 got databaseInfo request
+[Server 1] 2021/04/13 23:01:00 got query request
+[Server 1] 2021/04/13 23:01:39 answer size in bytes: 41804
+[Server 1] 2021/04/13 23:01:39 stats,12,41804
+[Server 1] 2021/04/13 23:01:46 got databaseInfo request
+[Server 1] 2021/04/13 23:01:46 got query request
+[Server 1] 2021/04/13 23:02:28 answer size in bytes: 41808
+[Server 1] 2021/04/13 23:02:28 stats,12,41808
+[Server 1] 2021/04/13 23:02:33 got databaseInfo request
+[Server 1] 2021/04/13 23:02:33 got query request
+[Server 1] 2021/04/13 23:03:10 answer size in bytes: 41804
+[Server 1] 2021/04/13 23:03:10 stats,12,41804
+[Server 1] 2021/04/13 23:03:15 got databaseInfo request
+[Server 1] 2021/04/13 23:03:15 got query request
+[Server 1] 2021/04/13 23:03:56 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:03:56 stats,12,41803
+[Server 1] 2021/04/13 23:04:01 got databaseInfo request
+[Server 1] 2021/04/13 23:04:01 got query request
+[Server 1] 2021/04/13 23:04:39 answer size in bytes: 41793
+[Server 1] 2021/04/13 23:04:39 stats,12,41793
+[Server 1] 2021/04/13 23:04:44 got databaseInfo request
+[Server 1] 2021/04/13 23:04:44 got query request
+[Server 1] 2021/04/13 23:05:24 answer size in bytes: 41798
+[Server 1] 2021/04/13 23:05:24 stats,12,41798
+[Server 1] 2021/04/13 23:05:29 got databaseInfo request
+[Server 1] 2021/04/13 23:05:29 got query request
+[Server 1] 2021/04/13 23:06:07 answer size in bytes: 41804
+[Server 1] 2021/04/13 23:06:07 stats,12,41804
+[Server 1] 2021/04/13 23:06:12 got databaseInfo request
+[Server 1] 2021/04/13 23:06:12 got query request
+[Server 1] 2021/04/13 23:06:47 answer size in bytes: 41797
+[Server 1] 2021/04/13 23:06:47 stats,12,41797
+[Server 1] 2021/04/13 23:06:54 got databaseInfo request
+[Server 1] 2021/04/13 23:06:54 got query request
+[Server 1] 2021/04/13 23:07:34 answer size in bytes: 41801
+[Server 1] 2021/04/13 23:07:34 stats,12,41801
+[Server 1] 2021/04/13 23:07:39 got databaseInfo request
+[Server 1] 2021/04/13 23:07:39 got query request
+[Server 1] 2021/04/13 23:08:19 answer size in bytes: 41802
+[Server 1] 2021/04/13 23:08:19 stats,12,41802
+[Server 1] 2021/04/13 23:08:29 got databaseInfo request
+[Server 1] 2021/04/13 23:08:29 got query request
+[Server 1] 2021/04/13 23:09:06 answer size in bytes: 41799
+[Server 1] 2021/04/13 23:09:06 stats,12,41799
+[Server 1] 2021/04/13 23:09:11 got databaseInfo request
+[Server 1] 2021/04/13 23:09:11 got query request
+[Server 1] 2021/04/13 23:09:48 answer size in bytes: 41804
+[Server 1] 2021/04/13 23:09:48 stats,12,41804
+[Server 1] 2021/04/13 23:09:56 got databaseInfo request
+[Server 1] 2021/04/13 23:09:56 got query request
+[Server 1] 2021/04/13 23:10:32 answer size in bytes: 41807
+[Server 1] 2021/04/13 23:10:32 stats,12,41807
+[Server 1] 2021/04/13 23:10:39 got databaseInfo request
+[Server 1] 2021/04/13 23:10:39 got query request
+[Server 1] 2021/04/13 23:11:15 answer size in bytes: 41799
+[Server 1] 2021/04/13 23:11:15 stats,12,41799
+[Server 1] 2021/04/13 23:11:20 got databaseInfo request
+[Server 1] 2021/04/13 23:11:20 got query request
+[Server 1] 2021/04/13 23:12:01 answer size in bytes: 41811
+[Server 1] 2021/04/13 23:12:01 stats,12,41811
+[Server 1] 2021/04/13 23:12:06 got databaseInfo request
+[Server 1] 2021/04/13 23:12:06 got query request
+[Server 1] 2021/04/13 23:12:42 answer size in bytes: 41796
+[Server 1] 2021/04/13 23:12:42 stats,12,41796
+[Server 1] 2021/04/13 23:12:48 clean shutdown of server done
+31
+[Server 1] 2021/04/13 23:12:49 Starting to read in the DB data
+[Server 1] 2021/04/13 23:12:49 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 23:13:37 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 23:13:38 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 23:13:38 starting grpc server
+[Server 1] 2021/04/13 23:14:18 got databaseInfo request
+[Server 1] 2021/04/13 23:14:18 got query request
+[Server 1] 2021/04/13 23:15:05 answer size in bytes: 41800
+[Server 1] 2021/04/13 23:15:05 stats,13,41800
+[Server 1] 2021/04/13 23:15:13 got databaseInfo request
+[Server 1] 2021/04/13 23:15:13 got query request
+[Server 1] 2021/04/13 23:15:53 answer size in bytes: 41802
+[Server 1] 2021/04/13 23:15:53 stats,13,41802
+[Server 1] 2021/04/13 23:15:58 got databaseInfo request
+[Server 1] 2021/04/13 23:15:58 got query request
+[Server 1] 2021/04/13 23:16:39 answer size in bytes: 41804
+[Server 1] 2021/04/13 23:16:39 stats,13,41804
+[Server 1] 2021/04/13 23:16:46 got databaseInfo request
+[Server 1] 2021/04/13 23:16:46 got query request
+[Server 1] 2021/04/13 23:17:24 answer size in bytes: 41799
+[Server 1] 2021/04/13 23:17:24 stats,13,41799
+[Server 1] 2021/04/13 23:17:29 got databaseInfo request
+[Server 1] 2021/04/13 23:17:29 got query request
+[Server 1] 2021/04/13 23:18:07 answer size in bytes: 41799
+[Server 1] 2021/04/13 23:18:07 stats,13,41799
+[Server 1] 2021/04/13 23:18:13 got databaseInfo request
+[Server 1] 2021/04/13 23:18:13 got query request
+[Server 1] 2021/04/13 23:18:56 answer size in bytes: 41805
+[Server 1] 2021/04/13 23:18:56 stats,13,41805
+[Server 1] 2021/04/13 23:19:01 got databaseInfo request
+[Server 1] 2021/04/13 23:19:01 got query request
+[Server 1] 2021/04/13 23:19:37 answer size in bytes: 41796
+[Server 1] 2021/04/13 23:19:37 stats,13,41796
+[Server 1] 2021/04/13 23:19:42 got databaseInfo request
+[Server 1] 2021/04/13 23:19:42 got query request
+[Server 1] 2021/04/13 23:20:24 answer size in bytes: 41794
+[Server 1] 2021/04/13 23:20:24 stats,13,41794
+[Server 1] 2021/04/13 23:20:29 got databaseInfo request
+[Server 1] 2021/04/13 23:20:29 got query request
+[Server 1] 2021/04/13 23:21:08 answer size in bytes: 41788
+[Server 1] 2021/04/13 23:21:08 stats,13,41788
+[Server 1] 2021/04/13 23:21:13 got databaseInfo request
+[Server 1] 2021/04/13 23:21:13 got query request
+[Server 1] 2021/04/13 23:21:53 answer size in bytes: 41802
+[Server 1] 2021/04/13 23:21:53 stats,13,41802
+[Server 1] 2021/04/13 23:21:58 got databaseInfo request
+[Server 1] 2021/04/13 23:21:58 got query request
+[Server 1] 2021/04/13 23:22:36 answer size in bytes: 41800
+[Server 1] 2021/04/13 23:22:36 stats,13,41800
+[Server 1] 2021/04/13 23:22:41 got databaseInfo request
+[Server 1] 2021/04/13 23:22:41 got query request
+[Server 1] 2021/04/13 23:23:17 answer size in bytes: 41801
+[Server 1] 2021/04/13 23:23:17 stats,13,41801
+[Server 1] 2021/04/13 23:23:23 got databaseInfo request
+[Server 1] 2021/04/13 23:23:23 got query request
+[Server 1] 2021/04/13 23:24:03 answer size in bytes: 41797
+[Server 1] 2021/04/13 23:24:03 stats,13,41797
+[Server 1] 2021/04/13 23:24:08 got databaseInfo request
+[Server 1] 2021/04/13 23:24:08 got query request
+[Server 1] 2021/04/13 23:24:44 answer size in bytes: 41797
+[Server 1] 2021/04/13 23:24:44 stats,13,41797
+[Server 1] 2021/04/13 23:24:49 got databaseInfo request
+[Server 1] 2021/04/13 23:24:49 got query request
+[Server 1] 2021/04/13 23:25:27 answer size in bytes: 41797
+[Server 1] 2021/04/13 23:25:27 stats,13,41797
+[Server 1] 2021/04/13 23:25:32 got databaseInfo request
+[Server 1] 2021/04/13 23:25:32 got query request
+[Server 1] 2021/04/13 23:26:09 answer size in bytes: 41807
+[Server 1] 2021/04/13 23:26:09 stats,13,41807
+[Server 1] 2021/04/13 23:26:14 got databaseInfo request
+[Server 1] 2021/04/13 23:26:14 got query request
+[Server 1] 2021/04/13 23:26:50 answer size in bytes: 41798
+[Server 1] 2021/04/13 23:26:50 stats,13,41798
+[Server 1] 2021/04/13 23:26:55 got databaseInfo request
+[Server 1] 2021/04/13 23:26:55 got query request
+[Server 1] 2021/04/13 23:27:33 answer size in bytes: 41800
+[Server 1] 2021/04/13 23:27:33 stats,13,41800
+[Server 1] 2021/04/13 23:27:38 got databaseInfo request
+[Server 1] 2021/04/13 23:27:38 got query request
+[Server 1] 2021/04/13 23:28:23 answer size in bytes: 41807
+[Server 1] 2021/04/13 23:28:23 stats,13,41807
+[Server 1] 2021/04/13 23:28:28 got databaseInfo request
+[Server 1] 2021/04/13 23:28:28 got query request
+[Server 1] 2021/04/13 23:29:07 answer size in bytes: 41809
+[Server 1] 2021/04/13 23:29:07 stats,13,41809
+[Server 1] 2021/04/13 23:29:13 clean shutdown of server done
+31
+[Server 1] 2021/04/13 23:29:15 Starting to read in the DB data
+[Server 1] 2021/04/13 23:29:15 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 23:30:03 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 23:30:03 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 23:30:03 starting grpc server
+[Server 1] 2021/04/13 23:30:43 got databaseInfo request
+[Server 1] 2021/04/13 23:30:43 got query request
+[Server 1] 2021/04/13 23:31:35 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:31:35 stats,14,41803
+[Server 1] 2021/04/13 23:31:40 got databaseInfo request
+[Server 1] 2021/04/13 23:31:40 got query request
+[Server 1] 2021/04/13 23:32:19 answer size in bytes: 41794
+[Server 1] 2021/04/13 23:32:19 stats,14,41794
+[Server 1] 2021/04/13 23:32:27 got databaseInfo request
+[Server 1] 2021/04/13 23:32:27 got query request
+[Server 1] 2021/04/13 23:33:06 answer size in bytes: 41806
+[Server 1] 2021/04/13 23:33:06 stats,14,41806
+[Server 1] 2021/04/13 23:33:11 got databaseInfo request
+[Server 1] 2021/04/13 23:33:11 got query request
+[Server 1] 2021/04/13 23:33:49 answer size in bytes: 41811
+[Server 1] 2021/04/13 23:33:49 stats,14,41811
+[Server 1] 2021/04/13 23:33:54 got databaseInfo request
+[Server 1] 2021/04/13 23:33:54 got query request
+[Server 1] 2021/04/13 23:34:33 answer size in bytes: 41797
+[Server 1] 2021/04/13 23:34:33 stats,14,41797
+[Server 1] 2021/04/13 23:34:38 got databaseInfo request
+[Server 1] 2021/04/13 23:34:38 got query request
+[Server 1] 2021/04/13 23:35:17 answer size in bytes: 41807
+[Server 1] 2021/04/13 23:35:17 stats,14,41807
+[Server 1] 2021/04/13 23:35:22 got databaseInfo request
+[Server 1] 2021/04/13 23:35:22 got query request
+[Server 1] 2021/04/13 23:36:01 answer size in bytes: 41810
+[Server 1] 2021/04/13 23:36:01 stats,14,41810
+[Server 1] 2021/04/13 23:36:06 got databaseInfo request
+[Server 1] 2021/04/13 23:36:06 got query request
+[Server 1] 2021/04/13 23:36:42 answer size in bytes: 41797
+[Server 1] 2021/04/13 23:36:42 stats,14,41797
+[Server 1] 2021/04/13 23:36:49 got databaseInfo request
+[Server 1] 2021/04/13 23:36:49 got query request
+[Server 1] 2021/04/13 23:37:27 answer size in bytes: 41804
+[Server 1] 2021/04/13 23:37:27 stats,14,41804
+[Server 1] 2021/04/13 23:37:34 got databaseInfo request
+[Server 1] 2021/04/13 23:37:34 got query request
+[Server 1] 2021/04/13 23:38:13 answer size in bytes: 41800
+[Server 1] 2021/04/13 23:38:13 stats,14,41800
+[Server 1] 2021/04/13 23:38:18 got databaseInfo request
+[Server 1] 2021/04/13 23:38:19 got query request
+[Server 1] 2021/04/13 23:38:57 answer size in bytes: 41811
+[Server 1] 2021/04/13 23:38:57 stats,14,41811
+[Server 1] 2021/04/13 23:39:02 got databaseInfo request
+[Server 1] 2021/04/13 23:39:02 got query request
+[Server 1] 2021/04/13 23:39:38 answer size in bytes: 41802
+[Server 1] 2021/04/13 23:39:38 stats,14,41802
+[Server 1] 2021/04/13 23:39:44 got databaseInfo request
+[Server 1] 2021/04/13 23:39:44 got query request
+[Server 1] 2021/04/13 23:40:24 answer size in bytes: 41795
+[Server 1] 2021/04/13 23:40:24 stats,14,41795
+[Server 1] 2021/04/13 23:40:29 got databaseInfo request
+[Server 1] 2021/04/13 23:40:29 got query request
+[Server 1] 2021/04/13 23:41:05 answer size in bytes: 41794
+[Server 1] 2021/04/13 23:41:05 stats,14,41794
+[Server 1] 2021/04/13 23:41:17 got databaseInfo request
+[Server 1] 2021/04/13 23:41:17 got query request
+[Server 1] 2021/04/13 23:41:53 answer size in bytes: 41792
+[Server 1] 2021/04/13 23:41:53 stats,14,41792
+[Server 1] 2021/04/13 23:41:58 got databaseInfo request
+[Server 1] 2021/04/13 23:41:58 got query request
+[Server 1] 2021/04/13 23:42:36 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:42:36 stats,14,41803
+[Server 1] 2021/04/13 23:42:41 got databaseInfo request
+[Server 1] 2021/04/13 23:42:41 got query request
+[Server 1] 2021/04/13 23:43:20 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:43:20 stats,14,41803
+[Server 1] 2021/04/13 23:43:25 got databaseInfo request
+[Server 1] 2021/04/13 23:43:25 got query request
+[Server 1] 2021/04/13 23:44:00 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:44:00 stats,14,41803
+[Server 1] 2021/04/13 23:44:06 got databaseInfo request
+[Server 1] 2021/04/13 23:44:06 got query request
+[Server 1] 2021/04/13 23:44:44 answer size in bytes: 41799
+[Server 1] 2021/04/13 23:44:44 stats,14,41799
+[Server 1] 2021/04/13 23:44:49 got databaseInfo request
+[Server 1] 2021/04/13 23:44:49 got query request
+[Server 1] 2021/04/13 23:45:27 answer size in bytes: 41810
+[Server 1] 2021/04/13 23:45:27 stats,14,41810
+[Server 1] 2021/04/13 23:45:32 clean shutdown of server done
+31
+[Server 1] 2021/04/13 23:45:33 Starting to read in the DB data
+[Server 1] 2021/04/13 23:45:33 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 23:46:21 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/13 23:46:22 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/13 23:46:22 starting grpc server
+[Server 1] 2021/04/13 23:47:02 got databaseInfo request
+[Server 1] 2021/04/13 23:47:02 got query request
+[Server 1] 2021/04/13 23:47:55 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:47:55 stats,15,41803
+[Server 1] 2021/04/13 23:48:00 got databaseInfo request
+[Server 1] 2021/04/13 23:48:00 got query request
+[Server 1] 2021/04/13 23:48:39 answer size in bytes: 41806
+[Server 1] 2021/04/13 23:48:39 stats,15,41806
+[Server 1] 2021/04/13 23:48:46 got databaseInfo request
+[Server 1] 2021/04/13 23:48:46 got query request
+[Server 1] 2021/04/13 23:49:24 answer size in bytes: 41806
+[Server 1] 2021/04/13 23:49:24 stats,15,41806
+[Server 1] 2021/04/13 23:49:33 got databaseInfo request
+[Server 1] 2021/04/13 23:49:33 got query request
+[Server 1] 2021/04/13 23:50:11 answer size in bytes: 41799
+[Server 1] 2021/04/13 23:50:11 stats,15,41799
+[Server 1] 2021/04/13 23:50:16 got databaseInfo request
+[Server 1] 2021/04/13 23:50:16 got query request
+[Server 1] 2021/04/13 23:50:55 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:50:55 stats,15,41803
+[Server 1] 2021/04/13 23:51:00 got databaseInfo request
+[Server 1] 2021/04/13 23:51:00 got query request
+[Server 1] 2021/04/13 23:51:36 answer size in bytes: 41796
+[Server 1] 2021/04/13 23:51:36 stats,15,41796
+[Server 1] 2021/04/13 23:51:41 got databaseInfo request
+[Server 1] 2021/04/13 23:51:41 got query request
+[Server 1] 2021/04/13 23:52:23 answer size in bytes: 41809
+[Server 1] 2021/04/13 23:52:23 stats,15,41809
+[Server 1] 2021/04/13 23:52:28 got databaseInfo request
+[Server 1] 2021/04/13 23:52:28 got query request
+[Server 1] 2021/04/13 23:53:08 answer size in bytes: 41795
+[Server 1] 2021/04/13 23:53:08 stats,15,41795
+[Server 1] 2021/04/13 23:53:14 got databaseInfo request
+[Server 1] 2021/04/13 23:53:14 got query request
+[Server 1] 2021/04/13 23:53:49 answer size in bytes: 41800
+[Server 1] 2021/04/13 23:53:49 stats,15,41800
+[Server 1] 2021/04/13 23:53:56 got databaseInfo request
+[Server 1] 2021/04/13 23:53:56 got query request
+[Server 1] 2021/04/13 23:54:35 answer size in bytes: 41800
+[Server 1] 2021/04/13 23:54:35 stats,15,41800
+[Server 1] 2021/04/13 23:54:40 got databaseInfo request
+[Server 1] 2021/04/13 23:54:40 got query request
+[Server 1] 2021/04/13 23:55:20 answer size in bytes: 41804
+[Server 1] 2021/04/13 23:55:20 stats,15,41804
+[Server 1] 2021/04/13 23:55:25 got databaseInfo request
+[Server 1] 2021/04/13 23:55:25 got query request
+[Server 1] 2021/04/13 23:56:01 answer size in bytes: 41802
+[Server 1] 2021/04/13 23:56:01 stats,15,41802
+[Server 1] 2021/04/13 23:56:08 got databaseInfo request
+[Server 1] 2021/04/13 23:56:08 got query request
+[Server 1] 2021/04/13 23:56:46 answer size in bytes: 41803
+[Server 1] 2021/04/13 23:56:46 stats,15,41803
+[Server 1] 2021/04/13 23:56:53 got databaseInfo request
+[Server 1] 2021/04/13 23:56:53 got query request
+[Server 1] 2021/04/13 23:57:31 answer size in bytes: 41805
+[Server 1] 2021/04/13 23:57:31 stats,15,41805
+[Server 1] 2021/04/13 23:57:37 got databaseInfo request
+[Server 1] 2021/04/13 23:57:37 got query request
+[Server 1] 2021/04/13 23:58:13 answer size in bytes: 41805
+[Server 1] 2021/04/13 23:58:13 stats,15,41805
+[Server 1] 2021/04/13 23:58:18 got databaseInfo request
+[Server 1] 2021/04/13 23:58:18 got query request
+[Server 1] 2021/04/13 23:58:56 answer size in bytes: 41808
+[Server 1] 2021/04/13 23:58:56 stats,15,41808
+[Server 1] 2021/04/13 23:59:01 got databaseInfo request
+[Server 1] 2021/04/13 23:59:01 got query request
+[Server 1] 2021/04/13 23:59:39 answer size in bytes: 41800
+[Server 1] 2021/04/13 23:59:39 stats,15,41800
+[Server 1] 2021/04/13 23:59:44 got databaseInfo request
+[Server 1] 2021/04/13 23:59:44 got query request
+[Server 1] 2021/04/14 00:00:21 answer size in bytes: 41803
+[Server 1] 2021/04/14 00:00:21 stats,15,41803
+[Server 1] 2021/04/14 00:00:26 got databaseInfo request
+[Server 1] 2021/04/14 00:00:26 got query request
+[Server 1] 2021/04/14 00:01:07 answer size in bytes: 41803
+[Server 1] 2021/04/14 00:01:07 stats,15,41803
+[Server 1] 2021/04/14 00:01:12 got databaseInfo request
+[Server 1] 2021/04/14 00:01:12 got query request
+[Server 1] 2021/04/14 00:01:51 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:01:51 stats,15,41806
+[Server 1] 2021/04/14 00:01:56 clean shutdown of server done
+31
+[Server 1] 2021/04/14 00:01:56 Starting to read in the DB data
+[Server 1] 2021/04/14 00:01:56 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:02:55 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:02:55 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 00:02:55 starting grpc server
+[Server 1] 2021/04/14 00:03:26 got databaseInfo request
+[Server 1] 2021/04/14 00:03:26 got query request
+[Server 1] 2021/04/14 00:04:07 answer size in bytes: 41812
+[Server 1] 2021/04/14 00:04:07 stats,16,41812
+[Server 1] 2021/04/14 00:04:12 got databaseInfo request
+[Server 1] 2021/04/14 00:04:12 got query request
+[Server 1] 2021/04/14 00:04:50 answer size in bytes: 41807
+[Server 1] 2021/04/14 00:04:50 stats,16,41807
+[Server 1] 2021/04/14 00:04:56 got databaseInfo request
+[Server 1] 2021/04/14 00:04:56 got query request
+[Server 1] 2021/04/14 00:05:34 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:05:34 stats,16,41806
+[Server 1] 2021/04/14 00:05:40 got databaseInfo request
+[Server 1] 2021/04/14 00:05:40 got query request
+[Server 1] 2021/04/14 00:06:16 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:06:16 stats,16,41802
+[Server 1] 2021/04/14 00:06:23 got databaseInfo request
+[Server 1] 2021/04/14 00:06:23 got query request
+[Server 1] 2021/04/14 00:07:02 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:07:02 stats,16,41806
+[Server 1] 2021/04/14 00:07:08 got databaseInfo request
+[Server 1] 2021/04/14 00:07:08 got query request
+[Server 1] 2021/04/14 00:07:43 answer size in bytes: 41807
+[Server 1] 2021/04/14 00:07:43 stats,16,41807
+[Server 1] 2021/04/14 00:07:52 got databaseInfo request
+[Server 1] 2021/04/14 00:07:52 got query request
+[Server 1] 2021/04/14 00:08:27 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:08:27 stats,16,41805
+[Server 1] 2021/04/14 00:08:34 got databaseInfo request
+[Server 1] 2021/04/14 00:08:34 got query request
+[Server 1] 2021/04/14 00:09:12 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:09:12 stats,16,41805
+[Server 1] 2021/04/14 00:09:18 got databaseInfo request
+[Server 1] 2021/04/14 00:09:18 got query request
+[Server 1] 2021/04/14 00:10:00 answer size in bytes: 41810
+[Server 1] 2021/04/14 00:10:00 stats,16,41810
+[Server 1] 2021/04/14 00:10:08 got databaseInfo request
+[Server 1] 2021/04/14 00:10:08 got query request
+[Server 1] 2021/04/14 00:10:44 answer size in bytes: 41808
+[Server 1] 2021/04/14 00:10:44 stats,16,41808
+[Server 1] 2021/04/14 00:10:49 got databaseInfo request
+[Server 1] 2021/04/14 00:10:49 got query request
+[Server 1] 2021/04/14 00:11:25 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:11:25 stats,16,41805
+[Server 1] 2021/04/14 00:11:35 got databaseInfo request
+[Server 1] 2021/04/14 00:11:35 got query request
+[Server 1] 2021/04/14 00:12:13 answer size in bytes: 41811
+[Server 1] 2021/04/14 00:12:13 stats,16,41811
+[Server 1] 2021/04/14 00:12:19 got databaseInfo request
+[Server 1] 2021/04/14 00:12:19 got query request
+[Server 1] 2021/04/14 00:12:55 answer size in bytes: 41804
+[Server 1] 2021/04/14 00:12:55 stats,16,41804
+[Server 1] 2021/04/14 00:13:04 got databaseInfo request
+[Server 1] 2021/04/14 00:13:04 got query request
+[Server 1] 2021/04/14 00:13:42 answer size in bytes: 41807
+[Server 1] 2021/04/14 00:13:42 stats,16,41807
+[Server 1] 2021/04/14 00:13:47 got databaseInfo request
+[Server 1] 2021/04/14 00:13:47 got query request
+[Server 1] 2021/04/14 00:14:26 answer size in bytes: 41801
+[Server 1] 2021/04/14 00:14:26 stats,16,41801
+[Server 1] 2021/04/14 00:14:31 got databaseInfo request
+[Server 1] 2021/04/14 00:14:31 got query request
+[Server 1] 2021/04/14 00:15:12 answer size in bytes: 41809
+[Server 1] 2021/04/14 00:15:12 stats,16,41809
+[Server 1] 2021/04/14 00:15:17 got databaseInfo request
+[Server 1] 2021/04/14 00:15:17 got query request
+[Server 1] 2021/04/14 00:15:55 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:15:55 stats,16,41802
+[Server 1] 2021/04/14 00:16:00 got databaseInfo request
+[Server 1] 2021/04/14 00:16:00 got query request
+[Server 1] 2021/04/14 00:16:35 answer size in bytes: 41798
+[Server 1] 2021/04/14 00:16:35 stats,16,41798
+[Server 1] 2021/04/14 00:16:41 got databaseInfo request
+[Server 1] 2021/04/14 00:16:41 got query request
+[Server 1] 2021/04/14 00:17:21 answer size in bytes: 41800
+[Server 1] 2021/04/14 00:17:21 stats,16,41800
+[Server 1] 2021/04/14 00:17:26 got databaseInfo request
+[Server 1] 2021/04/14 00:17:26 got query request
+[Server 1] 2021/04/14 00:18:02 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:18:02 stats,16,41802
+[Server 1] 2021/04/14 00:18:10 clean shutdown of server done
+31
+[Server 1] 2021/04/14 00:18:11 Starting to read in the DB data
+[Server 1] 2021/04/14 00:18:11 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:18:58 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:18:58 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 00:18:58 starting grpc server
+[Server 1] 2021/04/14 00:19:40 got databaseInfo request
+[Server 1] 2021/04/14 00:19:40 got query request
+[Server 1] 2021/04/14 00:20:21 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:20:21 stats,17,41805
+[Server 1] 2021/04/14 00:20:36 got databaseInfo request
+[Server 1] 2021/04/14 00:20:36 got query request
+[Server 1] 2021/04/14 00:21:14 answer size in bytes: 41793
+[Server 1] 2021/04/14 00:21:14 stats,17,41793
+[Server 1] 2021/04/14 00:21:19 got databaseInfo request
+[Server 1] 2021/04/14 00:21:19 got query request
+[Server 1] 2021/04/14 00:21:57 answer size in bytes: 41786
+[Server 1] 2021/04/14 00:21:57 stats,17,41786
+[Server 1] 2021/04/14 00:22:04 got databaseInfo request
+[Server 1] 2021/04/14 00:22:04 got query request
+[Server 1] 2021/04/14 00:22:42 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:22:42 stats,17,41806
+[Server 1] 2021/04/14 00:22:47 got databaseInfo request
+[Server 1] 2021/04/14 00:22:47 got query request
+[Server 1] 2021/04/14 00:23:29 answer size in bytes: 41799
+[Server 1] 2021/04/14 00:23:29 stats,17,41799
+[Server 1] 2021/04/14 00:23:34 got databaseInfo request
+[Server 1] 2021/04/14 00:23:34 got query request
+[Server 1] 2021/04/14 00:24:18 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:24:18 stats,17,41806
+[Server 1] 2021/04/14 00:24:24 got databaseInfo request
+[Server 1] 2021/04/14 00:24:24 got query request
+[Server 1] 2021/04/14 00:25:00 answer size in bytes: 41804
+[Server 1] 2021/04/14 00:25:00 stats,17,41804
+[Server 1] 2021/04/14 00:25:05 got databaseInfo request
+[Server 1] 2021/04/14 00:25:05 got query request
+[Server 1] 2021/04/14 00:25:45 answer size in bytes: 41799
+[Server 1] 2021/04/14 00:25:45 stats,17,41799
+[Server 1] 2021/04/14 00:25:50 got databaseInfo request
+[Server 1] 2021/04/14 00:25:50 got query request
+[Server 1] 2021/04/14 00:26:28 answer size in bytes: 41807
+[Server 1] 2021/04/14 00:26:28 stats,17,41807
+[Server 1] 2021/04/14 00:26:33 got databaseInfo request
+[Server 1] 2021/04/14 00:26:33 got query request
+[Server 1] 2021/04/14 00:27:13 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:27:13 stats,17,41805
+[Server 1] 2021/04/14 00:27:18 got databaseInfo request
+[Server 1] 2021/04/14 00:27:18 got query request
+[Server 1] 2021/04/14 00:27:58 answer size in bytes: 41795
+[Server 1] 2021/04/14 00:27:58 stats,17,41795
+[Server 1] 2021/04/14 00:28:03 got databaseInfo request
+[Server 1] 2021/04/14 00:28:03 got query request
+[Server 1] 2021/04/14 00:28:38 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:28:38 stats,17,41802
+[Server 1] 2021/04/14 00:28:44 got databaseInfo request
+[Server 1] 2021/04/14 00:28:44 got query request
+[Server 1] 2021/04/14 00:29:22 answer size in bytes: 41801
+[Server 1] 2021/04/14 00:29:22 stats,17,41801
+[Server 1] 2021/04/14 00:29:27 got databaseInfo request
+[Server 1] 2021/04/14 00:29:27 got query request
+[Server 1] 2021/04/14 00:30:07 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:30:07 stats,17,41805
+[Server 1] 2021/04/14 00:30:12 got databaseInfo request
+[Server 1] 2021/04/14 00:30:12 got query request
+[Server 1] 2021/04/14 00:30:46 answer size in bytes: 41799
+[Server 1] 2021/04/14 00:30:46 stats,17,41799
+[Server 1] 2021/04/14 00:30:53 got databaseInfo request
+[Server 1] 2021/04/14 00:30:53 got query request
+[Server 1] 2021/04/14 00:31:34 answer size in bytes: 41804
+[Server 1] 2021/04/14 00:31:34 stats,17,41804
+[Server 1] 2021/04/14 00:31:39 got databaseInfo request
+[Server 1] 2021/04/14 00:31:39 got query request
+[Server 1] 2021/04/14 00:32:16 answer size in bytes: 41799
+[Server 1] 2021/04/14 00:32:16 stats,17,41799
+[Server 1] 2021/04/14 00:32:23 got databaseInfo request
+[Server 1] 2021/04/14 00:32:23 got query request
+[Server 1] 2021/04/14 00:32:58 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:32:58 stats,17,41806
+[Server 1] 2021/04/14 00:33:03 got databaseInfo request
+[Server 1] 2021/04/14 00:33:03 got query request
+[Server 1] 2021/04/14 00:33:39 answer size in bytes: 41803
+[Server 1] 2021/04/14 00:33:39 stats,17,41803
+[Server 1] 2021/04/14 00:33:44 got databaseInfo request
+[Server 1] 2021/04/14 00:33:44 got query request
+[Server 1] 2021/04/14 00:34:21 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:34:21 stats,17,41805
+[Server 1] 2021/04/14 00:34:26 clean shutdown of server done
+31
+[Server 1] 2021/04/14 00:34:27 Starting to read in the DB data
+[Server 1] 2021/04/14 00:34:27 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:35:13 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:35:14 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 00:35:14 starting grpc server
+[Server 1] 2021/04/14 00:35:56 got databaseInfo request
+[Server 1] 2021/04/14 00:35:56 got query request
+[Server 1] 2021/04/14 00:36:38 answer size in bytes: 41810
+[Server 1] 2021/04/14 00:36:38 stats,18,41810
+[Server 1] 2021/04/14 00:36:43 got databaseInfo request
+[Server 1] 2021/04/14 00:36:43 got query request
+[Server 1] 2021/04/14 00:37:22 answer size in bytes: 41807
+[Server 1] 2021/04/14 00:37:22 stats,18,41807
+[Server 1] 2021/04/14 00:37:27 got databaseInfo request
+[Server 1] 2021/04/14 00:37:27 got query request
+[Server 1] 2021/04/14 00:38:06 answer size in bytes: 41808
+[Server 1] 2021/04/14 00:38:06 stats,18,41808
+[Server 1] 2021/04/14 00:38:11 got databaseInfo request
+[Server 1] 2021/04/14 00:38:11 got query request
+[Server 1] 2021/04/14 00:38:50 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:38:50 stats,18,41802
+[Server 1] 2021/04/14 00:38:55 got databaseInfo request
+[Server 1] 2021/04/14 00:38:55 got query request
+[Server 1] 2021/04/14 00:39:33 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:39:33 stats,18,41805
+[Server 1] 2021/04/14 00:39:39 got databaseInfo request
+[Server 1] 2021/04/14 00:39:39 got query request
+[Server 1] 2021/04/14 00:40:17 answer size in bytes: 41799
+[Server 1] 2021/04/14 00:40:17 stats,18,41799
+[Server 1] 2021/04/14 00:40:22 got databaseInfo request
+[Server 1] 2021/04/14 00:40:22 got query request
+[Server 1] 2021/04/14 00:40:59 answer size in bytes: 41809
+[Server 1] 2021/04/14 00:40:59 stats,18,41809
+[Server 1] 2021/04/14 00:41:04 got databaseInfo request
+[Server 1] 2021/04/14 00:41:04 got query request
+[Server 1] 2021/04/14 00:41:40 answer size in bytes: 41799
+[Server 1] 2021/04/14 00:41:40 stats,18,41799
+[Server 1] 2021/04/14 00:41:45 got databaseInfo request
+[Server 1] 2021/04/14 00:41:45 got query request
+[Server 1] 2021/04/14 00:42:23 answer size in bytes: 41813
+[Server 1] 2021/04/14 00:42:23 stats,18,41813
+[Server 1] 2021/04/14 00:42:32 got databaseInfo request
+[Server 1] 2021/04/14 00:42:32 got query request
+[Server 1] 2021/04/14 00:43:08 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:43:08 stats,18,41802
+[Server 1] 2021/04/14 00:43:13 got databaseInfo request
+[Server 1] 2021/04/14 00:43:13 got query request
+[Server 1] 2021/04/14 00:43:49 answer size in bytes: 41801
+[Server 1] 2021/04/14 00:43:49 stats,18,41801
+[Server 1] 2021/04/14 00:43:55 got databaseInfo request
+[Server 1] 2021/04/14 00:43:55 got query request
+[Server 1] 2021/04/14 00:44:32 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:44:32 stats,18,41802
+[Server 1] 2021/04/14 00:44:37 got databaseInfo request
+[Server 1] 2021/04/14 00:44:37 got query request
+[Server 1] 2021/04/14 00:45:14 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:45:14 stats,18,41805
+[Server 1] 2021/04/14 00:45:19 got databaseInfo request
+[Server 1] 2021/04/14 00:45:19 got query request
+[Server 1] 2021/04/14 00:45:56 answer size in bytes: 41801
+[Server 1] 2021/04/14 00:45:56 stats,18,41801
+[Server 1] 2021/04/14 00:46:06 got databaseInfo request
+[Server 1] 2021/04/14 00:46:06 got query request
+[Server 1] 2021/04/14 00:46:43 answer size in bytes: 41796
+[Server 1] 2021/04/14 00:46:43 stats,18,41796
+[Server 1] 2021/04/14 00:46:48 got databaseInfo request
+[Server 1] 2021/04/14 00:46:48 got query request
+[Server 1] 2021/04/14 00:47:27 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:47:27 stats,18,41806
+[Server 1] 2021/04/14 00:47:33 got databaseInfo request
+[Server 1] 2021/04/14 00:47:33 got query request
+[Server 1] 2021/04/14 00:48:14 answer size in bytes: 41807
+[Server 1] 2021/04/14 00:48:14 stats,18,41807
+[Server 1] 2021/04/14 00:48:19 got databaseInfo request
+[Server 1] 2021/04/14 00:48:19 got query request
+[Server 1] 2021/04/14 00:48:56 answer size in bytes: 41803
+[Server 1] 2021/04/14 00:48:56 stats,18,41803
+[Server 1] 2021/04/14 00:49:02 got databaseInfo request
+[Server 1] 2021/04/14 00:49:02 got query request
+[Server 1] 2021/04/14 00:49:38 answer size in bytes: 41799
+[Server 1] 2021/04/14 00:49:38 stats,18,41799
+[Server 1] 2021/04/14 00:49:46 got databaseInfo request
+[Server 1] 2021/04/14 00:49:46 got query request
+[Server 1] 2021/04/14 00:50:23 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:50:23 stats,18,41802
+[Server 1] 2021/04/14 00:50:28 clean shutdown of server done
+31
+[Server 1] 2021/04/14 00:50:29 Starting to read in the DB data
+[Server 1] 2021/04/14 00:50:29 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:51:16 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 00:51:16 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 00:51:16 starting grpc server
+[Server 1] 2021/04/14 00:51:58 got databaseInfo request
+[Server 1] 2021/04/14 00:51:58 got query request
+[Server 1] 2021/04/14 00:52:39 answer size in bytes: 41804
+[Server 1] 2021/04/14 00:52:39 stats,19,41804
+[Server 1] 2021/04/14 00:52:44 got databaseInfo request
+[Server 1] 2021/04/14 00:52:44 got query request
+[Server 1] 2021/04/14 00:53:22 answer size in bytes: 41804
+[Server 1] 2021/04/14 00:53:22 stats,19,41804
+[Server 1] 2021/04/14 00:53:30 got databaseInfo request
+[Server 1] 2021/04/14 00:53:30 got query request
+[Server 1] 2021/04/14 00:54:07 answer size in bytes: 41805
+[Server 1] 2021/04/14 00:54:07 stats,19,41805
+[Server 1] 2021/04/14 00:54:14 got databaseInfo request
+[Server 1] 2021/04/14 00:54:14 got query request
+[Server 1] 2021/04/14 00:54:52 answer size in bytes: 41802
+[Server 1] 2021/04/14 00:54:52 stats,19,41802
+[Server 1] 2021/04/14 00:54:57 got databaseInfo request
+[Server 1] 2021/04/14 00:54:57 got query request
+[Server 1] 2021/04/14 00:55:35 answer size in bytes: 41801
+[Server 1] 2021/04/14 00:55:35 stats,19,41801
+[Server 1] 2021/04/14 00:55:40 got databaseInfo request
+[Server 1] 2021/04/14 00:55:40 got query request
+[Server 1] 2021/04/14 00:56:20 answer size in bytes: 41808
+[Server 1] 2021/04/14 00:56:20 stats,19,41808
+[Server 1] 2021/04/14 00:56:25 got databaseInfo request
+[Server 1] 2021/04/14 00:56:25 got query request
+[Server 1] 2021/04/14 00:57:00 answer size in bytes: 41810
+[Server 1] 2021/04/14 00:57:00 stats,19,41810
+[Server 1] 2021/04/14 00:57:05 got databaseInfo request
+[Server 1] 2021/04/14 00:57:05 got query request
+[Server 1] 2021/04/14 00:57:45 answer size in bytes: 41798
+[Server 1] 2021/04/14 00:57:45 stats,19,41798
+[Server 1] 2021/04/14 00:57:50 got databaseInfo request
+[Server 1] 2021/04/14 00:57:50 got query request
+[Server 1] 2021/04/14 00:58:25 answer size in bytes: 41800
+[Server 1] 2021/04/14 00:58:25 stats,19,41800
+[Server 1] 2021/04/14 00:58:30 got databaseInfo request
+[Server 1] 2021/04/14 00:58:30 got query request
+[Server 1] 2021/04/14 00:59:07 answer size in bytes: 41806
+[Server 1] 2021/04/14 00:59:07 stats,19,41806
+[Server 1] 2021/04/14 00:59:12 got databaseInfo request
+[Server 1] 2021/04/14 00:59:12 got query request
+[Server 1] 2021/04/14 00:59:48 answer size in bytes: 41795
+[Server 1] 2021/04/14 00:59:48 stats,19,41795
+[Server 1] 2021/04/14 00:59:53 got databaseInfo request
+[Server 1] 2021/04/14 00:59:53 got query request
+[Server 1] 2021/04/14 01:00:32 answer size in bytes: 41811
+[Server 1] 2021/04/14 01:00:32 stats,19,41811
+[Server 1] 2021/04/14 01:00:37 got databaseInfo request
+[Server 1] 2021/04/14 01:00:37 got query request
+[Server 1] 2021/04/14 01:01:12 answer size in bytes: 41794
+[Server 1] 2021/04/14 01:01:12 stats,19,41794
+[Server 1] 2021/04/14 01:01:18 got databaseInfo request
+[Server 1] 2021/04/14 01:01:18 got query request
+[Server 1] 2021/04/14 01:01:55 answer size in bytes: 41798
+[Server 1] 2021/04/14 01:01:55 stats,19,41798
+[Server 1] 2021/04/14 01:02:00 got databaseInfo request
+[Server 1] 2021/04/14 01:02:00 got query request
+[Server 1] 2021/04/14 01:02:38 answer size in bytes: 41803
+[Server 1] 2021/04/14 01:02:38 stats,19,41803
+[Server 1] 2021/04/14 01:02:43 got databaseInfo request
+[Server 1] 2021/04/14 01:02:43 got query request
+[Server 1] 2021/04/14 01:03:22 answer size in bytes: 41797
+[Server 1] 2021/04/14 01:03:22 stats,19,41797
+[Server 1] 2021/04/14 01:03:27 got databaseInfo request
+[Server 1] 2021/04/14 01:03:27 got query request
+[Server 1] 2021/04/14 01:04:03 answer size in bytes: 41796
+[Server 1] 2021/04/14 01:04:03 stats,19,41796
+[Server 1] 2021/04/14 01:04:12 got databaseInfo request
+[Server 1] 2021/04/14 01:04:12 got query request
+[Server 1] 2021/04/14 01:04:47 answer size in bytes: 41806
+[Server 1] 2021/04/14 01:04:47 stats,19,41806
+[Server 1] 2021/04/14 01:04:54 got databaseInfo request
+[Server 1] 2021/04/14 01:04:54 got query request
+[Server 1] 2021/04/14 01:05:33 answer size in bytes: 41807
+[Server 1] 2021/04/14 01:05:33 stats,19,41807
+[Server 1] 2021/04/14 01:05:38 got databaseInfo request
+[Server 1] 2021/04/14 01:05:38 got query request
+[Server 1] 2021/04/14 01:06:14 answer size in bytes: 41801
+[Server 1] 2021/04/14 01:06:14 stats,19,41801
+[Server 1] 2021/04/14 01:06:19 clean shutdown of server done
+31
+[Server 1] 2021/04/14 01:06:20 Starting to read in the DB data
+[Server 1] 2021/04/14 01:06:20 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:07:13 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:07:13 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 01:07:13 starting grpc server
+[Server 1] 2021/04/14 01:07:49 got databaseInfo request
+[Server 1] 2021/04/14 01:07:49 got query request
+[Server 1] 2021/04/14 01:08:28 answer size in bytes: 41801
+[Server 1] 2021/04/14 01:08:28 stats,20,41801
+[Server 1] 2021/04/14 01:08:46 got databaseInfo request
+[Server 1] 2021/04/14 01:08:46 got query request
+[Server 1] 2021/04/14 01:09:23 answer size in bytes: 41808
+[Server 1] 2021/04/14 01:09:23 stats,20,41808
+[Server 1] 2021/04/14 01:09:29 got databaseInfo request
+[Server 1] 2021/04/14 01:09:29 got query request
+[Server 1] 2021/04/14 01:10:07 answer size in bytes: 41791
+[Server 1] 2021/04/14 01:10:07 stats,20,41791
+[Server 1] 2021/04/14 01:10:12 got databaseInfo request
+[Server 1] 2021/04/14 01:10:12 got query request
+[Server 1] 2021/04/14 01:10:51 answer size in bytes: 41803
+[Server 1] 2021/04/14 01:10:51 stats,20,41803
+[Server 1] 2021/04/14 01:10:56 got databaseInfo request
+[Server 1] 2021/04/14 01:10:56 got query request
+[Server 1] 2021/04/14 01:11:34 answer size in bytes: 41804
+[Server 1] 2021/04/14 01:11:34 stats,20,41804
+[Server 1] 2021/04/14 01:11:39 got databaseInfo request
+[Server 1] 2021/04/14 01:11:39 got query request
+[Server 1] 2021/04/14 01:12:18 answer size in bytes: 41803
+[Server 1] 2021/04/14 01:12:18 stats,20,41803
+[Server 1] 2021/04/14 01:12:23 got databaseInfo request
+[Server 1] 2021/04/14 01:12:23 got query request
+[Server 1] 2021/04/14 01:13:02 answer size in bytes: 41800
+[Server 1] 2021/04/14 01:13:02 stats,20,41800
+[Server 1] 2021/04/14 01:13:07 got databaseInfo request
+[Server 1] 2021/04/14 01:13:07 got query request
+[Server 1] 2021/04/14 01:13:43 answer size in bytes: 41800
+[Server 1] 2021/04/14 01:13:43 stats,20,41800
+[Server 1] 2021/04/14 01:13:49 got databaseInfo request
+[Server 1] 2021/04/14 01:13:49 got query request
+[Server 1] 2021/04/14 01:14:29 answer size in bytes: 41799
+[Server 1] 2021/04/14 01:14:29 stats,20,41799
+[Server 1] 2021/04/14 01:14:34 got databaseInfo request
+[Server 1] 2021/04/14 01:14:34 got query request
+[Server 1] 2021/04/14 01:15:09 answer size in bytes: 41797
+[Server 1] 2021/04/14 01:15:09 stats,20,41797
+[Server 1] 2021/04/14 01:15:21 got databaseInfo request
+[Server 1] 2021/04/14 01:15:21 got query request
+[Server 1] 2021/04/14 01:15:59 answer size in bytes: 41813
+[Server 1] 2021/04/14 01:15:59 stats,20,41813
+[Server 1] 2021/04/14 01:16:08 got databaseInfo request
+[Server 1] 2021/04/14 01:16:08 got query request
+[Server 1] 2021/04/14 01:16:46 answer size in bytes: 41802
+[Server 1] 2021/04/14 01:16:46 stats,20,41802
+[Server 1] 2021/04/14 01:16:51 got databaseInfo request
+[Server 1] 2021/04/14 01:16:51 got query request
+[Server 1] 2021/04/14 01:17:30 answer size in bytes: 41807
+[Server 1] 2021/04/14 01:17:30 stats,20,41807
+[Server 1] 2021/04/14 01:17:35 got databaseInfo request
+[Server 1] 2021/04/14 01:17:35 got query request
+[Server 1] 2021/04/14 01:18:21 answer size in bytes: 41799
+[Server 1] 2021/04/14 01:18:21 stats,20,41799
+[Server 1] 2021/04/14 01:18:26 got databaseInfo request
+[Server 1] 2021/04/14 01:18:26 got query request
+[Server 1] 2021/04/14 01:19:02 answer size in bytes: 41809
+[Server 1] 2021/04/14 01:19:02 stats,20,41809
+[Server 1] 2021/04/14 01:19:07 got databaseInfo request
+[Server 1] 2021/04/14 01:19:07 got query request
+[Server 1] 2021/04/14 01:19:46 answer size in bytes: 41807
+[Server 1] 2021/04/14 01:19:46 stats,20,41807
+[Server 1] 2021/04/14 01:19:51 got databaseInfo request
+[Server 1] 2021/04/14 01:19:51 got query request
+[Server 1] 2021/04/14 01:20:28 answer size in bytes: 41792
+[Server 1] 2021/04/14 01:20:28 stats,20,41792
+[Server 1] 2021/04/14 01:20:35 got databaseInfo request
+[Server 1] 2021/04/14 01:20:35 got query request
+[Server 1] 2021/04/14 01:21:11 answer size in bytes: 41800
+[Server 1] 2021/04/14 01:21:11 stats,20,41800
+[Server 1] 2021/04/14 01:21:16 got databaseInfo request
+[Server 1] 2021/04/14 01:21:16 got query request
+[Server 1] 2021/04/14 01:21:53 answer size in bytes: 41801
+[Server 1] 2021/04/14 01:21:53 stats,20,41801
+[Server 1] 2021/04/14 01:22:00 got databaseInfo request
+[Server 1] 2021/04/14 01:22:00 got query request
+[Server 1] 2021/04/14 01:22:37 answer size in bytes: 41792
+[Server 1] 2021/04/14 01:22:37 stats,20,41792
+[Server 1] 2021/04/14 01:22:42 clean shutdown of server done
+31
+[Server 1] 2021/04/14 01:22:43 Starting to read in the DB data
+[Server 1] 2021/04/14 01:22:43 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:23:36 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:23:36 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 01:23:36 starting grpc server
+[Server 1] 2021/04/14 01:24:12 got databaseInfo request
+[Server 1] 2021/04/14 01:24:12 got query request
+[Server 1] 2021/04/14 01:24:56 answer size in bytes: 41813
+[Server 1] 2021/04/14 01:24:56 stats,21,41813
+[Server 1] 2021/04/14 01:25:01 got databaseInfo request
+[Server 1] 2021/04/14 01:25:01 got query request
+[Server 1] 2021/04/14 01:25:40 answer size in bytes: 41790
+[Server 1] 2021/04/14 01:25:40 stats,21,41790
+[Server 1] 2021/04/14 01:25:45 got databaseInfo request
+[Server 1] 2021/04/14 01:25:45 got query request
+[Server 1] 2021/04/14 01:26:23 answer size in bytes: 41804
+[Server 1] 2021/04/14 01:26:23 stats,21,41804
+[Server 1] 2021/04/14 01:26:28 got databaseInfo request
+[Server 1] 2021/04/14 01:26:28 got query request
+[Server 1] 2021/04/14 01:27:06 answer size in bytes: 41812
+[Server 1] 2021/04/14 01:27:06 stats,21,41812
+[Server 1] 2021/04/14 01:27:11 got databaseInfo request
+[Server 1] 2021/04/14 01:27:11 got query request
+[Server 1] 2021/04/14 01:27:49 answer size in bytes: 41808
+[Server 1] 2021/04/14 01:27:49 stats,21,41808
+[Server 1] 2021/04/14 01:27:54 got databaseInfo request
+[Server 1] 2021/04/14 01:27:54 got query request
+[Server 1] 2021/04/14 01:28:31 answer size in bytes: 41814
+[Server 1] 2021/04/14 01:28:31 stats,21,41814
+[Server 1] 2021/04/14 01:28:38 got databaseInfo request
+[Server 1] 2021/04/14 01:28:38 got query request
+[Server 1] 2021/04/14 01:29:13 answer size in bytes: 41805
+[Server 1] 2021/04/14 01:29:13 stats,21,41805
+[Server 1] 2021/04/14 01:29:23 got databaseInfo request
+[Server 1] 2021/04/14 01:29:23 got query request
+[Server 1] 2021/04/14 01:30:00 answer size in bytes: 41803
+[Server 1] 2021/04/14 01:30:00 stats,21,41803
+[Server 1] 2021/04/14 01:30:08 got databaseInfo request
+[Server 1] 2021/04/14 01:30:08 got query request
+[Server 1] 2021/04/14 01:30:46 answer size in bytes: 41800
+[Server 1] 2021/04/14 01:30:46 stats,21,41800
+[Server 1] 2021/04/14 01:30:52 got databaseInfo request
+[Server 1] 2021/04/14 01:30:52 got query request
+[Server 1] 2021/04/14 01:31:28 answer size in bytes: 41799
+[Server 1] 2021/04/14 01:31:28 stats,21,41799
+[Server 1] 2021/04/14 01:31:33 got databaseInfo request
+[Server 1] 2021/04/14 01:31:33 got query request
+[Server 1] 2021/04/14 01:32:10 answer size in bytes: 41798
+[Server 1] 2021/04/14 01:32:10 stats,21,41798
+[Server 1] 2021/04/14 01:32:15 got databaseInfo request
+[Server 1] 2021/04/14 01:32:15 got query request
+[Server 1] 2021/04/14 01:32:53 answer size in bytes: 41812
+[Server 1] 2021/04/14 01:32:53 stats,21,41812
+[Server 1] 2021/04/14 01:32:58 got databaseInfo request
+[Server 1] 2021/04/14 01:32:58 got query request
+[Server 1] 2021/04/14 01:33:34 answer size in bytes: 41792
+[Server 1] 2021/04/14 01:33:34 stats,21,41792
+[Server 1] 2021/04/14 01:33:39 got databaseInfo request
+[Server 1] 2021/04/14 01:33:39 got query request
+[Server 1] 2021/04/14 01:34:20 answer size in bytes: 41805
+[Server 1] 2021/04/14 01:34:20 stats,21,41805
+[Server 1] 2021/04/14 01:34:27 got databaseInfo request
+[Server 1] 2021/04/14 01:34:27 got query request
+[Server 1] 2021/04/14 01:35:05 answer size in bytes: 41806
+[Server 1] 2021/04/14 01:35:05 stats,21,41806
+[Server 1] 2021/04/14 01:35:13 got databaseInfo request
+[Server 1] 2021/04/14 01:35:13 got query request
+[Server 1] 2021/04/14 01:35:53 answer size in bytes: 41799
+[Server 1] 2021/04/14 01:35:53 stats,21,41799
+[Server 1] 2021/04/14 01:35:59 got databaseInfo request
+[Server 1] 2021/04/14 01:35:59 got query request
+[Server 1] 2021/04/14 01:36:34 answer size in bytes: 41778
+[Server 1] 2021/04/14 01:36:34 stats,21,41778
+[Server 1] 2021/04/14 01:36:43 got databaseInfo request
+[Server 1] 2021/04/14 01:36:43 got query request
+[Server 1] 2021/04/14 01:37:18 answer size in bytes: 41803
+[Server 1] 2021/04/14 01:37:18 stats,21,41803
+[Server 1] 2021/04/14 01:37:24 got databaseInfo request
+[Server 1] 2021/04/14 01:37:24 got query request
+[Server 1] 2021/04/14 01:38:03 answer size in bytes: 41800
+[Server 1] 2021/04/14 01:38:03 stats,21,41800
+[Server 1] 2021/04/14 01:38:09 got databaseInfo request
+[Server 1] 2021/04/14 01:38:09 got query request
+[Server 1] 2021/04/14 01:38:45 answer size in bytes: 41801
+[Server 1] 2021/04/14 01:38:45 stats,21,41801
+[Server 1] 2021/04/14 01:38:50 clean shutdown of server done
+31
+[Server 1] 2021/04/14 01:38:52 Starting to read in the DB data
+[Server 1] 2021/04/14 01:38:52 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:39:38 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:39:38 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 01:39:38 starting grpc server
+[Server 1] 2021/04/14 01:40:20 got databaseInfo request
+[Server 1] 2021/04/14 01:40:20 got query request
+[Server 1] 2021/04/14 01:40:57 answer size in bytes: 41796
+[Server 1] 2021/04/14 01:40:57 stats,22,41796
+[Server 1] 2021/04/14 01:41:06 got databaseInfo request
+[Server 1] 2021/04/14 01:41:06 got query request
+[Server 1] 2021/04/14 01:41:46 answer size in bytes: 41802
+[Server 1] 2021/04/14 01:41:46 stats,22,41802
+[Server 1] 2021/04/14 01:41:51 got databaseInfo request
+[Server 1] 2021/04/14 01:41:51 got query request
+[Server 1] 2021/04/14 01:42:32 answer size in bytes: 41799
+[Server 1] 2021/04/14 01:42:32 stats,22,41799
+[Server 1] 2021/04/14 01:42:37 got databaseInfo request
+[Server 1] 2021/04/14 01:42:37 got query request
+[Server 1] 2021/04/14 01:43:15 answer size in bytes: 41807
+[Server 1] 2021/04/14 01:43:15 stats,22,41807
+[Server 1] 2021/04/14 01:43:20 got databaseInfo request
+[Server 1] 2021/04/14 01:43:20 got query request
+[Server 1] 2021/04/14 01:43:59 answer size in bytes: 41801
+[Server 1] 2021/04/14 01:43:59 stats,22,41801
+[Server 1] 2021/04/14 01:44:04 got databaseInfo request
+[Server 1] 2021/04/14 01:44:04 got query request
+[Server 1] 2021/04/14 01:44:42 answer size in bytes: 41799
+[Server 1] 2021/04/14 01:44:42 stats,22,41799
+[Server 1] 2021/04/14 01:44:47 got databaseInfo request
+[Server 1] 2021/04/14 01:44:47 got query request
+[Server 1] 2021/04/14 01:45:24 answer size in bytes: 41801
+[Server 1] 2021/04/14 01:45:24 stats,22,41801
+[Server 1] 2021/04/14 01:45:29 got databaseInfo request
+[Server 1] 2021/04/14 01:45:29 got query request
+[Server 1] 2021/04/14 01:46:06 answer size in bytes: 41808
+[Server 1] 2021/04/14 01:46:06 stats,22,41808
+[Server 1] 2021/04/14 01:46:11 got databaseInfo request
+[Server 1] 2021/04/14 01:46:11 got query request
+[Server 1] 2021/04/14 01:46:49 answer size in bytes: 41799
+[Server 1] 2021/04/14 01:46:49 stats,22,41799
+[Server 1] 2021/04/14 01:46:56 got databaseInfo request
+[Server 1] 2021/04/14 01:46:56 got query request
+[Server 1] 2021/04/14 01:47:31 answer size in bytes: 41793
+[Server 1] 2021/04/14 01:47:31 stats,22,41793
+[Server 1] 2021/04/14 01:47:36 got databaseInfo request
+[Server 1] 2021/04/14 01:47:37 got query request
+[Server 1] 2021/04/14 01:48:15 answer size in bytes: 41803
+[Server 1] 2021/04/14 01:48:15 stats,22,41803
+[Server 1] 2021/04/14 01:48:20 got databaseInfo request
+[Server 1] 2021/04/14 01:48:20 got query request
+[Server 1] 2021/04/14 01:48:59 answer size in bytes: 41798
+[Server 1] 2021/04/14 01:48:59 stats,22,41798
+[Server 1] 2021/04/14 01:49:04 got databaseInfo request
+[Server 1] 2021/04/14 01:49:04 got query request
+[Server 1] 2021/04/14 01:49:39 answer size in bytes: 41797
+[Server 1] 2021/04/14 01:49:39 stats,22,41797
+[Server 1] 2021/04/14 01:49:44 got databaseInfo request
+[Server 1] 2021/04/14 01:49:44 got query request
+[Server 1] 2021/04/14 01:50:25 answer size in bytes: 41807
+[Server 1] 2021/04/14 01:50:25 stats,22,41807
+[Server 1] 2021/04/14 01:50:30 got databaseInfo request
+[Server 1] 2021/04/14 01:50:30 got query request
+[Server 1] 2021/04/14 01:51:08 answer size in bytes: 41793
+[Server 1] 2021/04/14 01:51:08 stats,22,41793
+[Server 1] 2021/04/14 01:51:13 got databaseInfo request
+[Server 1] 2021/04/14 01:51:13 got query request
+[Server 1] 2021/04/14 01:51:52 answer size in bytes: 41804
+[Server 1] 2021/04/14 01:51:52 stats,22,41804
+[Server 1] 2021/04/14 01:51:58 got databaseInfo request
+[Server 1] 2021/04/14 01:51:58 got query request
+[Server 1] 2021/04/14 01:52:36 answer size in bytes: 41801
+[Server 1] 2021/04/14 01:52:36 stats,22,41801
+[Server 1] 2021/04/14 01:52:41 got databaseInfo request
+[Server 1] 2021/04/14 01:52:41 got query request
+[Server 1] 2021/04/14 01:53:17 answer size in bytes: 41798
+[Server 1] 2021/04/14 01:53:17 stats,22,41798
+[Server 1] 2021/04/14 01:53:22 got databaseInfo request
+[Server 1] 2021/04/14 01:53:22 got query request
+[Server 1] 2021/04/14 01:54:02 answer size in bytes: 41795
+[Server 1] 2021/04/14 01:54:02 stats,22,41795
+[Server 1] 2021/04/14 01:54:07 got databaseInfo request
+[Server 1] 2021/04/14 01:54:07 got query request
+[Server 1] 2021/04/14 01:54:45 answer size in bytes: 41800
+[Server 1] 2021/04/14 01:54:45 stats,22,41800
+[Server 1] 2021/04/14 01:54:50 clean shutdown of server done
+31
+[Server 1] 2021/04/14 01:54:51 Starting to read in the DB data
+[Server 1] 2021/04/14 01:54:51 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:55:39 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 01:55:39 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 01:55:39 starting grpc server
+[Server 1] 2021/04/14 01:56:20 got databaseInfo request
+[Server 1] 2021/04/14 01:56:20 got query request
+[Server 1] 2021/04/14 01:56:58 answer size in bytes: 41805
+[Server 1] 2021/04/14 01:56:58 stats,23,41805
+[Server 1] 2021/04/14 01:57:05 got databaseInfo request
+[Server 1] 2021/04/14 01:57:05 got query request
+[Server 1] 2021/04/14 01:57:43 answer size in bytes: 41793
+[Server 1] 2021/04/14 01:57:43 stats,23,41793
+[Server 1] 2021/04/14 01:57:48 got databaseInfo request
+[Server 1] 2021/04/14 01:57:48 got query request
+[Server 1] 2021/04/14 01:58:29 answer size in bytes: 41810
+[Server 1] 2021/04/14 01:58:29 stats,23,41810
+[Server 1] 2021/04/14 01:58:35 got databaseInfo request
+[Server 1] 2021/04/14 01:58:35 got query request
+[Server 1] 2021/04/14 01:59:12 answer size in bytes: 41789
+[Server 1] 2021/04/14 01:59:12 stats,23,41789
+[Server 1] 2021/04/14 01:59:18 got databaseInfo request
+[Server 1] 2021/04/14 01:59:18 got query request
+[Server 1] 2021/04/14 01:59:55 answer size in bytes: 41804
+[Server 1] 2021/04/14 01:59:55 stats,23,41804
+[Server 1] 2021/04/14 02:00:01 got databaseInfo request
+[Server 1] 2021/04/14 02:00:01 got query request
+[Server 1] 2021/04/14 02:00:36 answer size in bytes: 41800
+[Server 1] 2021/04/14 02:00:36 stats,23,41800
+[Server 1] 2021/04/14 02:00:44 got databaseInfo request
+[Server 1] 2021/04/14 02:00:44 got query request
+[Server 1] 2021/04/14 02:01:21 answer size in bytes: 41804
+[Server 1] 2021/04/14 02:01:21 stats,23,41804
+[Server 1] 2021/04/14 02:01:26 got databaseInfo request
+[Server 1] 2021/04/14 02:01:26 got query request
+[Server 1] 2021/04/14 02:02:03 answer size in bytes: 41807
+[Server 1] 2021/04/14 02:02:03 stats,23,41807
+[Server 1] 2021/04/14 02:02:08 got databaseInfo request
+[Server 1] 2021/04/14 02:02:08 got query request
+[Server 1] 2021/04/14 02:02:43 answer size in bytes: 41805
+[Server 1] 2021/04/14 02:02:43 stats,23,41805
+[Server 1] 2021/04/14 02:02:51 got databaseInfo request
+[Server 1] 2021/04/14 02:02:51 got query request
+[Server 1] 2021/04/14 02:03:25 answer size in bytes: 41807
+[Server 1] 2021/04/14 02:03:25 stats,23,41807
+[Server 1] 2021/04/14 02:03:32 got databaseInfo request
+[Server 1] 2021/04/14 02:03:32 got query request
+[Server 1] 2021/04/14 02:04:07 answer size in bytes: 41805
+[Server 1] 2021/04/14 02:04:07 stats,23,41805
+[Server 1] 2021/04/14 02:04:12 got databaseInfo request
+[Server 1] 2021/04/14 02:04:12 got query request
+[Server 1] 2021/04/14 02:04:48 answer size in bytes: 41804
+[Server 1] 2021/04/14 02:04:48 stats,23,41804
+[Server 1] 2021/04/14 02:04:53 got databaseInfo request
+[Server 1] 2021/04/14 02:04:53 got query request
+[Server 1] 2021/04/14 02:05:30 answer size in bytes: 41799
+[Server 1] 2021/04/14 02:05:30 stats,23,41799
+[Server 1] 2021/04/14 02:05:35 got databaseInfo request
+[Server 1] 2021/04/14 02:05:35 got query request
+[Server 1] 2021/04/14 02:06:10 answer size in bytes: 41804
+[Server 1] 2021/04/14 02:06:10 stats,23,41804
+[Server 1] 2021/04/14 02:06:15 got databaseInfo request
+[Server 1] 2021/04/14 02:06:15 got query request
+[Server 1] 2021/04/14 02:06:51 answer size in bytes: 41805
+[Server 1] 2021/04/14 02:06:51 stats,23,41805
+[Server 1] 2021/04/14 02:06:58 got databaseInfo request
+[Server 1] 2021/04/14 02:06:58 got query request
+[Server 1] 2021/04/14 02:07:34 answer size in bytes: 41800
+[Server 1] 2021/04/14 02:07:34 stats,23,41800
+[Server 1] 2021/04/14 02:07:39 got databaseInfo request
+[Server 1] 2021/04/14 02:07:39 got query request
+[Server 1] 2021/04/14 02:08:18 answer size in bytes: 41807
+[Server 1] 2021/04/14 02:08:18 stats,23,41807
+[Server 1] 2021/04/14 02:08:23 got databaseInfo request
+[Server 1] 2021/04/14 02:08:23 got query request
+[Server 1] 2021/04/14 02:09:00 answer size in bytes: 41804
+[Server 1] 2021/04/14 02:09:00 stats,23,41804
+[Server 1] 2021/04/14 02:09:07 got databaseInfo request
+[Server 1] 2021/04/14 02:09:07 got query request
+[Server 1] 2021/04/14 02:09:47 answer size in bytes: 41798
+[Server 1] 2021/04/14 02:09:47 stats,23,41798
+[Server 1] 2021/04/14 02:09:52 got databaseInfo request
+[Server 1] 2021/04/14 02:09:52 got query request
+[Server 1] 2021/04/14 02:10:27 answer size in bytes: 41795
+[Server 1] 2021/04/14 02:10:27 stats,23,41795
+[Server 1] 2021/04/14 02:10:34 clean shutdown of server done
+31
+[Server 1] 2021/04/14 02:10:34 Starting to read in the DB data
+[Server 1] 2021/04/14 02:10:34 Field db rebalanced: false, loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 02:11:27 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 1] 2021/04/14 02:11:28 is listening at 10.90.36.39:50051
+[Server 1] 2021/04/14 02:11:28 starting grpc server
+[Server 1] 2021/04/14 02:12:04 got databaseInfo request
+[Server 1] 2021/04/14 02:12:04 got query request
+[Server 1] 2021/04/14 02:12:43 answer size in bytes: 41793
+[Server 1] 2021/04/14 02:12:43 stats,24,41793
+[Server 1] 2021/04/14 02:12:51 got databaseInfo request
+[Server 1] 2021/04/14 02:12:51 got query request
+[Server 1] 2021/04/14 02:13:30 answer size in bytes: 41803
+[Server 1] 2021/04/14 02:13:30 stats,24,41803
+[Server 1] 2021/04/14 02:13:35 got databaseInfo request
+[Server 1] 2021/04/14 02:13:35 got query request
+[Server 1] 2021/04/14 02:14:14 answer size in bytes: 41798
+[Server 1] 2021/04/14 02:14:14 stats,24,41798
+[Server 1] 2021/04/14 02:14:19 got databaseInfo request
+[Server 1] 2021/04/14 02:14:19 got query request
+[Server 1] 2021/04/14 02:14:56 answer size in bytes: 41811
+[Server 1] 2021/04/14 02:14:56 stats,24,41811
+[Server 1] 2021/04/14 02:15:01 got databaseInfo request
+[Server 1] 2021/04/14 02:15:01 got query request
+[Server 1] 2021/04/14 02:15:40 answer size in bytes: 41803
+[Server 1] 2021/04/14 02:15:40 stats,24,41803
+[Server 1] 2021/04/14 02:15:46 got databaseInfo request
+[Server 1] 2021/04/14 02:15:46 got query request
+[Server 1] 2021/04/14 02:16:24 answer size in bytes: 41808
+[Server 1] 2021/04/14 02:16:24 stats,24,41808
+[Server 1] 2021/04/14 02:16:29 got databaseInfo request
+[Server 1] 2021/04/14 02:16:29 got query request
+[Server 1] 2021/04/14 02:17:09 answer size in bytes: 41798
+[Server 1] 2021/04/14 02:17:09 stats,24,41798
+[Server 1] 2021/04/14 02:17:14 got databaseInfo request
+[Server 1] 2021/04/14 02:17:14 got query request
+[Server 1] 2021/04/14 02:17:51 answer size in bytes: 41793
+[Server 1] 2021/04/14 02:17:51 stats,24,41793
+[Server 1] 2021/04/14 02:17:56 got databaseInfo request
+[Server 1] 2021/04/14 02:17:56 got query request
+[Server 1] 2021/04/14 02:18:33 answer size in bytes: 41807
+[Server 1] 2021/04/14 02:18:33 stats,24,41807
+[Server 1] 2021/04/14 02:18:39 got databaseInfo request
+[Server 1] 2021/04/14 02:18:39 got query request
+[Server 1] 2021/04/14 02:19:16 answer size in bytes: 41799
+[Server 1] 2021/04/14 02:19:16 stats,24,41799
+[Server 1] 2021/04/14 02:19:21 got databaseInfo request
+[Server 1] 2021/04/14 02:19:21 got query request
+[Server 1] 2021/04/14 02:19:59 answer size in bytes: 41807
+[Server 1] 2021/04/14 02:19:59 stats,24,41807
+[Server 1] 2021/04/14 02:20:04 got databaseInfo request
+[Server 1] 2021/04/14 02:20:04 got query request
+[Server 1] 2021/04/14 02:20:43 answer size in bytes: 41799
+[Server 1] 2021/04/14 02:20:43 stats,24,41799
+[Server 1] 2021/04/14 02:20:48 got databaseInfo request
+[Server 1] 2021/04/14 02:20:48 got query request
+[Server 1] 2021/04/14 02:21:24 answer size in bytes: 41810
+[Server 1] 2021/04/14 02:21:24 stats,24,41810
+[Server 1] 2021/04/14 02:21:33 got databaseInfo request
+[Server 1] 2021/04/14 02:21:33 got query request
+[Server 1] 2021/04/14 02:22:12 answer size in bytes: 41810
+[Server 1] 2021/04/14 02:22:12 stats,24,41810
+[Server 1] 2021/04/14 02:22:17 got databaseInfo request
+[Server 1] 2021/04/14 02:22:17 got query request
+[Server 1] 2021/04/14 02:22:55 answer size in bytes: 41804
+[Server 1] 2021/04/14 02:22:55 stats,24,41804
+[Server 1] 2021/04/14 02:23:00 got databaseInfo request
+[Server 1] 2021/04/14 02:23:00 got query request
+[Server 1] 2021/04/14 02:23:40 answer size in bytes: 41805
+[Server 1] 2021/04/14 02:23:40 stats,24,41805
+[Server 1] 2021/04/14 02:23:45 got databaseInfo request
+[Server 1] 2021/04/14 02:23:45 got query request
+[Server 1] 2021/04/14 02:24:33 answer size in bytes: 41806
+[Server 1] 2021/04/14 02:24:33 stats,24,41806
+[Server 1] 2021/04/14 02:24:38 got databaseInfo request
+[Server 1] 2021/04/14 02:24:38 got query request
+[Server 1] 2021/04/14 02:25:16 answer size in bytes: 41806
+[Server 1] 2021/04/14 02:25:16 stats,24,41806
+[Server 1] 2021/04/14 02:25:21 got databaseInfo request
+[Server 1] 2021/04/14 02:25:21 got query request
+[Server 1] 2021/04/14 02:26:00 answer size in bytes: 41801
+[Server 1] 2021/04/14 02:26:00 stats,24,41801
+[Server 1] 2021/04/14 02:26:05 got databaseInfo request
+[Server 1] 2021/04/14 02:26:06 got query request
+[Server 1] 2021/04/14 02:26:43 answer size in bytes: 41803
+[Server 1] 2021/04/14 02:26:43 stats,24,41803
+[Server 1] 2021/04/14 02:26:48 clean shutdown of server done
