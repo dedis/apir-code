@@ -155,13 +155,13 @@ func main() {
 		} else {
 			s = server.NewDPF(db)
 		}
-	case "pir-it":
+	case "pir-it", "merkle-it":
 		if *cores != -1 && *experiment {
 			s = server.NewPIR(dbBytes, *cores)
 		} else {
 			s = server.NewPIR(dbBytes)
 		}
-	case "pir-dpf":
+	case "pir-dpf", "merkle-dpf":
 		if *cores != -1 && *experiment {
 			s = server.NewPIRdpf(dbBytes, *cores)
 		} else {
