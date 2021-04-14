@@ -219,24 +219,14 @@ def plotSingle():
 
 
 def plotReal():
-    # define prices
-    # costClientUpload = 0.09 / pow(10, 6)
-    # costClientDownload = 0.09 / pow(10, 6)
-    costPerHour = 1.9456
-    #costPerHour = 0.616 
-    costClientUpload = 0.0
-    costClientDownload = 0.0
-    costOut = 0.09 / pow(10, 9)
-    costCore = 0.466/16 # a1.metal
+    # define price
+    #costPerHour = 0.6854
+    costPerMonth = 1
 
-    # schemes = ["it", "dpf", "pir-it", "pir-dpf"]
-    # labels = ["Atomic VPIR", "DPF VPIR", "PIR", "PIR DPF"]
-    schemes = ["it", "dpf"]
-    labels = ["Atomic Matrix", "Atomic DPF"]
+    schemes = ["it", "dpf", "pir-it", "pir-dpf"]
+    labels = ["Atomic Matrix", "Atomic DPF", "None Matrix", "None DPF"]
 
     fig, ax = plt.subplots()
-    plt.style.use('grayscale')
-    color = 'black'
 
     for i, scheme in enumerate(schemes):
         logServers = [
@@ -261,7 +251,7 @@ def plotReal():
             queries[c] = statsClient[c]["queries"]
             # artificially add 100ms of RTT between client and servers. Since
             # request done in parallel, only add 100ms
-            latencies[c] = [0.1 + x for x in statsClient[c]["latency"]]
+            latencies[c] = [0.1 + float(x) for x in statsClient[c]["latency"]]
 
 
         # take means
@@ -272,38 +262,31 @@ def plotReal():
         # compute price
         costs = dict()
         for cores in answers:
-            # price = costCore * cores \
-                    # + answersMean[cores] * costClientDownload \
-                    # + answersMean[cores] * costOut \
-                    # + queriesMean[cores] * costClientUpload
             costs[cores] = latencyMean[cores]
-        print(costs)
 
+        
         bestCores = 24
         bestLatency = latencyMean[bestCores]
-        keyPerSecond = 1/bestLatency
-        bwPerKey = answersMean[bestCores] + queriesMean[bestCores]
-        print("keyPerSecond:", keyPerSecond)
-        throughput = [x for x in range(1, 11)]
-        cost = [(x/keyPerSecond * costPerHour*8766 + bwPerKey*x*costOut) for x in throughput]
 
-        # plot
-        # x, y = [], []
-        # for k in sorted(costs):
-            # x.append(k)
-            # y.append(costs[k])
-        # ax.plot(x, y, label=labels[i])
-        ax.plot([x/pow(10,6) for x in cost], throughput, label=labels[i])
+        print(labels[i], "&", rounder2(bestLatency), "\\\\")
+
+        #keyPerSecond = 1/bestLatency
+        keyPerSecond = 1
+        keyPerDay = keyPerSecond * 60 * 60 * 24
+        #print(keyPerSecond)
+        bwPerKey = answersMean[bestCores] + queriesMean[bestCores]
+        throughput = [x*60*60*24 for x in range(1, 11)]
+        #cost = [(x/keyPerSecond * costPerHour*8760) for x in throughput]
+        #cost = [(x/keyPerSecond * costPerMonth*12 * 2) for x in throughput]
+        #cost = [(x/keyPerSecond * costPerMonth * 2) for x in throughput]
+        cost = [(x/keyPerDay * costPerMonth * 2) for x in throughput]
+
+        #ax.plot([x/pow(10,6) for x in cost], throughput, label=labels[i])
+        ax.plot([x for x in cost], throughput, label=labels[i])
     
-    #ax.set_ylabel("Latency [s]", color=color)
-    ax.set_ylabel("Throughput [key/s]", color=color)
-    ax.set_xlabel("Cost per year [M\$/year]", color=color)
-    ticksLabels = [c/pow(10,6) for c in cost]
-    # print(ticksLabels)
-    # ax.set_xticks(len(cost),ticksLabels)
-    # ax.set_xticklabels(ticksLabels)
-    #ax.set_xticks(ticksLabels)
-    ax.tick_params(axis='y', labelcolor=color)
+    ax.set_ylabel("Throughput [key/s]")
+    ax.set_xlabel("Cost per year [M\$/year]")
+    ax.tick_params(axis='y')
     ax.legend()
     plt.tight_layout()
     #plt.show()

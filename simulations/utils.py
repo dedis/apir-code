@@ -87,7 +87,7 @@ def stats(data):
 def meanFromDict(data):
     stats = dict()
     for d in data:
-        stats[d]= int(np.median(data[d]))
+        stats[d]= np.median(data[d])
     return stats
 
 def prepare_for_latex():
