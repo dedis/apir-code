@@ -8,6 +8,10 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
+    <link rel="stylesheet" href="/static/static/style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet"> 
+
     <title>VPIR demo</title>
   </head>
   <body>
@@ -15,10 +19,14 @@
     </div>
 
     <div class="main">
-        <p>Hi</p>
+        <h1>VPIR</h1>
+        <p class="subtitle">
+            <span>verifiable</span>
+            Private-information-retreival
+        </p>
+
         <form method="POST" action="javascript:void(0);" onSubmit="retreive()">
-            <input id="email-input" type="text" name="email" />
-            <button>Retreive</button>
+            <input placeholder="Enter email..." id="email-input" type="text" name="email" /><button>Retreive</button>
         </form>
         <div id="result">
 

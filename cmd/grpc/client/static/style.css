@@ -1,0 +1,79 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+div.main {
+  max-width: 1024px;
+  text-align: center;
+  padding-top: 10%;
+}
+
+div.main h1 {
+  font-family: "Arial black", sans-serif;
+  font-size: 4em;
+  line-height: 1em;
+  padding: 20px 0;
+}
+
+div.main p.subtitle {
+  line-height: 1em;
+  font-family: "silom", sans-serif;
+  padding: 0 0 60px 0;
+}
+
+div.main p.subtitle span {
+  text-transform: uppercase;
+  color: #b90000;
+}
+
+div.main form {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+  justify-content: center;
+  padding: 0 0 50px 0;
+}
+
+div.main form input {
+  border-width: 1px;
+  border-style: solid;
+  border-color: black transparent black black;
+  border-radius: 20px 0 0 20px;
+  font-size: 1.1em;
+  padding: 10px 20px;
+}
+
+div.main form input:focus {
+  outline: none;
+}
+
+div.main form button {
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 0 20px 20px 0;
+  font-size: 1em;
+  padding: 5px 14px 5px 7px;
+  cursor: pointer;
+}
+
+div.main form button:hover {
+  background-color: #d6d6d6;
+}
+
+div.main div#result {
+  padding: 30px;
+  font-family: monospace;
+}
+
+@font-face {
+  font-family: silom;
+  src: url(/static/static/Silom.ttf);
+}
