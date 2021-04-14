@@ -108,12 +108,12 @@ func main() {
 		if err != nil {
 			log.Fatalf("impossible to construct real keys db: %v", err)
 		}
-	case "pir-it":
+	case "pir-it", "merkle-it":
 		dbBytes, err = loadPgpBytes(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
-	case "pir-dpf":
+	case "pir-dpf", "merkle-dpf":
 		dbBytes, err = loadPgpBytes(*filesNumber, false)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)

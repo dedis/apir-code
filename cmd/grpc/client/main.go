@@ -157,9 +157,9 @@ func (lc *localClient) exec() (string, error) {
 		lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 	case "dpf":
 		lc.vpirClient = client.NewDPF(lc.prg, lc.dbInfo)
-	case "pir-it":
+	case "pir-it", "merkle-it":
 		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
-	case "pir-dpf":
+	case "pir-dpf", "merkle-dpf":
 		lc.vpirClient = client.NewPIRdpf(lc.prg, lc.dbInfo)
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
