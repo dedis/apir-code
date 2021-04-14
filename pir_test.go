@@ -153,5 +153,7 @@ func TestPIRNumberThreads(t *testing.T) {
 		_, err = c.ReconstructBytes(answers)
 		require.NoError(t, err)
 		fmt.Printf("Total time: %v  \n", time.Since(clock))
+		// GC after each repetition
+		runtime.GC()
 	}
 }
