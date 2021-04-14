@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"html/template"
 	"log"
@@ -19,6 +20,12 @@ const (
 	requestIDKey key = 0
 )
 
+//go:embed index.gohtml
+var content embed.FS
+
+//go:embed static
+var static embed.FS
+
 func (lc *localClient) runDemo() {
 	var listenAddr = lc.flags.listenAddr
 	if listenAddr == "" {
@@ -33,8 +40,9 @@ func (lc *localClient) runDemo() {
 		ErrorLog: logger,
 	}
 
-	mux.HandleFunc("/", lc.handleIndex)
 	mux.HandleFunc("/retreive", lc.handleRetreive)
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
+	mux.HandleFunc("/", lc.handleIndex)
 
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
@@ -51,7 +59,7 @@ func (lc *localClient) runDemo() {
 }
 
 func (lc *localClient) handleIndex(w http.ResponseWriter, req *http.Request) {
-	t, err := template.ParseFiles("index.gohtml")
+	t, err := template.ParseFS(content, "index.gohtml")
 	if err != nil {
 		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
 		return
