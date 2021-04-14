@@ -222,13 +222,17 @@ def plotReal():
     # define prices
     # costClientUpload = 0.09 / pow(10, 6)
     # costClientDownload = 0.09 / pow(10, 6)
+    costPerHour = 1.9456
+    #costPerHour = 0.616 
     costClientUpload = 0.0
     costClientDownload = 0.0
     costOut = 0.09 / pow(10, 9)
     costCore = 0.466/16 # a1.metal
 
-    schemes = ["it", "dpf", "pir-it", "pir-dpf"]
-    labels = ["Atomic VPIR", "DPF VPIR", "PIR", "PIR DPF"]
+    # schemes = ["it", "dpf", "pir-it", "pir-dpf"]
+    # labels = ["Atomic VPIR", "DPF VPIR", "PIR", "PIR DPF"]
+    schemes = ["it", "dpf"]
+    labels = ["Atomic Matrix", "Atomic DPF"]
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
@@ -273,21 +277,36 @@ def plotReal():
                     # + answersMean[cores] * costOut \
                     # + queriesMean[cores] * costClientUpload
             costs[cores] = latencyMean[cores]
+        print(costs)
+
+        bestCores = 24
+        bestLatency = latencyMean[bestCores]
+        keyPerSecond = 1/bestLatency
+        bwPerKey = answersMean[bestCores] + queriesMean[bestCores]
+        print("keyPerSecond:", keyPerSecond)
+        throughput = [x for x in range(1, 11)]
+        cost = [(x/keyPerSecond * costPerHour*8766 + bwPerKey*x*costOut) for x in throughput]
 
         # plot
-        x, y = [], []
-        for k in sorted(costs):
-            x.append(k)
-            y.append(costs[k])
-        ax.plot(x, y, label=labels[i])
-
-    ax.set_ylabel("Latency [s]", color=color)
-    ax.set_xlabel("Cost [\$]", color=color)
-    ax.set_xticks(x)
+        # x, y = [], []
+        # for k in sorted(costs):
+            # x.append(k)
+            # y.append(costs[k])
+        # ax.plot(x, y, label=labels[i])
+        ax.plot([x/pow(10,6) for x in cost], throughput, label=labels[i])
+    
+    #ax.set_ylabel("Latency [s]", color=color)
+    ax.set_ylabel("Throughput [key/s]", color=color)
+    ax.set_xlabel("Cost per year [M\$/year]", color=color)
+    ticksLabels = [c/pow(10,6) for c in cost]
+    # print(ticksLabels)
+    # ax.set_xticks(len(cost),ticksLabels)
+    # ax.set_xticklabels(ticksLabels)
+    #ax.set_xticks(ticksLabels)
     ax.tick_params(axis='y', labelcolor=color)
     ax.legend()
     plt.tight_layout()
-    # plt.show()
+    #plt.show()
     plt.savefig('real.eps', format='eps', dpi=300, transparent=True)
 
 
