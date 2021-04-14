@@ -104,7 +104,7 @@ func main() {
 			log.Fatalf("impossible to load real keys db: %v", err)
 		}
 	case "dpf":
-		db, err = database.LoadMMapDB("data/data_dpf/")
+		db, err = loadPgpDB(*filesNumber, false)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys db: %v", err)
 		}
