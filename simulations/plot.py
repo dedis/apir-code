@@ -269,9 +269,9 @@ def plotReal():
         bestLatency = latencyMean[bestCores]
 
         print(labels[i], "&", rounder2(bestLatency), "\\\\")
-
-        #keyPerSecond = 1/bestLatency
-        keyPerSecond = 1
+        
+        avgPing = 230.128 # ms
+        keyPerSecond = 1/bestLatency
         keyPerDay = keyPerSecond * 60 * 60 * 24
         #print(keyPerSecond)
         bwPerKey = answersMean[bestCores] + queriesMean[bestCores]
