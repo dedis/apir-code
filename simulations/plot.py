@@ -19,9 +19,12 @@ MB = pow(1024, 2)
 KB = 1024
 
 def plotVpirBenchmarks():
-    schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-bit (§4.1)", "Single-element (§4.4)", "Block (§4.4)"]
-    colors = ['black', 'grey', 'lightgrey']
+    # schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
+    # labels = ["Single-bit (§4.2)", "Single-element (§4.4)", "Block (§4.4)"]
+    # colors = ['black', 'grey', 'lightgrey']
+    schemes = ["vpirMultiVector.json", "vpirMultiVectorBlock.json"]
+    labels = ["Single-element (§4.4)", "Block (§4.4)"]
+    colors = ['grey', 'lightgrey']
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
@@ -219,10 +222,6 @@ def plotSingle():
 
 
 def plotReal():
-    # define price
-    #costPerHour = 0.6854
-    costPerMonth = 1
-
     schemes = ["it", "dpf", "merkle-it", "merkle-dpf", "pir-it", "pir-dpf"]
     labels = ["Atomic", "Merkle", "PIR"]
 
@@ -249,22 +248,21 @@ def plotReal():
         latencies = dict()
         for c in statsClient:
             queries[c] = statsClient[c]["queries"]
-            # artificially add 100ms of RTT between client and servers. Since
-            # request done in parallel, only add 100ms
-            latencies[c] = [0.1 + float(x) for x in statsClient[c]["latency"]]
+            latencies[c] = statsClient[c]["latency"]
 
-
+        
         # take medians
         #answersMean = meanFromDict(answers)
         #queriesMean = meanFromDict(queries)
-        ping = 0.375815
+        ping = 0.375815 # ms
         latencyMean = meanFromDict(latencies)
-        bestLatency = latencyMean[24] + 0.375815
+        bestLatency = latencyMean[24] + ping
+        worstLatency = latencyMean[1] + ping
         
         if i % 2 == 0:
-            print(labels[int(i/2)], "&",  rounder2(bestLatency), "&", end=" ")
+            print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
         else:
-            print(rounder2(bestLatency), "\\\\") 
+            print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
 
         
         # avgPing = 230.128 # ms
