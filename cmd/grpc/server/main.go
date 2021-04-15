@@ -110,14 +110,26 @@ func main() {
 			log.Fatalf("impossible to construct real keys db: %v", err)
 		}
 		log.Printf("db size in GiB: %f", db.SizeGiB())
-	case "pir-it", "merkle-it":
+	case "pir-it":
 		dbBytes, err = loadPgpBytes(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
 		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "pir-dpf", "merkle-dpf":
+	case "pir-dpf":
 		dbBytes, err = loadPgpBytes(*filesNumber, false)
+		if err != nil {
+			log.Fatalf("impossible to construct real keys bytes db: %v", err)
+		}
+		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
+	case "merkle-it":
+		dbBytes, err = loadPgpMerkle(*filesNumber, true)
+		if err != nil {
+			log.Fatalf("impossible to construct real keys bytes db: %v", err)
+		}
+		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
+	case "merkle-dpf":
+		dbBytes, err = loadPgpMerkle(*filesNumber, false)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
@@ -285,6 +297,21 @@ func loadPgpBytes(filesNumber int, rebalanced bool) (*database.Bytes, error) {
 	files := getSksFiles(filesNumber)
 
 	db, err := database.GenerateRealKeyBytes(files, rebalanced)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("Bytes loaded with files", files)
+
+	return db, nil
+}
+
+func loadPgpMerkle(filesNumber int, rebalanced bool) (*database.Bytes, error) {
+	log.Println("Starting to read in the DB data")
+
+	// take only filesNumber files
+	files := getSksFiles(filesNumber)
+
+	db, err := database.GenerateRealKeyMerkle(files, rebalanced)
 	if err != nil {
 		return nil, err
 	}
