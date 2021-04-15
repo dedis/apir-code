@@ -49,7 +49,7 @@ func (d *DB) SetEntry(i int, el field.Element) {
 }
 
 func (d *DB) SizeGiB() float64 {
-	return float64(len(d.inMemory)*16) / 9.313e-10
+	return float64(len(d.inMemory)*16) * 9.313e-10
 }
 
 type saveInfo struct {
