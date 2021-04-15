@@ -18,11 +18,15 @@ import (
 )
 
 func TestLatticeMatrixOneMb(t *testing.T) {
-	dbLen := 83886080 // specified in bits
+	//dbLen := 83886080 // specified in bits
 	dbPRG := utils.RandomPRG()
-	db := database.CreateRandomRingDB(dbPRG, dbLen, true)
+	lens := []int{1000000, 10000000}
 
-	retrieveBlocksLattice(t, db, "LatticeMatrixOneMB")
+	for _, dbLen := range lens {
+		db := database.CreateRandomRingDB(dbPRG, dbLen, true)
+		retrieveBlocksLattice(t, db, "LatticeMatrixOneMB")
+	}
+
 }
 
 func retrieveBlocksLattice(t *testing.T, db *database.Ring, testName string) {
@@ -32,7 +36,7 @@ func retrieveBlocksLattice(t *testing.T, db *database.Ring, testName string) {
 	encoder := bfv.NewEncoder(db.LatParams)
 	totalTimer := monitor.NewMonitor()
 	var i int
-	for j := 0; j < 10; j++ {
+	for j := 0; j < 1; j++ {
 		i = rand.Intn(db.NumRows * db.NumColumns)
 		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
