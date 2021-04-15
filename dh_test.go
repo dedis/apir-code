@@ -21,7 +21,7 @@ func TestDHMatrixOneMb(t *testing.T) {
 	dbLen := 1024 * 1024 // dbLen is specified in bits
 	dbPRG := utils.RandomPRG()
 	ecg := group.P256
-	db := database.CreateRandomEllipticWithDigest(dbPRG, ecg, dbLen, true)
+	db := database.CreateRandomEllipticWithDigest(dbPRG, dbLen, ecg, true)
 
 	prg := utils.RandomPRG()
 	retrieveBlocksDH(t, prg, db, "SingleMatrixOneMB")
