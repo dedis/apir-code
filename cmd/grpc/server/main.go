@@ -103,21 +103,25 @@ func main() {
 		if err != nil {
 			log.Fatalf("impossible to load real keys db: %v", err)
 		}
+		log.Printf("db size in gb: %f", db.SizeGiB())
 	case "dpf":
 		db, err = loadPgpDB(*filesNumber, false)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys db: %v", err)
 		}
+		log.Printf("db size in gb: %f", db.SizeGiB())
 	case "pir-it", "merkle-it":
 		dbBytes, err = loadPgpBytes(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
+		log.Printf("db size in gb: %f", db.SizeGiB())
 	case "pir-dpf", "merkle-dpf":
 		dbBytes, err = loadPgpBytes(*filesNumber, false)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
+		log.Printf("db size in gb: %f", db.SizeGiB())
 	default:
 		log.Fatal("unknown scheme")
 	}

@@ -48,6 +48,10 @@ func (d *DB) SetEntry(i int, el field.Element) {
 	d.inMemory[i] = el
 }
 
+func (d *DB) SizeGiB() float64 {
+	return float64(len(d.inMemory)*16) / 9.313e-10
+}
+
 type saveInfo struct {
 	Info Info
 	// the list of chunks, with start/end indexes for each chunk
@@ -334,7 +338,7 @@ type Info struct {
 // Authentication information for the single-server setting
 type Auth struct {
 	// The global digest that is a hash of all the row digests. Public.
-	Digest     []byte
+	Digest []byte
 	// One digest per row, authenticating all the elements in that row.
 	SubDigests []byte
 	// ECC group and hash algorithm used for digest computation and PIR itself

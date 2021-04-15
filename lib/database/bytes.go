@@ -45,3 +45,7 @@ func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Byt
 		},
 	}
 }
+
+func (b *Bytes) SizeGiB() float64 {
+	return float64(len(b.Entries)) / 9.313e-10
+}
