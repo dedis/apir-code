@@ -115,13 +115,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
-		log.Printf("db size in GiB: %f", db.SizeGiB())
+		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
 	case "pir-dpf", "merkle-dpf":
 		dbBytes, err = loadPgpBytes(*filesNumber, false)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
-		log.Printf("db size in GiB: %f", db.SizeGiB())
+		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
 	default:
 		log.Fatal("unknown scheme")
 	}
