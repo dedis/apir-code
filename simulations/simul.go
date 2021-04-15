@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
@@ -131,7 +132,6 @@ func main() {
 		dbBytes := new(database.Bytes)
 		dbRing := new(database.Ring)
 		dbElliptic := new(database.Elliptic)
-		var data []byte
 		switch s.Primitive[:3] {
 		case "vpi":
 			if s.BlockLength == constants.SingleBitBlockLength {
@@ -152,14 +152,18 @@ func main() {
 				dbBytes = database.CreateRandomMultiBitBytes(dbPRG, dbLen, nRows, blockLen)
 			}
 		case "cmp":
-			dbRing, data = database.CreateRandomRingDB(dbPRG, dbLen, true)
-			if s.Primitive[len(s.Primitive)-4:] == "vpir" {
-				dbElliptic = database.CreateEllipticWithDigestFromData(data, &dbRing.Info)
+			if s.Primitive == "cmp-pir" {
+				log.Printf("Generating lattice db of size %d\n", dbLen)
+				dbRing = database.CreateRandomRingDB(dbPRG, dbLen, true)
+			} else if s.Primitive == "cmp-vpir" {
+				log.Printf("Generating elliptic db of size %d\n", dbLen)
+				dbElliptic = database.CreateRandomEllipticWithDigest(dbPRG, dbLen, group.P256, true)
 			}
 		}
 
 		// GC after DB creation
 		runtime.GC()
+		time.Sleep(3)
 
 		// run experiment
 		var results []*Chunk
@@ -183,8 +187,8 @@ func main() {
 			log.Printf("db info: %#v", dbRing.Info)
 			results = pirLattice(dbRing, s.Repetitions)
 		case "cmp-vpir":
-			log.Printf("db info: %#v", dbRing.Info)
-			results = pirLatticeWithEllipticTag(dbRing, dbElliptic, s.Repetitions)
+			log.Printf("db info: %#v", dbElliptic.Info)
+			results = pirElliptic(dbElliptic, s.Repetitions)
 		default:
 			log.Fatal("unknown primitive type")
 		}
@@ -490,11 +494,12 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 
 		// GC after each repetition
 		runtime.GC()
+		time.Sleep(2)
 	}
 	return results
 }
 
-func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepeat int) []*Chunk {
+func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 	numRetrievedBlocks := 1
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
@@ -502,52 +507,37 @@ func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepe
 	results := make([]*Chunk, nRepeat)
 
 	prg := utils.RandomPRG()
-	cl := client.NewLattice(&dbr.Info)
-	sl := server.NewLattice(dbr)
-	ce := client.NewDH(prg, &dbe.Info)
-	se := server.NewDH(dbe)
+	c := client.NewDH(prg, &db.Info)
+	s := server.NewDH(db)
 
 	var index int
 	var err error
-	var queryL, queryE, answerL, answerE []byte
-	var column [][]byte
+	var query, answer []byte
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrievedBlocks)
 		// pick a random block index to start the retrieval
-		index = rand.Intn(dbr.NumRows * dbr.NumColumns)
+		index = rand.Intn(db.NumRows * db.NumColumns)
 		results[j].CPU[0] = initBlock(1)
 		results[j].Bandwidth[0] = initBlock(1)
 
 		m.Reset()
-		queryL, err = cl.QueryBytes(index)
-		if err != nil {
-			log.Fatal(err)
-		}
-		queryE, err = ce.QueryBytes(index)
+		query, err = c.QueryBytes(index)
 		if err != nil {
 			log.Fatal(err)
 		}
 		results[j].CPU[0].Query = m.RecordAndReset()
-		results[j].Bandwidth[0].Query += float64(len(queryL) + len(queryE))
+		results[j].Bandwidth[0].Query += float64(len(query))
 
-		// get servers answers
-		answerL, err = sl.AnswerBytes(queryL)
-		if err != nil {
-			log.Fatal(err)
-		}
-		answerE, err = se.AnswerBytes(queryE)
+		// get server's answer
+		answer, err = s.AnswerBytes(query)
 		if err != nil {
 			log.Fatal(err)
 		}
 		results[j].CPU[0].Answers[0] = m.RecordAndReset()
-		results[j].Bandwidth[0].Answers[0] = float64(len(answerL) + len(answerE))
+		results[j].Bandwidth[0].Answers[0] = float64(len(answer))
 
-		column, err = cl.ReconstructBytes(answerL)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = ce.ReconstructBytes(answerE, column)
+		_, err = c.ReconstructBytes(answer)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -556,6 +546,7 @@ func pirLatticeWithEllipticTag(dbr *database.Ring, dbe *database.Elliptic, nRepe
 
 		// GC after each repetition
 		runtime.GC()
+		time.Sleep(2)
 	}
 
 	return results

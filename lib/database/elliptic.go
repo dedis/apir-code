@@ -17,7 +17,7 @@ type Elliptic struct {
 	Info
 }
 
-func CreateRandomEllipticWithDigest(rnd io.Reader, g group.Group, dbLen int, rebalanced bool) *Elliptic {
+func CreateRandomEllipticWithDigest(rnd io.Reader, dbLen int, g group.Group, rebalanced bool) *Elliptic {
 	numRows, numColumns := CalculateNumRowsAndColumns(dbLen, rebalanced)
 	// read random bytes for filling out the entries
 	// For simplicity, we use the whole byte to store 0 or 1

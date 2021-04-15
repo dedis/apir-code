@@ -4,10 +4,7 @@ package client
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/gob"
-	"math"
-
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
 )
@@ -58,7 +55,7 @@ func (c *Lattice) QueryBytes(index int) ([]byte, error) {
 	return encodedQuery, nil
 }
 
-func (c *Lattice) ReconstructBytes(a []byte) ([][]byte, error) {
+func (c *Lattice) ReconstructBytes(a []byte) ([]uint64, error) {
 	var err error
 	params := c.dbInfo.LatParams
 	encoder := bfv.NewEncoder(params)
@@ -67,28 +64,19 @@ func (c *Lattice) ReconstructBytes(a []byte) ([][]byte, error) {
 
 	ctx := new(bfv.Ciphertext)
 	var coeffs []uint64
-	tmp := make([]byte, 8)
-	column := make([][]byte, c.dbInfo.NumRows)
-	dataSize := int(math.Log2(float64(params.T()))) / 8
-	j := 0
+	//dataSize := int(math.Log2(float64(params.T()))) / 8
 	for i := 0; i < len(a); i += ciphertextSize {
 		err = ctx.UnmarshalBinary(a[i : i+ciphertextSize])
 		if err != nil {
 			return nil, err
 		}
 		coeffs = encoder.DecodeUintNew(decryptor.DecryptNew(ctx))
-		column[j] = make([]byte, 0, dataSize*int(params.N()))
-		for _, coeff := range coeffs {
-			binary.BigEndian.PutUint64(tmp, coeff)
-			column[j] = append(column[j], tmp[len(tmp)-dataSize:]...)
+		if i / ciphertextSize == c.state.ix {
+			return coeffs, nil
 		}
-		j++
-		//if i / ciphertextSize == c.state.ix {
-		//	return m, nil
-		//}
 	}
 
-	return column, nil
+	return nil, nil
 }
 
 func genQuery(params *bfv.Parameters, queryIndex int, encoder bfv.Encoder, encryptor bfv.Encryptor) *bfv.Ciphertext {
