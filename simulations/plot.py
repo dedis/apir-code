@@ -224,6 +224,7 @@ def plotSingle():
 def plotReal():
     schemes = ["it", "dpf", "merkle-it", "merkle-dpf", "pir-it", "pir-dpf"]
     labels = ["Atomic", "Merkle", "PIR"]
+    dbSizes = [12.485642 ,11.650396 ,11.907099,11.122669,11.702634 ,10.918602]
 
     fig, ax = plt.subplots()
 
@@ -256,15 +257,15 @@ def plotReal():
         #queriesMean = meanFromDict(queries)
         ping = 0.375815 # ms
         latencyMean = meanFromDict(latencies)
-        bestLatency = latencyMean[24] + ping
+        #bestLatency = latencyMean[24] + ping
         worstLatency = latencyMean[1] + ping
         
         if i % 2 == 0:
             #print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
-            print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", end=" ")
+            print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", round(dbSizes[i], 2), "&", end=" ")
         else:
             #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
-            print(rounder2(worstLatency), "\\\\") 
+            print(round(worstLatency, 2), "&", round(dbSizes[i], 2), "\\\\") 
 
 def print_latex_table_separate(results, numApproaches):
     for size, values in results.items():
