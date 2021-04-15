@@ -287,6 +287,8 @@ func dbInfo(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption) 
 		NumRows:    int(answer.GetNumRows()),
 		NumColumns: int(answer.GetNumColumns()),
 		BlockSize:  int(answer.GetBlockLength()),
+		PIRType:    answer.GetPirType(),
+		Merkle:     &database.Merkle{Root: answer.GetRoot(), ProofLen: int(answer.GetProofLen())},
 	}
 
 	return dbInfo

@@ -253,6 +253,9 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 		NumRows:     uint32(dbInfo.NumRows),
 		NumColumns:  uint32(dbInfo.NumColumns),
 		BlockLength: uint32(dbInfo.BlockSize),
+		PirType:     dbInfo.PIRType,
+		Root:        dbInfo.Root,
+		ProofLen:    uint32(dbInfo.ProofLen),
 	}
 
 	return resp, nil

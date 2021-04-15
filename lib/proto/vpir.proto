@@ -23,6 +23,7 @@ message DatabaseInfoResponse {
         uint32 numRows = 1;
         uint32 numColumns = 2;
         uint32 blockLength = 3;
-        uint32 idLength = 4;
-        uint32 keyLength = 5;
+        string pirType = 4;
+        bytes root = 5;
+        uint32 proofLen = 6;
 }
