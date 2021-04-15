@@ -334,7 +334,9 @@ type Info struct {
 // Authentication information for the single-server setting
 type Auth struct {
 	// The global digest that is a hash of all the row digests. Public.
-	Digest []byte
+	Digest     []byte
+	// One digest per row, authenticating all the elements in that row.
+	SubDigests []byte
 	// ECC group and hash algorithm used for digest computation and PIR itself
 	Group group.Group
 	Hash  crypto.Hash
@@ -419,8 +421,8 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
 	// by convention a block size of 0 indicates the single-bit scheme
 	info := Info{
 		NumColumns: numColumns,
-		NumRows: numRows,
-		BlockSize: 1,
+		NumRows:    numRows,
+		BlockSize:  1,
 	}
 
 	db, err := NewDB(info)

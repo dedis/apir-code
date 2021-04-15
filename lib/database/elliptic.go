@@ -3,138 +3,102 @@ package database
 import (
 	"crypto"
 	"encoding/binary"
-	"github.com/si-co/vpir-code/lib/utils"
 	"io"
 	"log"
+	"math"
+	"runtime"
 
 	"github.com/cloudflare/circl/group"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 type Elliptic struct {
-	Entries []group.Scalar
-	// One digest per row, authenticating all the elements in that row.
-	Digests []byte
+	Entries []byte
 	Info
 }
 
-// blockLen must be the number of scalars in a block
-func CreateRandomEllipticWithDigest(rnd io.Reader, g group.Group, dbLen, blockLen int, rebalanced bool) *Elliptic {
-	elementSize, scalarSize := getElementAndScalarSizes(g)
-	preSquareNumBlocks := dbLen / (8 * scalarSize * blockLen)
-	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
+func CreateRandomEllipticWithDigest(rnd io.Reader, g group.Group, dbLen int, rebalanced bool) *Elliptic {
+	numRows, numColumns := CalculateNumRowsAndColumns(dbLen, rebalanced)
+	// read random bytes for filling out the entries
+	// For simplicity, we use the whole byte to store 0 or 1
+	data := make([]byte, numRows*numColumns)
+	if _, err := rnd.Read(data); err != nil {
+		log.Fatal(err)
+	}
+	for i := 0; i < len(data); i++ {
+		data[i] = data[i] & 1
+	}
 
+	NGoRoutines := runtime.NumCPU()
 	h := crypto.BLAKE2b_256
-	// fill out the db with scalars and
-	// compute the db digest.
-	entries := make([]group.Scalar, numRows*numColumns*blockLen)
+	rowsPerRoutine := int(math.Ceil(float64(numRows) / float64(NGoRoutines)))
+	replies := make([]chan []byte, NGoRoutines)
+	var begin, end int
+	for i := 0; i < NGoRoutines; i++ {
+		begin, end = i*rowsPerRoutine, (i+1)*rowsPerRoutine
+		// make the last routine take all the left-over (from division) rows
+		if end > numRows {
+			end = numRows
+		}
+		replyChan := make(chan []byte, (end-begin)*h.Size())
+		replies[i] = replyChan
+		go computeDigests(begin, end, data, numColumns, g, h, replyChan)
+	}
 	digests := make([]byte, 0, numRows*h.Size())
-	for i := 0; i < numRows; i++ {
+	for i, reply := range replies {
+		chunk := <-reply
+		digests = append(digests, chunk...)
+		close(replies[i])
+	}
+
+	// global digest
+	hasher := h.New()
+	hasher.Write(digests)
+
+	return &Elliptic{Entries: data,
+		Info: Info{NumColumns: numColumns,
+			NumRows:   numRows,
+			BlockSize: 1,
+			Auth: &Auth{
+				Digest: hasher.Sum(nil),
+				SubDigests: digests,
+				Group:  g,
+				Hash:   h,
+				ElementSize: getGroupElementSize(g),
+			},
+		},
+	}
+}
+
+func computeDigests(begin, end int, data []byte, rowLen int, g group.Group, h crypto.Hash, replyTo chan<- []byte) {
+	digs := make([]byte, 0, (end-begin)*h.Size())
+	for i := begin; i < end; i++ {
 		d := g.Identity()
-		for j := 0; j < numColumns; j++ {
-			for l := 0; l < blockLen; l++ {
-				// sample and fill in a random scalar
-				entries[i*numColumns*blockLen+j*blockLen+l] = g.RandomScalar(rnd)
-				d.Add(d, CommitScalarToIndex(entries[i*numColumns*blockLen+j*blockLen+l], uint64(j), uint64(l), g))
+		for j := 0; j < rowLen; j++ {
+			if data[i*rowLen+j] == 1 {
+				d.Add(d, HashIndexToGroup(uint64(j), g))
 			}
 		}
 		tmp, err := d.MarshalBinaryCompress()
 		if err != nil {
 			log.Fatal(err)
 		}
-		digests = append(digests, tmp...)
+		digs = append(digs, tmp...)
 	}
-	// global digest
-	hasher := h.New()
-	hasher.Write(digests)
-
-	return &Elliptic{Entries: entries,
-		Digests: digests,
-		Info: Info{NumColumns: numColumns,
-			NumRows:   numRows,
-			BlockSize: blockLen,
-			Auth: &Auth{
-				Digest:      hasher.Sum(nil),
-				Group:       g,
-				Hash:        h,
-				ElementSize: elementSize,
-				ScalarSize:  scalarSize,
-			},
-		},
-	}
-}
-
-func CreateEllipticWithDigestFromData(data []byte, info *Info) *Elliptic {
-	var err error
-	g := group.P256
-	elementSize, scalarSize := getElementAndScalarSizes(g)
-	numRows, numColumns := info.NumRows, info.NumColumns
-	blockLen := len(data) / (numRows * numColumns * scalarSize)
-
-	h := crypto.BLAKE2b_256
-	// fill out the db with scalars and
-	// compute the db digest.
-	entries := make([]group.Scalar, numRows*numColumns*blockLen)
-	digests := make([]byte, 0, numRows*h.Size())
-	for i := 0; i < numRows; i++ {
-		d := g.Identity()
-		for j := 0; j < numColumns; j++ {
-			for l := 0; l < blockLen; l++ {
-				// get scalar from the data
-				s := g.NewScalar()
-				err = s.UnmarshalBinary(data[(i*numColumns*blockLen+j*blockLen+l)*scalarSize : (i*numColumns*blockLen+j*blockLen+l+1)*scalarSize])
-				if err != nil {
-					log.Fatal(err)
-				}
-				entries[i*numColumns*blockLen+j*blockLen+l] = s
-				d.Add(d, CommitScalarToIndex(entries[i*numColumns*blockLen+j*blockLen+l], uint64(j), uint64(l), g))
-			}
-		}
-		tmp, err := d.MarshalBinaryCompress()
-		if err != nil {
-			log.Fatal(err)
-		}
-		digests = append(digests, tmp...)
-	}
-	// global digest
-	hasher := h.New()
-	hasher.Write(digests)
-
-	return &Elliptic{Entries: entries,
-		Digests: digests,
-		Info: Info{NumColumns: numColumns,
-			NumRows:   numRows,
-			BlockSize: blockLen,
-			Auth: &Auth{
-				Digest:      hasher.Sum(nil),
-				Group:       g,
-				Hash:        h,
-				ElementSize: elementSize,
-				ScalarSize:  scalarSize,
-			},
-		},
-	}
-}
-
-func getElementAndScalarSizes(g group.Group) (int, int) {
-	// Obtaining the scalar and element sizes for the group
-	rnd := utils.RandomPRG()
-	rndScalar, _ := g.RandomScalar(rnd).MarshalBinary()
-	rndElement, _ := g.RandomElement(rnd).MarshalBinaryCompress()
-	return len(rndElement), len(rndScalar)
+	replyTo <- digs
 }
 
 // Take the indices (j, l) and hash them to get a group element
-func HashIndexToGroup(j, l uint64, g group.Group) group.Element {
+func HashIndexToGroup(j uint64, g group.Group) group.Element {
 	// hash the concatenation of row and block indices to a group element
-	index := make([]byte, 16)
-	binary.LittleEndian.PutUint64(index[:8], j)
-	binary.LittleEndian.PutUint64(index[8:], l)
+	index := make([]byte, 8)
+	binary.LittleEndian.PutUint64(index, j)
 	return g.HashToElement(index, nil)
 }
 
-// Raise the group element obtained iva index hashing to the scalar
-func CommitScalarToIndex(x group.Scalar, j, l uint64, g group.Group) group.Element {
-	H := HashIndexToGroup(j, l, g)
+// Raise the group element obtained via index hashing to the scalar
+func CommitScalarToIndex(x group.Scalar, j uint64, g group.Group) group.Element {
+	H := HashIndexToGroup(j, g)
 	// multiply the hash by the db entry as a scalar
 	return g.NewElement().Mul(H, x)
 }
@@ -165,4 +129,11 @@ func UnmarshalGroupElements(q []byte, g group.Group, elemSize int) ([]group.Elem
 		decoded = append(decoded, elem)
 	}
 	return decoded, nil
+}
+
+func getGroupElementSize(g group.Group) int {
+	// Obtaining the scalar and element sizes for the group
+	rnd := utils.RandomPRG()
+	rndElement, _ := g.RandomElement(rnd).MarshalBinaryCompress()
+	return len(rndElement)
 }

@@ -1,11 +1,11 @@
 package main
 
-// Test suite for the single-server tag retrieval, i.e. the *verifiable* part
-// of the single-server VPIR scheme.
+// Test suite for the single-server VPIR scheme
 
 import (
 	"fmt"
 	"io"
+	"math/rand"
 	"testing"
 
 	"github.com/cloudflare/circl/group"
@@ -18,11 +18,10 @@ import (
 )
 
 func TestDHMatrixOneMb(t *testing.T) {
-	dbLen := 8000000 // dbLen is specified in bits
+	dbLen := 1024 * 1024 // dbLen is specified in bits
 	dbPRG := utils.RandomPRG()
-	blockLen := 16
 	ecg := group.P256
-	db := database.CreateRandomEllipticWithDigest(dbPRG, ecg, dbLen, blockLen, true)
+	db := database.CreateRandomEllipticWithDigest(dbPRG, ecg, dbLen, true)
 
 	prg := utils.RandomPRG()
 	retrieveBlocksDH(t, prg, db, "SingleMatrixOneMB")
@@ -32,17 +31,20 @@ func retrieveBlocksDH(t *testing.T, rnd io.Reader, db *database.Elliptic, testNa
 	c := client.NewDH(rnd, &db.Info)
 	s := server.NewDH(db)
 
+	var i int
 	totalTimer := monitor.NewMonitor()
-	for i := 0; i < 10; i++ {
+	for j := 0; j < 10; j++ {
+		i = rand.Intn(db.NumRows * db.NumColumns)
+		fmt.Printf("%d ", i)
 		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
 
-		_, err = s.AnswerBytes(query)
+		a, err := s.AnswerBytes(query)
 		require.NoError(t, err)
 
-		//_, err = c.ReconstructBytes(a, nil)
-		//require.NoError(t, err)
+		res, err := c.ReconstructBytes(a)
+		require.NoError(t, err)
+		require.Equal(t, db.Entries[i], res)
 	}
-
 	fmt.Printf("\nTotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 }

@@ -33,7 +33,7 @@ type state struct {
 
 	// for single-server (DH)
 	r   group.Scalar
-	Ht  []group.Element
+	ht  group.Element
 	key *bfv.SecretKey // lattice secret key
 }
 

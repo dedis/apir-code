@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"log"
 	"runtime"
 
 	"github.com/cloudflare/circl/group"
@@ -18,8 +19,14 @@ type DH struct {
 }
 
 // NewDH returns an instance of a DH-based client for
-// the single-server tag retrieval scheme
+// the single-server scheme
 func NewDH(rnd io.Reader, info *database.Info) *DH {
+	// check that row digests hash to the global one
+	hasher := info.Hash.New()
+	hasher.Write(info.SubDigests)
+	if !bytes.Equal(hasher.Sum(nil), info.Digest) {
+		panic("row digests and the global digest in the info do not match")
+	}
 	return &DH{
 		rnd:    rnd,
 		dbInfo: info,
@@ -53,14 +60,14 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 		if i == NGoRoutines-1 {
 			end = c.dbInfo.NumColumns
 		}
-		replyChan := make(chan []group.Element, columnsPerRoutine*c.dbInfo.BlockSize)
+		replyChan := make(chan []group.Element, end-begin)
 		replies[i] = replyChan
 		go generateBlindedElements(begin, end, r, c.dbInfo, replyChan)
 	}
 
 	// Combine the generated chunks from all the routines.
-	// We wait for each routines in the initial order so it is ok
-	// to simply append the results one after another.
+	// We wait for each routines in the initial order so
+	// it is ok to simply append the results one after another.
 	query := make([]group.Element, 0, c.dbInfo.NumColumns*c.dbInfo.BlockSize)
 	for i, reply := range replies {
 		chunk := <-reply
@@ -68,18 +75,10 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 		close(replies[i])
 	}
 
-	// Add the additional blinding t to the block of the retrieval index.
-	// See Construction 10 of the paper.
-	T := copyScalar(t, g)
-	hTs := make([]group.Element, c.dbInfo.BlockSize)
-	for l := 0; l < c.dbInfo.BlockSize; l++ {
-		hT := database.CommitScalarToIndex(T, uint64(st.iy), uint64(l), g)
-		pos := st.iy*c.dbInfo.BlockSize + l
-		query[pos].Add(query[pos], hT)
-		hTs[l] = hT
-		T.Mul(T, t)
-	}
-	st.Ht = hTs
+	// Add the additional blinding t to the the retrieval index.
+	// See Construction 9 of the paper.
+	st.ht = database.CommitScalarToIndex(t, uint64(st.iy), g)
+	query[st.iy].Add(query[st.iy], st.ht)
 	c.state = st
 
 	encodedQuery, err := database.MarshalGroupElements(query, c.dbInfo.ElementSize)
@@ -90,75 +89,49 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 	return encodedQuery, nil
 }
 
-func (c *DH) ReconstructBytes(a []byte, m [][]byte) (interface{}, error) {
+func (c *DH) ReconstructBytes(a []byte) (interface{}, error) {
 	g := c.dbInfo.Group
-	// get row digests from the end of the answer
 	digSize := c.dbInfo.ElementSize
-	digestsSize := c.dbInfo.NumRows * digSize
-	digests := a[len(a)-digestsSize:]
-	// check that row digests hash to the global one
-	hasher := c.dbInfo.Hash.New()
-	hasher.Write(digests)
-	if !bytes.Equal(hasher.Sum(nil), c.dbInfo.Digest) {
-		return nil, errors.New("received row digests and the global digests do not match")
-	}
-
+	rneg := g.NewScalar().Neg(c.state.r)
 	// get the tags of all the rows
-	answer, err := database.UnmarshalGroupElements(a[:len(a)-digestsSize], c.dbInfo.Group, c.dbInfo.ElementSize)
+	answer, err := database.UnmarshalGroupElements(a, c.dbInfo.Group, c.dbInfo.ElementSize)
 	if err != nil {
 		return nil, err
 	}
-	scalarSize := c.dbInfo.ScalarSize
-	ml := g.NewScalar()
+	m := g.Identity()
+	var res byte
 	for i := 0; i < c.dbInfo.NumRows; i++ {
-		// multiply all the block elements
-		sum := g.Identity()
-		for l := 0; l < c.dbInfo.BlockSize; l++ {
-			h := g.NewElement()
-			err = ml.UnmarshalBinary(m[i][l*scalarSize : (l+1)*scalarSize])
-			if err != nil {
-				return nil, err
-			}
-			h.Mul(c.state.Ht[l], ml)
-			sum.Add(sum, h)
-		}
 		// get the row digest and raise it to a power r
 		d := g.NewElement()
-		err = d.UnmarshalBinary(digests[i*digSize : (i+1)*digSize])
+		err = d.UnmarshalBinary(c.dbInfo.SubDigests[i*digSize : (i+1)*digSize])
 		if err != nil {
 			return nil, err
 		}
-		d.Mul(d, c.state.r)
-		tau := g.NewElement().Add(d, sum)
-		if !tau.IsEqual(answer[i]) {
-			return nil, errors.New("the tag is incorrect")
+		d.Mul(d, rneg)
+		m.Add(d, answer[i])
+		if !m.IsIdentity() && !m.IsEqual(c.state.ht) {
+			return nil, errors.New("reject")
+		}
+		if i == c.state.ix {
+			switch {
+			case m.IsIdentity():
+				res = 0
+			case m.IsEqual(c.state.ht):
+				res = 1
+			default:
+				log.Printf("something wrong, accepted %v\n", m)
+			}
 		}
 	}
 
-	return nil, nil
+	return res, nil
 }
 
 // Hash indices to group elements and multiply by the blinding scalar
 func generateBlindedElements(begin, end int, blinding group.Scalar, info *database.Info, replyTo chan<- []group.Element) {
 	elements := make([]group.Element, 0, (end-begin)*info.BlockSize)
 	for j := begin; j < end; j++ {
-		for l := 0; l < info.BlockSize; l++ {
-			elements = append(elements, database.CommitScalarToIndex(blinding, uint64(j), uint64(l), info.Group))
-		}
+		elements = append(elements, database.CommitScalarToIndex(blinding, uint64(j), info.Group))
 	}
 	replyTo <- elements
-}
-
-// A hack function (due to lack of lib API) to return a copy of a scalar
-func copyScalar(scalar group.Scalar, g group.Group) group.Scalar {
-	data, err := scalar.MarshalBinary()
-	if err != nil {
-		panic(err)
-	}
-	s := g.NewScalar()
-	err = s.UnmarshalBinary(data)
-	if err != nil {
-		panic(err)
-	}
-	return s
 }

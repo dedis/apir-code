@@ -1,6 +1,7 @@
 package server
 
 import (
+	"math"
 	"runtime"
 
 	"github.com/cloudflare/circl/group"
@@ -27,16 +28,16 @@ func (s *DH) AnswerBytes(q []byte) ([]byte, error) {
 	if NGoRoutines > s.db.NumRows {
 		NGoRoutines = s.db.NumRows
 	}
-	rowsPerRoutine := s.db.NumRows / NGoRoutines
+	rowsPerRoutine := int(math.Ceil(float64(s.db.NumRows) / float64(NGoRoutines)))
 	replies := make([]chan []group.Element, NGoRoutines)
 	var begin, end int
 	for i := 0; i < NGoRoutines; i++ {
 		begin, end = i*rowsPerRoutine, (i+1)*rowsPerRoutine
 		// make the last routine take all the left-over (from division) rows
-		if i == NGoRoutines-1 {
+		if end > s.db.NumRows {
 			end = s.db.NumRows
 		}
-		replyChan := make(chan []group.Element, rowsPerRoutine)
+		replyChan := make(chan []group.Element, end-begin)
 		replies[i] = replyChan
 		go s.processRows(begin, end, query, replyChan)
 	}
@@ -53,26 +54,22 @@ func (s *DH) AnswerBytes(q []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Appending row digests to the answer
-	encoded = append(encoded, s.db.Digests...)
 
 	return encoded, nil
 }
 
 func (s *DH) processRows(begin, end int, input []group.Element, replyTo chan<- []group.Element) {
-	// one tag per row
-	tags := make([]group.Element, end-begin)
+	// one product per row
+	prods := make([]group.Element, end-begin)
 	for i := begin; i < end; i++ {
-		tags[i-begin] = s.db.Group.Identity()
+		prods[i-begin] = s.db.Group.Identity()
 		for j := 0; j < s.db.NumColumns; j++ {
-			for l := 0; l < s.db.BlockSize; l++ {
-				// multiply an element of the query by the corresponding scalar from the db
-				tmp := s.db.Group.NewElement()
-				tmp.Mul(input[j*s.db.BlockSize+l], s.db.Entries[i*s.db.NumColumns*s.db.BlockSize+j*s.db.BlockSize+l])
-				// sum up the result into the row tag
-				tags[i-begin].Add(tags[i-begin], tmp)
+			if s.db.Entries[i*s.db.NumColumns+j] == 1 {
+				// add query element to the product if
+				// the corresponding database bit is 1
+				prods[i-begin].Add(prods[i-begin], input[j])
 			}
 		}
 	}
-	replyTo <- tags
+	replyTo <- prods
 }
