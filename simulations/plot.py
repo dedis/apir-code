@@ -260,33 +260,11 @@ def plotReal():
         worstLatency = latencyMean[1] + ping
         
         if i % 2 == 0:
-            print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
+            #print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
+            print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", end=" ")
         else:
-            print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
-
-        
-        # avgPing = 230.128 # ms
-        # keyPerSecond = 1/bestLatency
-        # keyPerDay = keyPerSecond * 60 * 60 * 24
-        # #print(keyPerSecond)
-        # bwPerKey = answersMean[bestCores] + queriesMean[bestCores]
-        # throughput = [x*60*60*24 for x in range(1, 11)]
-        # #cost = [(x/keyPerSecond * costPerHour*8760) for x in throughput]
-        # #cost = [(x/keyPerSecond * costPerMonth*12 * 2) for x in throughput]
-        # #cost = [(x/keyPerSecond * costPerMonth * 2) for x in throughput]
-        # cost = [(x/keyPerDay * costPerMonth * 2) for x in throughput]
-
-        # #ax.plot([x/pow(10,6) for x in cost], throughput, label=labels[i])
-        # ax.plot([x for x in cost], throughput, label=labels[i])
-    
-    # ax.set_ylabel("Throughput [key/s]")
-    # ax.set_xlabel("Cost per year [M\$/year]")
-    # ax.tick_params(axis='y')
-    # ax.legend()
-    # plt.tight_layout()
-    # #plt.show()
-    # plt.savefig('real.eps', format='eps', dpi=300, transparent=True)
-
+            #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
+            print(rounder2(worstLatency), "\\\\") 
 
 def print_latex_table_separate(results, numApproaches):
     for size, values in results.items():
