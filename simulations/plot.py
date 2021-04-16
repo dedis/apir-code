@@ -24,14 +24,14 @@ def plotVpirBenchmarks():
     # schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     # labels = ["Single-bit (§4.2)", "Single-element (§4.4)", "Block (§4.4)"]
     # colors = ['black', 'grey', 'lightgrey']
-    schemes = ["vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-element (§4.4)", "Block (§4.4)"]
-    colors = ['grey', 'lightgrey']
+    schemes = ["vpirSingleVector.json", "vpirMultiVectorBlock.json"]
+    labels = ["Single-bit (§4.2)", "Block (§4.4)"]
+    colors = ['black', 'darkgrey']
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
 
-    width = 0.15
+    width = 0.2
     dbSizes = sorted([int(size / (8 * KB)) for size in allStats(resultFolder + schemes[0]).keys()])
     Xs = np.arange(len(dbSizes))
     bars = [[]] * len(schemes)
