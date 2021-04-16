@@ -17,6 +17,8 @@ patterns = ['', '//', '.']
 GB = pow(1024, 3)
 MB = pow(1024, 2)
 KB = 1024
+LatticeRotKeysLen = 39322025
+LatticeCiphertextLen = 393221
 
 def plotVpirBenchmarks():
     # schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
@@ -174,9 +176,9 @@ def plotVpirPerformanceLines():
         ax.plot(Xs, Ys, color=colors[i % int(len(schemes) / 2)],
                 linestyle=linestyles[int(i / (len(schemes) / 2))])
 
-    print_latex_table_separate(cpuTable, int(len(schemes) / 2))
+    print_latex_table_separate(cpuTable, int(len(schemes) / 2), get_size_in_mib)
     print("")
-    print_latex_table_separate(bwTable, int(len(schemes) / 2))
+    print_latex_table_separate(bwTable, int(len(schemes) / 2), get_size_in_mib)
 
     schemeLabels = ["No integrity", "Merkle", "VPIR"]
     optimizationLabels = ["Matrix", "DPF"]
@@ -190,11 +192,6 @@ def plotVpirPerformanceLines():
     #     handles.append(mlines.Line2D([], [], color='black',
     #                                  marker=markers[i], label=size))
     ax.legend(handles=handles, loc='center left')
-
-    # ax.annotate('Worse',
-    #              xytext=(0.5, 1200),
-    #              xy=(0.1, 1000),
-    #              arrowprops={'facecolor': 'black', 'shrink': 0.05})
 
     # ax.legend(handles=handles, bbox_to_anchor=(0, 1.08, 1, 0.2), loc="lower left",
     #           mode="expand", borderaxespad=0, fancybox=True, ncol=3)
@@ -212,13 +209,15 @@ def plotSingle():
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            if scheme == schemes[0]:
+                bw -= LatticeRotKeysLen
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
             cpuTable[dbSize].append(cpu / 1000)
             bwTable[dbSize].append(bw/MB)
 
-    print_latex_table_separate(cpuTable, len(schemes))
+    print_latex_table_separate(cpuTable, len(schemes), get_size_in_bits)
     print("")
-    print_latex_table_separate(bwTable, len(schemes))
+    print_latex_table_separate(bwTable, len(schemes), get_size_in_bits)
 
 
 def plotReal():
@@ -267,9 +266,10 @@ def plotReal():
             #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
             print(round(worstLatency, 2), "&", round(dbSizes[i], 2), "\\\\") 
 
-def print_latex_table_separate(results, numApproaches):
+
+def print_latex_table_separate(results, numApproaches, get_printable_size):
     for size, values in results.items():
-        print(str(int(int(size) / (8 * MB))) + "\\,MiB", end=" ")
+        print(get_printable_size(size), end=" ")
         for i, value in enumerate(values):
             print("& %s " % rounder2(value), end="")
             # we need to compute the overhead over the baseline that is always at position i%numApproaches==0
@@ -288,6 +288,14 @@ def print_latex_table_joint(results, numApproaches):
                 print("& %s & %s " % (rounder2(value[0] / values[i - 1][0]), rounder2(value[1] / values[i - 1][1])),
                       end="")
         print("\\\\")
+
+
+def get_size_in_mib(bits):
+    return str(int(int(bits) / (8 * MB))) + "\\,MiB"
+
+
+def get_size_in_bits(bits):
+    return str(int(bits / 1e6)) + "\\,M"
 
 
 def rounder(x):
