@@ -24,9 +24,10 @@ def plotVpirBenchmarks():
     # schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
     # labels = ["Single-bit (§4.2)", "Single-element (§4.4)", "Block (§4.4)"]
     # colors = ['black', 'grey', 'lightgrey']
-    schemes = ["vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-element (§4.4)", "Block (§4.4)"]
-    colors = ['grey', 'lightgrey']
+
+    schemes = ["vpirSingleVector.json", "vpirMultiVectorBlock.json"]
+    labels = ["Single-bit (§4.2)", "Block (§4.4)"]
+    colors = ['black', 'grey']
 
     fig, ax = plt.subplots()
     plt.style.use('grayscale')
