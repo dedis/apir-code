@@ -271,12 +271,6 @@ func (z *Element) Add(x, y *Element) *Element {
 	return z
 }
 
-// Double z = x + x mod q, aka Lsh 1
-func (z *Element) Double(x *Element) *Element {
-	double(z, x)
-	return z
-}
-
 // Sub  z = x - y mod q
 func (z *Element) Sub(x, y *Element) *Element {
 	sub(z, x, y)
@@ -542,17 +536,6 @@ func (z *Element) String() string {
 	vv := bigIntPool.Get().(*big.Int)
 	defer bigIntPool.Put(vv)
 	return z.ToBigIntRegular(vv).String()
-}
-
-func VectorStrings(zs [][]Element) [][]string {
-	out := make([][]string, len(zs))
-	for i := range zs {
-		out[i] = make([]string, len(zs[i]))
-		for j := range zs[i] {
-			out[i][j] = (&zs[i][j]).HexString()
-		}
-	}
-	return out
 }
 
 func (z *Element) HexString() string {
