@@ -29,7 +29,6 @@ import (
 	"io"
 	"math/big"
 	"math/bits"
-	"strconv"
 	"sync"
 )
 
@@ -87,42 +86,11 @@ func init() {
 
 }
 
-// SetUint64 z = v, sets z LSB to v (non-Montgomery form) and convert z to Montgomery form
-func (z *Element) SetUint64(v uint64) *Element {
-	*z = Element{v}
-	return z.Mul(z, &rSquare) // z.ToMont()
-}
-
 // Set z = x
 func (z *Element) Set(x *Element) *Element {
 	z[0] = x[0]
 	z[1] = x[1]
 	return z
-}
-
-// SetInterface converts i1 from uint64, int, string, or Element, big.Int into Element
-// panic if provided type is not supported
-func (z *Element) SetInterface(i1 interface{}) *Element {
-	switch c1 := i1.(type) {
-	case Element:
-		return z.Set(&c1)
-	case *Element:
-		return z.Set(c1)
-	case uint64:
-		return z.SetUint64(c1)
-	case int:
-		return z.SetString(strconv.Itoa(c1))
-	case string:
-		return z.SetString(c1)
-	case *big.Int:
-		return z.SetBigInt(c1)
-	case big.Int:
-		return z.SetBigInt(&c1)
-	case []byte:
-		return z.SetBytes(c1)
-	default:
-		panic("invalid type")
-	}
 }
 
 // SetZero z = 0
@@ -136,14 +104,6 @@ func (z *Element) SetZero() *Element {
 func (z *Element) SetOne() *Element {
 	z[0] = 2
 	z[1] = 0
-	return z
-}
-
-// Div z = x*y^-1 mod q
-func (z *Element) Div(x, y *Element) *Element {
-	var yInv Element
-	yInv.Inverse(y)
-	z.Mul(x, &yInv)
 	return z
 }
 
@@ -179,23 +139,6 @@ func (z *Element) Cmp(x *Element) int {
 		return -1
 	}
 	return 0
-}
-
-// LexicographicallyLargest returns true if this element is strictly lexicographically
-// larger than its negation, false otherwise
-func (z *Element) LexicographicallyLargest() bool {
-	// adapted from github.com/zkcrypto/bls12_381
-	// we check if the element is larger than (q-1) / 2
-	// if z - (((q -1) / 2) + 1) have no underflow, then z > (q-1) / 2
-
-	_z := *z
-	_z.FromMont()
-
-	var b uint64
-	_, b = bits.Sub64(_z[0], 0, 0)
-	_, b = bits.Sub64(_z[1], 4611686018427387904, b)
-
-	return b == 0
 }
 
 // SetRandom sets z to a random element < q
@@ -297,24 +240,6 @@ func Zero() Element {
 	var zero Element
 	zero.SetZero()
 	return zero
-}
-
-// MulAssign is deprecated
-// Deprecated: use Mul instead
-func (z *Element) MulAssign(x *Element) *Element {
-	return z.Mul(z, x)
-}
-
-// AddAssign is deprecated
-// Deprecated: use Add instead
-func (z *Element) AddAssign(x *Element) *Element {
-	return z.Add(z, x)
-}
-
-// SubAssign is deprecated
-// Deprecated: use Sub instead
-func (z *Element) SubAssign(x *Element) *Element {
-	return z.Sub(z, x)
 }
 
 // API with assembly impl
@@ -601,25 +526,6 @@ func _reduceGeneric(z *Element) {
 	}
 }
 
-// Exp z = x^exponent mod q
-func (z *Element) Exp(x Element, exponent *big.Int) *Element {
-	var bZero big.Int
-	if exponent.Cmp(&bZero) == 0 {
-		return z.SetOne()
-	}
-
-	z.Set(&x)
-
-	for i := exponent.BitLen() - 2; i >= 0; i-- {
-		z.Square(z)
-		if exponent.Bit(i) == 1 {
-			z.Mul(z, &x)
-		}
-	}
-
-	return z
-}
-
 // ToMont converts z to Montgomery form
 // sets and returns z = z * r^2
 func (z *Element) ToMont() *Element {
@@ -770,59 +676,5 @@ func (z *Element) SetString(s string) *Element {
 	// release object into pool
 	bigIntPool.Put(vv)
 
-	return z
-}
-
-var (
-	_bLegendreExponentElement *big.Int
-	_bSqrtExponentElement     *big.Int
-)
-
-func init() {
-	_bLegendreExponentElement, _ = new(big.Int).SetString("3fffffffffffffffffffffffffffffff", 16)
-	const sqrtExponentElement = "20000000000000000000000000000000"
-	_bSqrtExponentElement, _ = new(big.Int).SetString(sqrtExponentElement, 16)
-}
-
-// Legendre returns the Legendre symbol of z (either +1, -1, or 0.)
-func (z *Element) Legendre() int {
-	var l Element
-	// z^((q-1)/2)
-	l.Exp(*z, _bLegendreExponentElement)
-
-	if l.IsZero() {
-		return 0
-	}
-
-	// if l == 1
-	if (l[1] == 0) && (l[0] == 2) {
-		return 1
-	}
-	return -1
-}
-
-// Sqrt z = √x mod q
-// if the square root doesn't exist (x is not a square mod q)
-// Sqrt leaves z unchanged and returns nil
-func (z *Element) Sqrt(x *Element) *Element {
-	// q ≡ 3 (mod 4)
-	// using  z ≡ ± x^((p+1)/4) (mod q)
-	var y, square Element
-	y.Exp(*x, _bSqrtExponentElement)
-	// as we didn't compute the legendre symbol, ensure we found y such that y * y = x
-	square.Square(&y)
-	if square.Equal(x) {
-		return z.Set(&y)
-	}
-	return nil
-}
-
-// Inverse z = x^-1 mod q
-// note: allocates a big.Int (math/big)
-func (z *Element) Inverse(x *Element) *Element {
-	var _xNonMont big.Int
-	x.ToBigIntRegular(&_xNonMont)
-	_xNonMont.ModInverse(&_xNonMont, Modulus())
-	z.SetBigInt(&_xNonMont)
 	return z
 }
