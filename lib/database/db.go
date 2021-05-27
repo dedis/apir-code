@@ -315,8 +315,44 @@ func (d *DB) GetEntry(i int) field.Element {
 	}
 }
 
-func (d *DB) Range(begin, end int) []field.Element {
-	return d.inMemory[begin:end]
+// Range returns a view on the db, scoped by a begin-end index.
+func (d *DB) Range(begin, end int) ElementRange {
+	return ElementRange{
+		db:    d,
+		begin: begin,
+		len:   end - begin,
+	}
+}
+
+// ElementRange defines a range on the db, this allows to have a sort of
+// slice[a:b] function. It doesn't load new element in memory but uses the same
+// db.
+type ElementRange struct {
+	db    *DB
+	begin int
+	len   int
+}
+
+// Get return the ith element relative to the range, from 0:(end-start).
+func (f *ElementRange) Get(i int) field.Element {
+	return f.db.GetEntry(i + f.begin)
+}
+
+// Range creates a range on a range:
+// db.mmap:                [....................]
+// db.Range:                ....[...........]...
+// range.Range:             ........[....]......
+func (f *ElementRange) Range(begin, end int) ElementRange {
+	return ElementRange{
+		db:    f.db,
+		begin: begin + f.begin,
+		len:   end - begin,
+	}
+}
+
+// Len returns the remaining number of elements
+func (f *ElementRange) Len() int {
+	return f.len
 }
 
 type Info struct {

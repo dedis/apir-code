@@ -1,11 +1,12 @@
 package server
 
 import (
+	"math"
+
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"math"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -101,39 +102,42 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 }
 
 // processing multiple rows by iterating over them
-func processRows(rows, query []field.Element, numColumns, blockLen int, reply chan<- []field.Element) {
+func processRows(rows database.ElementRange, query []field.Element, numColumns, blockLen int, reply chan<- []field.Element) {
 	numElementsInRow := blockLen * numColumns
-	numRowsToProcess := len(rows) / numElementsInRow
+	numRowsToProcess := rows.Len() / numElementsInRow
 	sums := make([]field.Element, 0, numRowsToProcess*(blockLen+1))
 	for i := 0; i < numRowsToProcess; i++ {
-		res := computeMessageAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], query, blockLen)
+		res := computeMessageAndTag(rows.Range(i*numElementsInRow, (i+1)*numElementsInRow), query, blockLen)
 		sums = append(sums, res...)
 	}
 	reply <- sums
 }
 
 // processing a chunk of a database row
-func processColumns(columns, query []field.Element, blockLen int, reply chan<- []field.Element) {
+func processColumns(columns database.ElementRange, query []field.Element, blockLen int, reply chan<- []field.Element) {
 	reply <- computeMessageAndTag(columns, query, blockLen)
 }
 
 // computeMessageAndTag multiplies db entries with the elements
 // from the client query and computes a tag over each block
-func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Element {
+func computeMessageAndTag(elements database.ElementRange, q []field.Element, blockLen int) []field.Element {
 	var prodTag, prod field.Element
 	sumTag := field.Zero()
 	sum := field.ZeroVector(blockLen)
-	for j := 0; j < len(elements)/blockLen; j++ {
+	for j := 0; j < elements.Len()/blockLen; j++ {
 		for b := 0; b < blockLen; b++ {
-			if elements[j*blockLen+b].IsZero() {
+			e := elements.Get(j*blockLen + b)
+			if e.IsZero() {
 				// no need to multiply if the element value is zero
 				continue
 			}
 			// compute message
-			prod.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)])
+			e = elements.Get(j*blockLen + b)
+			prod.Mul(&e, &q[j*(blockLen+1)])
 			sum[b].Add(&sum[b], &prod)
 			// compute block tag
-			prodTag.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)+1+b])
+			e = elements.Get(j*blockLen + b)
+			prodTag.Mul(&e, &q[j*(blockLen+1)+1+b])
 			sumTag.Add(&sumTag, &prodTag)
 		}
 	}
