@@ -15,7 +15,6 @@ import (
 	"runtime/pprof"
 	"syscall"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -282,13 +281,14 @@ func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 	log.Println("Starting to read in the DB data")
 
 	// take only filesNumber files
-	files := getSksFiles(filesNumber)
+	// files := getSksFiles(filesNumber)
 
-	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
+	// db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
+	db, err := database.LoadMMapDB(os.Getenv(dataEnvKey))
 	if err != nil {
 		return nil, err
 	}
-	log.Println("DB loaded with files", files)
+	// log.Println("DB loaded with files", files)
 
 	return db, nil
 }

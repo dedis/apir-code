@@ -45,11 +45,16 @@ type DB struct {
 }
 
 func (d *DB) SetEntry(i int, el field.Element) {
-	d.inMemory[i] = el
+	// d.inMemory[i] = el
+
+	memIndex := i * 8 * 2
+
+	binary.LittleEndian.PutUint64(d.mmap[memIndex:memIndex+8], el[0])
+	binary.LittleEndian.PutUint64(d.mmap[memIndex+8:memIndex+16], el[0])
 }
 
 func (d *DB) SizeGiB() float64 {
-	return float64(len(d.inMemory)*16) * 9.313e-10
+	return float64(len(d.mmap)) * 9.313e-10
 }
 
 type saveInfo struct {
