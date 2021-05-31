@@ -295,6 +295,7 @@ func dbInfo(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption) 
 }
 
 func (lc *localClient) runQueries(queries [][]byte) [][]byte {
+
 	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
 	defer cancel()
 
@@ -324,13 +325,14 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 func query(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, query []byte) []byte {
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
+	fmt.Printf("client, sending query. len(query): %d\n", len(q.Query))
 	answer, err := c.Query(ctx, q, opts...)
 	if err != nil {
 		log.Fatalf("could not query %s: %v",
 			conn.Target(), err)
 	}
 	log.Printf("sent query to %s", conn.Target())
-	log.Printf("query size in bytes %d", len(query))
+	fmt.Printf("client, query response len(Answer): %d\n", len(answer.Answer))
 
 	return answer.GetAnswer()
 }

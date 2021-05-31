@@ -8,6 +8,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
@@ -60,8 +61,21 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 			if m-k*blockLen >= len(elements) {
 				break
 			}
-			db.SetEntry(m, elements[m-k*blockLen])
+			db.setEntry(m, elements[m-k*blockLen])
 		}
+	}
+
+	if db.Info.Auth == nil {
+		db.Info.Auth = &Auth{}
+	}
+	if db.Info.Merkle == nil {
+		db.Info.Merkle = &Merkle{}
+	}
+	if db.Info.DataEmbedding == nil {
+		db.Info.DataEmbedding = &DataEmbedding{}
+	}
+	if db.Info.LatParams == nil {
+		db.Info.LatParams = &bfv.Parameters{}
 	}
 
 	return db, nil

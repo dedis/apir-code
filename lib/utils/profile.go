@@ -24,6 +24,7 @@ func StartProfiling(filename string) {
 	go func() {
 		for _ = range c {
 			// sig is a ^C, handle it
+			writeMemProfile("client-mem.prof")
 			pprof.StopCPUProfile()
 			os.Exit(0)
 		}
@@ -41,6 +42,7 @@ func writeMemProfile(filename string) {
 		log.Fatal(err)
 	}
 	log.Printf("Writing memory profile")
+	runtime.GC()
 	pprof.WriteHeapProfile(f)
 	f.Close()
 }

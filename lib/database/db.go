@@ -3,13 +3,16 @@ package database
 import (
 	"bytes"
 	"crypto"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
+	"fmt"
 	"io"
 	"log"
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cloudflare/circl/group"
 	mmap "github.com/edsrzf/mmap-go"
@@ -41,16 +44,47 @@ func NewDB(info Info) (*DB, error) {
 type DB struct {
 	Info
 	inMemory []field.Element
-	mmap     mmap.MMap
+
+	// if true, the GetEntry uses the mmap, other the inMemory
+	useMmap bool
+	mmap    mmap.MMap
 }
 
-func (d *DB) SetEntry(i int, el field.Element) {
-	// d.inMemory[i] = el
+// String returns a string representation of a db. Elements are hashed.
+func (d *DB) String() string {
+	out := new(strings.Builder)
 
-	memIndex := i * 8 * 2
+	h := sha256.New()
+	n := d.Info.NumColumns * d.Info.NumRows
+	b := make([]byte, 8)
+	for i := 0; i < n; i++ {
+		e := d.GetEntry(i)
+		binary.LittleEndian.PutUint64(b, e[0])
+		h.Write(b)
+		binary.LittleEndian.PutUint64(b, e[1])
+		h.Write(b)
+	}
+	els := h.Sum(nil)
 
-	binary.LittleEndian.PutUint64(d.mmap[memIndex:memIndex+8], el[0])
-	binary.LittleEndian.PutUint64(d.mmap[memIndex+8:memIndex+16], el[0])
+	h = sha256.New()
+	for _, el := range d.inMemory {
+		b := el.Bytes()
+		h.Write(b[:])
+	}
+	inMem := h.Sum(nil)
+
+	h = sha256.New()
+	h.Write(d.mmap)
+	mmap := h.Sum(nil)
+
+	fmt.Fprintf(out, "{DB: Info={%v} els={%x} inMemory={%x} useMmap=%v mmap={%x} }",
+		d.Info, els, inMem, d.useMmap, mmap)
+
+	return out.String()
+}
+
+func (d *DB) setEntry(i int, el field.Element) {
+	d.inMemory[i] = el
 }
 
 func (d *DB) SizeGiB() float64 {
@@ -219,6 +253,20 @@ func LoadMMapDB(path string) (*DB, error) {
 		return nil, xerrors.Errorf("failed to decode info: %v", err)
 	}
 
+	// https://github.com/golang/go/issues/4609
+	if info.Auth == nil {
+		info.Auth = &Auth{}
+	}
+	if info.Merkle == nil {
+		info.Merkle = &Merkle{}
+	}
+	if info.DataEmbedding == nil {
+		info.DataEmbedding = &DataEmbedding{}
+	}
+	if info.LatParams == nil {
+		info.LatParams = &bfv.Parameters{}
+	}
+
 	f, err := os.OpenFile(filepath.Join(path, "data"), os.O_RDONLY, 0644)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to read file: %v", err)
@@ -230,8 +278,9 @@ func LoadMMapDB(path string) (*DB, error) {
 	}
 
 	db := DB{
-		Info: info,
-		mmap: mmap,
+		Info:    info,
+		useMmap: true,
+		mmap:    mmap,
 	}
 
 	return &db, nil
@@ -312,6 +361,10 @@ func LoadDB(path, bucket string) (*DB, error) {
 }
 
 func (d *DB) GetEntry(i int) field.Element {
+	if !d.useMmap {
+		return d.inMemory[i]
+	}
+
 	memIndex := i * 8 * 2
 
 	return field.Element{
@@ -415,7 +468,7 @@ func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
 
 	n := numRows * numColumns * blockSize
 	for i := 0; i < n; i++ {
-		db.SetEntry(i, field.Zero())
+		db.setEntry(i, field.Zero())
 	}
 
 	return db, nil
@@ -454,7 +507,7 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 		element := &field.Element{}
 		element.SetFixedLengthBytes(buf)
 
-		db.SetEntry(i, *element)
+		db.setEntry(i, *element)
 	}
 
 	return db, nil
@@ -489,7 +542,7 @@ func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
 			element.SetZero()
 		}
 
-		db.SetEntry(i, element)
+		db.setEntry(i, element)
 	}
 
 	return db, nil

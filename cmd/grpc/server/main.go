@@ -47,9 +47,6 @@ func main() {
 
 	flag.Parse()
 
-	// TODO: remove
-	fmt.Println(*filesNumber)
-
 	// start profiling
 	if *prof {
 		utils.StartProfiling(fmt.Sprintf("server-%v.prof", *sid))
@@ -262,7 +259,7 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
-	log.Print("got query request")
+	log.Printf("got query request, len(Query): %d", len(qr.Query))
 
 	a, err := s.Server.AnswerBytes(qr.GetQuery())
 	if err != nil {
