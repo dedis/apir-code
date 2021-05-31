@@ -7,6 +7,7 @@ import (
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"golang.org/x/xerrors"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -33,34 +34,39 @@ func NewIT(rnd io.Reader, info *database.Info) *IT {
 }
 
 func (c *IT) QueryBytes(index, numServers int) ([][]byte, error) {
+	panic("not implemented")
+}
+
+func (c *IT) QueryBytesNew(index, numServers int) (*field.ElemSliceIterator, error) {
 	// get reconstruction
 	queries := c.Query(index, numServers)
 
 	// encode all the queries in bytes
-	out := make([][]byte, len(queries))
-	for i := range queries {
-		queryBuf := make([]byte, len(queries[i])*8*2)
-		for k := 0; k < len(queries[i]); k++ {
-			binary.LittleEndian.PutUint64(queryBuf[k*8*2:k*8*2+8], queries[i][k][0])
-			binary.LittleEndian.PutUint64(queryBuf[k*8*2+8:k*8*2+8+8], queries[i][k][1])
-		}
-		out[i] = queryBuf
+	// out := make([][]byte, len(queries))
+	// for i := range queries {
+	// 	// queryBuf := make([]byte, len(queries[i])*8*2)
+	// 	// for k := 0; k < len(queries[i]); k++ {
+	// 	// 	binary.LittleEndian.PutUint64(queryBuf[k*8*2:k*8*2+8], queries[i][k][0])
+	// 	// 	binary.LittleEndian.PutUint64(queryBuf[k*8*2+8:k*8*2+8+8], queries[i][k][1])
+	// 	// }
+	// 	// out[i] = queryBuf
+	// 	out[i] = queries[i].Bytes()
 
-		// buf := new(bytes.Buffer)
-		// enc := gob.NewEncoder(buf)
-		// if err := enc.Encode(queries[i]); err != nil {
-		// 	return nil, err
-		// }
-		// out[i] = buf.Bytes()
-	}
+	// 	// buf := new(bytes.Buffer)
+	// 	// enc := gob.NewEncoder(buf)
+	// 	// if err := enc.Encode(queries[i]); err != nil {
+	// 	// 	return nil, err
+	// 	// }
+	// 	// out[i] = buf.Bytes()
+	// }
 
-	return out, nil
+	return queries, nil
 }
 
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *IT) Query(index, numServers int) [][]field.Element {
+func (c *IT) Query(index, numServers int) *field.ElemSliceIterator {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -111,22 +117,27 @@ func (c *IT) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
 }
 
 // secretShare the vector a among numServers non-colluding servers
-func (c *IT) secretShare(numServers int) ([][]field.Element, error) {
+func (c *IT) secretShare(numServers int) (*field.ElemSliceIterator, error) {
 	// get block length
 	blockLen := len(c.state.a)
 	// Number of field elements in the whole vector
 	vectorLen := c.dbInfo.NumColumns * blockLen
 
-	// result := make([][]byte, numServers)
-	// for k := range result {
-	// 	result[k] = make([]byte, vectorLen*8*2)
-	// }
+	result := make([]field.ElemSlice, numServers)
+	for k := range result {
+		result[k] = field.NewElemSlice(vectorLen)
+
+		err := result[k].SetRandom(c.rnd)
+		if err != nil {
+			return nil, xerrors.Errorf("failed to set random: %v", err)
+		}
+	}
 
 	// create query vectors for all the servers F^(1+b)
-	vectors := make([][]field.Element, numServers)
-	for k := range vectors {
-		vectors[k] = make([]field.Element, vectorLen)
-	}
+	// vectors := make([][]field.Element, numServers)
+	// for k := range vectors {
+	// 	vectors[k] = make([]field.Element, vectorLen)
+	// }
 
 	// Get random elements for all numServers-1 vectors
 	// rand, err := field.RandomVector(c.rnd, (numServers-1)*vectorLen)
@@ -140,29 +151,38 @@ func (c *IT) secretShare(numServers int) ([][]field.Element, error) {
 		colEnd = (j + 1) * blockLen
 		// Assign k - 1 random vectors of length dbLength containing
 		// elements in F^(1+b)
-		for k := 0; k < numServers-1; k++ {
-			rand, err := field.RandomVector(c.rnd, colEnd-colStart)
-			if err != nil {
-				panic(err)
-			}
-			copy(vectors[k][colStart:colEnd], rand)
-			// copy(vectors[k][colStart:colEnd], rand[k*vectorLen+colStart:k*vectorLen+colEnd])
-		}
+		// for k := 0; k < numServers-1; k++ {
+		// rand, err := field.RandomVector(c.rnd, colEnd-colStart)
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// copy(vectors[k][colStart:colEnd], rand)
+		// copy(vectors[k][colStart:colEnd], rand[k*vectorLen+colStart:k*vectorLen+colEnd])
+		// }
 
 		// we should perform component-wise additive secret sharing
 		for b := colStart; b < colEnd; b++ {
 			sum := field.Zero()
 			for k := 0; k < numServers-1; k++ {
-				sum.Add(&sum, &vectors[k][b])
+				a := result[k].Get(b)
+				sum.Add(&sum, &a)
 			}
-			vectors[numServers-1][b].Set(&sum)
-			vectors[numServers-1][b].Neg(&vectors[numServers-1][b])
+			// vectors[numServers-1][b].Set(&sum)
+			// vectors[numServers-1][b].Neg(&vectors[numServers-1][b])
+
+			sum.Neg(&sum)
+
 			// set alpha vector at the block we want to retrieve
 			if j == c.state.iy {
-				vectors[numServers-1][b].Add(&vectors[numServers-1][b], &c.state.a[b-j*blockLen])
+				// vectors[numServers-1][b].Add(&vectors[numServers-1][b], &c.state.a[b-j*blockLen])
+				sum.Add(&sum, &c.state.a[b-j*blockLen])
+
 			}
+
+			result[numServers-1].Set(b, sum)
 		}
 	}
 
-	return vectors, nil
+	// return vectors, nil
+	return field.NewElemSliceIterator(result), nil
 }

@@ -96,18 +96,18 @@ func main() {
 	if lc.flags.demo {
 		lc.runDemo()
 		return
-	} else {
-		err := lc.connectToServers()
-		defer lc.closeConnections()
+	}
 
-		if err != nil {
-			log.Fatal(err)
-		}
+	err := lc.connectToServers()
+	defer lc.closeConnections()
 
-		_, err = lc.exec()
-		if err != nil {
-			log.Fatal(err)
-		}
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = lc.exec()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	os.Exit(0)
@@ -181,21 +181,22 @@ func (lc *localClient) exec() (string, error) {
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
-	t := time.Now()
+	// t := time.Now()
 
 	// compute hash key for id
 	hashKey := database.HashToIndex(id, lc.dbInfo.NumRows*lc.dbInfo.NumColumns)
 	log.Printf("id: %s, hashKey: %d", id, hashKey)
 
 	// query given hash key
-	queries, err := lc.vpirClient.QueryBytes(hashKey, len(lc.connections))
-	if err != nil {
-		return "", xerrors.Errorf("error when executing query: %v", err)
-	}
+	// queries, err := lc.vpirClient.QueryBytes(hashKey, len(lc.connections))
+	// if err != nil {
+	// 	return "", xerrors.Errorf("error when executing query: %v", err)
+	// }
+	queries, err := lc.vpirClient.(*client.IT).QueryBytesNew(hashKey, len(lc.connections))
 	log.Printf("done with queries computation")
 
 	// send queries to servers
-	answers := lc.runQueries(queries)
+	answers := lc.runQueriesNew(queries)
 
 	// reconstruct block
 	resultField, err := lc.vpirClient.ReconstructBytes(answers)
@@ -228,16 +229,16 @@ func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 
 	fmt.Println(armored)
 
-	elapsedTime := time.Since(t)
-	if lc.flags.experiment {
-		// query bw
-		bw := 0
-		for _, q := range queries {
-			bw += len(q)
-		}
-		log.Printf("stats,%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
-	}
-	fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
+	// elapsedTime := time.Since(t)
+	// if lc.flags.experiment {
+	// 	// query bw
+	// 	bw := 0
+	// 	for _, q := range queries {
+	// 		bw += len(q)
+	// 	}
+	// 	log.Printf("stats,%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
+	// }
+	// fmt.Printf("Wall-clock time to retrieve the key: %v\n", elapsedTime)
 
 	return armored, nil
 }
@@ -308,6 +309,34 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 			resCh <- query(subCtx, conn, lc.callOptions, queries[j])
 			wg.Done()
 		}(j, conn)
+		j++
+	}
+	wg.Wait()
+	close(resCh)
+
+	// combinate answers of all the servers
+	q := make([][]byte, 0)
+	for v := range resCh {
+		q = append(q, v)
+	}
+
+	return q
+}
+
+func (lc *localClient) runQueriesNew(queries *field.ElemSliceIterator) [][]byte {
+
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
+	defer cancel()
+
+	wg := sync.WaitGroup{}
+	resCh := make(chan []byte, len(lc.connections))
+	j := 0
+	for _, conn := range lc.connections {
+		wg.Add(1)
+		go func(data []byte, conn *grpc.ClientConn) {
+			resCh <- query(subCtx, conn, lc.callOptions, data)
+			wg.Done()
+		}(queries.Get().Bytes(), conn)
 		j++
 	}
 	wg.Wait()
