@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/codec"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
@@ -54,11 +55,12 @@ type flags struct {
 func newLocalClient() *localClient {
 	// initialize local client
 	lc := &localClient{
-		ctx:         context.Background(),
+		ctx: context.Background(),
 		callOptions: []grpc.CallOption{
-			// grpc.UseCompressor(gzip.Name),
-			// grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
-			// grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
+			grpc.UseCompressor(""),
+			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
+			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
+			grpc.ForceCodec(&codec.Codec{}),
 		},
 		prg:   utils.RandomPRG(),
 		flags: parseFlags(),
@@ -68,6 +70,9 @@ func newLocalClient() *localClient {
 	if lc.flags.profiling {
 		utils.StartProfiling("client.prof")
 		defer utils.StopProfiling()
+
+		utils.StartBlockProfiling("client-block.prof")
+		utils.StartTrace("client-trace.out")
 	}
 
 	// set logs to stdout

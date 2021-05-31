@@ -15,6 +15,7 @@ import (
 	"runtime/pprof"
 	"syscall"
 
+	"github.com/si-co/vpir-code/lib/codec"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -150,6 +151,7 @@ func main() {
 		grpc.MaxRecvMsgSize(1024*1024*1024),
 		grpc.MaxSendMsgSize(1024*1024*1024),
 		grpc.Creds(credentials.NewTLS(cfg)),
+		grpc.CustomCodec(&codec.Codec{}),
 	)
 
 	// select correct server

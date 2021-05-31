@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"runtime"
 	"runtime/pprof"
+	"runtime/trace"
 )
 
 func StartProfiling(filename string) {
@@ -79,7 +80,30 @@ func StartBlockProfiling(filename string) {
 		for _ = range c {
 			// sig is a ^C, handle it
 			writeBlockProfile(filename)
-			os.Exit(0)
+			// os.Exit(0)
 		}
 	}()
+}
+
+func StartTrace(filename string) {
+	f, err := os.Create(filename)
+	if err != nil {
+		log.Fatalf("failed to create trace output file: %v", err)
+	}
+
+	c := make(chan os.Signal, 1)
+
+	go func() {
+		for range c {
+			// sig is a ^C, handle it
+			if err := f.Close(); err != nil {
+				log.Fatalf("failed to close trace file: %v", err)
+			}
+		}
+	}()
+
+	if err := trace.Start(f); err != nil {
+		log.Fatalf("failed to start trace: %v", err)
+	}
+	defer trace.Stop()
 }
