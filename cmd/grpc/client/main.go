@@ -18,7 +18,6 @@ import (
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/encoding/gzip"
 )
 
 const (
@@ -55,11 +54,11 @@ type flags struct {
 func newLocalClient() *localClient {
 	// initialize local client
 	lc := &localClient{
-		ctx: context.Background(),
+		ctx:         context.Background(),
 		callOptions: []grpc.CallOption{
-			grpc.UseCompressor(gzip.Name),
-			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
-			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
+			// grpc.UseCompressor(gzip.Name),
+			// grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
+			// grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
 		},
 		prg:   utils.RandomPRG(),
 		flags: parseFlags(),
