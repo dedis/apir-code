@@ -327,30 +327,68 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	return q
 }
 
-func (lc *localClient) runQueriesNew(queries *field.ElemSliceIterator) [][]byte {
+func (lc *localClient) runQueriesNew(queries *client.QueryIterator) [][]byte {
 
 	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
 	defer cancel()
 
-	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(lc.connections))
-	j := 0
-	for _, conn := range lc.connections {
-		wg.Add(1)
-		go func(data []byte, conn *grpc.ClientConn) {
-			resCh <- query(subCtx, conn, lc.callOptions, data)
-			wg.Done()
-		}(queries.Get().Bytes(), conn)
-		j++
-	}
-	wg.Wait()
-	close(resCh)
+	streams := make([]proto.VPIR_QueryStreamClient, 0, len(lc.connections))
 
-	// combinate answers of all the servers
-	q := make([][]byte, 0)
-	for v := range resCh {
-		q = append(q, v)
+	for _, conn := range lc.connections {
+		c := proto.NewVPIRClient(conn)
+
+		stream, err := c.QueryStream(subCtx, lc.callOptions...)
+		if err != nil {
+			log.Fatalf("failed to stream: %v", err)
+		}
+
+		streams = append(streams, stream)
 	}
+
+	for queries.HasNext() {
+		columns := queries.Get()
+
+		for _, stream := range streams {
+			err := stream.Send(&proto.QueryRequest{
+				Query: columns.Get().Bytes(),
+			})
+
+			if err != nil {
+				log.Fatalf("failed to send stream: %v", err)
+			}
+		}
+	}
+
+	q := make([][]byte, 0)
+
+	for _, stream := range streams {
+		response, err := stream.CloseAndRecv()
+		if err != nil {
+			log.Fatalf("failed to close and receive: %v", err)
+		}
+
+		q = append(q, response.Answer)
+	}
+
+	// wg := sync.WaitGroup{}
+	// resCh := make(chan []byte, len(lc.connections))
+	// j := 0
+	// for _, conn := range lc.connections {
+	// 	wg.Add(1)
+	// 	go func(data []byte, conn *grpc.ClientConn) {
+	// 		resCh <- query(subCtx, conn, lc.callOptions, data)
+	// 		wg.Done()
+	// 	}(queries.Get().Bytes(), conn)
+	// 	j++
+	// }
+	// wg.Wait()
+	// close(resCh)
+
+	// // combinate answers of all the servers
+	// q := make([][]byte, 0)
+	// for v := range resCh {
+	// 	q = append(q, v)
+	// }
 
 	return q
 }

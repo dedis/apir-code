@@ -37,7 +37,7 @@ func (c *IT) QueryBytes(index, numServers int) ([][]byte, error) {
 	panic("not implemented")
 }
 
-func (c *IT) QueryBytesNew(index, numServers int) (*field.ElemSliceIterator, error) {
+func (c *IT) QueryBytesNew(index, numServers int) (*QueryIterator, error) {
 	// get reconstruction
 	queries := c.Query(index, numServers)
 
@@ -66,7 +66,7 @@ func (c *IT) QueryBytesNew(index, numServers int) (*field.ElemSliceIterator, err
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *IT) Query(index, numServers int) *field.ElemSliceIterator {
+func (c *IT) Query(index, numServers int) *QueryIterator {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -77,11 +77,15 @@ func (c *IT) Query(index, numServers int) *field.ElemSliceIterator {
 		log.Fatal(err)
 	}
 
-	vectors, err := c.secretShare(numServers)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return vectors
+	// vectors, err := c.secretShare(numServers)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	iter := newQueryIterator(c.dbInfo.NumColumns, numServers, len(c.state.a),
+		c.state.iy, c.rnd, c.state)
+
+	return iter
 }
 
 // ReconstructBytes returns []field.Element
@@ -185,4 +189,66 @@ func (c *IT) secretShare(numServers int) (*field.ElemSliceIterator, error) {
 
 	// return vectors, nil
 	return field.NewElemSliceIterator(result), nil
+}
+
+func newQueryIterator(numCols, numServers, colSize, iy int, rnd io.Reader,
+	state *state) *QueryIterator {
+
+	return &QueryIterator{
+		currentCol: 0,
+		numCols:    numCols,
+		numServers: numServers,
+		colSize:    colSize,
+		rnd:        rnd,
+		iy:         iy,
+		state:      state,
+	}
+}
+
+// QueryIterator ...
+type QueryIterator struct {
+	currentCol int
+	numCols    int
+	numServers int
+	colSize    int
+	rnd        io.Reader
+
+	iy    int
+	state *state
+}
+
+// HasNext ...
+func (q *QueryIterator) HasNext() bool {
+	return q.currentCol < q.numCols
+}
+
+// Get ...
+func (q *QueryIterator) Get() *field.ElemSliceIterator {
+	result := make([]field.ElemSlice, q.numServers)
+
+	for i := range result {
+		result[i] = field.NewElemSlice(q.colSize)
+		result[i].SetRandom(q.rnd)
+	}
+
+	for i := 0; i < q.colSize; i++ {
+		sum := field.Zero()
+
+		for k := 0; k < q.numServers-1; k++ {
+			a := result[k].Get(i)
+			sum.Add(&sum, &a)
+		}
+
+		sum.Neg(&sum)
+
+		if q.currentCol == q.iy {
+			sum.Add(&sum, &q.state.a[i])
+		}
+
+		result[q.numServers-1].Set(i, sum)
+	}
+
+	q.currentCol++
+
+	return field.NewElemSliceIterator(result)
 }

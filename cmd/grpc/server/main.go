@@ -19,6 +19,7 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/xerrors"
 
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/server"
@@ -257,6 +258,33 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 	}
 
 	return resp, nil
+}
+
+func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
+	res := []byte{}
+
+	for i := 0; i < s.Server.DBInfo().NumColumns; i++ {
+		req, err := srv.Recv()
+		if err != nil {
+			return xerrors.Errorf("failed to read request: %v", err)
+		}
+
+		res = append(res, req.Query...)
+	}
+
+	a, err := s.Server.AnswerBytes(res)
+	if err != nil {
+		return err
+	}
+	answerLen := len(a)
+	log.Printf("answer size in bytes: %d", answerLen)
+	if s.experiment {
+		log.Printf("stats,%d,%d", s.cores, answerLen)
+	}
+
+	srv.SendAndClose(&proto.QueryResponse{Answer: a})
+
+	return nil
 }
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (

@@ -7,6 +7,7 @@ option go_package = "github.com/si-co/vpir-code/lib/proto;proto";
 service VPIR {
         rpc DatabaseInfo (DatabaseInfoRequest) returns (DatabaseInfoResponse) {}
 	rpc Query (QueryRequest) returns (QueryResponse) {}
+        rpc QueryStream (stream QueryRequest) returns (QueryResponse) {}
 }
 
 message QueryRequest {

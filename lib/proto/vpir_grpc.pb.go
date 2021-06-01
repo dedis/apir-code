@@ -11,6 +11,7 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
+// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // VPIRClient is the client API for VPIR service.
@@ -19,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type VPIRClient interface {
 	DatabaseInfo(ctx context.Context, in *DatabaseInfoRequest, opts ...grpc.CallOption) (*DatabaseInfoResponse, error)
 	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error)
+	QueryStream(ctx context.Context, opts ...grpc.CallOption) (VPIR_QueryStreamClient, error)
 }
 
 type vPIRClient struct {
@@ -47,12 +49,47 @@ func (c *vPIRClient) Query(ctx context.Context, in *QueryRequest, opts ...grpc.C
 	return out, nil
 }
 
+func (c *vPIRClient) QueryStream(ctx context.Context, opts ...grpc.CallOption) (VPIR_QueryStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &VPIR_ServiceDesc.Streams[0], "/proto.VPIR/QueryStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &vPIRQueryStreamClient{stream}
+	return x, nil
+}
+
+type VPIR_QueryStreamClient interface {
+	Send(*QueryRequest) error
+	CloseAndRecv() (*QueryResponse, error)
+	grpc.ClientStream
+}
+
+type vPIRQueryStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *vPIRQueryStreamClient) Send(m *QueryRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *vPIRQueryStreamClient) CloseAndRecv() (*QueryResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(QueryResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // VPIRServer is the server API for VPIR service.
 // All implementations must embed UnimplementedVPIRServer
 // for forward compatibility
 type VPIRServer interface {
 	DatabaseInfo(context.Context, *DatabaseInfoRequest) (*DatabaseInfoResponse, error)
 	Query(context.Context, *QueryRequest) (*QueryResponse, error)
+	QueryStream(VPIR_QueryStreamServer) error
 	mustEmbedUnimplementedVPIRServer()
 }
 
@@ -66,6 +103,9 @@ func (UnimplementedVPIRServer) DatabaseInfo(context.Context, *DatabaseInfoReques
 func (UnimplementedVPIRServer) Query(context.Context, *QueryRequest) (*QueryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
+func (UnimplementedVPIRServer) QueryStream(VPIR_QueryStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method QueryStream not implemented")
+}
 func (UnimplementedVPIRServer) mustEmbedUnimplementedVPIRServer() {}
 
 // UnsafeVPIRServer may be embedded to opt out of forward compatibility for this service.
@@ -76,7 +116,7 @@ type UnsafeVPIRServer interface {
 }
 
 func RegisterVPIRServer(s grpc.ServiceRegistrar, srv VPIRServer) {
-	s.RegisterService(&_VPIR_serviceDesc, srv)
+	s.RegisterService(&VPIR_ServiceDesc, srv)
 }
 
 func _VPIR_DatabaseInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -115,7 +155,36 @@ func _VPIR_Query_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	return interceptor(ctx, in, info, handler)
 }
 
-var _VPIR_serviceDesc = grpc.ServiceDesc{
+func _VPIR_QueryStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(VPIRServer).QueryStream(&vPIRQueryStreamServer{stream})
+}
+
+type VPIR_QueryStreamServer interface {
+	SendAndClose(*QueryResponse) error
+	Recv() (*QueryRequest, error)
+	grpc.ServerStream
+}
+
+type vPIRQueryStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *vPIRQueryStreamServer) SendAndClose(m *QueryResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *vPIRQueryStreamServer) Recv() (*QueryRequest, error) {
+	m := new(QueryRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// VPIR_ServiceDesc is the grpc.ServiceDesc for VPIR service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var VPIR_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.VPIR",
 	HandlerType: (*VPIRServer)(nil),
 	Methods: []grpc.MethodDesc{
@@ -128,6 +197,12 @@ var _VPIR_serviceDesc = grpc.ServiceDesc{
 			Handler:    _VPIR_Query_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "QueryStream",
+			Handler:       _VPIR_QueryStream_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "lib/proto/vpir.proto",
 }
