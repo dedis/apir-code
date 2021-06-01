@@ -1,6 +1,7 @@
 package client
 
 import (
+	"crypto/rand"
 	"encoding/binary"
 	"io"
 	"log"
@@ -27,7 +28,7 @@ type IT struct {
 // the database.
 func NewIT(rnd io.Reader, info *database.Info) *IT {
 	return &IT{
-		rnd:    rnd,
+		rnd:    rand.Reader,
 		dbInfo: info,
 		state:  nil,
 	}

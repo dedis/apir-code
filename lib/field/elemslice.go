@@ -21,6 +21,13 @@ func NewElemSlice(n int) ElemSlice {
 	}
 }
 
+func NewElemSliceFromBytes(data []byte) ElemSlice {
+	return ElemSlice{
+		n:    len(data) / esize,
+		data: data,
+	}
+}
+
 // Set ...
 func (e ElemSlice) Set(i int, el Element) {
 	binary.LittleEndian.PutUint64(e.data[i*esize:i*esize+8], el[0])
@@ -43,6 +50,13 @@ func (e ElemSlice) Get(i int) Element {
 	return Element{
 		binary.LittleEndian.Uint64(e.data[i*esize : i*esize+8]),
 		binary.LittleEndian.Uint64(e.data[i*esize+8 : i*esize+8+8]),
+	}
+}
+
+func (e ElemSlice) Range(begin, end int) ElemSlice {
+	return ElemSlice{
+		n:    end - begin,
+		data: e.data[begin*esize : end*esize],
 	}
 }
 

@@ -38,17 +38,17 @@ func (s *IT) DBInfo() *database.Info {
 func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
 	fmt.Println("server answer bytes", len(q))
 
-	n := len(q) / (8 * 2)
-	data := make([]field.Element, n)
+	// n := len(q) / (8 * 2)
+	// data := make([]field.Element, n)
 
-	for i := 0; i < n; i++ {
-		memIndex := i * 8 * 2
+	// for i := 0; i < n; i++ {
+	// 	memIndex := i * 8 * 2
 
-		data[i] = field.Element{
-			binary.LittleEndian.Uint64(q[memIndex : memIndex+8]),
-			binary.LittleEndian.Uint64(q[memIndex+8 : memIndex+16]),
-		}
-	}
+	// 	data[i] = field.Element{
+	// 		binary.LittleEndian.Uint64(q[memIndex : memIndex+8]),
+	// 		binary.LittleEndian.Uint64(q[memIndex+8 : memIndex+16]),
+	// 	}
+	// }
 
 	// decode query
 	// buf := bytes.NewBuffer(q)
@@ -59,7 +59,13 @@ func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
 	// }
 
 	// get answer
-	a := s.Answer(data)
+	// a := s.Answer(data)
+
+	elements := field.NewElemSliceFromBytes(q)
+
+	fmt.Println("element 17:", elements.Get(17))
+
+	a := s.AnswerNew(elements)
 
 	// encode answer
 	// buf.Reset()
@@ -81,4 +87,9 @@ func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
 // Answer computes the answer for the given query
 func (s *IT) Answer(q []field.Element) []field.Element {
 	return answer(q, s.db, s.cores)
+}
+
+// AnswerNew computes the answer for the given query
+func (s *IT) AnswerNew(q field.ElemSlice) []field.Element {
+	return answerNew(q, s.db, s.cores)
 }
