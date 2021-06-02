@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"sync"
 	"syscall"
 
 	"github.com/si-co/vpir-code/lib/codec"
@@ -294,9 +295,59 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 // 	return nil
 // }
 
+func newWorkerPool(size int) *workerPool {
+	return &workerPool{
+		size:    size,
+		working: 0,
+
+		workerAvailable: make(chan struct{}, 1),
+	}
+}
+
+type workerPool struct {
+	sync.Mutex
+
+	size    int
+	working int
+
+	// used by worker to signal that there are done
+	workerAvailable chan struct{}
+}
+
+func (w *workerPool) addAndWait(f func()) {
+	w.Lock()
+
+	if w.size == w.working {
+		w.Unlock()
+		<-w.workerAvailable
+		w.Lock()
+	}
+
+	go func() {
+		w.working++
+		w.Unlock()
+
+		f()
+
+		w.Lock()
+		w.working--
+
+		select {
+		case w.workerAvailable <- struct{}{}:
+		default:
+		}
+
+		w.Unlock()
+	}()
+}
+
 func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 	res := []field.Element{}
+	resMutex := sync.Mutex{}
+
 	info := s.Server.DBInfo()
+
+	workerPool := newWorkerPool(10)
 
 	for i := 0; i < info.NumColumns; i++ {
 		req, err := srv.Recv()
@@ -304,17 +355,23 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 			return xerrors.Errorf("failed to read request: %v", err)
 		}
 
-		elements := field.NewElemSliceFromBytes(req.Query)
+		func(i int, req *proto.QueryRequest) {
+			workerPool.addAndWait(func() {
+				elements := field.NewElemSliceFromBytes(req.Query)
 
-		r := s.Server.(*server.IT).ComputeMessageAndTagNew(i*info.BlockSize, (i+1)*info.BlockSize, elements, info.BlockSize)
+				r := s.Server.(*server.IT).ComputeMessageAndTagNew(i*info.BlockSize, (i+1)*info.BlockSize, elements, info.BlockSize)
 
-		if len(res) != 0 {
-			for i, a := range r {
-				res[i].Add(&res[i], &a)
-			}
-		} else {
-			res = append(res, r...)
-		}
+				resMutex.Lock()
+				if len(res) != 0 {
+					for i, a := range r {
+						res[i].Add(&res[i], &a)
+					}
+				} else {
+					res = append(res, r...)
+				}
+				resMutex.Unlock()
+			})
+		}(i, req)
 	}
 
 	answerLen := len(res)
