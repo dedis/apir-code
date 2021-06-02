@@ -375,6 +375,10 @@ func (d *DB) GetEntry(i int) field.Element {
 
 // Range returns a view on the db, scoped by a begin-end index.
 func (d *DB) Range(begin, end int) ElementRange {
+	if end == -1 {
+		end = len(d.mmap) / (8 * 2)
+	}
+
 	return ElementRange{
 		db:    d,
 		begin: begin,

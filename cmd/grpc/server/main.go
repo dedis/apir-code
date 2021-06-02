@@ -17,6 +17,7 @@ import (
 
 	"github.com/si-co/vpir-code/lib/codec"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/xerrors"
@@ -149,8 +150,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	rpcServer := grpc.NewServer(
-		grpc.MaxRecvMsgSize(1024*1024*1024),
-		grpc.MaxSendMsgSize(1024*1024*1024),
+		// grpc.MaxRecvMsgSize(1024*1024*1024),
+		// grpc.MaxSendMsgSize(1024*1024*1024),
 		grpc.Creds(credentials.NewTLS(cfg)),
 		grpc.CustomCodec(&codec.Codec{}),
 	)
@@ -261,7 +262,11 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 }
 
 func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
-	res := []byte{}
+	info := s.Server.DBInfo()
+
+	var err error
+
+	requests := make([][]byte, info.NumColumns)
 
 	for i := 0; i < s.Server.DBInfo().NumColumns; i++ {
 		req, err := srv.Recv()
@@ -269,10 +274,14 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 			return xerrors.Errorf("failed to read request: %v", err)
 		}
 
-		res = append(res, req.Query...)
+		requests[i] = req.Query
 	}
 
-	a, err := s.Server.AnswerBytes(res)
+	elemGetter := field.NewElemSliceGetter(
+		field.NewBytesChunks(requests, len(requests[0])),
+	)
+
+	a, err := s.Server.(*server.IT).AnswerBytesNew(elemGetter)
 	if err != nil {
 		return err
 	}

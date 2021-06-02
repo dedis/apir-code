@@ -63,9 +63,28 @@ func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
 
 	elements := field.NewElemSliceFromBytes(q)
 
-	fmt.Println("element 17:", elements.Get(17))
-
 	a := s.AnswerNew(elements)
+
+	// encode answer
+	// buf.Reset()
+	// enc := gob.NewEncoder(buf)
+	// if err := enc.Encode(a); err != nil {
+	// 	return nil, err
+	// }
+	res := make([]byte, len(a)*8*2)
+	for k := 0; k < len(a); k++ {
+		binary.LittleEndian.PutUint64(res[k*8*2:k*8*2+8], a[k][0])
+		binary.LittleEndian.PutUint64(res[k*8*2+8:k*8*2+8+8], a[k][1])
+	}
+
+	fmt.Println("sever buf bytes", len(res))
+
+	return res, nil
+}
+
+func (s *IT) AnswerBytesNew(q field.ElemSliceGetter) ([]byte, error) {
+
+	a := s.AnswerNewNew(q)
 
 	// encode answer
 	// buf.Reset()
@@ -92,4 +111,8 @@ func (s *IT) Answer(q []field.Element) []field.Element {
 // AnswerNew computes the answer for the given query
 func (s *IT) AnswerNew(q field.ElemSlice) []field.Element {
 	return answerNew(q, s.db, s.cores)
+}
+
+func (s *IT) AnswerNewNew(q field.ElemSliceGetter) []field.Element {
+	return answerNewNew(q, s.db, s.cores)
 }
