@@ -341,13 +341,122 @@ func (w *workerPool) addAndWait(f func()) {
 	}()
 }
 
+type homework struct {
+	i int
+	q *proto.QueryRequest
+}
+
+func newWorkers(inputs <-chan homework, outputs chan<- []field.Element, blockSize int, s *server.IT) *workers {
+	return &workers{
+		inputs:  inputs,
+		outputs: outputs,
+
+		loadPerWorker: 10,
+		blockSize:     blockSize,
+
+		server: s,
+		stop:   make(chan struct{}),
+
+		finished: new(sync.WaitGroup),
+	}
+}
+
+type workers struct {
+	inputs  <-chan homework
+	outputs chan<- []field.Element
+
+	loadPerWorker int
+	blockSize     int
+
+	server *server.IT
+
+	stop chan struct{}
+
+	finished *sync.WaitGroup
+}
+
+func (w workers) start(n int) {
+	for i := 0; i < n; i++ {
+		w.finished.Add(1)
+		go w.startWorker()
+	}
+
+	go func() {
+		w.finished.Wait()
+		close(w.outputs)
+	}()
+}
+
+func (w workers) startWorker() {
+	defer w.finished.Done()
+
+	for {
+		res := []field.Element{}
+
+		for i := 0; i < w.loadPerWorker; i++ {
+			var homework homework
+
+			select {
+			case homework = <-w.inputs:
+			case <-w.stop:
+				// be sure there isn't anything left in the input
+				select {
+				case homework = <-w.inputs:
+				default:
+					if len(res) != 0 {
+						w.outputs <- res
+					}
+					return
+				}
+			}
+
+			elements := field.NewElemSliceFromBytes(homework.q.Query)
+			r := w.server.ComputeMessageAndTagNew(homework.i*w.blockSize, (homework.i+1)*w.blockSize, elements, w.blockSize)
+
+			if len(res) != 0 {
+				for i, a := range r {
+					res[i].Add(&res[i], &a)
+				}
+			} else {
+				res = r
+			}
+		}
+
+		w.outputs <- res
+	}
+}
+
+func (w workers) done() {
+	close(w.stop)
+}
+
 func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 	res := []field.Element{}
-	resMutex := sync.Mutex{}
+
+	inQueue := make(chan homework, 50)
+	outQueue := make(chan []field.Element, 50)
 
 	info := s.Server.DBInfo()
 
-	workerPool := newWorkerPool(10)
+	workers := newWorkers(inQueue, outQueue, info.BlockSize, s.Server.(*server.IT))
+	workers.start(10)
+
+	outDone := sync.WaitGroup{}
+	outDone.Add(1)
+	go func() {
+		defer outDone.Done()
+
+		for r := range outQueue {
+			if len(res) == 0 {
+				res = r
+				continue
+			}
+
+			for i, a := range r {
+				res[i].Add(&res[i], &a)
+			}
+		}
+	}()
 
 	for i := 0; i < info.NumColumns; i++ {
 		req, err := srv.Recv()
@@ -355,24 +464,14 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 			return xerrors.Errorf("failed to read request: %v", err)
 		}
 
-		func(i int, req *proto.QueryRequest) {
-			workerPool.addAndWait(func() {
-				elements := field.NewElemSliceFromBytes(req.Query)
-
-				r := s.Server.(*server.IT).ComputeMessageAndTagNew(i*info.BlockSize, (i+1)*info.BlockSize, elements, info.BlockSize)
-
-				resMutex.Lock()
-				if len(res) != 0 {
-					for i, a := range r {
-						res[i].Add(&res[i], &a)
-					}
-				} else {
-					res = append(res, r...)
-				}
-				resMutex.Unlock()
-			})
-		}(i, req)
+		inQueue <- homework{
+			i: i,
+			q: req,
+		}
 	}
+
+	workers.done()
+	outDone.Wait()
 
 	answerLen := len(res)
 	log.Printf("answer size in bytes: %d", answerLen)
