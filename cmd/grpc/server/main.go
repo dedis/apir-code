@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"log"
@@ -261,40 +262,112 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 	return resp, nil
 }
 
+// Standard naive one
+// func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
+// 	info := s.Server.DBInfo()
+// 	n := info.BlockSize * info.NumColumns * info.NumRows
+
+// 	data := make([]byte, 0, n)
+
+// 	for i := 0; i < s.Server.DBInfo().NumColumns; i++ {
+// 		req, err := srv.Recv()
+// 		if err != nil {
+// 			return xerrors.Errorf("failed to read request: %v", err)
+// 		}
+
+// 		data = append(data, req.Query...)
+// 	}
+
+// 	a, err := s.Server.AnswerBytes(data)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	answerLen := len(a)
+// 	log.Printf("answer size in bytes: %d", answerLen)
+// 	if s.experiment {
+// 		log.Printf("stats,%d,%d", s.cores, answerLen)
+// 	}
+
+// 	srv.SendAndClose(&proto.QueryResponse{Answer: a})
+
+// 	return nil
+// }
+
 func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
+	res := []field.Element{}
 	info := s.Server.DBInfo()
 
-	var err error
-
-	requests := make([][]byte, info.NumColumns)
-
-	for i := 0; i < s.Server.DBInfo().NumColumns; i++ {
+	for i := 0; i < info.NumColumns; i++ {
 		req, err := srv.Recv()
 		if err != nil {
 			return xerrors.Errorf("failed to read request: %v", err)
 		}
 
-		requests[i] = req.Query
+		elements := field.NewElemSliceFromBytes(req.Query)
+
+		r := s.Server.(*server.IT).ComputeMessageAndTagNew(i*info.BlockSize, (i+1)*info.BlockSize, elements, info.BlockSize)
+
+		if len(res) != 0 {
+			for i, a := range r {
+				res[i].Add(&res[i], &a)
+			}
+		} else {
+			res = append(res, r...)
+		}
 	}
 
-	elemGetter := field.NewElemSliceGetter(
-		field.NewBytesChunks(requests, len(requests[0])),
-	)
-
-	a, err := s.Server.(*server.IT).AnswerBytesNew(elemGetter)
-	if err != nil {
-		return err
-	}
-	answerLen := len(a)
+	answerLen := len(res)
 	log.Printf("answer size in bytes: %d", answerLen)
 	if s.experiment {
 		log.Printf("stats,%d,%d", s.cores, answerLen)
 	}
 
-	srv.SendAndClose(&proto.QueryResponse{Answer: a})
+	buf := make([]byte, len(res)*8*2)
+	for k := 0; k < len(res); k++ {
+		binary.LittleEndian.PutUint64(buf[k*8*2:k*8*2+8], res[k][0])
+		binary.LittleEndian.PutUint64(buf[k*8*2+8:k*8*2+8+8], res[k][1])
+	}
+
+	srv.SendAndClose(&proto.QueryResponse{Answer: buf})
 
 	return nil
 }
+
+// func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
+// 	info := s.Server.DBInfo()
+
+// 	var err error
+
+// 	requests := make([][]byte, info.NumColumns)
+
+// 	for i := 0; i < s.Server.DBInfo().NumColumns; i++ {
+// 		req, err := srv.Recv()
+// 		if err != nil {
+// 			return xerrors.Errorf("failed to read request: %v", err)
+// 		}
+
+// 		requests[i] = req.Query
+// 	}
+
+// 	elemGetter := field.NewElemSliceGetter(
+// 		field.NewBytesChunks(requests, len(requests[0])),
+// 	)
+
+// 	a, err := s.Server.(*server.IT).AnswerBytesNew(elemGetter)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	answerLen := len(a)
+// 	log.Printf("answer size in bytes: %d", answerLen)
+// 	if s.experiment {
+// 		log.Printf("stats,%d,%d", s.cores, answerLen)
+// 	}
+
+// 	srv.SendAndClose(&proto.QueryResponse{Answer: a})
+
+// 	return nil
+// }
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {

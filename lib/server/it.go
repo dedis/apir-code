@@ -116,3 +116,31 @@ func (s *IT) AnswerNew(q field.ElemSlice) []field.Element {
 func (s *IT) AnswerNewNew(q field.ElemSliceGetter) []field.Element {
 	return answerNewNew(q, s.db, s.cores)
 }
+
+func (s *IT) ComputeMessageAndTagNew(i, j int, q field.ElemSlice, blockLen int) []field.Element {
+	elements := s.db.Range(i, j)
+
+	var prodTag, prod field.Element
+	sumTag := field.Zero()
+	sum := field.ZeroVector(blockLen)
+	for j := 0; j < elements.Len()/blockLen; j++ {
+		for b := 0; b < blockLen; b++ {
+			e := elements.Get(j*blockLen + b)
+			if e.IsZero() {
+				// no need to multiply if the element value is zero
+				continue
+			}
+			// compute message
+			e = elements.Get(j*blockLen + b)
+			g := q.Get(j * (blockLen + 1))
+			prod.Mul(&e, &g)
+			sum[b].Add(&sum[b], &prod)
+			// compute block tag
+			e = elements.Get(j*blockLen + b)
+			f := q.Get(j*(blockLen+1) + 1 + b)
+			prodTag.Mul(&e, &f)
+			sumTag.Add(&sumTag, &prodTag)
+		}
+	}
+	return append(sum, sumTag)
+}
