@@ -350,16 +350,25 @@ func (lc *localClient) runQueriesNew(batches *client.BatchIterator) [][]byte {
 	for batches.HasNext() {
 		queries := batches.GetNext(batchSize)
 
-		for i := 0; queries.HasNext(); i++ {
-			msg := proto.QueryRequest{
-				Query: queries.GetNext().Bytes(),
-			}
+		wait := sync.WaitGroup{}
+		wait.Add(len(streams))
 
-			err := streams[i].Send(&msg)
-			if err != nil {
-				log.Fatalf("failed to send stream: %v", err)
-			}
+		for i := 0; queries.HasNext(); i++ {
+			go func(i int, data []byte) {
+				defer wait.Done()
+
+				msg := proto.QueryRequest{
+					Query: data,
+				}
+
+				err := streams[i].Send(&msg)
+				if err != nil {
+					log.Fatalf("failed to send stream: %v", err)
+				}
+			}(i, queries.GetNext().Bytes())
 		}
+
+		wait.Wait()
 	}
 
 	q := make([][]byte, 0)
