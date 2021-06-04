@@ -16,6 +16,7 @@ import (
 	"runtime/pprof"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/si-co/vpir-code/lib/codec"
 	"github.com/si-co/vpir-code/lib/database"
@@ -152,8 +153,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	rpcServer := grpc.NewServer(
-		// grpc.MaxRecvMsgSize(1024*1024*1024),
-		// grpc.MaxSendMsgSize(1024*1024*1024),
+		grpc.MaxRecvMsgSize(1024*1024*1024),
+		grpc.MaxSendMsgSize(1024*1024*1024),
 		grpc.Creds(credentials.NewTLS(cfg)),
 		grpc.CustomCodec(&codec.Codec{}),
 	)
@@ -346,12 +347,15 @@ type homework struct {
 	q *proto.QueryRequest
 }
 
-func newWorkers(inputs <-chan homework, outputs chan<- []field.Element, blockSize int, s *server.IT) *workers {
+func newWorkers(inputs <-chan homework, outputs chan<- []field.Element,
+	blockSize int, s *server.IT) *workers {
+
 	return &workers{
 		inputs:  inputs,
 		outputs: outputs,
 
-		loadPerWorker: 10,
+		// the number of messages a worker processes before sending its result
+		loadPerWorker: 1000,
 		blockSize:     blockSize,
 
 		server: s,
@@ -404,21 +408,31 @@ func (w workers) startWorker() {
 				case homework = <-w.inputs:
 				default:
 					if len(res) != 0 {
+						// send our remaining work
 						w.outputs <- res
 					}
 					return
 				}
 			}
 
-			elements := field.NewElemSliceFromBytes(homework.q.Query)
-			r := w.server.ComputeMessageAndTagNew(homework.i*w.blockSize, (homework.i+1)*w.blockSize, elements, w.blockSize)
+			batchSize := len(homework.q.Query) / ((w.blockSize + 1) * 16)
 
-			if len(res) != 0 {
+			for i := 0; i < batchSize; i++ {
+				querySize := (w.blockSize + 1) * 8 * 2
+				elemData := homework.q.Query[i*querySize : (i+1)*querySize]
+
+				elements := field.NewElemSliceFromBytes(elemData)
+
+				r := w.server.ComputeMessageAndTagNew((homework.i+i)*w.blockSize, (homework.i+i+1)*w.blockSize, elements, w.blockSize)
+
+				if len(res) == 0 {
+					res = r
+					continue
+				}
+
 				for i, a := range r {
 					res[i].Add(&res[i], &a)
 				}
-			} else {
-				res = r
 			}
 		}
 
@@ -458,20 +472,41 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 		}
 	}()
 
-	for i := 0; i < info.NumColumns; i++ {
+	startTime := time.Now()
+	for i := 0; i < info.NumColumns; {
 		req, err := srv.Recv()
 		if err != nil {
 			return xerrors.Errorf("failed to read request: %v", err)
 		}
 
-		inQueue <- homework{
+		select {
+		case inQueue <- homework{
 			i: i,
 			q: req,
+		}:
+		default:
+			log.Println("!!! queue full")
+			inQueue <- homework{
+				i: i,
+				q: req,
+			}
+		}
+
+		// we receive [batchSize * (blockSize + 1)] elements from the client
+		batchSize := len(req.Query) / ((info.BlockSize + 1) * 16)
+		i += batchSize
+
+		if i%10000 == 0 {
+			elapsed := time.Since(startTime)
+			log.Printf("elements %d, %d elem/s", i, i/int(elapsed.Seconds()))
 		}
 	}
 
+	log.Println("done")
 	workers.done()
+	log.Println("wait")
 	outDone.Wait()
+	log.Println("end")
 
 	answerLen := len(res)
 	log.Printf("answer size in bytes: %d", answerLen)
@@ -554,6 +589,8 @@ func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 		return nil, err
 	}
 	// log.Println("DB loaded with files", files)
+
+	// db.LoadInMemory()
 
 	return db, nil
 }

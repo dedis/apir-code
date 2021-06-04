@@ -86,7 +86,7 @@ func (e *ElemSliceIterator) HasNext() bool {
 	return e.current < len(e.data)
 }
 
-func (e *ElemSliceIterator) Get() ElemSlice {
+func (e *ElemSliceIterator) GetNext() ElemSlice {
 	res := e.data[e.current]
 	e.current++
 

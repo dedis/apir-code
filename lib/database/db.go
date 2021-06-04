@@ -97,6 +97,30 @@ type saveInfo struct {
 	Chunks [][2]int
 }
 
+func (d *DB) LoadInMemory() {
+	log.Println("loading db in memory")
+
+	// Already in memory
+	if !d.useMmap {
+		log.Println("db already in memory, nothing to do")
+		return
+	}
+
+	n := len(d.mmap) / (8 * 2)
+	d.inMemory = make([]field.Element, n)
+
+	for i := 0; i < n; i++ {
+		d.inMemory[i] = d.GetEntry(i)
+	}
+
+	err := d.mmap.Unmap()
+	if err != nil {
+		log.Fatalf("failed to unmap memory: %v", err)
+	}
+
+	d.useMmap = false
+}
+
 func (d *DB) SaveDBFileSingle(root string) error {
 	infoPath := filepath.Join(root, "info")
 

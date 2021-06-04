@@ -327,7 +327,7 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	return q
 }
 
-func (lc *localClient) runQueriesNew(queries *client.QueryIterator) [][]byte {
+func (lc *localClient) runQueriesNew(batches *client.BatchIterator) [][]byte {
 
 	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
 	defer cancel()
@@ -345,14 +345,17 @@ func (lc *localClient) runQueriesNew(queries *client.QueryIterator) [][]byte {
 		streams = append(streams, stream)
 	}
 
-	for queries.HasNext() {
-		columns := queries.Get()
+	batchSize := 10000
 
-		for _, stream := range streams {
-			err := stream.Send(&proto.QueryRequest{
-				Query: columns.Get().Bytes(),
-			})
+	for batches.HasNext() {
+		queries := batches.GetNext(batchSize)
 
+		for i := 0; queries.HasNext(); i++ {
+			msg := proto.QueryRequest{
+				Query: queries.GetNext().Bytes(),
+			}
+
+			err := streams[i].Send(&msg)
 			if err != nil {
 				log.Fatalf("failed to send stream: %v", err)
 			}
@@ -378,7 +381,7 @@ func (lc *localClient) runQueriesNew(queries *client.QueryIterator) [][]byte {
 	// 	go func(data []byte, conn *grpc.ClientConn) {
 	// 		resCh <- query(subCtx, conn, lc.callOptions, data)
 	// 		wg.Done()
-	// 	}(queries.Get().Bytes(), conn)
+	// 	}(queries.GetNext().Bytes(), conn)
 	// 	j++
 	// }
 	// wg.Wait()

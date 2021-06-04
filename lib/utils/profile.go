@@ -72,6 +72,12 @@ func writeBlockProfile(filename string) {
 }
 
 func StartBlockProfiling(filename string) {
+	// go func() {
+	// 	for {
+	// 		time.Sleep(time.Second * 3)
+	// 		writeBlockProfile(filename)
+	// 	}
+	// }()
 	// Stop on ^C
 	runtime.SetBlockProfileRate(1)
 	c := make(chan os.Signal, 1)

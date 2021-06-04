@@ -28,9 +28,8 @@
         <form method="POST" action="javascript:void(0);" onSubmit="retreive()">
             <input placeholder="Enter email..." id="email-input" type="text" name="email" /><button>Retreive</button>
         </form>
-        <div id="result">
-
-        </div>
+        <div id="elapsed"></div>
+        <div id="result"></div>
     </div>
 
     <div id="footer">
@@ -43,8 +42,12 @@
         function retreive() {
             const email = document.getElementById("email-input").value
             const result = document.getElementById("result")
+            const elapsed = document.getElementById("elapsed")
 
             result.innerText = "retreiving..."
+
+            var startTime, endTime;
+            startTime = new Date();
 
             fetch("/retreive", {
                 method: "POST",
@@ -61,6 +64,11 @@
             })
             .then(res => {
                 result.innerText = res;
+
+                endTime = new Date();
+                var timeDiff = endTime - startTime; // in ms
+                timeDiff /= 1000;
+                elapsed.innerText = `query executed in ${timeDiff}s`
             })
             .catch(error => {
                 result.innerText = "error: " + error;
