@@ -264,6 +264,7 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 	return resp, nil
 }
 
+// 👉 version not using workers and using the generic 's.Server.AnswerBytes'
 // Standard naive one
 // func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 // 	info := s.Server.DBInfo()
@@ -296,57 +297,14 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 // 	return nil
 // }
 
-func newWorkerPool(size int) *workerPool {
-	return &workerPool{
-		size:    size,
-		working: 0,
-
-		workerAvailable: make(chan struct{}, 1),
-	}
-}
-
-type workerPool struct {
-	sync.Mutex
-
-	size    int
-	working int
-
-	// used by worker to signal that there are done
-	workerAvailable chan struct{}
-}
-
-func (w *workerPool) addAndWait(f func()) {
-	w.Lock()
-
-	if w.size == w.working {
-		w.Unlock()
-		<-w.workerAvailable
-		w.Lock()
-	}
-
-	go func() {
-		w.working++
-		w.Unlock()
-
-		f()
-
-		w.Lock()
-		w.working--
-
-		select {
-		case w.workerAvailable <- struct{}{}:
-		default:
-		}
-
-		w.Unlock()
-	}()
-}
-
+// homework defines a work to be done by a worker
 type homework struct {
 	i int
 	q *proto.QueryRequest
 }
 
+// newWorkers creates a new worker pool. Output is closed once all the workers
+// are stopped.
 func newWorkers(inputs <-chan homework, outputs chan<- []field.Element,
 	blockSize int, s *server.IT) *workers {
 
@@ -365,6 +323,7 @@ func newWorkers(inputs <-chan homework, outputs chan<- []field.Element,
 	}
 }
 
+// workers defines a pool of worker that processes inputs and produces outputs.
 type workers struct {
 	inputs  <-chan homework
 	outputs chan<- []field.Element
@@ -379,6 +338,7 @@ type workers struct {
 	finished *sync.WaitGroup
 }
 
+// start starts all the n workers. Must be called once.
 func (w workers) start(n int) {
 	for i := 0; i < n; i++ {
 		w.finished.Add(1)
@@ -391,61 +351,85 @@ func (w workers) start(n int) {
 	}()
 }
 
+// startWorker starts the work. It will listen on homeworks and process them
+// until the stop chan is closed.
 func (w workers) startWorker() {
 	defer w.finished.Done()
 
 	for {
-		res := []field.Element{}
+		res := w.process()
 
-		for i := 0; i < w.loadPerWorker; i++ {
-			var homework homework
-
-			select {
-			case homework = <-w.inputs:
-			case <-w.stop:
-				// be sure there isn't anything left in the input
-				select {
-				case homework = <-w.inputs:
-				default:
-					if len(res) != 0 {
-						// send our remaining work
-						w.outputs <- res
-					}
-					return
-				}
-			}
-
-			batchSize := len(homework.q.Query) / ((w.blockSize + 1) * 16)
-
-			for i := 0; i < batchSize; i++ {
-				querySize := (w.blockSize + 1) * 8 * 2
-				elemData := homework.q.Query[i*querySize : (i+1)*querySize]
-
-				elements := field.NewElemSliceFromBytes(elemData)
-
-				r := w.server.ComputeMessageAndTagNew((homework.i+i)*w.blockSize, (homework.i+i+1)*w.blockSize, elements, w.blockSize)
-
-				if len(res) == 0 {
-					res = r
-					continue
-				}
-
-				for i, a := range r {
-					res[i].Add(&res[i], &a)
-				}
-			}
+		if len(res) == 0 {
+			return
 		}
 
 		w.outputs <- res
 	}
 }
 
+// process reads loadPerWorker elements and process them
+func (w workers) process() []field.Element {
+	res := []field.Element{}
+
+	for i := 0; i < w.loadPerWorker; i++ {
+		var homework homework
+
+		select {
+		case homework = <-w.inputs:
+		case <-w.stop:
+			// be sure there isn't anything left in the input
+			select {
+			case homework = <-w.inputs:
+			default:
+				return res
+			}
+		}
+
+		if len(res) == 0 {
+			res = make([]field.Element, w.blockSize+1)
+		}
+
+		w.processHomework(homework, res)
+	}
+
+	return res
+}
+
+// processHomework processes a homework and accumulates the result in res
+func (w workers) processHomework(h homework, res []field.Element) {
+	batchSize := len(h.q.Query) / ((w.blockSize + 1) * 16)
+
+	for i := 0; i < batchSize; i++ {
+		querySize := (w.blockSize + 1) * 8 * 2
+		elemData := h.q.Query[i*querySize : (i+1)*querySize]
+
+		elements := field.NewElemSliceFromBytes(elemData)
+
+		begin := (h.i + i) * w.blockSize
+		end := (h.i + i + 1) * w.blockSize
+
+		r := w.server.ComputeMessageAndTagNew(begin, end, elements, w.blockSize)
+
+		// Add the result with the previous one. We assume adding with the zero
+		// value of field.Element is fine, since the slice may be just
+		// initialized with empty elements.
+		for i, a := range r {
+			res[i].Add(&res[i], &a)
+		}
+	}
+}
+
+// done stops all the workers
 func (w workers) done() {
 	close(w.stop)
 }
 
+// QueryStream responds to a query stream from the client: it listens on client
+// messages until all columns have been sent, then it returns the result.
 func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 	res := []field.Element{}
+
+	numWorkers := 10
 
 	inQueue := make(chan homework, 50)
 	outQueue := make(chan []field.Element, 50)
@@ -453,10 +437,12 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 	info := s.Server.DBInfo()
 
 	workers := newWorkers(inQueue, outQueue, info.BlockSize, s.Server.(*server.IT))
-	workers.start(10)
+	workers.start(numWorkers)
 
 	outDone := sync.WaitGroup{}
 	outDone.Add(1)
+
+	// process worker's responses and accumulates the result in res
 	go func() {
 		defer outDone.Done()
 
@@ -473,6 +459,7 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 	}()
 
 	startTime := time.Now()
+
 	for i := 0; i < info.NumColumns; {
 		req, err := srv.Recv()
 		if err != nil {
@@ -502,11 +489,8 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 		}
 	}
 
-	log.Println("done")
 	workers.done()
-	log.Println("wait")
 	outDone.Wait()
-	log.Println("end")
 
 	answerLen := len(res)
 	log.Printf("answer size in bytes: %d", answerLen)
@@ -524,41 +508,6 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 
 	return nil
 }
-
-// func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
-// 	info := s.Server.DBInfo()
-
-// 	var err error
-
-// 	requests := make([][]byte, info.NumColumns)
-
-// 	for i := 0; i < s.Server.DBInfo().NumColumns; i++ {
-// 		req, err := srv.Recv()
-// 		if err != nil {
-// 			return xerrors.Errorf("failed to read request: %v", err)
-// 		}
-
-// 		requests[i] = req.Query
-// 	}
-
-// 	elemGetter := field.NewElemSliceGetter(
-// 		field.NewBytesChunks(requests, len(requests[0])),
-// 	)
-
-// 	a, err := s.Server.(*server.IT).AnswerBytesNew(elemGetter)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	answerLen := len(a)
-// 	log.Printf("answer size in bytes: %d", answerLen)
-// 	if s.experiment {
-// 		log.Printf("stats,%d,%d", s.cores, answerLen)
-// 	}
-
-// 	srv.SendAndClose(&proto.QueryResponse{Answer: a})
-
-// 	return nil
-// }
 
 func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
@@ -590,6 +539,8 @@ func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 	}
 	// log.Println("DB loaded with files", files)
 
+	// 👉 a new option to load db in memory. Can't use that in production
+	// because it uses too much memory to load into memory.
 	// db.LoadInMemory()
 
 	return db, nil

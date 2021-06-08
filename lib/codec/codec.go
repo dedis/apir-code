@@ -7,10 +7,11 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// Codec ...
+// Codec implements a custom gRPC codec, which in our case is faster and more
+// memory efficient.
 type Codec struct{}
 
-// Marshal ...
+// Marshal implements encoding.Codec
 func (cb *Codec) Marshal(v interface{}) ([]byte, error) {
 	switch msg := v.(type) {
 	case *proto.DatabaseInfoRequest:
@@ -26,7 +27,7 @@ func (cb *Codec) Marshal(v interface{}) ([]byte, error) {
 	}
 }
 
-// Unmarshal ...
+// Unmarshal implements encoding.Codec
 func (cb *Codec) Unmarshal(data []byte, v interface{}) error {
 	switch msg := v.(type) {
 	case *proto.DatabaseInfoRequest:
@@ -44,12 +45,12 @@ func (cb *Codec) Unmarshal(data []byte, v interface{}) error {
 	}
 }
 
-// Name ...
+// Name implements encoding.Codec
 func (cb *Codec) String() string {
 	return "worker.PayloadCodec"
 }
 
-// Name ...
+// Name implements encoding.Codec
 func (cb *Codec) Name() string {
 	return "worker.PayloadCodec"
 }

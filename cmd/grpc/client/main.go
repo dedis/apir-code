@@ -57,10 +57,12 @@ func newLocalClient() *localClient {
 	lc := &localClient{
 		ctx: context.Background(),
 		callOptions: []grpc.CallOption{
+			// 👉 Disabling compression and using a custom codec reduces
+			// significantly the memory usage.
 			grpc.UseCompressor(""),
+			grpc.ForceCodec(&codec.Codec{}),
 			grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
 			grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
-			grpc.ForceCodec(&codec.Codec{}),
 		},
 		prg:   utils.RandomPRG(),
 		flags: parseFlags(),
@@ -196,6 +198,11 @@ func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 	// if err != nil {
 	// 	return "", xerrors.Errorf("error when executing query: %v", err)
 	// }
+
+	// 👉 instead of computing the whole list of queries for every server once,
+	// we get a batch iterator, which computes the next batch for a server in a
+	// lazy fashion. That reduces memory from [num_servers * query_size] to
+	// [batch_size]
 	queries, err := lc.vpirClient.(*client.IT).QueryBytesNew(hashKey, len(lc.connections))
 	log.Printf("done with queries computation")
 
@@ -327,6 +334,7 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	return q
 }
 
+// 👉 runQueriesNew uses a batch iterator instead of the whole list of queries
 func (lc *localClient) runQueriesNew(batches *client.BatchIterator) [][]byte {
 
 	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
@@ -337,6 +345,8 @@ func (lc *localClient) runQueriesNew(batches *client.BatchIterator) [][]byte {
 	for _, conn := range lc.connections {
 		c := proto.NewVPIRClient(conn)
 
+		// 👉  we are using a grpc stream instead of a unary request. That
+		// allows use to send batches instead of one big query.
 		stream, err := c.QueryStream(subCtx, lc.callOptions...)
 		if err != nil {
 			log.Fatalf("failed to stream: %v", err)
@@ -345,9 +355,12 @@ func (lc *localClient) runQueriesNew(batches *client.BatchIterator) [][]byte {
 		streams = append(streams, stream)
 	}
 
+	// 👉 the batch size has a sweet spot around 10'000.
 	batchSize := 10000
 
 	for batches.HasNext() {
+		// 👉 queries is an iterator that yields batches for each server, in a
+		// lazy fashion. ie. batches are computed only when GetNext() is called.
 		queries := batches.GetNext(batchSize)
 
 		wait := sync.WaitGroup{}
@@ -371,6 +384,7 @@ func (lc *localClient) runQueriesNew(batches *client.BatchIterator) [][]byte {
 		wait.Wait()
 	}
 
+	// 👉 answers are small
 	q := make([][]byte, 0)
 
 	for _, stream := range streams {

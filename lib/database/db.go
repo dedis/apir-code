@@ -97,6 +97,7 @@ type saveInfo struct {
 	Chunks [][2]int
 }
 
+// LoadInMemory loads the content of mmap in memory.
 func (d *DB) LoadInMemory() {
 	log.Println("loading db in memory")
 

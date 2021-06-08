@@ -28,6 +28,7 @@ type IT struct {
 // the database.
 func NewIT(rnd io.Reader, info *database.Info) *IT {
 	return &IT{
+		// 👉 got a panic with the old rand reader
 		rnd:    rand.Reader,
 		dbInfo: info,
 		state:  nil,
@@ -41,6 +42,9 @@ func (c *IT) QueryBytes(index, numServers int) ([][]byte, error) {
 func (c *IT) QueryBytesNew(index, numServers int) (*BatchIterator, error) {
 	// get reconstruction
 	queries := c.Query(index, numServers)
+
+	// 👉 the old way: getting all results and then encoding it. At first it was
+	// using gob encoder, which uses a lot of memory. Then I used binary
 
 	// encode all the queries in bytes
 	// out := make([][]byte, len(queries))
@@ -83,10 +87,16 @@ func (c *IT) Query(index, numServers int) *BatchIterator {
 	// 	log.Fatal(err)
 	// }
 
+	// 👉 the only things we need to keep in memory during the batch processsing
+	// is the result of the last columns, to which all other columns accumulate
+	// their result, and the current column.
 	lastCol := field.NewElemSlice(len(c.state.a))
 	lastCol.SetRandom(rand.Reader)
 
 	result := NewBatchIterator(c.dbInfo.NumColumns, len(c.state.a), c.state.iy, numServers, c.state)
+
+	// 👉 another way to iterate over the results, which required to all results
+	// of all columns at once, and no batch.
 
 	// iter := newQueryIterator(c.dbInfo.NumColumns, numServers, len(c.state.a),
 	// 	c.state.iy, c.rnd, c.state)
@@ -101,6 +111,7 @@ func (c *IT) ReconstructBytes(a [][]byte) (interface{}, error) {
 	// 	return nil, err
 	// }
 
+	// 👉 we're using binary encoding, which is more memory efficient.
 	res := make([][]field.Element, len(a))
 
 	for i := range res {
@@ -292,6 +303,9 @@ func (s *QueriesIterator) HasNext() bool {
 
 // GetNext return the next query for the next server
 func (s *QueriesIterator) GetNext() field.ElemSlice {
+
+	// 👉 this is where the magic happens, we compute batches on demand
+
 	var result field.ElemSlice
 	currentCol := s.currentCol
 
@@ -344,6 +358,9 @@ func (s *QueriesIterator) GetNext() field.ElemSlice {
 
 	return result
 }
+
+// 👉 first version of the iterator, which was less memory efficient because we
+// had to keep batches for all servers at once in memory.
 
 // func newQueryIterator(numCols, numServers, colSize, iy int, rnd io.Reader,
 // 	state *state) *QueryIterator {

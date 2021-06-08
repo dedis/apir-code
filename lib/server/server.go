@@ -164,24 +164,6 @@ func answerNew(q field.ElemSlice, db *database.DB, NGoRoutines int) []field.Elem
 
 }
 
-func answerNewNew(q field.ElemSliceGetter, db *database.DB, NGoRoutines int) []field.Element {
-	// Doing simplified scheme if block consists of a single bit
-	if db.BlockSize == cst.SingleBitBlockLength {
-		panic("not implemented")
-	}
-
-	// Vector db
-	if db.NumRows == 1 {
-		log.Println("vector db")
-
-		res := computeMessageAndTagNewNew(db.Range(0, -1), q.Range(0, -1), db.BlockSize)
-
-		return res
-	}
-
-	panic("not implemented")
-}
-
 // processing multiple rows by iterating over them
 func processRows(rows database.ElementRange, query []field.Element, numColumns, blockLen int, reply chan<- []field.Element) {
 	numElementsInRow := blockLen * numColumns
@@ -241,32 +223,6 @@ func computeMessageAndTag(elements database.ElementRange, q []field.Element, blo
 }
 
 func computeMessageAndTagNew(elements database.ElementRange, q field.ElemSlice, blockLen int) []field.Element {
-	var prodTag, prod field.Element
-	sumTag := field.Zero()
-	sum := field.ZeroVector(blockLen)
-	for j := 0; j < elements.Len()/blockLen; j++ {
-		for b := 0; b < blockLen; b++ {
-			e := elements.Get(j*blockLen + b)
-			if e.IsZero() {
-				// no need to multiply if the element value is zero
-				continue
-			}
-			// compute message
-			e = elements.Get(j*blockLen + b)
-			g := q.Get(j * (blockLen + 1))
-			prod.Mul(&e, &g)
-			sum[b].Add(&sum[b], &prod)
-			// compute block tag
-			e = elements.Get(j*blockLen + b)
-			f := q.Get(j*(blockLen+1) + 1 + b)
-			prodTag.Mul(&e, &f)
-			sumTag.Add(&sumTag, &prodTag)
-		}
-	}
-	return append(sum, sumTag)
-}
-
-func computeMessageAndTagNewNew(elements database.ElementRange, q field.ElemSliceGetter, blockLen int) []field.Element {
 	var prodTag, prod field.Element
 	sumTag := field.Zero()
 	sum := field.ZeroVector(blockLen)
