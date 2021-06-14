@@ -140,10 +140,10 @@ func (z *Element) Mul(x, y *Element) *Element {
 
 // Add z = x + y mod q
 func (z *Element) Add(x, y *Element) *Element {
-	//z.E = (x.E + y.E) % p
-	if z.E >= p {
-		z.E -= p
-	}
+	z.E = (x.E + y.E) % p
+	//if z.E >= p {
+	//z.E -= p
+	//}
 
 	return z
 }
