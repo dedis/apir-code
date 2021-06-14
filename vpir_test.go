@@ -22,7 +22,7 @@ const (
 	oneMB           = 1048576 * 8
 	oneKB           = 1024 * 8
 	oneB            = 8
-	testBlockLength = 16
+	testBlockLength = 64
 )
 
 func TestMultiBitVectorOneMbVPIR(t *testing.T) {
