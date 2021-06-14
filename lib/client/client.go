@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 
@@ -145,6 +146,8 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 			reconstructedTag.Add(&reconstructedTag, &prod)
 		}
 		if !tag.Equal(&reconstructedTag) {
+			fmt.Println(tag)
+			fmt.Println(reconstructedTag)
 			return nil, errors.New("REJECT")
 		}
 	}

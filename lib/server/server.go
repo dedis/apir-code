@@ -1,11 +1,12 @@
 package server
 
 import (
+	"math"
+
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"math"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -121,8 +122,10 @@ func processColumns(columns, query []field.Element, blockLen int, reply chan<- [
 // from the client query and computes a tag over each block
 func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Element {
 	var prodTag, prod field.Element
-	sumTag := field.Zero()
-	sum := field.ZeroVector(blockLen)
+	//sumTag := field.Zero()
+	//sum := field.ZeroVector(blockLen)
+	sum64 := make([]uint64, blockLen)
+	sumTag64 := uint64(0)
 	for j := 0; j < len(elements)/blockLen; j++ {
 		for b := 0; b < blockLen; b++ {
 			if elements[j*blockLen+b].IsZero() {
@@ -131,11 +134,20 @@ func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Ele
 			}
 			// compute message
 			prod.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)])
-			sum[b].Add(&sum[b], &prod)
+			//sum[b].Add(&sum[b], &prod)
+			sum64[b] += uint64(prod.E)
 			// compute block tag
 			prodTag.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)+1+b])
-			sumTag.Add(&sumTag, &prodTag)
+			//sumTag.Add(&sumTag, &prodTag)
+			sumTag64 += uint64(prodTag.E)
 		}
+	}
+	sumTag64 %= 2147483647
+	sumTag := field.Element{E: uint32(sumTag64)}
+	sum := field.ZeroVector(blockLen)
+	for i, s := range sum64 {
+		s %= 2147483647
+		sum[i].E = uint32(s)
 	}
 	return append(sum, sumTag)
 }

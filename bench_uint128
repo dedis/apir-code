@@ -1,0 +1,12 @@
+=== RUN   TestMultiBitVectorOneMbVPIR
+TotalCPU time MultiBitVectorOneMbVPIR: - 17833.01ms
+--- PASS: TestMultiBitVectorOneMbVPIR - (13.11s)
+=== RUN   TestMultiBitMatrixOneMbVPIR
+TotalCPU time MultiBitMatrixOneMbVPIR: - 3115.27ms
+--- PASS: TestMultiBitMatrixOneMbVPIR - (1.10s)
+=== RUN   TestDPFMultiBitVectorVPIR
+TotalCPU time DPFMultiBitVectorVPIR: - 21378.2ms
+--- PASS: TestDPFMultiBitVectorVPIR - (16.49s)
+=== RUN   TestDPFMultiBitMatrixVPIR
+TotalCPU time DPFMultiBitMatrixVPIR: - 3230.6ms
+--- PASS: TestDPFMultiBitMatrixVPIR - (1.17s)

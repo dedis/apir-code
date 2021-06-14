@@ -58,6 +58,7 @@ type saveInfo struct {
 	Chunks [][2]int
 }
 
+/*
 func (d *DB) SaveDBFileSingle(root string) error {
 	infoPath := filepath.Join(root, "info")
 
@@ -115,6 +116,7 @@ func (d *DB) SaveDBFileSingle(root string) error {
 
 	return nil
 }
+*/
 
 func (d *DB) SaveDB(path string, bucket string) error {
 	chunkSize := DefaultChunkSize
@@ -309,10 +311,24 @@ func LoadDB(path, bucket string) (*DB, error) {
 func (d *DB) GetEntry(i int) field.Element {
 	memIndex := i * 8 * 2
 
-	return field.Element{
-		binary.LittleEndian.Uint64(d.mmap[memIndex : memIndex+8]),
-		binary.LittleEndian.Uint64(d.mmap[memIndex+8 : memIndex+16]),
-	}
+	//return field.CreateElement(binary.LittleEndian.Uint64(d.mmap[memIndex:memIndex+8]),
+	e := binary.LittleEndian.Uint32(d.mmap[memIndex : memIndex+4])
+	return field.Element{E: e}
+
+	//return field.Element{
+	//binary.LittleEndian.Uint64(d.mmap[memIndex : memIndex+8]),
+	//binary.LittleEndian.Uint64(d.mmap[memIndex+8 : memIndex+16]),
+	//}
+	//e := uint128.New(
+	//binary.LittleEndian.Uint64(d.mmap[memIndex:memIndex+8]),
+	//binary.LittleEndian.Uint64(d.mmap[memIndex+8:memIndex+16]),
+	//)
+	//return field.New(e)
+	//bytes := d.mmap[memIndex : memIndex+16]
+	//array := [16]byte{}
+	//copy(array[:], bytes)
+	//return field.Element(array)
+	//return field.New(bytes)
 }
 
 func (d *DB) Range(begin, end int) []field.Element {
@@ -408,12 +424,12 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 	}
 
 	for i := 0; i < n; i++ {
-		var buf [16]byte
-		copy(buf[:], bytes[i*field.Bytes:(1+i)*field.Bytes])
-		element := &field.Element{}
-		element.SetFixedLengthBytes(buf)
+		buf := make([]byte, 8)
+		copy(buf, bytes[i*field.Bytes:(1+i)*field.Bytes])
+		element := field.Element{}
+		element.SetBytes(buf)
 
-		db.SetEntry(i, *element)
+		db.SetEntry(i, element)
 	}
 
 	return db, nil
