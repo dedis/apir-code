@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 var p = uint32(2147483647) // 2^31 - 1
@@ -181,7 +183,8 @@ func (z *Element) SetBytes(in []byte) *Element {
 		return z
 	}
 
-	z.E = binary.LittleEndian.Uint32(in[:Bytes])
+	h := blake2b.Sum256(in)
+	z.E = binary.LittleEndian.Uint32(h[:Bytes])
 
 	if z.E >= p {
 		z.E -= p
@@ -192,6 +195,11 @@ func (z *Element) SetBytes(in []byte) *Element {
 
 // TODO: change this, here to 16 for compatibility reasons
 func (z *Element) SetFixedLengthBytes(e [16]byte) *Element {
+	z.SetBytes(e[:])
+	return z
+}
+
+func (z *Element) SetFixedLengthBytesFour(e [4]byte) *Element {
 	z.SetBytes(e[:])
 	return z
 }
