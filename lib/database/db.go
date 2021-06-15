@@ -311,7 +311,7 @@ func LoadDB(path, bucket string) (*DB, error) {
 func (d *DB) GetEntry(i int) field.Element {
 	memIndex := i * 8 * 2
 
-	e := binary.LittleEndian.Uint32(d.mmap[memIndex : memIndex+field.Bytes])
+	e := binary.BigEndian.Uint32(d.mmap[memIndex : memIndex+field.Bytes])
 	return field.Element{E: e}
 }
 

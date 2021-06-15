@@ -50,7 +50,7 @@ func (z *Element) SetRandom(rnd io.Reader) (*Element, error) {
 		return nil, err
 	}
 
-	z.E = binary.LittleEndian.Uint32(b)
+	z.E = binary.BigEndian.Uint32(b)
 
 	// mod if necessary
 	if z.E >= p {
@@ -112,7 +112,7 @@ func VectorToBytes(in interface{}) []byte {
 		out := make([]byte, len(vec)*elemSize)
 		for i, e := range vec {
 			b := make([]byte, Bytes)
-			binary.LittleEndian.PutUint32(b, e.E)
+			binary.BigEndian.PutUint32(b, e.E)
 			copy(out[i*elemSize:(i+1)*elemSize], b[1:])
 		}
 		return out
@@ -174,16 +174,27 @@ func (z *Element) String() string {
 // sets z to that value (in Montgomery form), and returns z.
 func (z *Element) SetBytes(in []byte) *Element {
 	if len(in) == Bytes {
-		z.E = binary.LittleEndian.Uint32(in)
+		z.E = binary.BigEndian.Uint32(in)
 		if z.E >= p {
 			z.E -= p
 		}
 
 		return z
 	}
+	if len(in) == Bytes-1 {
+		//in = append(in, []byte{0}...)
+		in = append([]byte{0}, in...)
+		z.E = binary.BigEndian.Uint32(in)
+		if z.E >= p {
+			z.E -= p
+		}
+
+		return z
+	}
+
 	//h := blake2b.Sum256(in)
-	//z.E = binary.LittleEndian.Uint32(h[:Bytes])
-	z.E = binary.LittleEndian.Uint32(in[:Bytes])
+	//z.E = binary.BigEndian.Uint32(h[:Bytes])
+	z.E = binary.BigEndian.Uint32(in[:Bytes])
 
 	if z.E >= p {
 		z.E -= p
