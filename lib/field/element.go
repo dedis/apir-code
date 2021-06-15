@@ -161,9 +161,7 @@ func (z *Element) Sub(x, y *Element) *Element {
 // Neg z = q - x
 func (z *Element) Neg(x *Element) *Element {
 	z.E = p - x.E
-	if z.E < 0 || z.E >= p {
-		fmt.Println("problem")
-	}
+
 	return z
 }
 
