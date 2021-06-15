@@ -4,8 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-
-	"golang.org/x/crypto/blake2b"
+	"math/bits"
 )
 
 var p = uint32(2147483647) // 2^31 - 1
@@ -134,7 +133,6 @@ func Zero() Element {
 
 // Mul z = x * y mod q
 func (z *Element) Mul(x, y *Element) *Element {
-	//(ab >> 31) + ab & (mask 31 bits) mod P
 	zz := (uint64(x.E) * uint64(y.E)) % uint64(p)
 	z.E = uint32(zz)
 	return z
@@ -152,17 +150,20 @@ func (z *Element) Add(x, y *Element) *Element {
 
 // Sub  z = x - y mod q
 func (z *Element) Sub(x, y *Element) *Element {
-	z.E = x.E - y.E
-	if z.E < 0 {
-		z.E += p
+	diff, borrowOut := bits.Sub32(x.E, y.E, 0)
+	if borrowOut == 1 {
+		diff += p
 	}
-
+	z.E = diff
 	return z
 }
 
 // Neg z = q - x
 func (z *Element) Neg(x *Element) *Element {
 	z.E = p - x.E
+	if z.E < 0 || z.E >= p {
+		fmt.Println("problem")
+	}
 	return z
 }
 
@@ -182,9 +183,9 @@ func (z *Element) SetBytes(in []byte) *Element {
 
 		return z
 	}
-
-	h := blake2b.Sum256(in)
-	z.E = binary.LittleEndian.Uint32(h[:Bytes])
+	//h := blake2b.Sum256(in)
+	//z.E = binary.LittleEndian.Uint32(h[:Bytes])
+	z.E = binary.LittleEndian.Uint32(in[:Bytes])
 
 	if z.E >= p {
 		z.E -= p
