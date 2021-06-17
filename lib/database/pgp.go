@@ -47,8 +47,13 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 
 	// embed data into field elements
 	for k, v := range ht {
+		// Pad single bytes with single bit
+		vBits := utils.BitsPadded(v)
+		v := utils.PackBits(vBits)
+
 		// Pad the block to be a multiple of elementLength
 		v = PadBlock(v, elementLength)
+
 		elements := make([]field.Element, len(v)/elementLength)
 
 		// embed all the bytes
