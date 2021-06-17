@@ -9,7 +9,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-var p = uint32(2147483647) // 2^31 - 1
+const p = uint32(2147483647) // 2^31 - 1
 
 type Element struct {
 	E uint32
