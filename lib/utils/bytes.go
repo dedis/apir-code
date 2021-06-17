@@ -5,6 +5,8 @@ import (
 	"math/bits"
 )
 
+// TODO: fusionate functions
+
 func BytesTobits(bs []byte) []byte {
 	r := make([]byte, len(bs)*8)
 	for i, b := range bs {

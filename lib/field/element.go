@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"math/bits"
+
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 var p = uint32(2147483647) // 2^31 - 1
@@ -116,6 +118,43 @@ func VectorToBytes(in interface{}) []byte {
 			copy(out[i*elemSize:(i+1)*elemSize], b[1:])
 		}
 		return out
+	default:
+		return nil
+	}
+}
+
+// VectorToBytes extracts bytes from a vector of field elements.  Assume that
+// only 15 bytes worth of data are embedded in each field element and therefore
+// strips the initial zero from each byte.
+func VectorToBytesAll(in interface{}) []byte {
+	switch vec := in.(type) {
+	case []Element:
+		elemSize := Bytes
+		out := make([]byte, len(vec)*elemSize)
+		for i, e := range vec {
+			b := make([]byte, Bytes)
+			binary.BigEndian.PutUint32(b, e.E)
+			copy(out[i*elemSize:(i+1)*elemSize], b[:])
+		}
+		return out
+	default:
+		return nil
+	}
+}
+
+func VectorBitsPaddedToBytes(in interface{}) []byte {
+	switch vec := in.(type) {
+	case []Element:
+		elemSize := Bytes
+		out := make([]byte, len(vec)*elemSize)
+		for i, e := range vec {
+			b := make([]byte, Bytes)
+			binary.BigEndian.PutUint32(b, e.E)
+			copy(out[i*elemSize:(i+1)*elemSize], b[:])
+		}
+		fmt.Println(out)
+		bits := utils.BytesTobits(out)
+		return utils.BytesUnpadded(bits)
 	default:
 		return nil
 	}
