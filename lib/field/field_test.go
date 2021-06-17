@@ -6,6 +6,30 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
+func Benchmark256Bits(b *testing.B) {
+	rnd := utils.RandomPRG()
+
+	// 2 elements of 32 bits each
+	elements := make([]*Element, 2)
+	var err error
+	for i := range elements {
+		elements[i], err = new(Element).SetRandom(rnd)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	r := new(Element).SetOne()
+
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		for _, e := range elements {
+			r.Mul(r, e)
+		}
+	}
+}
+
 func BenchmarkSetFixedBytes(b *testing.B) {
 	rng := utils.RandomPRG()
 	var buf [16]byte
