@@ -30,6 +30,32 @@ func Benchmark256Bits(b *testing.B) {
 	}
 }
 
+func BenchmarkInnerProduct(b *testing.B) {
+	rnd1 := utils.RandomPRG()
+	rnd2 := utils.RandomPRG()
+
+	length := 10000
+
+	aa, err := RandomVectorPointers(rnd1, length)
+	if err != nil {
+		panic(err)
+	}
+	bb, err := RandomVectorPointers(rnd2, length)
+	if err != nil {
+		panic(err)
+	}
+	r := new(Element).SetZero()
+
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		for i, a := range aa {
+			r.Add(r, a.Mul(a, bb[i]))
+		}
+	}
+
+}
+
 func BenchmarkSetFixedBytes(b *testing.B) {
 	rng := utils.RandomPRG()
 	var buf [16]byte
