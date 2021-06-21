@@ -88,7 +88,7 @@ func (d *DB) setEntry(i int, el field.Element) {
 }
 
 func (d *DB) SizeGiB() float64 {
-	return float64(len(d.mmap) / (1024 * 1024 * 1024))
+	return float64(len(d.mmap)) / (1024 * 1024 * 1024)
 }
 
 type saveInfo struct {
