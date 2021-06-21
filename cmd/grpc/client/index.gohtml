@@ -25,8 +25,8 @@
             Private-information-retreival
         </p>
 
-        <form method="POST" action="javascript:void(0);" onSubmit="retreive()">
-            <input placeholder="Enter email..." id="email-input" type="text" name="email" /><button>Retreive</button>
+        <form method="POST" action="javascript:void(0);" onSubmit="retrieve()">
+            <input placeholder="Enter email..." id="email-input" type="text" name="email" /><button>Retrieve</button>
         </form>
         <div id="elapsed"></div>
         <div id="result"></div>
@@ -39,7 +39,7 @@
     </style>
     
     <script>
-        function retreive() {
+        function retrieve() {
             const email = document.getElementById("email-input").value
             const result = document.getElementById("result")
             const elapsed = document.getElementById("elapsed")

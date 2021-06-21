@@ -297,15 +297,15 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 // 	return nil
 // }
 
-// homework defines a work to be done by a worker
-type homework struct {
+// job defines a work to be done by a worker
+type job struct {
 	i int
 	q *proto.QueryRequest
 }
 
 // newWorkers creates a new worker pool. Output is closed once all the workers
 // are stopped.
-func newWorkers(inputs <-chan homework, outputs chan<- []field.Element,
+func newWorkers(inputs <-chan job, outputs chan<- []field.Element,
 	blockSize int, s *server.IT) *workers {
 
 	return &workers{
@@ -325,7 +325,7 @@ func newWorkers(inputs <-chan homework, outputs chan<- []field.Element,
 
 // workers defines a pool of worker that processes inputs and produces outputs.
 type workers struct {
-	inputs  <-chan homework
+	inputs  <-chan job
 	outputs chan<- []field.Element
 
 	loadPerWorker int
@@ -372,14 +372,14 @@ func (w workers) process() []field.Element {
 	res := []field.Element{}
 
 	for i := 0; i < w.loadPerWorker; i++ {
-		var homework homework
+		var job job
 
 		select {
-		case homework = <-w.inputs:
+		case job = <-w.inputs:
 		case <-w.stop:
 			// be sure there isn't anything left in the input
 			select {
-			case homework = <-w.inputs:
+			case job = <-w.inputs:
 			default:
 				return res
 			}
@@ -389,24 +389,24 @@ func (w workers) process() []field.Element {
 			res = make([]field.Element, w.blockSize+1)
 		}
 
-		w.processHomework(homework, res)
+		w.processJob(job, res)
 	}
 
 	return res
 }
 
-// processHomework processes a homework and accumulates the result in res
-func (w workers) processHomework(h homework, res []field.Element) {
-	batchSize := len(h.q.Query) / ((w.blockSize + 1) * 16)
+// processJob processes a job and accumulates the result in res
+func (w workers) processJob(j job, res []field.Element) {
+	batchSize := len(j.q.Query) / ((w.blockSize + 1) * 16)
 
 	for i := 0; i < batchSize; i++ {
 		querySize := (w.blockSize + 1) * 8 * 2
-		elemData := h.q.Query[i*querySize : (i+1)*querySize]
+		elemData := j.q.Query[i*querySize : (i+1)*querySize]
 
 		elements := field.NewElemSliceFromBytes(elemData)
 
-		begin := (h.i + i) * w.blockSize
-		end := (h.i + i + 1) * w.blockSize
+		begin := (j.i + i) * w.blockSize
+		end := (j.i + i + 1) * w.blockSize
 
 		r := w.server.ComputeMessageAndTagNew(begin, end, elements, w.blockSize)
 
@@ -431,7 +431,7 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 
 	numWorkers := 10
 
-	inQueue := make(chan homework, 50)
+	inQueue := make(chan job, 50)
 	outQueue := make(chan []field.Element, 50)
 
 	info := s.Server.DBInfo()
@@ -467,13 +467,13 @@ func (s *vpirServer) QueryStream(srv proto.VPIR_QueryStreamServer) error {
 		}
 
 		select {
-		case inQueue <- homework{
+		case inQueue <- job{
 			i: i,
 			q: req,
 		}:
 		default:
-			log.Println("!!! queue full")
-			inQueue <- homework{
+			log.Println("!!! queue full; blocking until there's room")
+			inQueue <- job{
 				i: i,
 				q: req,
 			}
