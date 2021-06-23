@@ -9,6 +9,8 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 )
 
+const p = uint64(2147483647) // 2^31 - 1
+
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
 // and DPF-based schemes
 type Server interface {
@@ -142,11 +144,11 @@ func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Ele
 			sumTag64 += uint64(prodTag.E)
 		}
 	}
-	sumTag64 %= 2147483647
+	sumTag64 %= p
 	sumTag := field.Element{E: uint32(sumTag64)}
 	sum := field.ZeroVector(blockLen)
 	for i, s := range sum64 {
-		s %= 2147483647
+		s %= p
 		sum[i].E = uint32(s)
 	}
 	return append(sum, sumTag)
