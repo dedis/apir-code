@@ -45,12 +45,6 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 		return nil, xerrors.Errorf("failed to create zero db: %v", err)
 	}
 
-	//// map into blocks
-	//blocks := make([][]byte, maxBucket+1)
-	//for k, v := range ht {
-	//	blocks[k] = PadBlock(v, blockLen)
-	//}
-
 	// embed data into field elements
 	blocks := make([][]field.Element, numRows*numColumns)
 	for k, v := range ht {
@@ -63,10 +57,10 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 			e := new(field.Element).SetBytes(v[j : j+elementLength])
 			elements[j/elementLength] = *e
 		}
-
 		blocks[k] = make([]field.Element, len(elements))
 		copy(blocks[k], elements)
 	}
+
 	db.BlockLengths = make([]int, numRows*numColumns)
 	for k, block := range blocks {
 		db.AppendBlock(block)
