@@ -65,30 +65,38 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 	replies := make([]chan []field.Element, NGoRoutines)
 	// Vector db
 	if db.NumRows == 1 {
-		columnsPerRoutine := db.NumColumns / NGoRoutines
-		for i := 0; i < NGoRoutines; i++ {
-			begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
-			replyChan := make(chan []field.Element, db.BlockSize+1)
-			replies[i] = replyChan
-			go processColumns(db.Range(begin*db.BlockSize, end*db.BlockSize), q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
-		}
-		m := make([]field.Element, db.BlockSize+1)
-		for i, reply := range replies {
-			chunk := <-reply
-			for i, elem := range chunk {
-				m[i].Add(&m[i], &elem)
-			}
-			close(replies[i])
-		}
-		return m
+		//columnsPerRoutine := db.NumColumns / NGoRoutines
+		//for i := 0; i < NGoRoutines; i++ {
+		//	begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
+		//	replyChan := make(chan []field.Element, db.BlockSize+1)
+		//	replies[i] = replyChan
+		//	go processColumns(db.Range(begin*db.BlockSize, end*db.BlockSize), q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
+		//}
+		//m := make([]field.Element, db.BlockSize+1)
+		//for i, reply := range replies {
+		//	chunk := <-reply
+		//	for i, elem := range chunk {
+		//		m[i].Add(&m[i], &elem)
+		//	}
+		//	close(replies[i])
+		//}
+		//return m
+		return nil
 	} else {
 		//	Matrix db
 		rowsPerRoutine := db.NumRows / NGoRoutines
+		prevElemPos, nextElemPos := 0, 0
 		for i := 0; i < NGoRoutines; i++ {
 			begin, end = computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
+			for rowN := begin; rowN < end; rowN++ {
+				for colN := 0; colN < db.NumColumns; colN++ {
+					nextElemPos += db.BlockLengths[rowN*db.NumColumns+colN]
+				}
+			}
 			replyChan := make(chan []field.Element, (end-begin)*(db.BlockSize+1))
 			replies[i] = replyChan
-			go processRows(db.Range(begin*db.NumColumns*db.BlockSize, end*db.NumColumns*db.BlockSize), q, db.NumColumns, db.BlockSize, replyChan)
+			go processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
+			prevElemPos = nextElemPos
 		}
 		m := make([]field.Element, 0, db.NumRows*(db.BlockSize+1))
 		for i, reply := range replies {
@@ -101,40 +109,45 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 }
 
 // processing multiple rows by iterating over them
-func processRows(rows, query []field.Element, numColumns, blockLen int, reply chan<- []field.Element) {
-	numElementsInRow := blockLen * numColumns
-	numRowsToProcess := len(rows) / numElementsInRow
+func processRows(rows []field.Element, blockLens []int, query []field.Element, numRowsToProcess, numColumns, blockLen int, reply chan<- []field.Element) {
+	var prevPos, nextPos int
 	sums := make([]field.Element, 0, numRowsToProcess*(blockLen+1))
 	for i := 0; i < numRowsToProcess; i++ {
-		res := computeMessageAndTag(rows[i*numElementsInRow:(i+1)*numElementsInRow], query, blockLen)
+		for j := 0; j < numColumns; j++ {
+			nextPos += blockLens[i*numColumns+j]
+		}
+		res := computeMessageAndTag(rows[prevPos:nextPos], blockLens[i*numColumns:(i+1)*numColumns], query, blockLen)
 		sums = append(sums, res...)
+		prevPos = nextPos
 	}
 	reply <- sums
 }
 
-// processing a chunk of a database row
-func processColumns(columns, query []field.Element, blockLen int, reply chan<- []field.Element) {
-	reply <- computeMessageAndTag(columns, query, blockLen)
-}
+//// processing a chunk of a database row
+//func processColumns(columns, query []field.Element, blockLen int, reply chan<- []field.Element) {
+//	reply <- computeMessageAndTag(columns, query, blockLen)
+//}
 
 // computeMessageAndTag multiplies db entries with the elements
 // from the client query and computes a tag over each block
-func computeMessageAndTag(elements, q []field.Element, blockLen int) []field.Element {
+func computeMessageAndTag(elements []field.Element, blockLens []int, q []field.Element, blockLen int) []field.Element {
 	var prodTag, prod field.Element
+	var pos int
 	sumTag := field.Zero()
 	sum := field.ZeroVector(blockLen)
-	for j := 0; j < len(elements)/blockLen; j++ {
-		for b := 0; b < blockLen; b++ {
-			if elements[j*blockLen+b].IsZero() {
+	for j := 0; j < len(blockLens); j++ {
+		for b := 0; b < blockLens[j]; b++ {
+			if elements[pos].IsZero() {
 				// no need to multiply if the element value is zero
 				continue
 			}
 			// compute message
-			prod.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)])
+			prod.Mul(&elements[pos], &q[j*(blockLen+1)])
 			sum[b].Add(&sum[b], &prod)
 			// compute block tag
-			prodTag.Mul(&elements[j*blockLen+b], &q[j*(blockLen+1)+1+b])
+			prodTag.Mul(&elements[pos], &q[j*(blockLen+1)+1+b])
 			sumTag.Add(&sumTag, &prodTag)
+			pos += 1
 		}
 	}
 	return append(sum, sumTag)

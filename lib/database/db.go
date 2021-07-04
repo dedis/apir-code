@@ -38,6 +38,19 @@ func NewDB(info Info) (*DB, error) {
 	}, nil
 }
 
+func NewEmptyDB(info Info) (*DB, error) {
+	n := info.BlockSize * info.NumColumns * info.NumRows
+	if info.BlockSize == constants.SingleBitBlockLength {
+		n = info.NumColumns * info.NumRows
+	}
+
+	return &DB{
+		Info:     info,
+		inMemory: make([]field.Element, 0, n),
+	}, nil
+}
+
+
 type DB struct {
 	Info
 	inMemory []field.Element
@@ -46,6 +59,10 @@ type DB struct {
 
 func (d *DB) SetEntry(i int, el field.Element) {
 	d.inMemory[i] = el
+}
+
+func (d *DB) AppendBlock(bl []field.Element) {
+	d.inMemory = append(d.inMemory, bl...)
 }
 
 func (d *DB) SizeGiB() float64 {
@@ -323,19 +340,21 @@ type Info struct {
 	NumRows    int
 	NumColumns int
 	BlockSize  int
+	// The true length of data in each block,
+	// defined in the number of elements
+	BlockLengths []int
 
 	// PIR type: classical, merkle, signature
 	PIRType string
 
 	*Auth
 	*Merkle
-	*DataEmbedding
 
 	//Lattice parameters for the single-server data retrieval
 	LatParams *bfv.Parameters
 }
 
-// Authentication information for the single-server setting
+// Auth is authentication information for the single-server setting
 type Auth struct {
 	// The global digest that is a hash of all the row digests. Public.
 	Digest []byte
@@ -349,13 +368,7 @@ type Auth struct {
 	ScalarSize  int
 }
 
-// Data embedding info
-type DataEmbedding struct {
-	IDLength  int
-	KeyLength int
-}
-
-// The info needed for the Merkle-tree based approach
+// Merkle is the info needed for the Merkle-tree based approach
 type Merkle struct {
 	Root     []byte
 	ProofLen int
@@ -375,6 +388,20 @@ func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
 	n := numRows * numColumns * blockSize
 	for i := 0; i < n; i++ {
 		db.SetEntry(i, field.Zero())
+	}
+
+	return db, nil
+}
+
+func InitMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
+	info := Info{NumColumns: numColumns,
+		NumRows:   numRows,
+		BlockSize: blockSize,
+	}
+
+	db, err := NewEmptyDB(info)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to create db: %v", err)
 	}
 
 	return db, nil

@@ -234,8 +234,8 @@ func makeDPFServers(db *database.DB) []server.Server {
 }
 
 func makeITServers(db *database.DB) []server.Server {
-	s0 := server.NewIT(db)
-	s1 := server.NewIT(db)
+	s0 := server.NewIT(db, 1)
+	s1 := server.NewIT(db, 1)
 	return []server.Server{s0, s1}
 }
 
