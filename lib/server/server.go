@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
@@ -61,7 +62,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 	// Otherwise, if the db is a matrix, we split by rows and give a chunk of rows to each worker.
 	// The goal is to have a fixed number of workers and start them only once.
 	var begin, end int
-	prevElemPos, nextElemPos := 0, 0
+	var prevElemPos, nextElemPos int
 	// a channel to pass results from the routines back
 	replies := make([]chan []field.Element, NGoRoutines)
 	// Vector db
@@ -74,7 +75,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 			}
 			replyChan := make(chan []field.Element, db.BlockSize+1)
 			replies[i] = replyChan
-			go processColumns(db.Range(begin*db.BlockSize, end*db.BlockSize), db.BlockLengths[begin:end], q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
+			go processColumns(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin:end], q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
 		}
 		m := make([]field.Element, db.BlockSize+1)
@@ -98,8 +99,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 			}
 			replyChan := make(chan []field.Element, (end-begin)*(db.BlockSize+1))
 			replies[i] = replyChan
-			//go processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
-			processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
+			go processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
 		}
 		m := make([]field.Element, 0, db.NumRows*(db.BlockSize+1))
