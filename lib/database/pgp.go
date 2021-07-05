@@ -57,8 +57,7 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 			e := new(field.Element).SetBytes(v[j : j+elementLength])
 			elements[j/elementLength] = *e
 		}
-		blocks[k] = make([]field.Element, len(elements))
-		copy(blocks[k], elements)
+		blocks[k] = elements
 	}
 
 	db.BlockLengths = make([]int, numRows*numColumns)
