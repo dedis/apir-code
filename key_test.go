@@ -195,7 +195,6 @@ func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Serve
 		require.NoError(t, err)
 		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
 		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
-		fmt.Println(pgp.PrimaryEmail(realKeys[j]))
 	}
 	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
 }
@@ -219,7 +218,6 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	// reconstruct block
 	result, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
-	fmt.Println(result)
 
 	// return result bytes
 	switch result.(type) {
