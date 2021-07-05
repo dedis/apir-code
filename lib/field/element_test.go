@@ -45,14 +45,17 @@ func BenchmarkInnerProduct(b *testing.B) {
 	if err != nil {
 		panic(err)
 	}
-	r := new(Element).SetZero()
+	r64 := uint64(0)
 
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		for i, a := range aa {
-			r.Add(r, a.Mul(a, bb[i]))
+			prod := a.Mul(a, bb[i])
+			r64 += uint64(prod.E)
 		}
+
+		r64 %= uint64(p)
 	}
 
 }
