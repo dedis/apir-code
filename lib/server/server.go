@@ -136,9 +136,9 @@ func processColumns(columns []field.Element, blockLens []int, query []field.Elem
 // from the client query and computes a tag over each block
 func computeMessageAndTag(elements []field.Element, blockLens []int, q []field.Element, blockLen int) []field.Element {
 	var prodTag, prod field.Element
-	var pos int
 	sumTag := field.Zero()
 	sum := field.ZeroVector(blockLen)
+	pos := 0
 	for j := 0; j < len(blockLens); j++ {
 		for b := 0; b < blockLens[j]; b++ {
 			if elements[pos].IsZero() {
