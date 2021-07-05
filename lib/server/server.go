@@ -61,31 +61,34 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 	// Otherwise, if the db is a matrix, we split by rows and give a chunk of rows to each worker.
 	// The goal is to have a fixed number of workers and start them only once.
 	var begin, end int
+	prevElemPos, nextElemPos := 0, 0
 	// a channel to pass results from the routines back
 	replies := make([]chan []field.Element, NGoRoutines)
 	// Vector db
 	if db.NumRows == 1 {
-		//columnsPerRoutine := db.NumColumns / NGoRoutines
-		//for i := 0; i < NGoRoutines; i++ {
-		//	begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
-		//	replyChan := make(chan []field.Element, db.BlockSize+1)
-		//	replies[i] = replyChan
-		//	go processColumns(db.Range(begin*db.BlockSize, end*db.BlockSize), q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
-		//}
-		//m := make([]field.Element, db.BlockSize+1)
-		//for i, reply := range replies {
-		//	chunk := <-reply
-		//	for i, elem := range chunk {
-		//		m[i].Add(&m[i], &elem)
-		//	}
-		//	close(replies[i])
-		//}
-		//return m
-		return nil
+		columnsPerRoutine := db.NumColumns / NGoRoutines
+		for i := 0; i < NGoRoutines; i++ {
+			begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
+			for colN := begin; colN < end; colN++ {
+				nextElemPos += db.BlockLengths[colN]
+			}
+			replyChan := make(chan []field.Element, db.BlockSize+1)
+			replies[i] = replyChan
+			go processColumns(db.Range(begin*db.BlockSize, end*db.BlockSize), db.BlockLengths[begin:end], q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
+			prevElemPos = nextElemPos
+		}
+		m := make([]field.Element, db.BlockSize+1)
+		for i, reply := range replies {
+			chunk := <-reply
+			for i, elem := range chunk {
+				m[i].Add(&m[i], &elem)
+			}
+			close(replies[i])
+		}
+		return m
 	} else {
 		//	Matrix db
 		rowsPerRoutine := db.NumRows / NGoRoutines
-		prevElemPos, nextElemPos := 0, 0
 		for i := 0; i < NGoRoutines; i++ {
 			begin, end = computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
 			for rowN := begin; rowN < end; rowN++ {
@@ -95,7 +98,8 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 			}
 			replyChan := make(chan []field.Element, (end-begin)*(db.BlockSize+1))
 			replies[i] = replyChan
-			go processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
+			//go processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
+			processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
 		}
 		m := make([]field.Element, 0, db.NumRows*(db.BlockSize+1))
@@ -123,10 +127,10 @@ func processRows(rows []field.Element, blockLens []int, query []field.Element, n
 	reply <- sums
 }
 
-//// processing a chunk of a database row
-//func processColumns(columns, query []field.Element, blockLen int, reply chan<- []field.Element) {
-//	reply <- computeMessageAndTag(columns, query, blockLen)
-//}
+// processing a chunk of a database row
+func processColumns(columns []field.Element, blockLens []int, query []field.Element, blockLen int, reply chan<- []field.Element) {
+	reply <- computeMessageAndTag(columns, blockLens, query, blockLen)
+}
 
 // computeMessageAndTag multiplies db entries with the elements
 // from the client query and computes a tag over each block
