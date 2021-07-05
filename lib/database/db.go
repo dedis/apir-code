@@ -50,7 +50,6 @@ func NewEmptyDB(info Info) (*DB, error) {
 	}, nil
 }
 
-
 type DB struct {
 	Info
 	inMemory []field.Element
