@@ -195,6 +195,7 @@ func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Serve
 		require.NoError(t, err)
 		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
 		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
+		fmt.Println(pgp.PrimaryEmail(realKeys[j]))
 	}
 	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
 }
@@ -202,6 +203,7 @@ func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Serve
 func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
 	// compute hash key for id
 	hashKey := database.HashToIndex(id, dbLenBlocks)
+	fmt.Println(hashKey)
 
 	// query given hash key
 	queries, err := c.QueryBytes(hashKey, len(ss))
@@ -217,6 +219,7 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	// reconstruct block
 	result, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
+	fmt.Println(result)
 
 	// return result bytes
 	switch result.(type) {
@@ -228,8 +231,8 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 }
 
 func makeDPFServers(db *database.DB) []server.Server {
-	s0 := server.NewDPF(db)
-	s1 := server.NewDPF(db)
+	s0 := server.NewDPF(db, 1)
+	s1 := server.NewDPF(db, 1)
 	return []server.Server{s0, s1}
 }
 

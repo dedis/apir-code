@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
