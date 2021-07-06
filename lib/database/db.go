@@ -39,14 +39,14 @@ func NewDB(info Info) (*DB, error) {
 }
 
 func NewEmptyDB(info Info) (*DB, error) {
-	n := info.BlockSize * info.NumColumns * info.NumRows
-	if info.BlockSize == constants.SingleBitBlockLength {
-		n = info.NumColumns * info.NumRows
-	}
+	//n := info.BlockSize * info.NumColumns * info.NumRows
+	//if info.BlockSize == constants.SingleBitBlockLength {
+	//n = info.NumColumns * info.NumRows
+	//}
 
 	return &DB{
 		Info:     info,
-		inMemory: make([]field.Element, 0, n),
+		inMemory: make([]field.Element, 0),
 	}, nil
 }
 
