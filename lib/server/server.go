@@ -1,11 +1,12 @@
 package server
 
 import (
+	"math"
+
 	"github.com/lukechampine/fastxor"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"math"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -60,7 +61,6 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 	// If numRows == 1, the db is a vector so we split it by giving columns to workers.
 	// Otherwise, if the db is a matrix, we split by rows and give a chunk of rows to each worker.
 	// The goal is to have a fixed number of workers and start them only once.
-	var begin, end int
 	var prevElemPos, nextElemPos int
 	// a channel to pass results from the routines back
 	replies := make([]chan []field.Element, NGoRoutines)
@@ -68,7 +68,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 	if db.NumRows == 1 {
 		columnsPerRoutine := db.NumColumns / NGoRoutines
 		for i := 0; i < NGoRoutines; i++ {
-			begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
+			begin, end := computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
 			for colN := begin; colN < end; colN++ {
 				nextElemPos += db.BlockLengths[colN]
 			}
@@ -90,7 +90,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 		//	Matrix db
 		rowsPerRoutine := db.NumRows / NGoRoutines
 		for i := 0; i < NGoRoutines; i++ {
-			begin, end = computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
+			begin, end := computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
 			for rowN := begin; rowN < end; rowN++ {
 				for colN := 0; colN < db.NumColumns; colN++ {
 					nextElemPos += db.BlockLengths[rowN*db.NumColumns+colN]
@@ -135,9 +135,9 @@ func processColumns(columns []field.Element, blockLens []int, query []field.Elem
 // from the client query and computes a tag over each block
 func computeMessageAndTag(elements []field.Element, blockLens []int, q []field.Element, blockLen int) []field.Element {
 	var prodTag, prod field.Element
-	var pos int
 	sumTag := field.Zero()
 	sum := field.ZeroVector(blockLen)
+	pos := 0
 	for j := 0; j < len(blockLens); j++ {
 		for b := 0; b < blockLens[j]; b++ {
 			if elements[pos].IsZero() {
