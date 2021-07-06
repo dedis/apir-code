@@ -30,6 +30,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 		}
 		columnsPerRoutine := db.NumColumns / NGoRoutines
 		replies := make([]chan field.Element, NGoRoutines)
+		// default value is zero
 		m := make([]field.Element, db.NumRows)
 		var begin, end int
 		for i := 0; i < db.NumRows; i++ {
@@ -44,7 +45,6 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 				go processSingleBitColumns(begin, end, db, q, replyChan)
 			}
 
-			m[i].SetZero()
 			for j, reply := range replies {
 				element := <-reply
 				m[i].Add(&m[i], &element)
