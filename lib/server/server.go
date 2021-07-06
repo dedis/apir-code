@@ -142,6 +142,7 @@ func computeMessageAndTag(elements []field.Element, blockLens []int, q []field.E
 		for b := 0; b < blockLens[j]; b++ {
 			if elements[pos].IsZero() {
 				// no need to multiply if the element value is zero
+				pos += 1
 				continue
 			}
 			// compute message
