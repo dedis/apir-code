@@ -39,14 +39,9 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	maxBytes := utils.MaxBytesLength(ht) + 1
 	blockLen := int(math.Ceil(float64(maxBytes) / float64(elementLength)))
 
-	// create all zeros db
-	db, err := InitMultiBitDB(numRows, numColumns, blockLen)
-	if err != nil {
-		return nil, xerrors.Errorf("failed to create zero db: %v", err)
-	}
-
 	// embed data into field elements
 	blocks := make([][]field.Element, numRows*numColumns)
+	totalLength := 0
 	for k, v := range ht {
 		// Pad the block to be a multiple of elementLength
 		v = PadBlock(v, elementLength)
@@ -58,9 +53,15 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 			elements[j/elementLength] = *e
 		}
 		blocks[k] = elements
+		totalLength += len(elements)
 	}
 
-	db.BlockLengths = make([]int, numRows*numColumns)
+	// create all zeros db
+	db, err := InitMultiBitDBWithCapacity(numRows, numColumns, blockLen, totalLength)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to create zero db: %v", err)
+	}
+
 	for k, block := range blocks {
 		db.AppendBlock(block)
 		db.BlockLengths[k] = len(block)

@@ -38,16 +38,20 @@ func NewDB(info Info) (*DB, error) {
 	}, nil
 }
 
-func NewEmptyDB(info Info) (*DB, error) {
-	//n := info.BlockSize * info.NumColumns * info.NumRows
-	//if info.BlockSize == constants.SingleBitBlockLength {
-	//n = info.NumColumns * info.NumRows
-	//}
-
+func NewEmptyDBWithCapacity(info Info, cap int) (*DB, error) {
 	return &DB{
 		Info:     info,
-		inMemory: make([]field.Element, 0),
+		inMemory: make([]field.Element, 0, cap),
 	}, nil
+}
+
+func NewEmptyDB(info Info) (*DB, error) {
+	n := info.BlockSize * info.NumColumns * info.NumRows
+	if info.BlockSize == constants.SingleBitBlockLength {
+		n = info.NumColumns * info.NumRows
+	}
+
+	return NewEmptyDBWithCapacity(info, n)
 }
 
 type DB struct {
@@ -388,6 +392,22 @@ func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
 	for i := 0; i < n; i++ {
 		db.SetEntry(i, field.Zero())
 	}
+
+	return db, nil
+}
+
+func InitMultiBitDBWithCapacity(numRows, numColumns, blockSize, cap int) (*DB, error) {
+	info := Info{NumColumns: numColumns,
+		NumRows:   numRows,
+		BlockSize: blockSize,
+	}
+
+	db, err := NewEmptyDBWithCapacity(info, cap)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to create db: %v", err)
+	}
+
+	db.BlockLengths = make([]int, numRows*numColumns)
 
 	return db, nil
 }
