@@ -255,6 +255,12 @@ func getDBFilePaths() []string {
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)
 	// get a random chunk of the key dump in the folder
 	//filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))
+	//filePaths := make([]string, 0)
+	//for i := 0; i < 10; i++ {
+	//fp := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", i))
+	//filePaths = append(filePaths, fp)
+	//}
+	//return filePaths
 	filePath := filepath.Join(sksDir, "sks-022.pgp")
 	fmt.Printf("Testing with %s\n", filePath)
 	return []string{filePath}
