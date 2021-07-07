@@ -1,8 +1,7 @@
 package client
 
 import (
-	"bytes"
-	"encoding/gob"
+	"encoding/binary"
 	"io"
 	"log"
 
@@ -39,14 +38,22 @@ func (c *IT) QueryBytes(index, numServers int) ([][]byte, error) {
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
-	for i, q := range queries {
-		buf := new(bytes.Buffer)
-		enc := gob.NewEncoder(buf)
-		if err := enc.Encode(q); err != nil {
-			return nil, err
+	for i := range queries {
+		queryBuf := make([]byte, len(queries[i])*8*2)
+		for k := 0; k < len(queries[i]); k++ {
+			binary.LittleEndian.PutUint64(queryBuf[k*8*2:k*8*2+8], queries[i][k][0])
+			binary.LittleEndian.PutUint64(queryBuf[k*8*2+8:k*8*2+8+8], queries[i][k][1])
 		}
-		out[i] = buf.Bytes()
+		out[i] = queryBuf
 	}
+	//for i, q := range queries {
+	//buf := new(bytes.Buffer)
+	//enc := gob.NewEncoder(buf)
+	//if err := enc.Encode(q); err != nil {
+	//return nil, err
+	//}
+	//out[i] = buf.Bytes()
+	//}
 
 	return out, nil
 }
@@ -74,12 +81,28 @@ func (c *IT) Query(index, numServers int) [][]field.Element {
 
 // ReconstructBytes returns []field.Element
 func (c *IT) ReconstructBytes(a [][]byte) (interface{}, error) {
-	answer, err := decodeAnswer(a)
-	if err != nil {
-		return nil, err
+	//answer, err := decodeAnswer(a)
+	//if err != nil {
+	//return nil, err
+	//}
+	res := make([][]field.Element, len(a))
+
+	for i := range res {
+		n := len(a[i]) / (8 * 2)
+		data := make([]field.Element, n)
+
+		for k := 0; k < n; k++ {
+			memIndex := k * 8 * 2
+			data[k] = field.Element{
+				binary.LittleEndian.Uint64(a[i][memIndex : memIndex+8]),
+				binary.LittleEndian.Uint64(a[i][memIndex+8 : memIndex+16]),
+			}
+		}
+
+		res[i] = data
 	}
 
-	return c.Reconstruct(answer)
+	return c.Reconstruct(res)
 }
 
 func (c *IT) Reconstruct(answers [][]field.Element) ([]field.Element, error) {

@@ -1,8 +1,7 @@
 package server
 
 import (
-	"bytes"
-	"encoding/gob"
+	"encoding/binary"
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -35,25 +34,43 @@ func (s *IT) DBInfo() *database.Info {
 
 // AnswerBytes decode the input, execute Answer and encodes the output
 func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
-	// decode query
-	buf := bytes.NewBuffer(q)
-	dec := gob.NewDecoder(buf)
-	var query []field.Element
-	if err := dec.Decode(&query); err != nil {
-		return nil, err
+	n := len(q) / (8 * 2)
+	data := make([]field.Element, n)
+
+	for i := 0; i < n; i++ {
+		memIndex := i * 8 * 2
+
+		data[i] = field.Element{
+			binary.LittleEndian.Uint64(q[memIndex : memIndex+8]),
+			binary.LittleEndian.Uint64(q[memIndex+8 : memIndex+16]),
+		}
 	}
+	// decode query
+	//buf := bytes.NewBuffer(q)
+	//dec := gob.NewDecoder(buf)
+	//var query []field.Element
+	//if err := dec.Decode(&query); err != nil {
+	//return nil, err
+	//}
 
 	// get answer
-	a := s.Answer(query)
+	a := s.Answer(data)
 
 	// encode answer
-	buf.Reset()
-	enc := gob.NewEncoder(buf)
-	if err := enc.Encode(a); err != nil {
-		return nil, err
+	//buf.Reset()
+	//enc := gob.NewEncoder(buf)
+	//if err := enc.Encode(a); err != nil {
+	//return nil, err
+	//}
+
+	//return buf.Bytes(), nil
+	res := make([]byte, len(a)*8*2)
+	for k := 0; k < len(a); k++ {
+		binary.LittleEndian.PutUint64(res[k*8*2:k*8*2+8], a[k][0])
+		binary.LittleEndian.PutUint64(res[k*8*2+8:k*8*2+8+8], a[k][1])
 	}
 
-	return buf.Bytes(), nil
+	return res, nil
 }
 
 // Answer computes the answer for the given query
