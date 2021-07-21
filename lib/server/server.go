@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/lukechampine/fastxor"
@@ -175,6 +176,7 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 	// a channel to pass results from the routines back
 	replies := make([]chan []byte, NGoRoutines)
 	// Vector db
+	var prevElemPos, nextElemPos int
 	if db.NumRows == 1 {
 		// Divide and multiple by 8 to make sure that
 		// each routine process whole bytes from the query, i.e.,
@@ -182,10 +184,14 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 		columnsPerRoutine := ((db.NumColumns / NGoRoutines) / 8) * 8
 		for i := 0; i < NGoRoutines; i++ {
 			begin, end := computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
+			for colN := begin; colN < end; colN++ {
+				nextElemPos += db.BlockLengths[colN]
+			}
 			replyChan := make(chan []byte, db.BlockSize)
 			replies[i] = replyChan
 			// We need /8 because q is packed with 1 bit per block
-			go xorColumns(db.Entries[begin*db.BlockSize:end*db.BlockSize], q[begin/8:int(math.Ceil(float64(end)/8))], db.BlockSize, replyChan)
+			go xorColumns(db.Entries[prevElemPos:nextElemPos], db.BlockLengths[begin:end], q[begin/8:int(math.Ceil(float64(end)/8))], db.BlockSize, replyChan)
+			prevElemPos = nextElemPos
 		}
 		m := make([]byte, db.BlockSize)
 		for i, reply := range replies {
@@ -214,19 +220,30 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 }
 
 // XORs entries and q block by block of size bl
-func xorValues(entries, q []byte, bl int) []byte {
+func xorValues(entries []byte, blockLens []int, q []byte, bl int) []byte {
 	sum := make([]byte, bl)
-	for j := 0; j < len(entries)/bl; j++ {
+	pos := 0
+	//for j := 0; j < len(entries)/bl; j++ {
+	//if (q[j/8]>>(j%8))&1 == byte(1) {
+	//fastxor.Bytes(sum, sum, entries[pos:pos+blockLens[i]])
+	//}
+	//pos += blockLens[i]
+	//i++
+	//}
+	for j := range blockLens {
+		fmt.Println("bloclLens:", blockLens[j], "bl:", bl)
 		if (q[j/8]>>(j%8))&1 == byte(1) {
-			fastxor.Bytes(sum, sum, entries[j*bl:(j+1)*bl])
+			// TODO: if zero skip for all 8 values
+			fastxor.Bytes(sum, sum, entries[pos:pos+blockLens[j]])
 		}
+		pos += blockLens[j]
 	}
 	return sum
 }
 
 // XORs columns in the same row
-func xorColumns(columns, query []byte, blockLen int, reply chan<- []byte) {
-	reply <- xorValues(columns, query, blockLen)
+func xorColumns(columns []byte, blockLens []int, query []byte, blockLen int, reply chan<- []byte) {
+	reply <- xorValues(columns, blockLens, query, blockLen)
 }
 
 // XORs all the columns in a row, row by row, and writes the result into output
@@ -235,7 +252,8 @@ func xorRows(rows, query []byte, numColumns, blockLen int, reply chan<- []byte) 
 	numRowsToProcess := len(rows) / numElementsInRow
 	sums := make([]byte, 0, numRowsToProcess*blockLen)
 	for i := 0; i < numRowsToProcess; i++ {
-		res := xorValues(rows[i*numElementsInRow:(i+1)*numElementsInRow], query, blockLen)
+		// TODO fix int{0}
+		res := xorValues(rows[i*numElementsInRow:(i+1)*numElementsInRow], []int{0}, query, blockLen)
 		sums = append(sums, res...)
 	}
 	reply <- sums

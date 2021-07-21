@@ -26,6 +26,24 @@ func CreateZeroMultiBitBytes(numRows, numColumns, blockLen int) *Bytes {
 	}
 }
 
+// InitMultiBitBytes return an empty database with a initial zero capacity, to
+// be used when embedding keys into a bytes database.
+// blockLen must be the number of bytes in a block, as a byte is the element
+func InitMultiBitBytes(numRows, numColumns, blockLen int) *Bytes {
+	// sample random entries
+	entries := make([]byte, 0)
+
+	return &Bytes{Entries: entries,
+		Info: Info{
+			NumColumns:   numColumns,
+			NumRows:      numRows,
+			BlockSize:    blockLen,
+			BlockLengths: make([]int, numRows*numColumns),
+			Merkle:       &Merkle{ProofLen: 0}, // only for tests compatibility
+		},
+	}
+}
+
 // CreateRandomMultiBitBytes return a random bytes database.
 // blockLen must be the number of bytes in a block, as a byte is the element
 func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {

@@ -91,12 +91,12 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	blockLen := utils.MaxBytesLength(ht) + 1
 
 	// create all zeros db
-	db := CreateZeroMultiBitBytes(numRows, numColumns, blockLen)
+	db := InitMultiBitBytes(numRows, numColumns, blockLen)
 
 	// embed data into bytes
 	for k, v := range ht {
-		v = PadBlock(v, blockLen)
-		copy(db.Entries[k*blockLen:(k+1)*blockLen], v)
+		db.Entries = append(db.Entries, v...)
+		db.BlockLengths[k] = len(v)
 	}
 
 	return db, nil
