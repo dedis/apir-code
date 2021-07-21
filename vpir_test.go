@@ -4,12 +4,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/si-co/vpir-code/lib/constants"
 	"io"
 	"math"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	oneMB           = 1048576 * 8
-	oneKB           = 1024 * 8
 	oneB            = 8
+	oneKB           = 1024 * oneB
+	oneMB           = 1024 * oneKB
 	testBlockLength = 16
 )
 
@@ -70,21 +70,6 @@ func TestMultiBitMatrixOneMbVPIR(t *testing.T) {
 	require.NoError(t, err)
 
 	retrieveBlocks(t, xof, db, numBlocks, "MultiBitMatrixOneMbVPIR")
-}
-
-func TestSingleBitMatrixOneKbVPIR(t *testing.T) {
-	dbLen := oneKB - 92 // making the length a square
-	numBlocks := dbLen
-	nCols := int(math.Sqrt(float64(numBlocks)))
-	nRows := nCols
-
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
-
-	db, err := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
-	require.NoError(t, err)
-
-	retrieveBlocks(t, xof, db, numBlocks, "SingleBitMatrixOneKbVPIR")
 }
 
 func TestDPFMultiBitVectorVPIR(t *testing.T) {
