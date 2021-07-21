@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/lukechampine/fastxor"
@@ -30,7 +31,6 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 		}
 		columnsPerRoutine := db.NumColumns / NGoRoutines
 		replies := make([]chan field.Element, NGoRoutines)
-		// default value is zero
 		m := make([]field.Element, db.NumRows)
 		var begin, end int
 		for i := 0; i < db.NumRows; i++ {
@@ -42,7 +42,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 				}
 				replyChan := make(chan field.Element, 1)
 				replies[i] = replyChan
-				go processSingleBitColumns(begin, end, db, q, replyChan)
+				go processSingleBitColumns(db.Range(begin, end), q[begin:end], replyChan)
 			}
 
 			for j, reply := range replies {
@@ -159,11 +159,10 @@ func computeMessageAndTag(elements []field.Element, blockLens []int, q []field.E
 
 // Processing of columns for a database where each field element
 // encodes just a single bit
-func processSingleBitColumns(begin, end int, db *database.DB, q []field.Element, replyTo chan<- field.Element) {
+func processSingleBitColumns(elements []field.Element, q []field.Element, replyTo chan<- field.Element) {
 	reply := field.Zero()
-	for j := begin; j < end; j++ {
-		entry := db.GetEntry(j)
-		if entry.Equal(&cst.One) {
+	for j := 0; j < len(elements); j++ {
+		if elements[j].Equal(&cst.One) {
 			reply.Add(&reply, &q[j])
 		}
 	}

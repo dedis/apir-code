@@ -129,6 +129,7 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 	s1 := server.NewIT(db)
 
 	totalTimer := monitor.NewMonitor()
+	var elems []field.Element
 	for i := 0; i < numBlocks; i++ {
 		queries := c.Query(i, 2)
 
@@ -140,14 +141,11 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 		if db.BlockSize == constants.SingleBitBlockLength {
-			elems := db.Range(i, i+1)
-
-			require.Equal(t, elems, res)
+			elems = db.Range(i, i+1)
 		} else {
-			elems := db.Range(i*db.BlockSize, (i+1)*db.BlockSize)
-
-			require.Equal(t, elems, res)
+			elems = db.Range(i*db.BlockSize, (i+1)*db.BlockSize)
 		}
+		require.Equal(t, elems, res)
 	}
 	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
 }
