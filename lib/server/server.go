@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/lukechampine/fastxor"
