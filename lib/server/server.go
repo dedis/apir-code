@@ -39,8 +39,8 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 				if j == NGoRoutines-1 {
 					end = db.NumColumns
 				}
-				replyChan := make(chan field.Element, 1)
-				replies[i] = replyChan
+				replyChan := make(chan field.Element)
+				replies[j] = replyChan
 				go processSingleBitColumns(db.Range(begin, end), q[begin:end], replyChan)
 			}
 
