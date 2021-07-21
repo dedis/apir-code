@@ -453,14 +453,13 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 		return nil, xerrors.Errorf("failed to create db: %v", err)
 	}
 
-	// add block lengths also in this case for compatability
+	// add block lengths also in this case for compatibility
 	db.BlockLengths = make([]int, numRows*numColumns)
 
 	for i := 0; i < n; i++ {
 		var buf [16]byte
 		copy(buf[:], bytes[i*field.Bytes:(1+i)*field.Bytes])
-		element := &field.Element{}
-		element.SetFixedLengthBytes(buf)
+		element := new(field.Element).SetFixedLengthBytes(buf)
 
 		db.SetEntry(i, *element)
 		db.BlockLengths[i/blockLen] = blockLen
