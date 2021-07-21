@@ -54,11 +54,16 @@ func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Byt
 	}
 
 	numColumns := dbLen / (8 * numRows * blockLen)
+	blockLens := make([]int, numRows*numColumns)
+	for i := 0; i < numRows*numColumns; i++ {
+		blockLens[i] = blockLen
+	}
 	return &Bytes{Entries: entries,
 		Info: Info{
 			NumColumns: numColumns,
 			NumRows:    numRows,
 			BlockSize:  blockLen,
+			BlockLengths: blockLens,
 			Merkle:     &Merkle{ProofLen: 0}, // only for tests compatibility
 		},
 	}

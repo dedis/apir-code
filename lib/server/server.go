@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/lukechampine/fastxor"
@@ -231,7 +230,6 @@ func xorValues(entries []byte, blockLens []int, q []byte, bl int) []byte {
 	//i++
 	//}
 	for j := range blockLens {
-		fmt.Println("bloclLens:", blockLens[j], "bl:", bl)
 		if (q[j/8]>>(j%8))&1 == byte(1) {
 			// TODO: if zero skip for all 8 values
 			fastxor.Bytes(sum, sum, entries[pos:pos+blockLens[j]])
