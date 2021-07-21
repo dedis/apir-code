@@ -172,7 +172,6 @@ func processSingleBitColumns(elements []field.Element, q []field.Element, replyT
 %%	PIR primitives
 */
 func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
-	var begin, end int
 	// a channel to pass results from the routines back
 	replies := make([]chan []byte, NGoRoutines)
 	// Vector db
@@ -182,7 +181,7 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 		// a byte does not get split between different routines
 		columnsPerRoutine := ((db.NumColumns / NGoRoutines) / 8) * 8
 		for i := 0; i < NGoRoutines; i++ {
-			begin, end = computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
+			begin, end := computeChunkIndices(i, columnsPerRoutine, NGoRoutines-1, db.NumColumns)
 			replyChan := make(chan []byte, db.BlockSize)
 			replies[i] = replyChan
 			// We need /8 because q is packed with 1 bit per block
@@ -199,7 +198,7 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 		//	Matrix db
 		rowsPerRoutine := db.NumRows / NGoRoutines
 		for i := 0; i < NGoRoutines; i++ {
-			begin, end = computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
+			begin, end := computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
 			replyChan := make(chan []byte, (end-begin)*db.BlockSize)
 			replies[i] = replyChan
 			go xorRows(db.Entries[begin*db.NumColumns*db.BlockSize:end*db.NumColumns*db.BlockSize], q, db.NumColumns, db.BlockSize, replyChan)
