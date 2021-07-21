@@ -1,4 +1,0 @@
-Testing with data/sks/sks-022.pgp
-2021/07/21 17:09:11 Bytes db rebalanced: false, loading keys: [data/sks/sks-022.pgp]
-signal: interrupt
-FAIL	github.com/si-co/vpir-code	5.998s
