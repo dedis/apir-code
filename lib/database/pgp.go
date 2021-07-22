@@ -100,8 +100,8 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	// add blocks to the db with the according padding and store the length
 	for k, block := range blocks {
 		block = append(block, []byte{0x80}...)
-		db.Entries = append(db.Entries, block...)
 		db.BlockLengths[k] = len(block)
+		db.Entries = append(db.Entries, block...)
 	}
 
 	return db, nil

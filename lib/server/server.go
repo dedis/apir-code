@@ -204,9 +204,15 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 		rowsPerRoutine := db.NumRows / NGoRoutines
 		for i := 0; i < NGoRoutines; i++ {
 			begin, end := computeChunkIndices(i, rowsPerRoutine, NGoRoutines-1, db.NumRows)
+			for rowN := begin; rowN < end; rowN++ {
+				for colN := 0; colN < db.NumColumns; colN++ {
+					nextElemPos += db.BlockLengths[rowN*db.NumColumns+colN]
+				}
+			}
 			replyChan := make(chan []byte, (end-begin)*db.BlockSize)
 			replies[i] = replyChan
-			go xorRows(db.Entries[begin*db.NumColumns*db.BlockSize:end*db.NumColumns*db.BlockSize], q, db.NumColumns, db.BlockSize, replyChan)
+			go xorRows(db.Entries[prevElemPos:nextElemPos], db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
+			prevElemPos = nextElemPos
 		}
 		m := make([]byte, 0, db.NumRows*db.BlockSize)
 		for i, reply := range replies {
@@ -237,14 +243,16 @@ func xorColumns(columns []byte, blockLens []int, query []byte, blockLen int, rep
 }
 
 // XORs all the columns in a row, row by row, and writes the result into output
-func xorRows(rows, query []byte, numColumns, blockLen int, reply chan<- []byte) {
-	numElementsInRow := blockLen * numColumns
-	numRowsToProcess := len(rows) / numElementsInRow
+func xorRows(rows []byte, blockLens []int, query []byte, numRowsToProcess, numColumns, blockLen int, reply chan<- []byte) {
+	var prevPos, nextPos int
 	sums := make([]byte, 0, numRowsToProcess*blockLen)
 	for i := 0; i < numRowsToProcess; i++ {
-		// TODO fix int{0}
-		res := xorValues(rows[i*numElementsInRow:(i+1)*numElementsInRow], []int{0}, query, blockLen)
+		for j := 0; j < numColumns; j++ {
+			nextPos += blockLens[i*numColumns+j]
+		}
+		res := xorValues(rows[prevPos:nextPos], blockLens[i*numColumns:(i+1)*numColumns], query, blockLen)
 		sums = append(sums, res...)
+		prevPos = nextPos
 	}
 	reply <- sums
 }
