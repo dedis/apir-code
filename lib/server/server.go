@@ -222,13 +222,6 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 func xorValues(entries []byte, blockLens []int, q []byte, bl int) []byte {
 	sum := make([]byte, bl)
 	pos := 0
-	//for j := 0; j < len(entries)/bl; j++ {
-	//if (q[j/8]>>(j%8))&1 == byte(1) {
-	//fastxor.Bytes(sum, sum, entries[pos:pos+blockLens[i]])
-	//}
-	//pos += blockLens[i]
-	//i++
-	//}
 	for j := range blockLens {
 		if (q[j/8]>>(j%8))&1 == byte(1) {
 			// TODO: if zero skip for all 8 values
