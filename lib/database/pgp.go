@@ -94,12 +94,12 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	// order blocks because of map
 	blocks := make([][]byte, numRows*numColumns)
 	for k, v := range ht {
-		blocks[k] = v
+		// appending only 0x80 (without zeros)
+		blocks[k] = PadBlock(v, len(v)+1)
 	}
 
 	// add blocks to the db with the according padding and store the length
 	for k, block := range blocks {
-		block = append(block, []byte{0x80}...)
 		db.BlockLengths[k] = len(block)
 		db.Entries = append(db.Entries, block...)
 	}
@@ -121,13 +121,12 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 	// decide on the length of the hash table
 	preSquareNumBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
 	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
-
 	ht := makeHashTable(keys, numRows*numColumns)
 
 	// map into blocks
-	//blocks := make([][]byte, maxBucket+1)
 	blocks := make([][]byte, numRows*numColumns)
 	for k, v := range ht {
+		// appending only 0x80 (without zeros)
 		blocks[k] = v
 	}
 
@@ -139,11 +138,9 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 
 	proofLen := tree.EncodedProofLength()
 	maxBlockLen := utils.MaxBytesLength(ht) + proofLen
-	dbLen := 0
 	blockLens := make([]int, numRows*numColumns)
 	for i := 0; i < numRows*numColumns; i++ {
 		blockLens[i] = len(blocks[i]) + proofLen
-		dbLen += blockLens[i]
 	}
 
 	entries := makeMerkleEntries(blocks, tree, numRows, numColumns, maxBlockLen)
