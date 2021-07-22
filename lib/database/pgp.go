@@ -146,8 +146,8 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 			NumRows:      numRows,
 			NumColumns:   numColumns,
 			BlockLengths: blockLens,
-			// BlockSize here is simply to differentiate with single-bit scheme,
-			// not used otherwise
+			// BlockSize here is simply to differentiate from the single-bit scheme,
+			// not used otherwise.
 			BlockSize:    maxBlockLen,
 			PIRType:      "merkle",
 			Merkle:       &Merkle{Root: tree.Root(), ProofLen: proofLen},
