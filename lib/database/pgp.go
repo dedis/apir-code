@@ -94,9 +94,14 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	db := InitMultiBitBytes(numRows, numColumns, blockLen)
 
 	// embed data into bytes
+	blocks := make([][]byte, numRows*numColumns)
 	for k, v := range ht {
-		db.Entries = append(db.Entries, v...)
-		db.BlockLengths[k] = len(v)
+		blocks[k] = v
+	}
+
+	for k, block := range blocks {
+		db.Entries = append(db.Entries, block...)
+		db.BlockLengths[k] = len(block)
 	}
 
 	return db, nil

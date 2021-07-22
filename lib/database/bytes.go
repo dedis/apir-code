@@ -60,11 +60,11 @@ func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Byt
 	}
 	return &Bytes{Entries: entries,
 		Info: Info{
-			NumColumns: numColumns,
-			NumRows:    numRows,
-			BlockSize:  blockLen,
+			NumColumns:   numColumns,
+			NumRows:      numRows,
+			BlockSize:    blockLen,
 			BlockLengths: blockLens,
-			Merkle:     &Merkle{ProofLen: 0}, // only for tests compatibility
+			Merkle:       &Merkle{ProofLen: 0}, // only for tests compatibility
 		},
 	}
 }
