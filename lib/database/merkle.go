@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"io"
 	"log"
@@ -42,7 +41,6 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	}
 
 	entries := makeMerkleEntries(blocks, tree, numRows, numColumns, blockLen)
-	fmt.Println(entries)
 
 	m := &Bytes{
 		Entries: entries,
