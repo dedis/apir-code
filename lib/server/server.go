@@ -224,7 +224,6 @@ func xorValues(entries []byte, blockLens []int, q []byte, bl int) []byte {
 	pos := 0
 	for j := range blockLens {
 		if (q[j/8]>>(j%8))&1 == byte(1) {
-			// TODO: if zero skip for all 8 values
 			fastxor.Bytes(sum, sum, entries[pos:pos+blockLens[j]])
 		}
 		pos += blockLens[j]
