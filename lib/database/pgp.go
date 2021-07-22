@@ -2,14 +2,15 @@ package database
 
 import (
 	"bytes"
+	"log"
+	"math"
+	"sort"
+
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/xerrors"
-	"log"
-	"math"
-	"sort"
 )
 
 const numKeysToDBLengthRatio float32 = 0.1
@@ -90,13 +91,15 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	// create all zeros db
 	db := InitMultiBitBytes(numRows, numColumns, blockLen)
 
-	// embed data into bytes
+	// order blocks because of map
 	blocks := make([][]byte, numRows*numColumns)
 	for k, v := range ht {
 		blocks[k] = v
 	}
 
+	// add blocks to the db with the according padding and store the length
 	for k, block := range blocks {
+		block = append(block, []byte{0x80}...)
 		db.Entries = append(db.Entries, block...)
 		db.BlockLengths[k] = len(block)
 	}
@@ -153,9 +156,9 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 			BlockLengths: blockLens,
 			// BlockSize here is simply to differentiate with single-bit scheme,
 			// not used otherwise
-			BlockSize:    maxBlockLen,
-			PIRType:      "merkle",
-			Merkle:       &Merkle{Root: tree.Root(), ProofLen: proofLen},
+			BlockSize: maxBlockLen,
+			PIRType:   "merkle",
+			Merkle:    &Merkle{Root: tree.Root(), ProofLen: proofLen},
 		},
 	}
 
