@@ -2,17 +2,14 @@ package database
 
 import (
 	"bytes"
-	"log"
-	"math"
-	"runtime"
-	"sort"
-	"sync"
-
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/xerrors"
+	"log"
+	"math"
+	"sort"
 )
 
 const numKeysToDBLengthRatio float32 = 0.1
@@ -33,7 +30,7 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	preSquareNumBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
 	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
 
-	ht, _, err := makeHashTable(keys, numRows*numColumns)
+	ht := makeHashTable(keys, numRows*numColumns)
 	// get the maximum byte length of the values in the hashTable
 	// +1 takes into account the padding 0x80 that is always added.
 	maxBytes := utils.MaxBytesLength(ht) + 1
@@ -85,7 +82,7 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	preSquareNumBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
 	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
 
-	ht, _, err := makeHashTable(keys, numRows*numColumns)
+	ht := makeHashTable(keys, numRows*numColumns)
 	// get the maximum byte length of the values in the hashTable
 	// +1 takes into account the padding 0x80 that is always added.
 	blockLen := utils.MaxBytesLength(ht) + 1
@@ -117,15 +114,13 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 	preSquareNumBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
 	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
 
-	ht, maxBucket, err := makeHashTable(keys, numRows*numColumns)
-	// get the maximum byte length of the values in the hashTable
-	// +1 takes into account the padding 0x80 that is always added.
-	blockLen := utils.MaxBytesLength(ht) + 1
+	ht := makeHashTable(keys, numRows*numColumns)
 
 	// map into blocks
-	blocks := make([][]byte, maxBucket+1)
+	//blocks := make([][]byte, maxBucket+1)
+	blocks := make([][]byte, numRows*numColumns)
 	for k, v := range ht {
-		blocks[k] = PadBlock(v, blockLen)
+		blocks[k] = v
 	}
 
 	// generate tree
@@ -134,56 +129,45 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 		return nil, err
 	}
 
-	// generate db
 	proofLen := tree.EncodedProofLength()
-	blockLen = blockLen + proofLen
-	entries := make([]byte, numRows*numColumns*blockLen)
-
-	// multithreading
-	var wg sync.WaitGroup
-	var end int
-	numCores := runtime.NumCPU()
-	chunkLen := utils.DivideAndRoundUpToMultiple(numRows*numColumns, numCores, 1)
-	for i := 0; i < numRows*numColumns; i += chunkLen {
-		end = i + chunkLen
-		if end > numRows*numColumns {
-			end = numRows * numColumns
-		}
-		wg.Add(1)
-		go assignEntries(entries[i*blockLen:end*blockLen], blocks[i:end], tree, blockLen, &wg)
+	maxBlockLen := utils.MaxBytesLength(ht) + proofLen
+	dbLen := 0
+	blockLens := make([]int, numRows*numColumns)
+	for i := 0; i < numRows*numColumns; i++ {
+		blockLens[i] = len(blocks[i]) + proofLen
+		dbLen += blockLens[i]
 	}
-	wg.Wait()
+
+	entries := makeMerkleEntries(blocks, tree, numRows, numColumns, maxBlockLen)
 
 	m := &Bytes{
 		Entries: entries,
 		Info: Info{
-			NumRows:    numRows,
-			NumColumns: numColumns,
-			BlockSize:  blockLen,
-			PIRType:    "merkle",
-			Merkle:     &Merkle{Root: tree.Root(), ProofLen: proofLen},
+			NumRows:      numRows,
+			NumColumns:   numColumns,
+			BlockLengths: blockLens,
+			// BlockSize here is simply to differentiate with single-bit scheme,
+			// not used otherwise
+			BlockSize:    maxBlockLen,
+			PIRType:      "merkle",
+			Merkle:       &Merkle{Root: tree.Root(), ProofLen: proofLen},
 		},
 	}
 
 	return m, nil
 }
 
-func makeHashTable(keys []*pgp.Key, tableLen int) (map[int][]byte, int, error) {
+func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 	// prepare db
 	db := make(map[int][]byte)
-
-	maxBucket := 0
 
 	// range over all id,v pairs and assign every pair to a given bucket
 	for _, key := range keys {
 		hashKey := HashToIndex(key.ID, tableLen)
-		if hashKey > maxBucket {
-			maxBucket = hashKey
-		}
 		db[hashKey] = append(db[hashKey], key.Packet...)
 	}
 
-	return db, maxBucket, nil
+	return db
 }
 
 // Simple ISO/IEC 7816-4 padding where 0x80 is appended to the block, then

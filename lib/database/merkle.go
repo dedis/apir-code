@@ -1,13 +1,11 @@
 package database
 
 import (
+	"fmt"
+	"github.com/si-co/vpir-code/lib/merkle"
 	"io"
 	"log"
 	"runtime"
-	"sync"
-
-	"github.com/si-co/vpir-code/lib/merkle"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // CreateRandomMultiBitMerkle
@@ -38,45 +36,63 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	numColumns := numBlocks / numRows
 	proofLen := tree.EncodedProofLength()
 	blockLen = blockLen + proofLen
-	entries := make([]byte, numRows*numColumns*blockLen)
-
-	// multithreading
-	var wg sync.WaitGroup
-	var end int
-	numCores := runtime.NumCPU()
-	chunkLen := utils.DivideAndRoundUpToMultiple(numRows*numColumns, numCores, 1)
-	for i := 0; i < numRows*numColumns; i += chunkLen {
-		end = i + chunkLen
-		if end > numRows*numColumns {
-			end = numRows * numColumns
-		}
-		wg.Add(1)
-		go assignEntries(entries[i*blockLen:end*blockLen], blocks[i:end], tree, blockLen, &wg)
+	blockLens := make([]int, numRows*numColumns)
+	for b := 0; b < numRows*numColumns; b++ {
+		blockLens[b] = blockLen
 	}
-	wg.Wait()
+
+	entries := makeMerkleEntries(blocks, tree, numRows, numColumns, blockLen)
+	fmt.Println(entries)
 
 	m := &Bytes{
 		Entries: entries,
 		Info: Info{
-			NumRows:    numRows,
-			NumColumns: numColumns,
-			BlockSize:  blockLen,
-			PIRType:    "merkle",
-			Merkle:     &Merkle{Root: tree.Root(), ProofLen: proofLen},
+			NumRows:      numRows,
+			NumColumns:   numColumns,
+			BlockSize:    blockLen,
+			BlockLengths: blockLens,
+			PIRType:      "merkle",
+			Merkle:       &Merkle{Root: tree.Root(), ProofLen: proofLen},
 		},
 	}
 
 	return m
 }
 
-func assignEntries(es []byte, bks [][]byte, t *merkle.MerkleTree, blockLen int, wg *sync.WaitGroup) {
-	for b := 0; b < len(bks); b++ {
-		p, err := t.GenerateProof(bks[b])
+func makeMerkleEntries(blocks [][]byte, tree *merkle.MerkleTree, nRows, nColumns, maxBlockLen int) []byte {
+	output := make([]byte, 0)
+	var begin, end int
+	NGoRoutines := runtime.NumCPU()
+	replies := make([]chan []byte, NGoRoutines)
+	blocksPerRoutine := nRows * nColumns / NGoRoutines
+	for i := 0; i < NGoRoutines; i++ {
+		begin, end = i*blocksPerRoutine, (i+1)*blocksPerRoutine
+		if end > nRows*nColumns || i == NGoRoutines-1 {
+			end = nRows * nColumns
+		}
+		replyTo := make(chan []byte, maxBlockLen*(end-begin))
+		replies[i] = replyTo
+		generateMerkleProofs(blocks[begin:end], tree, replyTo)
+	}
+
+	for j, reply := range replies {
+		chunk := <-reply
+		output = append(output, chunk...)
+		close(replies[j])
+	}
+
+	return output
+}
+
+func generateMerkleProofs(data [][]byte, t *merkle.MerkleTree, reply chan<- []byte) {
+	result := make([]byte, 0)
+	for b := 0; b < len(data); b++ {
+		p, err := t.GenerateProof(data[b])
 		if err != nil {
 			log.Fatalf("error while generating proof for block %v: %v", b, err)
 		}
 		encodedProof := merkle.EncodeProof(p)
-		copy(es[b*blockLen:(b+1)*blockLen], append(bks[b], encodedProof...))
+		result = append(result, append(data[b], encodedProof...)...)
 	}
-	wg.Done()
+	reply <- result
 }
