@@ -34,7 +34,8 @@ func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *By
 	// generate db
 	numColumns := numBlocks / numRows
 	proofLen := tree.EncodedProofLength()
-	blockLen = blockLen + proofLen
+	// +1 is for storing the padding signal byte
+	blockLen = blockLen + proofLen + 1
 	blockLens := make([]int, numRows*numColumns)
 	for b := 0; b < numRows*numColumns; b++ {
 		blockLens[b] = blockLen
