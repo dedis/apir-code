@@ -90,6 +90,8 @@ func generateMerkleProofs(data [][]byte, t *merkle.MerkleTree, reply chan<- []by
 			log.Fatalf("error while generating proof for block %v: %v", b, err)
 		}
 		encodedProof := merkle.EncodeProof(p)
+		// appending 0x80
+		encodedProof = PadWithSignalByte(encodedProof)
 		result = append(result, append(data[b], encodedProof...)...)
 	}
 	reply <- result

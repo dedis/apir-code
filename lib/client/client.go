@@ -163,10 +163,11 @@ func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]by
 		if err != nil {
 			return block, err
 		}
+		block = database.UnPadBlock(block)
 		data := block[:len(block)-dbInfo.ProofLen]
 
 		// check Merkle proof
-		encodedProof := block[dbInfo.BlockSize-dbInfo.ProofLen:]
+		encodedProof := block[len(block)-dbInfo.ProofLen:]
 		proof := merkle.DecodeProof(encodedProof)
 		verified, err := merkle.VerifyProof(data, proof, dbInfo.Root)
 		if err != nil {

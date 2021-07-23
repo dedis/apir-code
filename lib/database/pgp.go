@@ -95,7 +95,7 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	blocks := make([][]byte, numRows*numColumns)
 	for k, v := range ht {
 		// appending only 0x80 (without zeros)
-		blocks[k] = PadBlock(v, len(v)+1)
+		blocks[k] = PadWithSignalByte(v)
 	}
 
 	// add blocks to the db with the according padding and store the length
@@ -127,7 +127,7 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 	blocks := make([][]byte, numRows*numColumns)
 	for k, v := range ht {
 		// appending only 0x80 (without zeros)
-		blocks[k] = v
+		blocks[k] = PadWithSignalByte(v)
 	}
 
 	// generate tree
@@ -137,10 +137,14 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 	}
 
 	proofLen := tree.EncodedProofLength()
-	maxBlockLen := utils.MaxBytesLength(ht) + proofLen
+	maxBlockLen := 0
 	blockLens := make([]int, numRows*numColumns)
 	for i := 0; i < numRows*numColumns; i++ {
-		blockLens[i] = len(blocks[i]) + proofLen
+		// we add +1 for appending 0x80 to the proof
+		blockLens[i] = len(blocks[i]) + proofLen + 1
+		if blockLens[i] > maxBlockLen {
+			maxBlockLen = blockLens[i]
+		}
 	}
 
 	entries := makeMerkleEntries(blocks, tree, numRows, numColumns, maxBlockLen)
@@ -181,6 +185,10 @@ func PadBlock(block []byte, blockLen int) []byte {
 	block = append(block, byte(0x80))
 	zeros := make([]byte, blockLen-(len(block)%blockLen))
 	return append(block, zeros...)
+}
+
+func PadWithSignalByte(block []byte) []byte {
+	return append(block, byte(0x80))
 }
 
 func UnPadBlock(block []byte) []byte {
