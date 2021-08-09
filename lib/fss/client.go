@@ -137,8 +137,8 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 
 // Generate Keys for 2-party point functions It creates keys for a function
 // that evaluates to vector b when input x = a.
-func (f Fss) GenerateTreePFVector(a, b []uint) []FssKeyEq2P {
-	fssKeys := make([]FssKeyEq2P, 2)
+func (f Fss) GenerateTreePFVector(a uint, b []uint) []FssKeyEq2PVector {
+	fssKeys := make([]FssKeyEq2PVector, 2)
 	// Set up initial values
 	tempRand1 := make([]byte, aes.BlockSize+1)
 	rand.Read(tempRand1)
@@ -176,8 +176,6 @@ func (f Fss) GenerateTreePFVector(a, b []uint) []FssKeyEq2P {
 		prfOut1 := make([]byte, aes.BlockSize*3)
 		copy(prfOut1, f.Out[:aes.BlockSize*3])
 
-		//fmt.Println(i, sCurr0)
-		//fmt.Println(i, sCurr1)
 		// Parse out "t" bits
 		t0Left := prfOut0[aes.BlockSize] % 2
 		t0Right := prfOut0[(aes.BlockSize*2)+1] % 2
@@ -193,8 +191,7 @@ func (f Fss) GenerateTreePFVector(a, b []uint) []FssKeyEq2P {
 			keep = leftStart
 			lose = rightStart
 		}
-		//fmt.Println("keep", keep)
-		//fmt.Println("aBit", aBit)
+
 		// Set correction words for both keys. Note: they are the same
 		for j := 0; j < aes.BlockSize; j++ {
 			fssKeys[0].CW[i][j] = prfOut0[lose+j] ^ prfOut1[lose+j]
@@ -218,15 +215,38 @@ func (f Fss) GenerateTreePFVector(a, b []uint) []FssKeyEq2P {
 		tCurr0 = (prfOut0[keep+aes.BlockSize] % 2) ^ tCWKeep*tCurr0
 		tCurr1 = (prfOut1[keep+aes.BlockSize] % 2) ^ tCWKeep*tCurr1
 	}
-	// Convert final CW to integer
-	sFinal0, _ := binary.Varint(sCurr0[:8])
-	sFinal1, _ := binary.Varint(sCurr1[:8])
-	fssKeys[0].FinalCW = (int(b) - int(sFinal0) + int(sFinal1))
-	fssKeys[1].FinalCW = fssKeys[0].FinalCW
-	if tCurr1 == 1 {
-		fssKeys[0].FinalCW = fssKeys[0].FinalCW * -1
-		fssKeys[1].FinalCW = fssKeys[0].FinalCW
+
+	bLen := uint(len(b))
+
+	tmp0 := make([]int64, bLen)
+	tmp1 := make([]int64, bLen)
+
+	out := make([]byte, bLen*8)
+
+	// we can generate two int per AES block since they are supposed to be
+	// 64 bits
+	prf(sCurr0, f.FixedBlocks, bLen/2, f.Temp, out)
+	for i := range tmp0 {
+		tmp0[i], _ = binary.Varint(out[i*8 : (i+1)*8])
 	}
+
+	prf(sCurr1, f.FixedBlocks, bLen/2, f.Temp, out)
+	for i := range tmp1 {
+		tmp1[i], _ = binary.Varint(out[i*8 : (i+1)*8])
+	}
+
+	fssKeys[0].FinalCW = make([]int, bLen)
+	fssKeys[1].FinalCW = make([]int, bLen)
+
+	for i := range fssKeys[0].FinalCW {
+		fssKeys[0].FinalCW[i] = (int(b[i]) - int(tmp0[i]) + int(tmp1[i]))
+		fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
+		if tCurr1 == 1 {
+			fssKeys[0].FinalCW[i] = fssKeys[0].FinalCW[i] * -1
+			fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
+		}
+	}
+
 	return fssKeys
 }
 

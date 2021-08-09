@@ -29,6 +29,13 @@ type FssKeyEq2P struct {
 	FinalCW int
 }
 
+type FssKeyEq2PVector struct {
+	SInit   []byte
+	TInit   byte
+	CW      [][]byte // there are n
+	FinalCW []int
+}
+
 type CWLt struct {
 	cs [][]byte
 	ct []uint8
@@ -66,8 +73,20 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 		out = make([]byte, numBlocks*aes.BlockSize)
 	}
 	for i := uint(0); i < numBlocks; i++ {
-		// get AES_k[i](x)
-		aesBlocks[i].Encrypt(temp, x)
+		// generate new key if needed
+		if i < uint(len(aesBlocks)) {
+			// get AES_k[i](x)
+			aesBlocks[i].Encrypt(temp, x)
+		} else {
+			prfKey := make([]byte, aes.BlockSize)
+			rand.Read(prfKey)
+			block, err := aes.NewCipher(prfKey)
+			if err != nil {
+				panic(err.Error())
+			}
+			block.Encrypt(temp, x)
+		}
+
 		// get AES_k[i](x) ^ x
 		for j := range temp {
 			out[i*aes.BlockSize+uint(j)] = temp[j] ^ x[j]

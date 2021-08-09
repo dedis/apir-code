@@ -88,6 +88,60 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint) int {
 	}
 }
 
+func (f Fss) EvaluatePFVector(serverNum byte, k FssKeyEq2PVector, x uint, out []int) {
+	sCurr := make([]byte, aes.BlockSize)
+	copy(sCurr, k.SInit)
+	tCurr := k.TInit
+	for i := uint(0); i < f.NumBits; i++ {
+		var xBit byte = 0
+		if i != f.N {
+			xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
+		}
+
+		prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+
+		// Keep counter to ensure we are accessing CW correctly
+		count := 0
+		for j := 0; j < aes.BlockSize*2+2; j++ {
+			// Make sure we are doing G(s) ^ (t*sCW||tLCW||sCW||tRCW)
+			if j == aes.BlockSize+1 {
+				count = 0
+			} else if j == aes.BlockSize*2+1 {
+				count = aes.BlockSize + 1
+			}
+			f.Out[j] = f.Out[j] ^ (tCurr * k.CW[i][count])
+			count++
+		}
+
+		// Pick right seed expansion based on
+		if xBit == 0 {
+			copy(sCurr, f.Out[:aes.BlockSize])
+			tCurr = f.Out[aes.BlockSize] % 2
+		} else {
+			copy(sCurr, f.Out[(aes.BlockSize+1):(aes.BlockSize*2+1)])
+			tCurr = f.Out[aes.BlockSize*2+1] % 2
+		}
+	}
+
+	outLen := uint(len(out))
+
+	tmp := make([]int64, outLen)
+	outPrg := make([]byte, outLen*8)
+
+	prf(sCurr, f.FixedBlocks, outLen/2, f.Temp, outPrg)
+	for i := range tmp {
+		tmp[i], _ = binary.Varint(outPrg[i*8 : (i+1)*8])
+	}
+
+	for i := range out {
+		if serverNum == 0 {
+			out[i] = int(tmp[i]) + int(tCurr)*k.FinalCW[i]
+		} else {
+			out[i] = -1 * (int(tmp[i]) + int(tCurr)*k.FinalCW[i])
+		}
+	}
+}
+
 // This is the 2-party FSS evaluation function for interval functions, i.e. <,> functions.
 // The usage is similar to 2-party FSS for equality functions
 func (f Fss) EvaluateLt(k ServerKeyLt, x uint) uint {
