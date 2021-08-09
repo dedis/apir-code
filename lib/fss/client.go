@@ -86,8 +86,6 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 		prfOut1 := make([]byte, aes.BlockSize*3)
 		copy(prfOut1, f.Out[:aes.BlockSize*3])
 
-		//fmt.Println(i, sCurr0)
-		//fmt.Println(i, sCurr1)
 		// Parse out "t" bits
 		t0Left := prfOut0[aes.BlockSize] % 2
 		t0Right := prfOut0[(aes.BlockSize*2)+1] % 2
@@ -103,8 +101,7 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 			keep = leftStart
 			lose = rightStart
 		}
-		//fmt.Println("keep", keep)
-		//fmt.Println("aBit", aBit)
+
 		// Set correction words for both keys. Note: they are the same
 		for j := 0; j < aes.BlockSize; j++ {
 			fssKeys[0].CW[i][j] = prfOut0[lose+j] ^ prfOut1[lose+j]
@@ -119,8 +116,6 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 			sCurr0[j] = prfOut0[keep+j] ^ (tCurr0 * fssKeys[0].CW[i][j])
 			sCurr1[j] = prfOut1[keep+j] ^ (tCurr1 * fssKeys[0].CW[i][j])
 		}
-		//fmt.Println("sKeep0:", prfOut0[keep:keep+aes.BlockSize])
-		//fmt.Println("sKeep1:", prfOut1[keep:keep+aes.BlockSize])
 		tCWKeep := fssKeys[0].CW[i][aes.BlockSize]
 		if keep == rightStart {
 			tCWKeep = fssKeys[0].CW[i][aes.BlockSize+1]
@@ -237,7 +232,6 @@ func (f Fss) GenerateTreePFVector(a, b []uint) []FssKeyEq2P {
 
 // This function contains the 2-party FSS key generation for interval functions, i.e. <, > functions.
 // The usage is similar to 2-party FSS for equality functions.
-
 func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	k := make([]ServerKeyLt, 2)
 

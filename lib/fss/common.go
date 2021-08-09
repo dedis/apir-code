@@ -22,7 +22,6 @@ type Fss struct {
 const initPRFLen uint = 4
 
 // Structs for keys
-
 type FssKeyEq2P struct {
 	SInit   []byte
 	TInit   byte
