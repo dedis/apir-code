@@ -1,4 +1,4 @@
-package libfss
+package fss
 
 // Source: https://github.com/frankw2/libfss/blob/master/go/libfss/common.go
 
