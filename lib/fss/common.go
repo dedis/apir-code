@@ -78,6 +78,7 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 			// get AES_k[i](x)
 			aesBlocks[i].Encrypt(temp, x)
 		} else {
+			// TODO: generate and store a new AES key?
 			prfKey := make([]byte, aes.BlockSize)
 			rand.Read(prfKey)
 			block, err := aes.NewCipher(prfKey)
@@ -91,5 +92,19 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 		for j := range temp {
 			out[i*aes.BlockSize+uint(j)] = temp[j] ^ x[j]
 		}
+	}
+}
+
+func convertBlock(f Fss, x []byte, out []int64) {
+	bLen := uint(len(out))
+
+	randBytes := make([]byte, bLen*8)
+
+	// we can generate two int per AES block since they are supposed to be
+	// 64 bits
+	prf(x, f.FixedBlocks, bLen/2, f.Temp, randBytes)
+
+	for i := range out {
+		out[i], _ = binary.Varint(randBytes[i*8 : (i+1)*8])
 	}
 }

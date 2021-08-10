@@ -41,7 +41,9 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 
 // This is the 2-party FSS evaluation function for point functions.
 // This is based on the following paper:
-// Boyle, Elette, Niv Gilboa, and Yuval Ishai. "Function Secret Sharing: Improvements and Extensions." Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security. ACM, 2016.
+// Boyle, Elette, Niv Gilboa, and Yuval Ishai. "Function Secret Sharing:
+// Improvements and Extensions." Proceedings of the 2016 ACM SIGSAC Conference
+// on Computer and Communications Security. ACM, 2016.
 
 // Each of the 2 server calls this function to evaluate their function
 // share on a value. Then, the client adds the results from both servers.
@@ -125,13 +127,9 @@ func (f Fss) EvaluatePFVector(serverNum byte, k FssKeyEq2PVector, x uint, out []
 
 	outLen := uint(len(out))
 
+	// convert block
 	tmp := make([]int64, outLen)
-	outPrg := make([]byte, outLen*8)
-
-	prf(sCurr, f.FixedBlocks, outLen/2, f.Temp, outPrg)
-	for i := range tmp {
-		tmp[i], _ = binary.Varint(outPrg[i*8 : (i+1)*8])
-	}
+	convertBlock(f, sCurr, tmp)
 
 	for i := range out {
 		if serverNum == 0 {

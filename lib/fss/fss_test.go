@@ -13,7 +13,7 @@ func TestVector(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(6)
 	// Test with if x = 10, evaluate to vector b
-	bLen := 10000
+	bLen := 100000
 	b := make([]uint, bLen)
 	for i := range b {
 		b[i] = uint(rand.Int())

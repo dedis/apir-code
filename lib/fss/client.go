@@ -206,8 +206,7 @@ func (f Fss) GenerateTreePFVector(a uint, b []uint) []FssKeyEq2PVector {
 			sCurr0[j] = prfOut0[keep+j] ^ (tCurr0 * fssKeys[0].CW[i][j])
 			sCurr1[j] = prfOut1[keep+j] ^ (tCurr1 * fssKeys[0].CW[i][j])
 		}
-		//fmt.Println("sKeep0:", prfOut0[keep:keep+aes.BlockSize])
-		//fmt.Println("sKeep1:", prfOut1[keep:keep+aes.BlockSize])
+
 		tCWKeep := fssKeys[0].CW[i][aes.BlockSize]
 		if keep == rightStart {
 			tCWKeep = fssKeys[0].CW[i][aes.BlockSize+1]
@@ -218,22 +217,11 @@ func (f Fss) GenerateTreePFVector(a uint, b []uint) []FssKeyEq2PVector {
 
 	bLen := uint(len(b))
 
+	// convert blocks
 	tmp0 := make([]int64, bLen)
 	tmp1 := make([]int64, bLen)
-
-	out := make([]byte, bLen*8)
-
-	// we can generate two int per AES block since they are supposed to be
-	// 64 bits
-	prf(sCurr0, f.FixedBlocks, bLen/2, f.Temp, out)
-	for i := range tmp0 {
-		tmp0[i], _ = binary.Varint(out[i*8 : (i+1)*8])
-	}
-
-	prf(sCurr1, f.FixedBlocks, bLen/2, f.Temp, out)
-	for i := range tmp1 {
-		tmp1[i], _ = binary.Varint(out[i*8 : (i+1)*8])
-	}
+	convertBlock(f, sCurr0, tmp0)
+	convertBlock(f, sCurr1, tmp1)
 
 	fssKeys[0].FinalCW = make([]int, bLen)
 	fssKeys[1].FinalCW = make([]int, bLen)
