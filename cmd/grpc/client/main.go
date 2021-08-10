@@ -156,7 +156,7 @@ func (lc *localClient) exec() (string, error) {
 	case "it":
 		lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
 	case "dpf":
-		lc.vpirClient = client.NewDPF(lc.prg, lc.dbInfo)
+		lc.vpirClient = client.NewFSS(lc.prg, lc.dbInfo)
 	case "pir-it", "merkle-it":
 		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
 	case "pir-dpf", "merkle-dpf":

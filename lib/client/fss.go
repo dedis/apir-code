@@ -8,7 +8,6 @@ import (
 	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 )
 
@@ -52,7 +51,7 @@ func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2PVector {
+func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2P {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -62,11 +61,11 @@ func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2PVector {
 		log.Fatal(err)
 	}
 	// client initialization is the same for both single- and multi-bit scheme
-	return c.fss.GenerateTreePFVector(uint(c.state.iy), c.state.a)
+	return c.fss.GenerateTreePF(uint(c.state.iy), c.state.a)
 }
 
 // ReconstructBytes decodes the answers from the servers and reconstruct the
-// entry, returned as []field.Element
+// entry, returned as []uint32
 func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 	answer, err := decodeAnswer(a)
 	if err != nil {
@@ -78,6 +77,6 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 
 // Reconstruct takes as input the answers from the client and returns the
 // reconstructed entry after the appropriate integrity check.
-func (c *FSS) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
+func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
 	return reconstruct(answers, c.dbInfo, c.state)
 }

@@ -1,12 +1,14 @@
 package client
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 	"log"
 
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -39,21 +41,13 @@ func (c *IT) QueryBytes(index, numServers int) ([][]byte, error) {
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
 	for i := range queries {
-		queryBuf := make([]byte, len(queries[i])*8*2)
-		for k := 0; k < len(queries[i]); k++ {
-			binary.LittleEndian.PutUint64(queryBuf[k*8*2:k*8*2+8], queries[i][k][0])
-			binary.LittleEndian.PutUint64(queryBuf[k*8*2+8:k*8*2+8+8], queries[i][k][1])
+		buf := new(bytes.Buffer)
+		err := binary.Write(buf, binary.BigEndian, queries[i])
+		if err != nil {
+			return nil, err
 		}
-		out[i] = queryBuf
+		out[i] = buf.Bytes()
 	}
-	//for i, q := range queries {
-	//buf := new(bytes.Buffer)
-	//enc := gob.NewEncoder(buf)
-	//if err := enc.Encode(q); err != nil {
-	//return nil, err
-	//}
-	//out[i] = buf.Bytes()
-	//}
 
 	return out, nil
 }
@@ -61,7 +55,7 @@ func (c *IT) QueryBytes(index, numServers int) ([][]byte, error) {
 // Query performs a client query for the given database index to numServers
 // servers. This function performs both vector and rebalanced query depending
 // on the client initialization.
-func (c *IT) Query(index, numServers int) [][]field.Element {
+func (c *IT) Query(index, numServers int) [][]uint32 {
 	if invalidQueryInputsIT(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -79,54 +73,50 @@ func (c *IT) Query(index, numServers int) [][]field.Element {
 	return vectors
 }
 
-// ReconstructBytes returns []field.Element
+// ReconstructBytes returns []uint32
 func (c *IT) ReconstructBytes(a [][]byte) (interface{}, error) {
-	//answer, err := decodeAnswer(a)
-	//if err != nil {
-	//return nil, err
-	//}
-	res := make([][]field.Element, len(a))
+	res := make([][]uint32, len(a))
 
 	for i := range res {
-		n := len(a[i]) / (8 * 2)
-		data := make([]field.Element, n)
-
-		for k := 0; k < n; k++ {
-			memIndex := k * 8 * 2
-			data[k] = field.Element{
-				binary.LittleEndian.Uint64(a[i][memIndex : memIndex+8]),
-				binary.LittleEndian.Uint64(a[i][memIndex+8 : memIndex+16]),
-			}
+		buf := bytes.NewReader(a[i])
+		res[i] = make([]uint32, len(a)/4)
+		err := binary.Read(buf, binary.LittleEndian, &res[i])
+		if err != nil {
+			return nil, err
 		}
-
-		res[i] = data
 	}
 
 	return c.Reconstruct(res)
 }
 
-func (c *IT) Reconstruct(answers [][]field.Element) ([]field.Element, error) {
+func (c *IT) Reconstruct(answers [][]uint32) ([]uint32, error) {
 	return reconstruct(answers, c.dbInfo, c.state)
 }
 
 // secretShare the vector a among numServers non-colluding servers
-func (c *IT) secretShare(numServers int) ([][]field.Element, error) {
+func (c *IT) secretShare(numServers int) ([][]uint32, error) {
 	// get block length
 	blockLen := len(c.state.a)
 	// Number of field elements in the whole vector
 	vectorLen := c.dbInfo.NumColumns * blockLen
 
 	// create query vectors for all the servers F^(1+b)
-	vectors := make([][]field.Element, numServers)
+	vectors := make([][]uint32, numServers)
 	for k := range vectors {
-		vectors[k] = make([]field.Element, vectorLen)
+		vectors[k] = make([]uint32, vectorLen)
 	}
 
 	// Get random elements for all numServers-1 vectors
-	rand, err := field.RandomVector(c.rnd, (numServers-1)*vectorLen)
-	if err != nil {
-		return nil, err
+	rand := make([]uint32, (numServers-1)*vectorLen)
+	var err error
+	for i := range rand {
+		rand[i], err = utils.RandUint32()
+		if err != nil {
+			return nil, err
+		}
+
 	}
+
 	// perform additive secret sharing
 	var colStart, colEnd int
 	for j := 0; j < c.dbInfo.NumColumns; j++ {
@@ -140,15 +130,15 @@ func (c *IT) secretShare(numServers int) ([][]field.Element, error) {
 
 		// we should perform component-wise additive secret sharing
 		for b := colStart; b < colEnd; b++ {
-			sum := field.Zero()
+			sum := uint32(0)
 			for k := 0; k < numServers-1; k++ {
-				sum.Add(&sum, &vectors[k][b])
+				sum += vectors[k][b] % constants.ModP
 			}
-			vectors[numServers-1][b].Set(&sum)
-			vectors[numServers-1][b].Neg(&vectors[numServers-1][b])
+			vectors[numServers-1][b] = sum
+			vectors[numServers-1][b] = constants.ModP - vectors[numServers-1][b]
 			// set alpha vector at the block we want to retrieve
 			if j == c.state.iy {
-				vectors[numServers-1][b].Add(&vectors[numServers-1][b], &c.state.a[b-j*blockLen])
+				vectors[numServers-1][b] += c.state.a[b-j*blockLen] % constants.ModP
 			}
 		}
 	}

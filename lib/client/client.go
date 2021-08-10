@@ -10,10 +10,11 @@ import (
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/lukechampine/fastxor"
+	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Client represents the client instance in both the IT and DPF-based schemes.
@@ -28,8 +29,8 @@ type state struct {
 	iy int
 
 	// for multi-server
-	alpha field.Element
-	a     []field.Element
+	alpha uint32
+	a     []uint32
 
 	// for single-server (DH)
 	r   group.Scalar
@@ -39,13 +40,13 @@ type state struct {
 
 // decodeAnswer decodes the gob-encoded answers from the servers and return
 // them as slices of field elements.
-func decodeAnswer(a [][]byte) ([][]field.Element, error) {
+func decodeAnswer(a [][]byte) ([][]uint32, error) {
 	// decode all the answers one by one
-	answer := make([][]field.Element, len(a))
+	answer := make([][]uint32, len(a))
 	for i, ans := range a {
 		buf := bytes.NewBuffer(ans)
 		dec := gob.NewDecoder(buf)
-		var serverAnswer []field.Element
+		var serverAnswer []uint32
 		if err := dec.Decode(&serverAnswer); err != nil {
 			return nil, err
 		}
@@ -61,7 +62,9 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	st := &state{}
 
 	// sample random alpha
-	if _, err := st.alpha.SetRandom(rnd); err != nil {
+	var err error
+	st.alpha, err = utils.RandUint32()
+	if err != nil {
 		return nil, err
 	}
 
@@ -74,14 +77,15 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
 		// multi-bit scheme
 		// +1 to BlockSize for recovering true value
-		st.a = make([]field.Element, dbInfo.BlockSize+1)
-		st.a[0] = field.One()
+		st.a = make([]uint32, dbInfo.BlockSize+1)
+		st.a[0] = 1
 		for i := 1; i < len(st.a); i++ {
-			st.a[i].Mul(&st.a[i-1], &st.alpha)
+			a := (uint64(st.a[i-1]) * uint64(st.alpha)) % uint64(constants.ModP)
+			st.a[i] = uint32(a)
 		}
 	} else {
 		// the single-bit scheme needs a single alpha
-		st.a = make([]field.Element, 1)
+		st.a = make([]uint32, 1)
 		st.a[0] = st.alpha
 	}
 
@@ -91,31 +95,31 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 // reconstruct takes as input the answers fro mthe servers, the info about the
 // database and the client state to return the reconstructed database entry.
 // The integrity check is performed in this function.
-func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([]field.Element, error) {
-	sum := make([][]field.Element, dbInfo.NumRows)
+func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32, error) {
+	sum := make([][]uint32, dbInfo.NumRows)
 
 	// single-bit scheme
 	if dbInfo.BlockSize == cst.SingleBitBlockLength {
 		// sum answers as vectors in F^b
 		for i := 0; i < dbInfo.NumRows; i++ {
-			sum[i] = make([]field.Element, 1)
+			sum[i] = make([]uint32, 1)
 			for k := range answers {
-				sum[i][0].Add(&sum[i][0], &answers[k][i])
+				sum[i][0] += answers[k][i] % constants.ModP
 			}
 		}
 		// verify integrity and return database entry if accept
 		for i := 0; i < dbInfo.NumRows; i++ {
 			if i == st.ix {
 				switch {
-				case sum[i][0].Equal(&st.alpha):
-					return []field.Element{cst.One}, nil
-				case sum[i][0].Equal(&cst.Zero):
-					return []field.Element{cst.Zero}, nil
+				case sum[i][0] == st.alpha:
+					return []uint32{1}, nil
+				case sum[i][0] == 0:
+					return []uint32{0}, nil
 				default:
 					return nil, errors.New("REJECT!")
 				}
 			} else {
-				if !sum[i][0].Equal(&st.alpha) && !sum[i][0].Equal(&cst.Zero) {
+				if sum[i][0] != st.alpha && sum[i][0] != 0 {
 					return nil, errors.New("REJECT!")
 				}
 			}
@@ -125,26 +129,25 @@ func reconstruct(answers [][]field.Element, dbInfo *database.Info, st *state) ([
 	// mutli-bit scheme
 	// sum answers as vectors in F^(b+1)
 	for i := 0; i < dbInfo.NumRows; i++ {
-		sum[i] = make([]field.Element, dbInfo.BlockSize+1)
+		sum[i] = make([]uint32, dbInfo.BlockSize+1)
 		for b := 0; b < dbInfo.BlockSize+1; b++ {
 			for k := range answers {
-				sum[i][b].Add(&sum[i][b], &answers[k][i*(dbInfo.BlockSize+1)+b])
+				sum[i][b] += answers[k][i*(dbInfo.BlockSize+1)+b] % constants.ModP
 			}
 		}
 	}
 
-	var prod field.Element
-	messages := make([]field.Element, dbInfo.BlockSize)
+	messages := make([]uint32, dbInfo.BlockSize)
 	for i := 0; i < dbInfo.NumRows; i++ {
 		copy(messages, sum[i][:len(sum[i])-1])
 		tag := sum[i][len(sum[i])-1]
 		// compute reconstructed tag
-		reconstructedTag := field.Zero()
+		reconstructedTag := uint32(0)
 		for b := 0; b < len(messages); b++ {
-			prod.Mul(&st.a[b+1], &messages[b])
-			reconstructedTag.Add(&reconstructedTag, &prod)
+			p := (uint64(st.a[b+1]) * uint64(messages[b])) % uint64(constants.ModP)
+			reconstructedTag += uint32(p) % constants.ModP
 		}
-		if !tag.Equal(&reconstructedTag) {
+		if tag != reconstructedTag {
 			return nil, errors.New("REJECT")
 		}
 	}

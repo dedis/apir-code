@@ -4,9 +4,9 @@ import (
 	"math"
 
 	"github.com/lukechampine/fastxor"
+	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -21,7 +21,7 @@ type Server interface {
 */
 
 // Answer computes the VPIR answer for the given query
-func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element {
+func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 	// Doing simplified scheme if block consists of a single bit
 	if db.BlockSize == cst.SingleBitBlockLength {
 		// make sure that we do not need up with routines processing 0 elements
@@ -29,8 +29,8 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 			NGoRoutines = db.NumColumns
 		}
 		columnsPerRoutine := db.NumColumns / NGoRoutines
-		replies := make([]chan field.Element, NGoRoutines)
-		m := make([]field.Element, db.NumRows)
+		replies := make([]chan uint32, NGoRoutines)
+		m := make([]uint32, db.NumRows)
 		var begin, end int
 		for i := 0; i < db.NumRows; i++ {
 			for j := 0; j < NGoRoutines; j++ {
@@ -39,14 +39,14 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 				if j == NGoRoutines-1 {
 					end = db.NumColumns
 				}
-				replyChan := make(chan field.Element)
+				replyChan := make(chan uint32)
 				replies[j] = replyChan
 				go processSingleBitColumns(db.Range(begin, end), q[begin:end], replyChan)
 			}
 
 			for j, reply := range replies {
 				element := <-reply
-				m[i].Add(&m[i], &element)
+				m[i] += element % cst.ModP
 				close(replies[j])
 			}
 		}
@@ -62,7 +62,7 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 	// The goal is to have a fixed number of workers and start them only once.
 	var prevElemPos, nextElemPos int
 	// a channel to pass results from the routines back
-	replies := make([]chan []field.Element, NGoRoutines)
+	replies := make([]chan []uint32, NGoRoutines)
 	// Vector db
 	if db.NumRows == 1 {
 		columnsPerRoutine := db.NumColumns / NGoRoutines
@@ -71,16 +71,16 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 			for colN := begin; colN < end; colN++ {
 				nextElemPos += db.BlockLengths[colN]
 			}
-			replyChan := make(chan []field.Element, db.BlockSize+1)
+			replyChan := make(chan []uint32, db.BlockSize+1)
 			replies[i] = replyChan
 			go processColumns(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin:end], q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
 		}
-		m := make([]field.Element, db.BlockSize+1)
+		m := make([]uint32, db.BlockSize+1)
 		for i, reply := range replies {
 			chunk := <-reply
 			for i, elem := range chunk {
-				m[i].Add(&m[i], &elem)
+				m[i] += elem % constants.ModP
 			}
 			close(replies[i])
 		}
@@ -95,12 +95,12 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 					nextElemPos += db.BlockLengths[rowN*db.NumColumns+colN]
 				}
 			}
-			replyChan := make(chan []field.Element, (end-begin)*(db.BlockSize+1))
+			replyChan := make(chan []uint32, (end-begin)*(db.BlockSize+1))
 			replies[i] = replyChan
 			go processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
 		}
-		m := make([]field.Element, 0, db.NumRows*(db.BlockSize+1))
+		m := make([]uint32, 0, db.NumRows*(db.BlockSize+1))
 		for i, reply := range replies {
 			chunk := <-reply
 			m = append(m, chunk...)
@@ -111,9 +111,9 @@ func answer(q []field.Element, db *database.DB, NGoRoutines int) []field.Element
 }
 
 // processing multiple rows by iterating over them
-func processRows(rows []field.Element, blockLens []int, query []field.Element, numRowsToProcess, numColumns, blockLen int, reply chan<- []field.Element) {
+func processRows(rows []uint32, blockLens []int, query []uint32, numRowsToProcess, numColumns, blockLen int, reply chan<- []uint32) {
 	var prevPos, nextPos int
-	sums := make([]field.Element, 0, numRowsToProcess*(blockLen+1))
+	sums := make([]uint32, 0, numRowsToProcess*(blockLen+1))
 	for i := 0; i < numRowsToProcess; i++ {
 		for j := 0; j < numColumns; j++ {
 			nextPos += blockLens[i*numColumns+j]
@@ -126,30 +126,29 @@ func processRows(rows []field.Element, blockLens []int, query []field.Element, n
 }
 
 // processing a chunk of a database row
-func processColumns(columns []field.Element, blockLens []int, query []field.Element, blockLen int, reply chan<- []field.Element) {
+func processColumns(columns []uint32, blockLens []int, query []uint32, blockLen int, reply chan<- []uint32) {
 	reply <- computeMessageAndTag(columns, blockLens, query, blockLen)
 }
 
 // computeMessageAndTag multiplies db entries with the elements
 // from the client query and computes a tag over each block
-func computeMessageAndTag(elements []field.Element, blockLens []int, q []field.Element, blockLen int) []field.Element {
-	var prodTag, prod field.Element
-	sumTag := field.Zero()
-	sum := field.ZeroVector(blockLen)
+func computeMessageAndTag(elements []uint32, blockLens []int, q []uint32, blockLen int) []uint32 {
+	sumTag := uint32(0)
+	sum := make([]uint32, blockLen) // already initilized at zero
 	pos := 0
 	for j := 0; j < len(blockLens); j++ {
 		for b := 0; b < blockLens[j]; b++ {
-			if elements[pos].IsZero() {
+			if elements[pos] == 0 {
 				// no need to multiply if the element value is zero
 				pos += 1
 				continue
 			}
 			// compute message
-			prod.Mul(&elements[pos], &q[j*(blockLen+1)])
-			sum[b].Add(&sum[b], &prod)
+			prod := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)])) % uint64(constants.ModP)
+			sum[b] += uint32(prod)
 			// compute block tag
-			prodTag.Mul(&elements[pos], &q[j*(blockLen+1)+1+b])
-			sumTag.Add(&sumTag, &prodTag)
+			prodTag := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)+1+b])) % uint64(constants.ModP)
+			sumTag += uint32(prodTag)
 			pos += 1
 		}
 	}
@@ -158,11 +157,11 @@ func computeMessageAndTag(elements []field.Element, blockLens []int, q []field.E
 
 // Processing of columns for a database where each field element
 // encodes just a single bit
-func processSingleBitColumns(elements []field.Element, q []field.Element, replyTo chan<- field.Element) {
-	reply := field.Zero()
+func processSingleBitColumns(elements []uint32, q []uint32, replyTo chan<- uint32) {
+	reply := uint32(0)
 	for j := 0; j < len(elements); j++ {
-		if elements[j].Equal(&cst.One) {
-			reply.Add(&reply, &q[j])
+		if elements[j] == 1 {
+			reply += q[j] % cst.ModP
 		}
 	}
 	replyTo <- reply

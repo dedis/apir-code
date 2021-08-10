@@ -4,10 +4,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/si-co/vpir-code/lib/constants"
 	"io"
 	"math"
 	"testing"
+
+	"github.com/si-co/vpir-code/lib/constants"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
@@ -72,7 +73,7 @@ func TestMultiBitMatrixOneMbVPIR(t *testing.T) {
 	retrieveBlocks(t, xof, db, numBlocks, "MultiBitMatrixOneMbVPIR")
 }
 
-func TestDPFMultiBitVectorVPIR(t *testing.T) {
+func TestFSSMultiBitVectorVPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength
 	elemSize := 128
@@ -84,10 +85,10 @@ func TestDPFMultiBitVectorVPIR(t *testing.T) {
 	db, err := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 	require.NoError(t, err)
 
-	retrieveBlocksDPF(t, xof, db, numBlocks, "DPFMultiBitVectorVPIR")
+	retrieveBlocksFSS(t, xof, db, numBlocks, "FSSMultiBitVectorVPIR")
 }
 
-func TestDPFMultiBitMatrixVPIR(t *testing.T) {
+func TestFSSMultiBitMatrixVPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength
 	elemSize := 128
@@ -101,7 +102,7 @@ func TestDPFMultiBitMatrixVPIR(t *testing.T) {
 	db, err := database.CreateRandomMultiBitDB(xofDB, dbLen, nRows, blockLen)
 	require.NoError(t, err)
 
-	retrieveBlocksDPF(t, xof, db, numBlocks, "DPFMultiBitMatrixVPIR")
+	retrieveBlocksFSS(t, xof, db, numBlocks, "FSSMultiBitMatrixVPIR")
 }
 
 func getXof(t *testing.T, key string) io.Reader {
@@ -114,14 +115,14 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 	s1 := server.NewIT(db)
 
 	totalTimer := monitor.NewMonitor()
-	var elems []field.Element
+	var elems []uint32
 	for i := 0; i < numBlocks; i++ {
 		queries := c.Query(i, 2)
 
 		a0 := s0.Answer(queries[0])
 		a1 := s1.Answer(queries[1])
 
-		answers := [][]field.Element{a0, a1}
+		answers := [][]uint32{a0, a1}
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
@@ -135,10 +136,10 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
 }
 
-func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
-	c := client.NewDPF(rnd, &db.Info)
-	s0 := server.NewDPF(db)
-	s1 := server.NewDPF(db)
+func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
+	c := client.NewFSS(rnd, &db.Info)
+	s0 := server.NewFSS(db)
+	s1 := server.NewFSS(db)
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
@@ -147,7 +148,7 @@ func retrieveBlocksDPF(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
 
-		answers := [][]field.Element{a0, a1}
+		answers := [][]uint32{a0, a1}
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
