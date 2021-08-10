@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/fss"
 )
 
 type FSS struct {
@@ -50,8 +50,8 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (s *FSS) Answer(key FSS.FSSkey) []field.Element {
-	q := make([]field.Element, s.db.NumColumns*(s.db.BlockSize+1))
+func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {
+	q := make([]uint32, s.db.NumColumns*(s.db.BlockSize+1))
 	FSS.EvalFullFlatten(key, uint64(bits.Len(uint(s.db.NumColumns)-1)), s.db.BlockSize+1, q)
 	return answer(q, s.db, s.cores)
 }

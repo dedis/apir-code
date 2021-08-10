@@ -29,6 +29,7 @@ func ClientInitialize(numBits uint) *Fss {
 		f.FixedBlocks[i] = block
 	}
 	// Check if int is 32 or 64 bit
+	// TODO: since we work with uint32, we should change this?
 	var x uint64 = 1 << 32
 	if uint(x) == 0 {
 		f.N = 32
@@ -42,7 +43,7 @@ func ClientInitialize(numBits uint) *Fss {
 
 // Generate Keys for 2-party point functions It creates keys for a function
 // that evaluates to vector b when input x = a.
-func (f Fss) GenerateTreePF(a uint, b []uint) []FssKeyEq2P {
+func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 	fssKeys := make([]FssKeyEq2P, 2)
 	// Set up initial values
 	tempRand1 := make([]byte, aes.BlockSize+1)
