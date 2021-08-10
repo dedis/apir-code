@@ -8,6 +8,8 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/binary"
+
+	"github.com/si-co/vpir-code/lib/constants"
 )
 
 // Initialize client with this function
@@ -30,12 +32,15 @@ func ClientInitialize(numBits uint) *Fss {
 	}
 	// Check if int is 32 or 64 bit
 	// TODO: since we work with uint32, we should change this?
-	var x uint64 = 1 << 32
-	if uint(x) == 0 {
-		f.N = 32
-	} else {
-		f.N = 64
-	}
+	/*
+		var x uint64 = 1 << 32
+		if uint(x) == 0 {
+			f.N = 32
+		} else {
+			f.N = 64
+		}
+	*/
+	f.N = 32
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	return f
@@ -88,7 +93,7 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 		t1Left := prfOut1[aes.BlockSize] % 2
 		t1Right := prfOut1[(aes.BlockSize*2)+1] % 2
 		// Find bit in a
-		aBit := getBit(a, (f.N - f.NumBits + i + 1), f.N)
+		aBit := getBit(uint(a), (f.N - f.NumBits + i + 1), f.N)
 
 		// Figure out which half of expanded seeds to keep and lose
 		keep := rightStart
@@ -124,19 +129,19 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 	bLen := uint(len(b))
 
 	// convert blocks
-	tmp0 := make([]int64, bLen)
-	tmp1 := make([]int64, bLen)
+	tmp0 := make([]uint32, bLen)
+	tmp1 := make([]uint32, bLen)
 	convertBlock(f, sCurr0, tmp0)
 	convertBlock(f, sCurr1, tmp1)
 
-	fssKeys[0].FinalCW = make([]int, bLen)
-	fssKeys[1].FinalCW = make([]int, bLen)
+	fssKeys[0].FinalCW = make([]uint32, bLen)
+	fssKeys[1].FinalCW = make([]uint32, bLen)
 
 	for i := range fssKeys[0].FinalCW {
-		fssKeys[0].FinalCW[i] = (int(b[i]) - int(tmp0[i]) + int(tmp1[i]))
+		fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % constants.ModP
 		fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
 		if tCurr1 == 1 {
-			fssKeys[0].FinalCW[i] = fssKeys[0].FinalCW[i] * -1
+			fssKeys[0].FinalCW[i] = constants.ModP - fssKeys[0].FinalCW[i] // negation
 			fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
 		}
 	}

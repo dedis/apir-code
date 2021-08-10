@@ -7,6 +7,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/binary"
+
+	"github.com/si-co/vpir-code/lib/constants"
 )
 
 // Upon receiving query from client, initialize server with
@@ -39,7 +41,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 	return f
 }
 
-func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []int) {
+func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 	sCurr := make([]byte, aes.BlockSize)
 	copy(sCurr, k.SInit)
 	tCurr := k.TInit
@@ -77,14 +79,14 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []int) {
 	outLen := uint(len(out))
 
 	// convert block
-	tmp := make([]int64, outLen)
+	tmp := make([]uint32, outLen)
 	convertBlock(f, sCurr, tmp)
-
 	for i := range out {
 		if serverNum == 0 {
-			out[i] = int(tmp[i]) + int(tCurr)*k.FinalCW[i]
+			// tCurr is either 0 or 1, no need to mod the multiplication
+			out[i] = (tmp[i] + uint32(tCurr)*k.FinalCW[i]) % constants.ModP
 		} else {
-			out[i] = -1 * (int(tmp[i]) + int(tCurr)*k.FinalCW[i])
+			out[i] = constants.ModP - ((tmp[i] + uint32(tCurr)*k.FinalCW[i]) % constants.ModP)
 		}
 	}
 }
