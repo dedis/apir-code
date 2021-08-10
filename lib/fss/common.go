@@ -26,13 +26,6 @@ type FssKeyEq2P struct {
 	SInit   []byte
 	TInit   byte
 	CW      [][]byte // there are n
-	FinalCW int
-}
-
-type FssKeyEq2PVector struct {
-	SInit   []byte
-	TInit   byte
-	CW      [][]byte // there are n
 	FinalCW []int
 }
 
