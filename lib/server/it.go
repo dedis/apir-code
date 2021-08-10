@@ -1,9 +1,11 @@
 package server
 
 import (
+	"bytes"
 	"encoding/binary"
 	"runtime"
 
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 )
 
@@ -33,28 +35,25 @@ func (s *IT) DBInfo() *database.Info {
 
 // AnswerBytes decode the input, execute Answer and encodes the output
 func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
-	n := len(q) / (8 * 2)
-	data := make([]uint32, n)
-
-	for i := 0; i < n; i++ {
-		memIndex := i * 8 * 2
-
-		data[i] = uint32{
-			binary.LittleEndian.Uint64(q[memIndex : memIndex+8]),
-			binary.LittleEndian.Uint64(q[memIndex+8 : memIndex+16]),
-		}
+	res := make([]uint32, len(q)/constants.Bytes)
+	buf := bytes.NewReader(q)
+	err := binary.Read(buf, binary.BigEndian, &res)
+	if err != nil {
+		return nil, err
 	}
 
 	// get answer
-	a := s.Answer(data)
+	a := s.Answer(res)
 
-	res := make([]byte, len(a)*8*2)
-	for k := 0; k < len(a); k++ {
-		binary.LittleEndian.PutUint64(res[k*8*2:k*8*2+8], a[k][0])
-		binary.LittleEndian.PutUint64(res[k*8*2+8:k*8*2+8+8], a[k][1])
+	out := make([]byte, len(a)*constants.Bytes)
+	buff := new(bytes.Buffer)
+	err = binary.Write(buff, binary.BigEndian, a)
+	if err != nil {
+		return nil, err
 	}
+	out = buff.Bytes()
 
-	return res, nil
+	return out, nil
 }
 
 // Answer computes the answer for the given query

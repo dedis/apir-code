@@ -79,8 +79,8 @@ func (c *IT) ReconstructBytes(a [][]byte) (interface{}, error) {
 
 	for i := range res {
 		buf := bytes.NewReader(a[i])
-		res[i] = make([]uint32, len(a)/4)
-		err := binary.Read(buf, binary.LittleEndian, &res[i])
+		res[i] = make([]uint32, len(a[i])/4)
+		err := binary.Read(buf, binary.BigEndian, &res[i])
 		if err != nil {
 			return nil, err
 		}
@@ -114,7 +114,6 @@ func (c *IT) secretShare(numServers int) ([][]uint32, error) {
 		if err != nil {
 			return nil, err
 		}
-
 	}
 
 	// perform additive secret sharing

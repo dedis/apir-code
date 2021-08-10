@@ -72,6 +72,7 @@ func TestMultiBitMatrixOneMbVPIR(t *testing.T) {
 	retrieveBlocks(t, xof, db, numBlocks, "MultiBitMatrixOneMbVPIR")
 }
 
+/*
 func TestFSSMultiBitVectorVPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength
@@ -103,6 +104,7 @@ func TestFSSMultiBitMatrixVPIR(t *testing.T) {
 
 	retrieveBlocksFSS(t, xof, db, numBlocks, "FSSMultiBitMatrixVPIR")
 }
+*/
 
 func getXof(t *testing.T, key string) io.Reader {
 	return utils.RandomPRG()
@@ -135,6 +137,7 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
 }
 
+/*
 func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
 	c := client.NewFSS(rnd, &db.Info)
 	s0 := server.NewFSS(db)
@@ -159,3 +162,4 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 }
+*/

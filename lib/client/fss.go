@@ -61,7 +61,7 @@ func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2P {
 		log.Fatal(err)
 	}
 	// client initialization is the same for both single- and multi-bit scheme
-	return c.fss.GenerateTreePF(uint(c.state.iy), c.state.a)
+	return c.fss.GenerateTreePF(uint32(c.state.iy), c.state.a)
 }
 
 // ReconstructBytes decodes the answers from the servers and reconstruct the
