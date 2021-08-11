@@ -145,7 +145,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		reconstructedTag := uint32(0)
 		for b := 0; b < len(messages); b++ {
 			p := (uint64(st.a[b+1]) * uint64(messages[b])) % uint64(constants.ModP)
-			reconstructedTag += uint32(p)
+			reconstructedTag = (reconstructedTag + uint32(p)) % constants.ModP
 		}
 		if tag != reconstructedTag {
 			return nil, errors.New("REJECT")

@@ -145,10 +145,10 @@ func computeMessageAndTag(elements []uint32, blockLens []int, q []uint32, blockL
 			}
 			// compute message
 			prod := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)])) % uint64(constants.ModP)
-			sum[b] += uint32(prod)
+			sum[b] = (sum[b] + uint32(prod)) % constants.ModP
 			// compute block tag
 			prodTag := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)+1+b])) % uint64(constants.ModP)
-			sumTag += uint32(prodTag)
+			sumTag = (sumTag + uint32(prodTag)) % constants.ModP
 			pos += 1
 		}
 	}

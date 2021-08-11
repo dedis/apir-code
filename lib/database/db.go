@@ -178,7 +178,6 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 
 	for i := 0; i < n; i++ {
 		element := binary.BigEndian.Uint32(bytes[i*constants.Bytes:(i+1)*constants.Bytes]) % constants.ModP
-
 		db.SetEntry(i, element)
 		db.BlockLengths[i/blockLen] = blockLen
 	}
