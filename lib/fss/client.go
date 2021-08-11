@@ -17,7 +17,8 @@ import (
 // of bits to check
 // TODO: initialize PRF keys as in Dima's init() function, so that we don't
 // have to send the prfKeys to the server and we avoid initialization of PRF
-// keys every time we invoke the client
+// keys every time we invoke the client. We can use the expand key function to
+// and replicate the same behaviour as the init function in the other library
 func ClientInitialize(numBits uint) *Fss {
 	f := new(Fss)
 	f.NumBits = numBits
