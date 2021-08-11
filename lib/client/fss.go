@@ -17,7 +17,7 @@ type FSS struct {
 	dbInfo *database.Info
 	state  *state
 
-	fss *fss.Fss
+	Fss *fss.Fss
 }
 
 // NewFSS returns a new client for the FSS-based single- and multi-bit schemes
@@ -26,7 +26,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		fss:    fss.ClientInitialize(uint(bits.Len(uint(info.NumColumns) - 1))),
+		Fss:    fss.ClientInitialize(uint(bits.Len(uint(info.NumColumns) - 1))),
 	}
 }
 
@@ -61,7 +61,7 @@ func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2P {
 		log.Fatal(err)
 	}
 	// client initialization is the same for both single- and multi-bit scheme
-	return c.fss.GenerateTreePF(uint32(c.state.iy), c.state.a)
+	return c.Fss.GenerateTreePF(uint32(c.state.iy), c.state.a)
 }
 
 // ReconstructBytes decodes the answers from the servers and reconstruct the
