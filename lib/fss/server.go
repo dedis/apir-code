@@ -29,16 +29,42 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 		f.FixedBlocks[i] = block
 	}
 	// Check if int is 32 or 64 bit
-	var x uint64 = 1 << 32
-	if uint(x) == 0 {
-		f.N = 32
-	} else {
-		f.N = 64
-	}
+	// TODO: check if correct, but since uint32, always N = 32
+	//var x uint64 = 1 << 32
+	//if uint(x) == 0 {
+	//f.N = 32
+	//} else {
+	//f.N = 64
+	//}
+	f.N = 32
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 
 	return f
+}
+
+func (f Fss) EvaluatePFFull(serverNum byte, k FssKeyEq2P, out []uint32) {
+	sCurr := make([]byte, aes.BlockSize)
+	copy(sCurr, k.SInit)
+	tCurr := k.TInit
+	stop := f.NumBits
+	index := uint(0)
+
+	f.evalPFFullRecursive(serverNum, k, sCurr, tCurr, 0, stop, index, out)
+}
+
+// TODO
+func (f Fss) evalPFFullRecursive(serverNum byte, k FssFssKeyEq2P, s []byte, t byte, lvl, stop, index uint, out [][]uint32) {
+	if index >= uint64(len(out)) {
+		return
+	}
+
+	if lvl == stop {
+		return
+	}
+
+	return
+
 }
 
 func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
@@ -83,7 +109,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 	convertBlock(f, sCurr, tmp)
 	for i := range out {
 		if serverNum == 0 {
-			// tCurr is either 0 or 1, no need to mod the multiplication
+			// tCurr is either 0 or 1, no need to mod
 			out[i] = (tmp[i] + uint32(tCurr)*k.FinalCW[i]) % constants.ModP
 		} else {
 			out[i] = constants.ModP - ((tmp[i] + uint32(tCurr)*k.FinalCW[i]) % constants.ModP)
