@@ -14,10 +14,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var DefaultChunkSize = 1e7
-
-const infoDbKey = "info"
-
 func NewDB(info Info) (*DB, error) {
 	n := info.BlockSize * info.NumColumns * info.NumRows
 	if info.BlockSize == constants.SingleBitBlockLength {
@@ -49,7 +45,6 @@ func NewEmptyDB(info Info) (*DB, error) {
 type DB struct {
 	Info
 	inMemory []uint32
-	//mmap     mmap.MMap
 }
 
 func (d *DB) SetEntry(i int, el uint32) {
@@ -112,14 +107,10 @@ func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
 		BlockSize: blockSize,
 	}
 
+	// already initialized at zero
 	db, err := NewDB(info)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to create db: %v", err)
-	}
-
-	n := numRows * numColumns * blockSize
-	for i := 0; i < n; i++ {
-		db.SetEntry(i, 0)
 	}
 
 	return db, nil
@@ -186,9 +177,7 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 	db.BlockLengths = make([]int, numRows*numColumns)
 
 	for i := 0; i < n; i++ {
-		var buf [16]byte
-		copy(buf[:], bytes[i*constants.Bytes:(1+i)*constants.Bytes])
-		element := binary.BigEndian.Uint32(buf[:])
+		element := binary.BigEndian.Uint32(bytes[i*constants.Bytes:(i+1)*constants.Bytes]) % constants.ModP
 
 		db.SetEntry(i, element)
 		db.BlockLengths[i/blockLen] = blockLen
