@@ -46,7 +46,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 
 			for j, reply := range replies {
 				element := <-reply
-				m[i] += element % cst.ModP
+				m[i] = (m[i] + element) % cst.ModP
 				close(replies[j])
 			}
 		}
@@ -80,7 +80,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 		for i, reply := range replies {
 			chunk := <-reply
 			for i, elem := range chunk {
-				m[i] += elem % constants.ModP
+				m[i] = (m[i] + elem) % constants.ModP
 			}
 			close(replies[i])
 		}
@@ -161,7 +161,7 @@ func processSingleBitColumns(elements []uint32, q []uint32, replyTo chan<- uint3
 	reply := uint32(0)
 	for j := 0; j < len(elements); j++ {
 		if elements[j] == 1 {
-			reply += q[j] % cst.ModP
+			reply = (reply + q[j]) % cst.ModP
 		}
 	}
 	replyTo <- reply

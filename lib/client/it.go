@@ -131,13 +131,13 @@ func (c *IT) secretShare(numServers int) ([][]uint32, error) {
 		for b := colStart; b < colEnd; b++ {
 			sum := uint32(0)
 			for k := 0; k < numServers-1; k++ {
-				sum += vectors[k][b] % constants.ModP
+				sum = (sum + vectors[k][b]) % constants.ModP
 			}
 			vectors[numServers-1][b] = sum
 			vectors[numServers-1][b] = constants.ModP - vectors[numServers-1][b]
 			// set alpha vector at the block we want to retrieve
 			if j == c.state.iy {
-				vectors[numServers-1][b] += c.state.a[b-j*blockLen] % constants.ModP
+				vectors[numServers-1][b] = (vectors[numServers-1][b] + c.state.a[b-j*blockLen]) % constants.ModP
 			}
 		}
 	}

@@ -104,7 +104,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		for i := 0; i < dbInfo.NumRows; i++ {
 			sum[i] = make([]uint32, 1)
 			for k := range answers {
-				sum[i][0] += answers[k][i] % constants.ModP
+				sum[i][0] = (sum[i][0] + answers[k][i]) % constants.ModP
 			}
 		}
 		// verify integrity and return database entry if accept
@@ -132,7 +132,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		sum[i] = make([]uint32, dbInfo.BlockSize+1)
 		for b := 0; b < dbInfo.BlockSize+1; b++ {
 			for k := range answers {
-				sum[i][b] += answers[k][i*(dbInfo.BlockSize+1)+b] % constants.ModP
+				sum[i][b] = (sum[i][b] + answers[k][i*(dbInfo.BlockSize+1)+b]) % constants.ModP
 			}
 		}
 	}
@@ -145,7 +145,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		reconstructedTag := uint32(0)
 		for b := 0; b < len(messages); b++ {
 			p := (uint64(st.a[b+1]) * uint64(messages[b])) % uint64(constants.ModP)
-			reconstructedTag += uint32(p) % constants.ModP
+			reconstructedTag += uint32(p)
 		}
 		if tag != reconstructedTag {
 			return nil, errors.New("REJECT")
