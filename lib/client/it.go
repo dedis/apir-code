@@ -8,7 +8,6 @@ import (
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -108,12 +107,13 @@ func (c *IT) secretShare(numServers int) ([][]uint32, error) {
 
 	// Get random elements for all numServers-1 vectors
 	rand := make([]uint32, (numServers-1)*vectorLen)
-	var err error
+	bytes := make([]byte, len(rand)*constants.Bytes)
+	if _, err := io.ReadFull(c.rnd, bytes[:]); err != nil {
+		return nil, err
+	}
+
 	for i := range rand {
-		rand[i], err = utils.RandUint32()
-		if err != nil {
-			return nil, err
-		}
+		rand[i] = binary.BigEndian.Uint32(bytes[i*4 : (i+1)*4])
 	}
 
 	// perform additive secret sharing
