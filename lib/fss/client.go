@@ -153,8 +153,10 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 	return fssKeys
 }
 
-// This function contains the 2-party FSS key generation for interval functions, i.e. <, > functions.
-// The usage is similar to 2-party FSS for equality functions.
+// This function contains the 2-party FSS key generation for interval
+// functions, i.e. <, > functions.  The usage is similar to 2-party FSS for
+// equality functions.
+// From: Boyle et al., Function Secret Sharing, EUROCRYPT'15, pag. 19
 func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	k := make([]ServerKeyLt, 2)
 
@@ -193,8 +195,7 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	rand.Read(s0[naStart : naStart+aes.BlockSize])
 	// Ensure the "not a" bits are the same
 	copy(s1[naStart:naStart+aes.BlockSize], s0[naStart:naStart+aes.BlockSize])
-	//fmt.Println("s0:", s0)
-	//fmt.Println("s1:", s1)
+
 	// Set initial "t" bits
 	t0 := make([]uint8, 2)
 	t1 := make([]uint8, 2)
@@ -210,6 +211,7 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	t1[naBit] = t0[naBit]
 
 	// Generate random Vs
+	// TODO: element of the group
 	v0 := make([]uint, 2)
 	v1 := make([]uint, 2)
 
@@ -218,6 +220,7 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	v1[aBit] = v0[aBit]
 
 	// make sure v0na + -v1na = a1 * b
+	// TODO: b is the target input, marked as g in the paper
 	v0[naBit] = randomCryptoInt()
 	v1[naBit] = v0[naBit] - b*uint(aBit)
 
@@ -247,6 +250,7 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	ct0 := make([]uint8, 2)
 	ct1 := make([]uint8, 2)
 
+	// TODO: elements of the group
 	var cv [][]uint
 	cv = make([][]uint, 2)
 	cv[0] = make([]uint, 2)
@@ -270,13 +274,13 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 		copy(s1, f.Out[:aes.BlockSize*2])
 		t1[0] = f.Out[aes.BlockSize*2] % 2
 		t1[1] = f.Out[aes.BlockSize*2+1] % 2
+		// TODO: these below are also group elements (line 6 of the
+		// algorithm in the paper)
 		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+8 : aes.BlockSize*2+16])
 		v1[0] = uint(conv)
 		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+16 : aes.BlockSize*2+24])
 		v1[1] = uint(conv)
 
-		//fmt.Println("s0:", s0)
-		//fmt.Println("s1:", s1)
 		// Redefine aStart and naStart based on new a's
 		aStart = int(aes.BlockSize * aBit)
 		naStart = int(aes.BlockSize * naBit)
@@ -304,6 +308,8 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 		ct0[naBit] = uint8(temp[1]) % 2
 		ct1[naBit] = ct0[naBit] ^ t0[naBit] ^ t1[naBit]
 
+		// TODO: cv are group element, need to look carefully at the
+		// condition on line 11
 		cv[tbit0][aBit] = randomCryptoInt()
 		cv[tbit1][aBit] = v0[aBit] + cv[tbit0][aBit] - v1[aBit]
 
@@ -318,9 +324,9 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 		k[0].cw[1][i].cs[1] = make([]byte, aes.BlockSize)
 
 		k[0].cw[0][i].ct = make([]uint8, 2)
-		k[0].cw[0][i].cv = make([]uint, 2)
+		k[0].cw[0][i].cv = make([]uint, 2) // TODO: group element
 		k[0].cw[1][i].ct = make([]uint8, 2)
-		k[0].cw[1][i].cv = make([]uint, 2)
+		k[0].cw[1][i].cv = make([]uint, 2) // TODO: group element
 
 		copy(k[0].cw[0][i].cs[0], cs0[0:aes.BlockSize])
 		copy(k[0].cw[0][i].cs[1], cs0[aes.BlockSize:aes.BlockSize*2])
