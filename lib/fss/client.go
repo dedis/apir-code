@@ -179,10 +179,10 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 
 	k[0].t = make([]uint8, 2)
 	k[1].t = make([]uint8, 2)
-	k[0].v = make([]uint, 2)
-	k[1].v = make([]uint, 2)
+	k[0].v = make([][]uint32, 2)
+	k[1].v = make([][]uint32, 2)
 	// Figure out first bit
-	aBit := getBit(a, (f.N - f.NumBits + 1), f.N)
+	aBit := getBit(uint(a), (f.N - f.NumBits + 1), f.N)
 	naBit := aBit ^ 1
 
 	// Initialize seeds (store as an array for each server)
@@ -214,7 +214,7 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 	t1[naBit] = t0[naBit]
 
 	// Generate random Vs
-	// TODO: element of the group
+	// NOTE: element of the output group, which for us is F^(1+b)
 	v0 := make([][]uint32, 2)
 	v1 := make([][]uint32, 2)
 
@@ -223,9 +223,15 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 	v1[aBit] = field.NegateVector(v0[aBit])
 
 	// make sure v0na + -v1na = a1 * b
-	// TODO: b is the target input, marked as g in the paper
+	// NOTE: b is the target input, denoted as g in the paper, in F^(1+b)
 	v0[naBit] = field.RandVector(lenb)
-	v1[naBit] = v0[naBit] - b*uint(aBit)
+	if aBit == 0 {
+		v1[naBit] = field.NegateVector((v0[naBit]))
+	} else {
+		for i := range v1[naBit] {
+			v1[naBit][i] = v0[naBit][i] - b[i]
+		}
+	}
 
 	// Store generated values into the key
 	copy(k[0].s[0], s0[0:aes.BlockSize])
@@ -254,20 +260,23 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 	ct1 := make([]uint8, 2)
 
 	// TODO: elements of the group
-	var cv [][]uint
-	cv = make([][]uint, 2)
-	cv[0] = make([]uint, 2)
-	cv[1] = make([]uint, 2)
+	var cv [][][]uint32
+	cv = make([][][]uint32, 2)
+	cv[0] = make([][]uint32, 2)
+	cv[1] = make([][]uint32, 2)
 
 	for i := uint(0); i < f.NumBits-1; i++ {
 		// Figure out next bit
-		aBit = getBit(a, (f.N - f.NumBits + i + 2), f.N)
+		aBit = getBit(uint(a), (f.N - f.NumBits + i + 2), f.N)
 		naBit = aBit ^ 1
 
 		prf(key0, f.FixedBlocks, 4, f.Temp, f.Out)
 		copy(s0, f.Out[:aes.BlockSize*2])
 		t0[0] = f.Out[aes.BlockSize*2] % 2
 		t0[1] = f.Out[aes.BlockSize*2+1] % 2
+		// Note: the number of bytes in field element is hardcoded here
+		// TODO: need to generate to group elements here, i.e. two elements of
+		// F^(1+b): how to expand randomness?
 		conv, _ := binary.Uvarint(f.Out[aes.BlockSize*2+8 : aes.BlockSize*2+16])
 		v0[0] = uint(conv)
 		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+16 : aes.BlockSize*2+24])
@@ -311,13 +320,19 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		ct0[naBit] = uint8(temp[1]) % 2
 		ct1[naBit] = ct0[naBit] ^ t0[naBit] ^ t1[naBit]
 
-		// TODO: cv are group element, need to look carefully at the
-		// condition on line 11
-		cv[tbit0][aBit] = randomCryptoInt()
-		cv[tbit1][aBit] = v0[aBit] + cv[tbit0][aBit] - v1[aBit]
+		// NOTE: cv are group element
+		cv[tbit0][aBit] = field.RandVector(lenb)
+		for i := range cv[tbit0][aBit] {
+			cv[tbit1][aBit][i] = (v0[aBit][i] + cv[tbit0][aBit][i] - v1[aBit][i]) % field.ModP
+		}
 
-		cv[tbit0][naBit] = randomCryptoInt()
-		cv[tbit1][naBit] = cv[tbit0][naBit] + v0[naBit] - v1[naBit] - b*uint(aBit)
+		cv[tbit0][naBit] = field.RandVector(lenb)
+		for i := range cv[tbit0][naBit] {
+			cv[tbit1][naBit][i] = (cv[tbit0][naBit][i] +
+				v0[naBit][i] -
+				v1[naBit][i] -
+				b[i]*uint32(aBit)) % field.ModP
+		}
 
 		k[0].cw[0][i].cs = make([][]byte, 2)
 		k[0].cw[0][i].cs[0] = make([]byte, aes.BlockSize)
@@ -327,9 +342,9 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		k[0].cw[1][i].cs[1] = make([]byte, aes.BlockSize)
 
 		k[0].cw[0][i].ct = make([]uint8, 2)
-		k[0].cw[0][i].cv = make([]uint, 2) // TODO: group element
+		k[0].cw[0][i].cv = make([][]uint32, 2) // NOTE: group element
 		k[0].cw[1][i].ct = make([]uint8, 2)
-		k[0].cw[1][i].cv = make([]uint, 2) // TODO: group element
+		k[0].cw[1][i].cv = make([][]uint32, 2) // NOTE: group element
 
 		copy(k[0].cw[0][i].cs[0], cs0[0:aes.BlockSize])
 		copy(k[0].cw[0][i].cs[1], cs0[aes.BlockSize:aes.BlockSize*2])

@@ -32,14 +32,14 @@ type FssKeyEq2P struct {
 type CWLt struct {
 	cs [][]byte
 	ct []uint8
-	cv []uint // TODO: elements of the group
+	cv [][]uint32 // NOTE: elements of the group, i.e. F^(1+b)
 }
 
 type ServerKeyLt struct {
 	s  [][]byte
 	t  []uint8
-	v  []uint   // TODO: element of the group
-	cw [][]CWLt // Should be length n
+	v  [][]uint32 // TOTE: elements of the group, i.e. F^(1+b)
+	cw [][]CWLt   // Should be length n
 }
 
 // Helper functions
