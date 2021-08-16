@@ -10,6 +10,7 @@ import (
 	"encoding/binary"
 
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Initialize client with this function
@@ -157,7 +158,9 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 // functions, i.e. <, > functions.  The usage is similar to 2-party FSS for
 // equality functions.
 // From: Boyle et al., Function Secret Sharing, EUROCRYPT'15, pag. 19
-func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
+func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
+	lenb := len(b)
+
 	k := make([]ServerKeyLt, 2)
 
 	k[0].cw = make([][]CWLt, 2)
@@ -212,16 +215,16 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 
 	// Generate random Vs
 	// TODO: element of the group
-	v0 := make([]uint, 2)
-	v1 := make([]uint, 2)
+	v0 := make([][]uint32, 2)
+	v1 := make([][]uint32, 2)
 
 	// make sure v0a + -v1a = 0
-	v0[aBit] = randomCryptoInt()
-	v1[aBit] = v0[aBit]
+	v0[aBit] = field.RandVector(lenb)
+	v1[aBit] = field.NegateVector(v0[aBit])
 
 	// make sure v0na + -v1na = a1 * b
 	// TODO: b is the target input, marked as g in the paper
-	v0[naBit] = randomCryptoInt()
+	v0[naBit] = field.RandVector(lenb)
 	v1[naBit] = v0[naBit] - b*uint(aBit)
 
 	// Store generated values into the key

@@ -1,11 +1,7 @@
 package utils
 
 import (
-	"crypto/rand"
-	"encoding/binary"
 	"math"
-
-	"github.com/si-co/vpir-code/lib/constants"
 )
 
 // MaxBytesLength get maximal []byte length in map[int][]byte
@@ -34,10 +30,4 @@ func IncreaseToNextSquare(num *int) {
 		return
 	}
 	*num = int(math.Pow(i+1, 2))
-}
-
-func RandUint32() (uint32, error) {
-	var buf [4]byte
-	_, err := rand.Read(buf[:])
-	return binary.BigEndian.Uint32(buf[:]) % constants.ModP, err
 }

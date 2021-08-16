@@ -13,8 +13,8 @@ import (
 	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Client represents the client instance in both the IT and DPF-based schemes.
@@ -62,11 +62,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	st := &state{}
 
 	// sample random alpha
-	var err error
-	st.alpha, err = utils.RandUint32()
-	if err != nil {
-		return nil, err
-	}
+	st.alpha = field.RandElementWithPRG(rnd)
 
 	// Compute the position in the db (vector or matrix)
 	// if db is a vector, ix always equals 0
