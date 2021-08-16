@@ -38,7 +38,7 @@ type CWLt struct {
 type ServerKeyLt struct {
 	s  [][]byte
 	t  []uint8
-	v  [][]uint32 // TOTE: elements of the group, i.e. F^(1+b)
+	v  [][]uint32 // NOTE: elements of the group, i.e. F^(1+b)
 	cw [][]CWLt   // Should be length n
 }
 
@@ -88,6 +88,7 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 	}
 }
 
+// TODO: check if everything's fine
 func convertBlock(f Fss, x []byte, out []uint32) {
 	bLen := uint(len(out))
 

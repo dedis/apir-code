@@ -119,6 +119,8 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 
 // This is the 2-party FSS evaluation function for interval functions, i.e. <,> functions.
 // The usage is similar to 2-party FSS for equality functions
+// TODO: need to change the signature of the function and input a out vector
+// to have the correct length
 func (f Fss) EvaluateLt(k ServerKeyLt, x uint) uint {
 	xBit := getBit(x, (f.N - f.NumBits + 1), f.N)
 	s := make([]byte, aes.BlockSize)
@@ -142,6 +144,7 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint) uint {
 			s[j] = s[j] ^ k.cw[t][i-1].cs[xBit][j]
 		}
 		vStart := aes.BlockSize*2 + 8 + 8*xBit
+		// TODO: conv should be a vector of field elements
 		conv, _ := binary.Uvarint(f.Out[vStart : vStart+8])
 		v = v + uint(conv) + k.cw[t][i-1].cv[xBit]
 		t = (uint8(f.Out[2*aes.BlockSize+xBit]) % 2) ^ k.cw[t][i-1].ct[xBit]
