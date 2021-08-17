@@ -16,7 +16,7 @@ func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(6, testBlockLength)
 	// Test with if x = 10, evaluate to vector b
-	bLen := 1000
+	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
 		b[i] = rand.Uint32() % constants.ModP
@@ -49,7 +49,7 @@ func TestInterval(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(6, testBlockLength)
 	// Test with if x < 10, evaluate to vector b
-	bLen := 1000
+	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
 		b[i] = rand.Uint32() % constants.ModP
