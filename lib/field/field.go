@@ -50,3 +50,13 @@ func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
 func RandVector(length int) []uint32 {
 	return RandVectorWithPRG(length, rand.Reader)
 }
+
+func ByteSliceToFieldElementSlice(in []byte) []uint32 {
+	out := make([]uint32, len(in)/4)
+
+	for i := range out {
+		out[i] = binary.BigEndian.Uint32(in[i*Bytes:(i+1)*Bytes]) % ModP
+	}
+
+	return out
+}
