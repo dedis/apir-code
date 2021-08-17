@@ -7,7 +7,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/binary"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
@@ -262,28 +261,22 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		naBit = aBit ^ 1
 
 		// TODO: check this until line 288
-		// we need two blocks for s1, one entire block for both bits in t1 and
-		// for each of the two vectors, we need blockLength/field.Bytes
-		numBlocks := uint(2 + 1 + 2*(len(v0[0])/field.Bytes))
-		prf(key0, f.FixedBlocks, numBlocks, f.Temp, f.Out)
-		copy(s0, f.Out[:aes.BlockSize*2])
-		t0[0] = f.Out[aes.BlockSize*2] % 2
-		t0[1] = f.Out[aes.BlockSize*2+1] % 2
+		prf(key0, f.FixedBlocks, 3, f.Temp, f.Out)
+		copy(s0, f.Out[:aes.BlockSize*2])    // 2 blocks here
+		t0[0] = f.Out[aes.BlockSize*2] % 2   // one byte from third block
+		t0[1] = f.Out[aes.BlockSize*2+1] % 2 // one additional byte from third block
+		// TODO: here we are wasting 14 bytes from the third block
 
-		for i := range v0[0] {
-			v0[0][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+8+8*i:aes.BlockSize*2+12+8*i]) % field.ModP
-			v0[1][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+12+8*i:aes.BlockSize*2+16+8*i]) % field.ModP
-		}
+		convertBlock(f, s0, v0[0])
+		convertBlock(f, s0, v0[1])
 
-		prf(key1, f.FixedBlocks, numBlocks, f.Temp, f.Out)
+		prf(key1, f.FixedBlocks, 3, f.Temp, f.Out)
 		copy(s1, f.Out[:aes.BlockSize*2])
 		t1[0] = f.Out[aes.BlockSize*2] % 2
 		t1[1] = f.Out[aes.BlockSize*2+1] % 2
 
-		for i := range v0[0] {
-			v1[0][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+8+8*i:aes.BlockSize*2+12+8*i]) % field.ModP
-			v1[1][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+12+8*i:aes.BlockSize*2+16+8*i]) % field.ModP
-		}
+		convertBlock(f, s0, v1[0])
+		convertBlock(f, s0, v1[1])
 
 		// Redefine aStart and naStart based on new a's
 		aStart = int(aes.BlockSize * aBit)
