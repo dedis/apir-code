@@ -307,11 +307,13 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 
 		// NOTE: cv are group element
 		cv[tbit0][aBit] = field.RandVector(lenb)
+		cv[tbit1][aBit] = make([]uint32, lenb)
 		for i := range cv[tbit0][aBit] {
 			cv[tbit1][aBit][i] = (v0[aBit][i] + cv[tbit0][aBit][i] - v1[aBit][i]) % field.ModP
 		}
 
 		cv[tbit0][naBit] = field.RandVector(lenb)
+		cv[tbit1][naBit] = make([]uint32, lenb)
 		for i := range cv[tbit0][naBit] {
 			cv[tbit1][naBit][i] = (cv[tbit0][naBit][i] +
 				v0[naBit][i] -
