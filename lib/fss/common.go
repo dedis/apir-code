@@ -7,6 +7,8 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/binary"
+
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 type Fss struct {
@@ -88,17 +90,13 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 	}
 }
 
-// TODO: check if everything's fine
 func convertBlock(f Fss, x []byte, out []uint32) {
 	bLen := uint(len(out))
+	randBytes := make([]byte, bLen*field.Bytes)
 
-	randBytes := make([]byte, bLen*8)
-
-	// we can generate four uint32 per AES block since they are supposed to be
-	// 32 bits
-	prf(x, f.FixedBlocks, bLen/4, f.Temp, randBytes)
+	prf(x, f.FixedBlocks, bLen/field.Bytes, f.Temp, randBytes)
 
 	for i := range out {
-		out[i] = binary.BigEndian.Uint32(randBytes[i*4 : (i+1)*4])
+		out[i] = binary.BigEndian.Uint32(randBytes[i*field.Bytes : (i+1)*field.Bytes])
 	}
 }

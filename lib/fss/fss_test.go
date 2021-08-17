@@ -10,9 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testBlockLength = 16
+
 func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
-	fClient := ClientInitialize(6)
+	fClient := ClientInitialize(6, testBlockLength)
 	// Test with if x = 10, evaluate to vector b
 	bLen := 1000
 	b := make([]uint32, bLen)

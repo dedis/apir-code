@@ -9,6 +9,7 @@ import (
 	"encoding/binary"
 
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Upon receiving query from client, initialize server with
@@ -28,15 +29,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	// Check if int is 32 or 64 bit
-	// TODO: check if correct, but since uint32, always N = 32
-	//var x uint64 = 1 << 32
-	//if uint(x) == 0 {
-	//f.N = 32
-	//} else {
-	//f.N = 64
-	//}
-	f.N = 32
+	f.N = field.Bytes * 4
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 

@@ -20,13 +20,14 @@ import (
 // have to send the prfKeys to the server and we avoid initialization of PRF
 // keys every time we invoke the client. We can use the expand key function to
 // and replicate the same behaviour as the init function in the other library
-func ClientInitialize(numBits uint) *Fss {
+func ClientInitialize(numBits uint, blockLength int) *Fss {
 	f := new(Fss)
 	f.NumBits = numBits
+	initPRFLen := blockLength / field.Bytes
 	f.PrfKeys = make([][]byte, initPRFLen)
 	// Create fixed AES blocks
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)
-	for i := uint(0); i < initPRFLen; i++ {
+	for i := uint(0); i < uint(initPRFLen); i++ {
 		f.PrfKeys[i] = make([]byte, aes.BlockSize)
 		rand.Read(f.PrfKeys[i])
 		block, err := aes.NewCipher(f.PrfKeys[i])
@@ -35,17 +36,7 @@ func ClientInitialize(numBits uint) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	// Check if int is 32 or 64 bit
-	// TODO: since we work with uint32, we should change this?
-	/*
-		var x uint64 = 1 << 32
-		if uint(x) == 0 {
-			f.N = 32
-		} else {
-			f.N = 64
-		}
-	*/
-	f.N = 32
+	f.N = field.Bytes * 8
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	return f
@@ -270,28 +261,30 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		aBit = getBit(uint(a), (f.N - f.NumBits + i + 2), f.N)
 		naBit = aBit ^ 1
 
-		prf(key0, f.FixedBlocks, 4, f.Temp, f.Out)
+		// we need two blocks for s1, one entire block for both bits in t1 and
+		// for each of the two vectors, we need blockLength/4 (i.e., len(v0[0])/4)
+		// so len(v0[0])/2
+		numBlocks := uint(2 + 1 + len(v0[0])/2)
+		prf(key0, f.FixedBlocks, numBlocks, f.Temp, f.Out)
 		copy(s0, f.Out[:aes.BlockSize*2])
 		t0[0] = f.Out[aes.BlockSize*2] % 2
 		t0[1] = f.Out[aes.BlockSize*2+1] % 2
 		// Note: the number of bytes in field element is hardcoded here
-		// TODO: need to generate to group elements here, i.e. two elements of
-		// F^(1+b): how to expand randomness?
-		conv, _ := binary.Uvarint(f.Out[aes.BlockSize*2+8 : aes.BlockSize*2+16])
-		v0[0] = uint(conv)
-		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+16 : aes.BlockSize*2+24])
-		v0[1] = uint(conv)
+		// TODO: check this
+		for i := range v0[0] {
+			v0[0][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+8+8*i : aes.BlockSize*2+12+8*i])
+			v0[1][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+12+8*i : aes.BlockSize*2+16+8*i])
+		}
 
-		prf(key1, f.FixedBlocks, 4, f.Temp, f.Out)
+		prf(key1, f.FixedBlocks, numBlocks, f.Temp, f.Out)
 		copy(s1, f.Out[:aes.BlockSize*2])
 		t1[0] = f.Out[aes.BlockSize*2] % 2
 		t1[1] = f.Out[aes.BlockSize*2+1] % 2
-		// TODO: these below are also group elements (line 6 of the
-		// algorithm in the paper)
-		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+8 : aes.BlockSize*2+16])
-		v1[0] = uint(conv)
-		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+16 : aes.BlockSize*2+24])
-		v1[1] = uint(conv)
+		// TODO: check this
+		for i := range v0[0] {
+			v1[0][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+8+8*i : aes.BlockSize*2+12+8*i])
+			v1[1][i] = binary.BigEndian.Uint32(f.Out[aes.BlockSize*2+12+8*i : aes.BlockSize*2+16+8*i])
+		}
 
 		// Redefine aStart and naStart based on new a's
 		aStart = int(aes.BlockSize * aBit)
@@ -368,9 +361,9 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		k[1].cw[1][i].cs[1] = make([]byte, aes.BlockSize)
 
 		k[1].cw[0][i].ct = make([]uint8, 2)
-		k[1].cw[0][i].cv = make([]uint, 2)
+		k[1].cw[0][i].cv = make([][]uint32, 2)
 		k[1].cw[1][i].ct = make([]uint8, 2)
-		k[1].cw[1][i].cv = make([]uint, 2)
+		k[1].cw[1][i].cv = make([][]uint32, 2)
 
 		copy(k[1].cw[0][i].cs[0], cs0[0:aes.BlockSize])
 		copy(k[1].cw[0][i].cs[1], cs0[aes.BlockSize:aes.BlockSize*2])
