@@ -6,7 +6,6 @@ package fss
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/binary"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
@@ -76,21 +75,19 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 
 	// convert block
 	tmp := make([]uint32, outLen)
-	convertBlock(f, sCurr, tmp)
+	convertBlock(f, sCurr, &tmp)
 	for i := range out {
 		if serverNum == 0 {
 			// tCurr is either 0 or 1, no need to mod
-			out[i] = (tmp[i] + uint32(tCurr)*k.FinalCW[i]) % constants.ModP
+			out[i] = (tmp[i] + uint32(tCurr)*k.FinalCW[i]) % field.ModP
 		} else {
-			out[i] = constants.ModP - ((tmp[i] + uint32(tCurr)*k.FinalCW[i]) % constants.ModP)
+			out[i] = constants.ModP - ((tmp[i] + uint32(tCurr)*k.FinalCW[i]) % field.ModP)
 		}
 	}
 }
 
 // This is the 2-party FSS evaluation function for interval functions, i.e. <,> functions.
 // The usage is similar to 2-party FSS for equality functions
-// TODO: need to change the signature of the function and input a out vector
-// to have the correct length
 func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
 	xBit := getBit(uint(x), (f.N - f.NumBits + 1), f.N)
 	s := make([]byte, aes.BlockSize)
@@ -106,11 +103,7 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
 		}
 
 		// TODO: check this until end of function
-		// we need two blocks for s1, one entire block for both bits in t1 and
-		// for each of the two vectors, we need blockLength/4 (i.e., len(v0[0])/4)
-		// so len(v0[0])/2
-		numBlocks := uint(2 + 1 + len(v)/field.Bytes)
-		prf(s, f.FixedBlocks, numBlocks, f.Temp, f.Out)
+		prf(s, f.FixedBlocks, 4, f.Temp, f.Out) // TODO: we are waisting a block?
 
 		// Pick the right values to use based on bit of x
 		xStart := int(aes.BlockSize * xBit)
@@ -119,11 +112,11 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
 		for j := 0; j < aes.BlockSize; j++ {
 			s[j] = s[j] ^ k.cw[t][i-1].cs[xBit][j]
 		}
-		vStart := aes.BlockSize*2 + 8 + 8*xBit
-		// TODO: conv should be a vector of field elements
-		for i := range v {
-			conv := binary.BigEndian.Uint32(f.Out[int(vStart)+4*i:int(vStart)+4*(i+1)]) % field.ModP
-			v[i] = (v[i] + conv + k.cw[t][i-1].cv[xBit][i]) % field.ModP
+
+		conv := make([]uint32, len(v))
+		convertBlock(f, s, &conv)
+		for j := range v {
+			v[j] = (v[j] + conv[j] + k.cw[t][i-1].cv[xBit][j]) % field.ModP
 		}
 		t = (uint8(f.Out[2*aes.BlockSize+xBit]) % 2) ^ k.cw[t][i-1].ct[xBit]
 	}

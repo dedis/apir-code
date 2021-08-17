@@ -126,8 +126,8 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 	// convert blocks
 	tmp0 := make([]uint32, bLen)
 	tmp1 := make([]uint32, bLen)
-	convertBlock(f, sCurr0, tmp0)
-	convertBlock(f, sCurr1, tmp1)
+	convertBlock(f, sCurr0, &tmp0)
+	convertBlock(f, sCurr1, &tmp1)
 
 	fssKeys[0].FinalCW = make([]uint32, bLen)
 	fssKeys[1].FinalCW = make([]uint32, bLen)
@@ -267,16 +267,16 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		t0[1] = f.Out[aes.BlockSize*2+1] % 2 // one additional byte from third block
 		// TODO: here we are wasting 14 bytes from the third block
 
-		convertBlock(f, s0, v0[0])
-		convertBlock(f, s0, v0[1])
+		convertBlock(f, s0, &(v0[0]))
+		convertBlock(f, s0, &(v0[1]))
 
 		prf(key1, f.FixedBlocks, 3, f.Temp, f.Out)
 		copy(s1, f.Out[:aes.BlockSize*2])
 		t1[0] = f.Out[aes.BlockSize*2] % 2
 		t1[1] = f.Out[aes.BlockSize*2+1] % 2
 
-		convertBlock(f, s0, v1[0])
-		convertBlock(f, s0, v1[1])
+		convertBlock(f, s0, &(v1[0]))
+		convertBlock(f, s0, &(v1[1]))
 
 		// Redefine aStart and naStart based on new a's
 		aStart = int(aes.BlockSize * aBit)

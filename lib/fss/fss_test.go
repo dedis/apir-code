@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testBlockLength = 10000
+const testBlockLength = 16
 
 func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
