@@ -36,30 +36,6 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 	return f
 }
 
-func (f Fss) EvaluatePFFull(serverNum byte, k FssKeyEq2P, out [][]uint32) {
-	sCurr := make([]byte, aes.BlockSize)
-	copy(sCurr, k.SInit)
-	tCurr := k.TInit
-	stop := f.NumBits
-	index := uint(0)
-
-	f.evalPFFullRecursive(serverNum, k, sCurr, tCurr, 0, stop, index, out)
-}
-
-// TODO
-func (f Fss) evalPFFullRecursive(serverNum byte, k FssKeyEq2P, s []byte, t byte, lvl, stop, index uint, out [][]uint32) {
-	if index >= uint(len(out)) {
-		return
-	}
-
-	if lvl == stop {
-		return
-	}
-
-	return
-
-}
-
 func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 	sCurr := make([]byte, aes.BlockSize)
 	copy(sCurr, k.SInit)
