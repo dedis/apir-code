@@ -17,6 +17,7 @@ import (
 // receives prfKeys, so it doesn't need to pick random ones
 func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 	f := new(Fss)
+	initPRFLen := len(prfKeys)
 	f.NumBits = numBits
 	f.PrfKeys = make([][]byte, initPRFLen)
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)

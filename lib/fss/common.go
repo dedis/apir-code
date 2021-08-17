@@ -5,8 +5,6 @@ package fss
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
-	"encoding/binary"
 
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -21,7 +19,7 @@ type Fss struct {
 	Out         []byte
 }
 
-const initPRFLen uint = 4
+//const initPRFLen uint = 4
 
 // Structs for keys
 type FssKeyEq2P struct {
@@ -46,13 +44,6 @@ type ServerKeyLt struct {
 
 // Helper functions
 
-func randomCryptoInt() uint {
-	b := make([]byte, 8)
-	rand.Read(b)
-	ans, _ := binary.Uvarint(b)
-	return uint(ans)
-}
-
 // 0th position is the most significant bit
 // True if bit is 1 and False if bit is 0
 // N is the number of bits in uint
@@ -63,10 +54,10 @@ func getBit(n, pos, N uint) byte {
 // fixed key PRF (Matyas–Meyer–Oseas one way compression function)
 // numBlocks represents the number
 func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
-	// If request blocks greater than actual needed blocks, grow output array
-	if numBlocks > initPRFLen {
-		out = make([]byte, numBlocks*aes.BlockSize)
-	}
+	//// If request blocks greater than actual needed blocks, grow output array
+	//if numBlocks > initPRFLen {
+	//out = make([]byte, numBlocks*aes.BlockSize)
+	//}
 	for i := uint(0); i < numBlocks; i++ {
 		// get AES_k[i](x)
 		aesBlocks[i].Encrypt(temp, x)
@@ -81,9 +72,8 @@ func convertBlock(f Fss, x []byte, out []uint32) {
 	bLen := uint(len(out))
 	randBytes := make([]byte, bLen*field.Bytes)
 
-	prf(x, f.FixedBlocks, bLen/field.Bytes, f.Temp, randBytes)
+	// we can generate four uint32 numbers with a 16-bytes AES block
+	prf(x, f.FixedBlocks, bLen/4, f.Temp, randBytes)
 
-	for i := range out {
-		out[i] = binary.BigEndian.Uint32(randBytes[i*field.Bytes : (i+1)*field.Bytes])
-	}
+	out = field.ByteSliceToFieldElementSlice(randBytes)
 }
