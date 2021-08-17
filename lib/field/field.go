@@ -6,10 +6,21 @@ import (
 	"io"
 )
 
-const ModP = uint32(2147483647) // 2^31 - 1
+const (
+	ModP  = uint32(2147483647) // 2^31 - 1
+	Bytes = 4
+)
+
+func NegateVector(in []uint32) []uint32 {
+	for i := range in {
+		in[i] = ModP - in[i]
+	}
+
+	return in
+}
 
 func RandElementWithPRG(rnd io.Reader) uint32 {
-	var buf [4]byte
+	var buf [Bytes]byte
 	_, err := rnd.Read(buf[:])
 	if err != nil {
 		panic("error in randomness")
@@ -22,7 +33,7 @@ func RandElement() uint32 {
 }
 
 func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
-	bytesLength := length * 4
+	bytesLength := length * Bytes
 	buf := make([]byte, bytesLength)
 	_, err := rnd.Read(buf)
 	if err != nil {
@@ -30,7 +41,7 @@ func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
 	}
 	out := make([]uint32, length)
 	for i := range out {
-		out[i] = binary.BigEndian.Uint32(buf[i*4:(i+1)*4]) % ModP
+		out[i] = binary.BigEndian.Uint32(buf[i*Bytes:(i+1)*Bytes]) % ModP
 	}
 
 	return out
@@ -38,12 +49,4 @@ func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
 
 func RandVector(length int) []uint32 {
 	return RandVectorWithPRG(length, rand.Reader)
-}
-
-func NegateVector(in []uint32) []uint32 {
-	for i := range in {
-		in[i] = ModP - in[i]
-	}
-
-	return in
 }
