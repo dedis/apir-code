@@ -43,5 +43,35 @@ func TestPoint(t *testing.T) {
 		sum[i] = (out0[i] + out1[i]) % constants.ModP
 	}
 	require.NotEqual(t, b, sum)
+}
 
+func TestInterval(t *testing.T) {
+	// Generate fss Keys on client
+	fClient := ClientInitialize(6, testBlockLength)
+	// Test with if x < 10, evaluate to vector b
+	bLen := 1000
+	b := make([]uint32, bLen)
+	for i := range b {
+		b[i] = rand.Uint32() % constants.ModP
+	}
+	fssKeys := fClient.GenerateTreeLt(10, b)
+
+	// Simulate server
+	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
+
+	sum := make([]uint32, bLen)
+
+	out0 := fServer.EvaluateLt(fssKeys[0], 1)
+	out1 := fServer.EvaluateLt(fssKeys[1], 1)
+	for i := range sum {
+		sum[i] = (out0[i] + out1[i]) % constants.ModP
+	}
+	require.Equal(t, b, sum)
+
+	out0 = fServer.EvaluateLt(fssKeys[0], 11)
+	out1 = fServer.EvaluateLt(fssKeys[1], 11)
+	for i := range sum {
+		sum[i] = (out0[i] + out1[i]) % constants.ModP
+	}
+	require.NotEqual(t, b, sum)
 }

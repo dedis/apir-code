@@ -114,7 +114,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 // The usage is similar to 2-party FSS for equality functions
 // TODO: need to change the signature of the function and input a out vector
 // to have the correct length
-func (f Fss) EvaluateLt(k ServerKeyLt, x uint32, out []uint32) {
+func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
 	xBit := getBit(uint(x), (f.N - f.NumBits + 1), f.N)
 	s := make([]byte, aes.BlockSize)
 	copy(s, k.s[xBit])
@@ -132,7 +132,7 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint32, out []uint32) {
 		// we need two blocks for s1, one entire block for both bits in t1 and
 		// for each of the two vectors, we need blockLength/4 (i.e., len(v0[0])/4)
 		// so len(v0[0])/2
-		numBlocks := uint(2 + 1 + len(out)/field.Bytes)
+		numBlocks := uint(2 + 1 + len(v)/field.Bytes)
 		prf(s, f.FixedBlocks, numBlocks, f.Temp, f.Out)
 
 		// Pick the right values to use based on bit of x
@@ -144,12 +144,12 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint32, out []uint32) {
 		}
 		vStart := aes.BlockSize*2 + 8 + 8*xBit
 		// TODO: conv should be a vector of field elements
-		for i := range out {
+		for i := range v {
 			conv := binary.BigEndian.Uint32(f.Out[int(vStart)+4*i:int(vStart)+4*(i+1)]) % field.ModP
 			v[i] = (v[i] + conv + k.cw[t][i-1].cv[xBit][i]) % field.ModP
 		}
 		t = (uint8(f.Out[2*aes.BlockSize+xBit]) % 2) ^ k.cw[t][i-1].ct[xBit]
 	}
 
-	out = v
+	return v
 }
