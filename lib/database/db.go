@@ -9,6 +9,7 @@ import (
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/xerrors"
@@ -147,7 +148,7 @@ func InitMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
 }
 
 func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, error) {
-	numColumns := dbLen / (8 * constants.Bytes * numRows * blockLen)
+	numColumns := dbLen / (8 * field.Bytes * numRows * blockLen)
 	// handle very small db
 	if numColumns == 0 {
 		numColumns = 1
@@ -161,7 +162,7 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 
 	n := numRows * numColumns * blockLen
 
-	bytesLength := n*constants.Bytes + 1
+	bytesLength := n*field.Bytes + 1
 	bytes := make([]byte, bytesLength)
 
 	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
@@ -177,7 +178,7 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 	db.BlockLengths = make([]int, numRows*numColumns)
 
 	for i := 0; i < n; i++ {
-		element := binary.BigEndian.Uint32(bytes[i*constants.Bytes:(i+1)*constants.Bytes]) % constants.ModP
+		element := binary.BigEndian.Uint32(bytes[i*field.Bytes:(i+1)*field.Bytes]) % field.ModP
 		db.SetEntry(i, element)
 		db.BlockLengths[i/blockLen] = blockLen
 	}

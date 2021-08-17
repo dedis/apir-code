@@ -8,7 +8,6 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 )
 
@@ -133,10 +132,10 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 	fssKeys[1].FinalCW = make([]uint32, bLen)
 
 	for i := range fssKeys[0].FinalCW {
-		fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % constants.ModP
+		fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % field.ModP
 		fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
 		if tCurr1 == 1 {
-			fssKeys[0].FinalCW[i] = constants.ModP - fssKeys[0].FinalCW[i] // negation
+			fssKeys[0].FinalCW[i] = field.ModP - fssKeys[0].FinalCW[i] // negation
 			fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
 		}
 	}

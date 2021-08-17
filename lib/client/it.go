@@ -6,8 +6,8 @@ import (
 	"io"
 	"log"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Information theoretic client for single-bit and multi-bit schemes
@@ -107,7 +107,7 @@ func (c *IT) secretShare(numServers int) ([][]uint32, error) {
 
 	// Get random elements for all numServers-1 vectors
 	rand := make([]uint32, (numServers-1)*vectorLen)
-	bytes := make([]byte, len(rand)*constants.Bytes)
+	bytes := make([]byte, len(rand)*field.Bytes)
 	if _, err := io.ReadFull(c.rnd, bytes[:]); err != nil {
 		return nil, err
 	}
@@ -131,13 +131,13 @@ func (c *IT) secretShare(numServers int) ([][]uint32, error) {
 		for b := colStart; b < colEnd; b++ {
 			sum := uint32(0)
 			for k := 0; k < numServers-1; k++ {
-				sum = (sum + vectors[k][b]) % constants.ModP
+				sum = (sum + vectors[k][b]) % field.ModP
 			}
 			vectors[numServers-1][b] = sum
-			vectors[numServers-1][b] = constants.ModP - vectors[numServers-1][b]
+			vectors[numServers-1][b] = field.ModP - vectors[numServers-1][b]
 			// set alpha vector at the block we want to retrieve
 			if j == c.state.iy {
-				vectors[numServers-1][b] = (vectors[numServers-1][b] + c.state.a[b-j*blockLen]) % constants.ModP
+				vectors[numServers-1][b] = (vectors[numServers-1][b] + c.state.a[b-j*blockLen]) % field.ModP
 			}
 		}
 	}

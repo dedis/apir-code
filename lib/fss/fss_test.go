@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +19,7 @@ func TestPoint(t *testing.T) {
 	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
-		b[i] = rand.Uint32() % constants.ModP
+		b[i] = rand.Uint32() % field.ModP
 	}
 	fssKeys := fClient.GenerateTreePF(10, b)
 
@@ -33,14 +33,14 @@ func TestPoint(t *testing.T) {
 	fServer.EvaluatePF(0, fssKeys[0], 10, out1)
 	fServer.EvaluatePF(1, fssKeys[1], 10, out0)
 	for i := range sum {
-		sum[i] = (out0[i] + out1[i]) % constants.ModP
+		sum[i] = (out0[i] + out1[i]) % field.ModP
 	}
 	require.Equal(t, b, sum)
 
 	fServer.EvaluatePF(0, fssKeys[0], 1, out1)
 	fServer.EvaluatePF(1, fssKeys[1], 1, out0)
 	for i := range sum {
-		sum[i] = (out0[i] + out1[i]) % constants.ModP
+		sum[i] = (out0[i] + out1[i]) % field.ModP
 	}
 	require.NotEqual(t, b, sum)
 }
@@ -52,7 +52,7 @@ func TestInterval(t *testing.T) {
 	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
-		b[i] = rand.Uint32() % constants.ModP
+		b[i] = rand.Uint32() % field.ModP
 	}
 	fssKeys := fClient.GenerateTreeLt(10, b)
 
@@ -64,14 +64,14 @@ func TestInterval(t *testing.T) {
 	out0 := fServer.EvaluateLt(fssKeys[0], 1)
 	out1 := fServer.EvaluateLt(fssKeys[1], 1)
 	for i := range sum {
-		sum[i] = (out0[i] + out1[i]) % constants.ModP
+		sum[i] = (out0[i] + out1[i]) % field.ModP
 	}
 	require.Equal(t, b, sum)
 
 	out0 = fServer.EvaluateLt(fssKeys[0], 11)
 	out1 = fServer.EvaluateLt(fssKeys[1], 11)
 	for i := range sum {
-		sum[i] = (out0[i] + out1[i]) % constants.ModP
+		sum[i] = (out0[i] + out1[i]) % field.ModP
 	}
 	require.NotEqual(t, b, sum)
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/lukechampine/fastxor"
-	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -76,7 +75,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 		st.a = make([]uint32, dbInfo.BlockSize+1)
 		st.a[0] = 1
 		for i := 1; i < len(st.a); i++ {
-			a := (uint64(st.a[i-1]) * uint64(st.alpha)) % uint64(constants.ModP)
+			a := (uint64(st.a[i-1]) * uint64(st.alpha)) % uint64(field.ModP)
 			st.a[i] = uint32(a)
 		}
 	} else {
@@ -100,7 +99,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		for i := 0; i < dbInfo.NumRows; i++ {
 			sum[i] = make([]uint32, 1)
 			for k := range answers {
-				sum[i][0] = (sum[i][0] + answers[k][i]) % constants.ModP
+				sum[i][0] = (sum[i][0] + answers[k][i]) % field.ModP
 			}
 		}
 		// verify integrity and return database entry if accept
@@ -128,7 +127,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		sum[i] = make([]uint32, dbInfo.BlockSize+1)
 		for b := 0; b < dbInfo.BlockSize+1; b++ {
 			for k := range answers {
-				sum[i][b] = (sum[i][b] + answers[k][i*(dbInfo.BlockSize+1)+b]) % constants.ModP
+				sum[i][b] = (sum[i][b] + answers[k][i*(dbInfo.BlockSize+1)+b]) % field.ModP
 			}
 		}
 	}
@@ -140,8 +139,8 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		// compute reconstructed tag
 		reconstructedTag := uint32(0)
 		for b := 0; b < len(messages); b++ {
-			p := (uint64(st.a[b+1]) * uint64(messages[b])) % uint64(constants.ModP)
-			reconstructedTag = (reconstructedTag + uint32(p)) % constants.ModP
+			p := (uint64(st.a[b+1]) * uint64(messages[b])) % uint64(field.ModP)
+			reconstructedTag = (reconstructedTag + uint32(p)) % field.ModP
 		}
 		if tag != reconstructedTag {
 			return nil, errors.New("REJECT")

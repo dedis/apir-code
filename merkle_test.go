@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/stretchr/testify/require"
@@ -22,7 +22,7 @@ func TestMultiBitVectorOneMbMerkle(t *testing.T) {
 	// blockLen is computed such that a block contains the same amount of
 	// bytes as in the integrated approach, which uses the finite filed in
 	// /lib/field.
-	blockLen := testBlockLength * constants.Bytes
+	blockLen := testBlockLength * field.Bytes
 	nRows := 1
 
 	// functions defined in vpir_test.go
@@ -36,7 +36,7 @@ func TestMultiBitVectorOneMbMerkle(t *testing.T) {
 
 func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
 	dbLen := oneMB
-	blockLen := testBlockLength * constants.Bytes
+	blockLen := testBlockLength * field.Bytes
 	// since this scheme works on bytes, the bit size of one element is 8
 	elemBitSize := 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
@@ -54,7 +54,7 @@ func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
 
 func TestDPFMultiBitVectorMerkle(t *testing.T) {
 	dbLen := oneMB
-	blockLen := testBlockLength * constants.Bytes
+	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nRows := 1

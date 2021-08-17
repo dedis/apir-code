@@ -7,7 +7,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 )
 
@@ -81,7 +80,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 			// tCurr is either 0 or 1, no need to mod
 			out[i] = (tmp[i] + uint32(tCurr)*k.FinalCW[i]) % field.ModP
 		} else {
-			out[i] = constants.ModP - ((tmp[i] + uint32(tCurr)*k.FinalCW[i]) % field.ModP)
+			out[i] = field.ModP - ((tmp[i] + uint32(tCurr)*k.FinalCW[i]) % field.ModP)
 		}
 	}
 }

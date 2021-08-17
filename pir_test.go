@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/stretchr/testify/require"
@@ -22,7 +22,7 @@ func TestMultiBitVectorOneMbPIR(t *testing.T) {
 	dbLen := oneMB
 	// we want to download the same number of bytes
 	// as in the field representation
-	blockLen := testBlockLength * constants.Bytes
+	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
 	nRows := 1
 	nCols := dbLen / (elemBitSize * blockLen * nRows)
@@ -38,7 +38,7 @@ func TestMultiBitVectorOneMbPIR(t *testing.T) {
 
 func TestMultiBitMatrixOneMbPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := testBlockLength * constants.Bytes
+	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
@@ -55,7 +55,7 @@ func TestMultiBitMatrixOneMbPIR(t *testing.T) {
 
 func TestDPFMultiBitVectorPIR(t *testing.T) {
 	dbLen := oneMB
-	blockLen := testBlockLength * constants.Bytes
+	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nRows := 1

@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"runtime"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Information theoretic multi-bit server for scheme working in DB(2^128).
@@ -35,7 +35,7 @@ func (s *IT) DBInfo() *database.Info {
 
 // AnswerBytes decode the input, execute Answer and encodes the output
 func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
-	res := make([]uint32, len(q)/constants.Bytes)
+	res := make([]uint32, len(q)/field.Bytes)
 	buf := bytes.NewReader(q)
 	err := binary.Read(buf, binary.BigEndian, &res)
 	if err != nil {
@@ -45,7 +45,7 @@ func (s *IT) AnswerBytes(q []byte) ([]byte, error) {
 	// get answer
 	a := s.Answer(res)
 
-	out := make([]byte, len(a)*constants.Bytes)
+	out := make([]byte, len(a)*field.Bytes)
 	buff := new(bytes.Buffer)
 	err = binary.Write(buff, binary.BigEndian, a)
 	if err != nil {

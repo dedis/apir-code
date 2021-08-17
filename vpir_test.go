@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
@@ -28,7 +29,7 @@ const (
 func TestMultiBitVectorOneMbVPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength
-	elemBitSize := constants.Bytes * 8
+	elemBitSize := field.Bytes * 8
 	nRows := 1
 	nCols := dbLen / (elemBitSize * blockLen * nRows)
 
@@ -58,7 +59,7 @@ func TestSingleBitVectorOneKbVPIR(t *testing.T) {
 func TestMultiBitMatrixOneMbVPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength
-	elemBitSize := constants.Bytes * 8
+	elemBitSize := field.Bytes * 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols

@@ -3,8 +3,8 @@ package client
 import (
 	"testing"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -36,7 +36,7 @@ func TestSecretSharing(t *testing.T) {
 
 	stillInBlock := 0
 	for i := range shares[0] {
-		result := (shares[0][i] + shares[1][i]) % constants.ModP
+		result := (shares[0][i] + shares[1][i]) % field.ModP
 		if stillInBlock < testBlockLength+1 {
 			require.NotEqual(t, uint32(0), result)
 		} else {

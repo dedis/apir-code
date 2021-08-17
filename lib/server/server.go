@@ -4,9 +4,9 @@ import (
 	"math"
 
 	"github.com/lukechampine/fastxor"
-	"github.com/si-co/vpir-code/lib/constants"
 	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Server is a scheme-agnostic VPIR server interface, implemented by both IT
@@ -46,7 +46,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 
 			for j, reply := range replies {
 				element := <-reply
-				m[i] = (m[i] + element) % cst.ModP
+				m[i] = (m[i] + element) % field.ModP
 				close(replies[j])
 			}
 		}
@@ -80,7 +80,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 		for i, reply := range replies {
 			chunk := <-reply
 			for i, elem := range chunk {
-				m[i] = (m[i] + elem) % constants.ModP
+				m[i] = (m[i] + elem) % field.ModP
 			}
 			close(replies[i])
 		}
@@ -144,11 +144,11 @@ func computeMessageAndTag(elements []uint32, blockLens []int, q []uint32, blockL
 				continue
 			}
 			// compute message
-			prod := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)])) % uint64(constants.ModP)
-			sum[b] = (sum[b] + uint32(prod)) % constants.ModP
+			prod := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)])) % uint64(field.ModP)
+			sum[b] = (sum[b] + uint32(prod)) % field.ModP
 			// compute block tag
-			prodTag := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)+1+b])) % uint64(constants.ModP)
-			sumTag = (sumTag + uint32(prodTag)) % constants.ModP
+			prodTag := (uint64(elements[pos]) * uint64(q[j*(blockLen+1)+1+b])) % uint64(field.ModP)
+			sumTag = (sumTag + uint32(prodTag)) % field.ModP
 			pos += 1
 		}
 	}
@@ -161,7 +161,7 @@ func processSingleBitColumns(elements []uint32, q []uint32, replyTo chan<- uint3
 	reply := uint32(0)
 	for j := 0; j < len(elements); j++ {
 		if elements[j] == 1 {
-			reply = (reply + q[j]) % cst.ModP
+			reply = (reply + q[j]) % field.ModP
 		}
 	}
 	replyTo <- reply
