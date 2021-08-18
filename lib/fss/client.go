@@ -281,8 +281,8 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		t1[0] = f.Out[aes.BlockSize*2] % 2
 		t1[1] = f.Out[aes.BlockSize*2+1] % 2
 
-		convertBlock(f, s0, &(v1[0]))
-		convertBlock(f, s0, &(v1[1]))
+		convertBlock(f, s1, &(v1[0]))
+		convertBlock(f, s1, &(v1[1]))
 
 		// Redefine aStart and naStart based on new a's
 		aStart = int(aes.BlockSize * aBit)
