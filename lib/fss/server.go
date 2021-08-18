@@ -115,7 +115,10 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
 		conv := make([]uint32, len(v))
 		convertBlock(f, s, &conv)
 		for j := range v {
-			v[j] = (v[j] + conv[j] + k.cw[t][i-1].cv[xBit][j]) % field.ModP
+			//v[j] = (v[j] + conv[j] + k.cw[t][i-1].cv[xBit][j]) % field.ModP
+			val := (v[j] + conv[j]) % field.ModP
+			val = (val + k.cw[t][i-1].cv[xBit][j]) % field.ModP
+			v[j] = val
 		}
 		t = (uint8(f.Out[2*aes.BlockSize+xBit]) % 2) ^ k.cw[t][i-1].ct[xBit]
 	}

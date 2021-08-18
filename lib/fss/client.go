@@ -331,6 +331,7 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 			val := (cv[tbit0][naBit][i] + v0[naBit][i]) % field.ModP
 			val = (val + (field.ModP - v1[naBit][i])) % field.ModP
 			val = (val + (field.ModP - b[i]*uint32(aBit))) % field.ModP
+			cv[tbit1][naBit][i] = val
 		}
 
 		k[0].cw[0][i].cs = make([][]byte, 2)
