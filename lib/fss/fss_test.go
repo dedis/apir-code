@@ -26,30 +26,25 @@ func TestPoint(t *testing.T) {
 	// Simulate server
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
 
-  zeros := make([]uint32, bLen)
-  for j := uint(0); j < (1 << 6); j++ {
-    out0 := make([]uint32, bLen)
-    out1 := make([]uint32, bLen)
-    sum := make([]uint32, bLen)
+	zeros := make([]uint32, bLen)
+	for j := uint(0); j < (1 << 6); j++ {
+		out0 := make([]uint32, bLen)
+		out1 := make([]uint32, bLen)
+		sum := make([]uint32, bLen)
 
-    fServer.EvaluatePF(0, fssKeys[0], j, out0)
-    fServer.EvaluatePF(1, fssKeys[1], j, out1)
+		fServer.EvaluatePF(0, fssKeys[0], j, out0)
+		fServer.EvaluatePF(1, fssKeys[1], j, out1)
 
-    for i := range sum {
-      sum[i] = (out0[i] + out1[i]) % field.ModP
-    }
+		for i := range sum {
+			sum[i] = (out0[i] + out1[i]) % field.ModP
+		}
 
-    if j == 10 {
-      require.Equal(t, b, sum)
-    } else {
-      fServer.EvaluatePF(0, fssKeys[0], 1, out0)
-      fServer.EvaluatePF(1, fssKeys[1], 1, out1)
-      for i := range sum {
-        sum[i] = (out0[i] + out1[i]) % field.ModP
-      }
-      require.Equal(t, zeros, sum)
-    }
-  }
+		if j == 10 {
+			require.Equal(t, b, sum)
+		} else {
+			require.Equal(t, zeros, sum)
+		}
+	}
 }
 
 func TestInterval(t *testing.T) {
