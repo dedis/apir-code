@@ -2,12 +2,17 @@ package database
 
 import (
 	"bytes"
+	"log"
+	"math"
 	"sort"
 
+	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
+	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/xerrors"
 )
 
-/*
 const numKeysToDBLengthRatio float32 = 0.1
 
 func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
@@ -173,7 +178,7 @@ func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 
 	return db
 }
-*/
+
 // Simple ISO/IEC 7816-4 padding where 0x80 is appended to the block, then
 // zeros to make up to blockLen
 func PadBlock(block []byte, blockLen int) []byte {
