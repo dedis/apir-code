@@ -15,9 +15,8 @@ import (
 )
 
 type DB struct {
-	Identifiers    []byte
-	Entries        []byte
-	EntiresLengths []int // in bytes
+	Identifiers []byte
+	Entries     []byte
 
 	Info
 }
@@ -29,6 +28,7 @@ type Info struct {
 	// The true length of data in each block,
 	// defined in the number of elements
 	BlockLengths []int
+	IdLen        int // length of each identifier
 
 	// PIR type: classical, merkle, signature
 	PIRType string
@@ -60,6 +60,23 @@ type Merkle struct {
 	ProofLen int
 }
 
+func NewEmptyDB(info Info) (*DB, error) {
+	return &DB{
+		Info:         info,
+		Identifiers:  make([]byte, 0),
+		Entries:      make([]byte, 0),
+	}, nil
+}
+
+func NewInfo(nRows, nCols, bSize int) Info {
+	return Info{
+		NumRows:    nRows,
+		NumColumns: nCols,
+		BlockSize:  bSize,
+		BlockLengths: make([]int, nRows*nCols),
+	}
+}
+
 func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	identifiers := make([]byte, numIdentifiers*constants.IdentifierLength)
 	if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
@@ -74,48 +91,49 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	}
 
 	// in this case lengths are all equal
-	entriesLengths := make([]int, numIdentifiers)
-	for i := range entriesLengths {
-		entriesLengths[i] = entryLength
+	info := NewInfo(1, numIdentifiers, entryLength)
+	info.BlockLengths = make([]int, numIdentifiers)
+	for i := range info.BlockLengths {
+		info.BlockLengths[i] = entryLength
 	}
 
 	return &DB{
-		Identifiers:    identifiers,
-		Entries:        entries,
-		EntiresLengths: entriesLengths,
+		Identifiers: identifiers,
+		Entries:     entries,
+		Info:        info,
 	}, nil
 }
 
-func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
-	numColumns := dbLen / numRows
-
-	info := Info{
-		NumColumns: numColumns,
-		NumRows:    numRows,
-		BlockSize:  constants.SingleBitBlockLength,
-	}
-
-	db, err := NewDB(info)
-	if err != nil {
-		return nil, xerrors.Errorf("failed to create db: %v", err)
-	}
-
-	buf := make([]byte, dbLen)
-	if _, err := io.ReadFull(rnd, buf[:]); err != nil {
-		return nil, xerrors.Errorf("failed to read random buf: %v", err)
-	}
-
-	for i := 0; i < dbLen; i++ {
-		element := uint32(0)
-		if buf[i]>>7 == 1 {
-			element = 1
-		}
-
-		db.SetEntry(i, element)
-	}
-
-	return db, nil
-}
+//func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
+//	numColumns := dbLen / numRows
+//
+//	info := Info{
+//		NumColumns: numColumns,
+//		NumRows:    numRows,
+//		BlockSize:  constants.SingleBitBlockLength,
+//	}
+//
+//	db, err := NewDB(info)
+//	if err != nil {
+//		return nil, xerrors.Errorf("failed to create db: %v", err)
+//	}
+//
+//	buf := make([]byte, dbLen)
+//	if _, err := io.ReadFull(rnd, buf[:]); err != nil {
+//		return nil, xerrors.Errorf("failed to read random buf: %v", err)
+//	}
+//
+//	for i := 0; i < dbLen; i++ {
+//		element := uint32(0)
+//		if buf[i]>>7 == 1 {
+//			element = 1
+//		}
+//
+//		db.SetEntry(i, element)
+//	}
+//
+//	return db, nil
+//}
 
 // HashToIndex hashes the given id to an index for a database of the given
 // length
@@ -154,7 +172,6 @@ func (d *DB) Range(begin, end int) []uint32 {
 }
 */
 
-/*
 func InitMultiBitDBWithCapacity(numRows, numColumns, blockSize, cap int) (*DB, error) {
 	info := Info{NumColumns: numColumns,
 		NumRows:   numRows,
@@ -171,6 +188,7 @@ func InitMultiBitDBWithCapacity(numRows, numColumns, blockSize, cap int) (*DB, e
 	return db, nil
 }
 
+/*
 func InitMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
 	info := Info{NumColumns: numColumns,
 		NumRows:   numRows,

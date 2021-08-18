@@ -3,7 +3,6 @@ package fss
 // Source: https://github.com/frankw2/libfss/blob/master/go/test_fss/test_fss.go
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/field"
@@ -54,7 +53,7 @@ func TestInterval(t *testing.T) {
 	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
-		b[i] = rand.Uint32() % field.ModP
+		b[i] = field.RandElement()
 	}
 	fssKeys := fClient.GenerateTreeLt(10, b)
 
