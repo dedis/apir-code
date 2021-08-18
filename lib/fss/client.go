@@ -132,7 +132,13 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 	fssKeys[1].FinalCW = make([]uint32, bLen)
 
 	for i := range fssKeys[0].FinalCW {
-		fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % field.ModP
+    // Need to make sure that no intermediate
+    // results under or overflow the 32-bit modulus
+
+    //fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % field.ModP
+    val := (b[i] + (field.ModP - tmp0[i])) % field.ModP
+    val = (val + tmp1[i]) % field.ModP
+		fssKeys[0].FinalCW[i] = val
 		fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
 		if tCurr1 == 1 {
 			fssKeys[0].FinalCW[i] = field.ModP - fssKeys[0].FinalCW[i] // negation
