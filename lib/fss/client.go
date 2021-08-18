@@ -132,12 +132,12 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 	fssKeys[1].FinalCW = make([]uint32, bLen)
 
 	for i := range fssKeys[0].FinalCW {
-    // Need to make sure that no intermediate
-    // results under or overflow the 32-bit modulus
+		// Need to make sure that no intermediate
+		// results under or overflow the 32-bit modulus
 
-    //fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % field.ModP
-    val := (b[i] + (field.ModP - tmp0[i])) % field.ModP
-    val = (val + tmp1[i]) % field.ModP
+		//fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % field.ModP
+		val := (b[i] + (field.ModP - tmp0[i])) % field.ModP
+		val = (val + tmp1[i]) % field.ModP
 		fssKeys[0].FinalCW[i] = val
 		fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
 		if tCurr1 == 1 {
@@ -224,7 +224,8 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		v1[naBit] = field.NegateVector((v0[naBit]))
 	} else {
 		for i := range v1[naBit] {
-			v1[naBit][i] = v0[naBit][i] - b[i]
+			// v1[naBit][i] = v0[naBit][i] - b[i]
+			v1[naBit][i] = (v0[naBit][i] + (field.ModP - b[i])) % field.ModP
 		}
 	}
 
@@ -314,16 +315,22 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 		cv[tbit0][aBit] = field.RandVector(lenb)
 		cv[tbit1][aBit] = make([]uint32, lenb)
 		for i := range cv[tbit0][aBit] {
-			cv[tbit1][aBit][i] = (v0[aBit][i] + cv[tbit0][aBit][i] - v1[aBit][i]) % field.ModP
+			//cv[tbit1][aBit][i] = (v0[aBit][i] + cv[tbit0][aBit][i] - v1[aBit][i]) % field.ModP
+			val := (v0[aBit][i] + cv[tbit0][aBit][i]) % field.ModP
+			val = (val + (field.ModP - v1[aBit][i])) % field.ModP
+			cv[tbit1][aBit][i] = val
 		}
 
 		cv[tbit0][naBit] = field.RandVector(lenb)
 		cv[tbit1][naBit] = make([]uint32, lenb)
 		for i := range cv[tbit0][naBit] {
-			cv[tbit1][naBit][i] = (cv[tbit0][naBit][i] +
-				v0[naBit][i] -
-				v1[naBit][i] -
-				b[i]*uint32(aBit)) % field.ModP
+			//cv[tbit1][naBit][i] = (cv[tbit0][naBit][i] +
+			//v0[naBit][i] -
+			//v1[naBit][i] -
+			//b[i]*uint32(aBit)) % field.ModP
+			val := (cv[tbit0][naBit][i] + v0[naBit][i]) % field.ModP
+			val = (val + (field.ModP - v1[naBit][i])) % field.ModP
+			val = (val + (field.ModP - b[i]*uint32(aBit))) % field.ModP
 		}
 
 		k[0].cw[0][i].cs = make([][]byte, 2)
