@@ -26,7 +26,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		Fss:    fss.ClientInitialize(uint(bits.Len(uint(info.NumColumns) - 1))),
+		Fss:    fss.ClientInitialize(uint(bits.Len(uint(info.NumColumns)-1)), info.BlockSize),
 	}
 }
 
