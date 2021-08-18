@@ -23,7 +23,6 @@ inline void gcm_into(uint8_t *out, const uint8_t *mask, const uint8_t *row) {
 
     a = GFMUL(a, b);
    
-   /* 
     for (int i=0; i<8; i++) {
       uint16_t *p = (uint16_t*)&out[(c*16)+2*i];
       const int j = i;
@@ -36,7 +35,6 @@ inline void gcm_into(uint8_t *out, const uint8_t *mask, const uint8_t *row) {
       *(p+12) = _mm_extract_epi16(tmp, 6);
       *(p+14) = _mm_extract_epi16(tmp, 7);
     }
-    */
   }
 }
 
