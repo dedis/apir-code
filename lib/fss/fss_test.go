@@ -19,7 +19,7 @@ func TestPoint(t *testing.T) {
 	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
-		b[i] = rand.Uint32() % field.ModP
+		b[i] = field.RandElement()
 	}
 	fssKeys := fClient.GenerateTreePF(10, b)
 
@@ -30,15 +30,15 @@ func TestPoint(t *testing.T) {
 	out1 := make([]uint32, bLen)
 	sum := make([]uint32, bLen)
 
-	fServer.EvaluatePF(0, fssKeys[0], 10, out1)
-	fServer.EvaluatePF(1, fssKeys[1], 10, out0)
+	fServer.EvaluatePF(0, fssKeys[0], 10, out0)
+	fServer.EvaluatePF(1, fssKeys[1], 10, out1)
 	for i := range sum {
 		sum[i] = (out0[i] + out1[i]) % field.ModP
 	}
 	require.Equal(t, b, sum)
 
-	fServer.EvaluatePF(0, fssKeys[0], 1, out1)
-	fServer.EvaluatePF(1, fssKeys[1], 1, out0)
+	fServer.EvaluatePF(0, fssKeys[0], 1, out0)
+	fServer.EvaluatePF(1, fssKeys[1], 1, out1)
 	for i := range sum {
 		sum[i] = (out0[i] + out1[i]) % field.ModP
 	}
