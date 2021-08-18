@@ -9,59 +9,17 @@ import (
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/xerrors"
 )
 
-func NewDB(info Info) (*DB, error) {
-	n := info.BlockSize * info.NumColumns * info.NumRows
-	if info.BlockSize == constants.SingleBitBlockLength {
-		n = info.NumColumns * info.NumRows
-	}
-
-	return &DB{
-		Info:     info,
-		inMemory: make([]uint32, n),
-	}, nil
-}
-
-func NewEmptyDBWithCapacity(info Info, cap int) (*DB, error) {
-	return &DB{
-		Info:     info,
-		inMemory: make([]uint32, 0, cap),
-	}, nil
-}
-
-func NewEmptyDB(info Info) (*DB, error) {
-	n := info.BlockSize * info.NumColumns * info.NumRows
-	if info.BlockSize == constants.SingleBitBlockLength {
-		n = info.NumColumns * info.NumRows
-	}
-
-	return NewEmptyDBWithCapacity(info, n)
-}
-
 type DB struct {
+	Identifiers    []byte
+	Entries        []byte
+	EntiresLengths []int // in bytes
+
 	Info
-	inMemory []uint32
-}
-
-func (d *DB) SetEntry(i int, el uint32) {
-	d.inMemory[i] = el
-}
-
-func (d *DB) AppendBlock(bl []uint32) {
-	d.inMemory = append(d.inMemory, bl...)
-}
-
-func (d *DB) GetEntry(i int) uint32 {
-	return d.inMemory[i]
-}
-
-func (d *DB) Range(begin, end int) []uint32 {
-	return d.inMemory[begin:end]
 }
 
 type Info struct {
@@ -102,21 +60,101 @@ type Merkle struct {
 	ProofLen int
 }
 
-func CreateZeroMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
-	info := Info{NumColumns: numColumns,
-		NumRows:   numRows,
-		BlockSize: blockSize,
+func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
+	identifiers := make([]byte, numIdentifiers*constants.IdentifierLength)
+	if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
+		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
 
-	// already initialized at zero
+	// for random db use 2048 bits = 256 bytes of data
+	entryLength := 256
+	entries := make([]byte, numIdentifiers*entryLength)
+	if _, err := io.ReadFull(rnd, entries[:]); err != nil {
+		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
+	}
+
+	// in this case lengths are all equal
+	entriesLengths := make([]int, numIdentifiers)
+	for i := range entriesLengths {
+		entriesLengths[i] = entryLength
+	}
+
+	return &DB{
+		Identifiers:    identifiers,
+		Entries:        entries,
+		EntiresLengths: entriesLengths,
+	}, nil
+}
+
+func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
+	numColumns := dbLen / numRows
+
+	info := Info{
+		NumColumns: numColumns,
+		NumRows:    numRows,
+		BlockSize:  constants.SingleBitBlockLength,
+	}
+
 	db, err := NewDB(info)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to create db: %v", err)
 	}
 
+	buf := make([]byte, dbLen)
+	if _, err := io.ReadFull(rnd, buf[:]); err != nil {
+		return nil, xerrors.Errorf("failed to read random buf: %v", err)
+	}
+
+	for i := 0; i < dbLen; i++ {
+		element := uint32(0)
+		if buf[i]>>7 == 1 {
+			element = 1
+		}
+
+		db.SetEntry(i, element)
+	}
+
 	return db, nil
 }
 
+// HashToIndex hashes the given id to an index for a database of the given
+// length
+func HashToIndex(id string, length int) int {
+	hash := blake2b.Sum256([]byte(id))
+	return int(binary.BigEndian.Uint64(hash[:]) % uint64(length))
+}
+
+func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns int) {
+	if matrix {
+		utils.IncreaseToNextSquare(&numBlocks)
+		numColumns = int(math.Sqrt(float64(numBlocks)))
+		numRows = numColumns
+	} else {
+		numColumns = numBlocks
+		numRows = 1
+	}
+	return
+}
+
+/*
+func (d *DB) SetEntry(i int, el uint32) {
+	d.Entries[i] = []byte(el)
+}
+
+func (d *DB) AppendBlock(bl []uint32) {
+	d.Entries = append(d.Entries, bl...)
+}
+
+func (d *DB) GetEntry(i int) uint32 {
+	return d.Entries[i]
+}
+
+func (d *DB) Range(begin, end int) []uint32 {
+	return d.Entries[begin:end]
+}
+*/
+
+/*
 func InitMultiBitDBWithCapacity(numRows, numColumns, blockSize, cap int) (*DB, error) {
 	info := Info{NumColumns: numColumns,
 		NumRows:   numRows,
@@ -185,53 +223,4 @@ func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, e
 
 	return db, nil
 }
-
-func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
-	numColumns := dbLen / numRows
-
-	info := Info{
-		NumColumns: numColumns,
-		NumRows:    numRows,
-		BlockSize:  constants.SingleBitBlockLength,
-	}
-
-	db, err := NewDB(info)
-	if err != nil {
-		return nil, xerrors.Errorf("failed to create db: %v", err)
-	}
-
-	buf := make([]byte, dbLen)
-	if _, err := io.ReadFull(rnd, buf[:]); err != nil {
-		return nil, xerrors.Errorf("failed to read random buf: %v", err)
-	}
-
-	for i := 0; i < dbLen; i++ {
-		element := uint32(0)
-		if buf[i]>>7 == 1 {
-			element = 1
-		}
-
-		db.SetEntry(i, element)
-	}
-
-	return db, nil
-}
-
-// HashToIndex hashes the given id to an index for a database of the given
-// length
-func HashToIndex(id string, length int) int {
-	hash := blake2b.Sum256([]byte(id))
-	return int(binary.BigEndian.Uint64(hash[:]) % uint64(length))
-}
-
-func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns int) {
-	if matrix {
-		utils.IncreaseToNextSquare(&numBlocks)
-		numColumns = int(math.Sqrt(float64(numBlocks)))
-		numRows = numColumns
-	} else {
-		numColumns = numBlocks
-		numRows = 1
-	}
-	return
-}
+*/
