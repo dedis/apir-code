@@ -25,8 +25,8 @@ const (
 )
 
 func TestMultiBitVPIR(t *testing.T) {
-	keyToDownload := 500
-	numIdentifiers := 1000
+	keyToDownload := 1
+	numIdentifiers := 3000000
 
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
@@ -38,13 +38,12 @@ func TestMultiBitVPIR(t *testing.T) {
 
 func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {
 	c := client.NewFSS(rnd, &db.Info)
-	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys, 1)
-	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys, 1)
+	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
+	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
-		id := int(binary.BigEndian.Uint32(db.Identifiers[i : i+constants.IdentifierLength]))
-		fmt.Println(id)
+		id := int(binary.BigEndian.Uint32(db.Identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength]))
 		fssKeys := c.Query(id, 2)
 
 		a0 := s0.Answer(fssKeys[0])

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 
@@ -92,7 +91,6 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 // database and the client state to return the reconstructed database entry.
 // The integrity check is performed in this function.
 func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32, error) {
-	fmt.Println(answers)
 	sum := make([][]uint32, dbInfo.NumRows)
 
 	// single-bit scheme
@@ -135,7 +133,6 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 	}
 
 	messages := make([]uint32, dbInfo.BlockSize)
-	fmt.Println(sum)
 	for i := 0; i < dbInfo.NumRows; i++ {
 		copy(messages, sum[i][:len(sum[i])-1])
 		tag := sum[i][len(sum[i])-1]
@@ -145,7 +142,6 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 			p := (uint64(st.a[b+1]) * uint64(messages[b])) % uint64(field.ModP)
 			reconstructedTag = (reconstructedTag + uint32(p)) % field.ModP
 		}
-		fmt.Println("tag:", tag, "reconstructedTag:", reconstructedTag)
 		if tag != reconstructedTag {
 			return nil, errors.New("REJECT")
 		}
