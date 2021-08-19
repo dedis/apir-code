@@ -92,6 +92,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 // database and the client state to return the reconstructed database entry.
 // The integrity check is performed in this function.
 func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32, error) {
+	fmt.Println(answers)
 	sum := make([][]uint32, dbInfo.NumRows)
 
 	// single-bit scheme
