@@ -8,11 +8,9 @@ import (
 
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
-	"golang.org/x/xerrors"
 )
 
 type DB struct {
@@ -79,10 +77,15 @@ func NewInfo(nRows, nCols, bSize int) Info {
 }
 
 func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
-	identifiers := make([]byte, numIdentifiers*constants.IdentifierLength)
-	if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
-		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
+	//identifiers := make([]byte, numIdentifiers*constants.IdentifierLength)
+	//if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
+	//return nil, xerrors.Errorf("failed to read random bytes: %v", err)
+	//}
+	idUint32 := make([]uint32, numIdentifiers)
+	for i := range idUint32 {
+		idUint32[i] = uint32(i)
 	}
+	identifiers := utils.Uint32SliceToByteSlice(idUint32)
 
 	// for random db use 2048 bits = 64 uint32 elements
 	entryLength := 64

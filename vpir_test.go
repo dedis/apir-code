@@ -3,11 +3,13 @@ package main
 // Test suite for integrated VPIR.
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
@@ -23,8 +25,8 @@ const (
 )
 
 func TestMultiBitVPIR(t *testing.T) {
-	keyToDownload := 1
-	numIdentifiers := 2
+	keyToDownload := 500
+	numIdentifiers := 1000
 
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
@@ -41,7 +43,9 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
-		fssKeys := c.Query(i, 2)
+		id := int(binary.BigEndian.Uint32(db.Identifiers[i : i+constants.IdentifierLength]))
+		fmt.Println(id)
+		fssKeys := c.Query(id, 2)
 
 		a0 := s0.Answer(fssKeys[0])
 		a1 := s1.Answer(fssKeys[1])
