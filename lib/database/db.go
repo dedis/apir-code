@@ -62,17 +62,17 @@ type Merkle struct {
 
 func NewEmptyDB(info Info) (*DB, error) {
 	return &DB{
-		Info:         info,
-		Identifiers:  make([]byte, 0),
-		Entries:      make([]byte, 0),
+		Info:        info,
+		Identifiers: make([]byte, 0),
+		Entries:     make([]byte, 0),
 	}, nil
 }
 
 func NewInfo(nRows, nCols, bSize int) Info {
 	return Info{
-		NumRows:    nRows,
-		NumColumns: nCols,
-		BlockSize:  bSize,
+		NumRows:      nRows,
+		NumColumns:   nCols,
+		BlockSize:    bSize,
 		BlockLengths: make([]int, nRows*nCols),
 	}
 }
@@ -167,11 +167,12 @@ func (d *DB) GetEntry(i int) uint32 {
 	return d.Entries[i]
 }
 
-func (d *DB) Range(begin, end int) []uint32 {
-	return d.Entries[begin:end]
-}
 */
+func (d *DB) Range(begin, end int) []uint32 {
+	return utils.ByteSliceToUint32Slice(d.Entries[begin:end])
+}
 
+/*
 func InitMultiBitDBWithCapacity(numRows, numColumns, blockSize, cap int) (*DB, error) {
 	info := Info{NumColumns: numColumns,
 		NumRows:   numRows,
