@@ -9,6 +9,7 @@ import (
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/xerrors"
@@ -85,12 +86,12 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 
 	// for random db use 2048 bits = 256 bytes of data = 64 uint32 elements
 	entryLengthBytes := 256
-	entryLengthUint := entryLengthBytes / 4
+	entryLengthUint := entryLengthBytes / field.Bytes
 	entriesBytes := make([]byte, numIdentifiers*entryLengthBytes)
 	if _, err := io.ReadFull(rnd, entriesBytes[:]); err != nil {
 		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
-	entries := utils.ByteSliceToUint32Slice(entriesBytes)
+	entries := field.ByteSliceToFieldElementSlice(entriesBytes)
 
 	// in this case lengths are all equal
 	info := NewInfo(1, numIdentifiers, entryLengthUint)

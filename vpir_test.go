@@ -23,10 +23,8 @@ const (
 )
 
 func TestMultiBitVPIR(t *testing.T) {
-	//keyToDownload := 500
-	//numIdentifiers := 1000
 	keyToDownload := 1
-	numIdentifiers := 1
+	numIdentifiers := 2
 
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
@@ -43,7 +41,6 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
-		fmt.Println("querying id:", i)
 		fssKeys := c.Query(i, 2)
 
 		a0 := s0.Answer(fssKeys[0])
