@@ -41,6 +41,7 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
+		fmt.Println("querying id:", i)
 		fssKeys := c.Query(i, 2)
 
 		a0 := s0.Answer(fssKeys[0])
