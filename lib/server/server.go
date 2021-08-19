@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/lukechampine/fastxor"
@@ -138,6 +139,10 @@ func computeMessageAndTag(elements []uint32, blockLens []int, q []uint32, blockL
 	pos := 0
 	for j := 0; j < len(blockLens); j++ {
 		for b := 0; b < blockLens[j]; b++ {
+			fmt.Println(elements)
+			fmt.Println("len(elements):", len(elements))
+			fmt.Println(pos)
+			fmt.Println(elements[pos])
 			if elements[pos] == 0 {
 				// no need to multiply if the element value is zero
 				pos += 1

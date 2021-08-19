@@ -2,17 +2,19 @@ package database
 
 import (
 	"bytes"
-	"golang.org/x/crypto/blake2b"
 	"log"
 	"sort"
 
+	"golang.org/x/crypto/blake2b"
+
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
 const (
-	hashLength = 32
+	hashLength                     = 32
 	numKeysToDBLengthRatio float32 = 0.1
 )
 
@@ -41,11 +43,10 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	db.IdLen = hashLength
 	for i := 0; i < len(keys); i++ {
 		db.Identifiers = append(db.Identifiers, IdToHash(keys[i].ID)...)
-		db.Entries = append(db.Entries, keys[i].Packet...)
+		db.Entries = append(db.Entries, field.ByteSliceToFieldElementSlice(keys[i].Packet)...)
 		db.BlockLengths[i] = len(keys[i].Packet)
 	}
 
-	
 	//ht := makeHashTable(keys, numRows*numColumns)
 	//// get the maximum byte length of the values in the hashTable
 	//// +1 takes into account the padding 0x80 that is always added.

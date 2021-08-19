@@ -16,7 +16,7 @@ import (
 
 type DB struct {
 	Identifiers []byte
-	Entries     []byte
+	Entries     []uint32
 
 	Info
 }
@@ -64,7 +64,7 @@ func NewEmptyDB(info Info) (*DB, error) {
 	return &DB{
 		Info:        info,
 		Identifiers: make([]byte, 0),
-		Entries:     make([]byte, 0),
+		Entries:     make([]uint32, 0),
 	}, nil
 }
 
@@ -84,17 +84,18 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	}
 
 	// for random db use 2048 bits = 256 bytes of data
-	entryLength := 256
-	entries := make([]byte, numIdentifiers*entryLength)
-	if _, err := io.ReadFull(rnd, entries[:]); err != nil {
+	entryLengthBytes := 256
+	entriesBytes := make([]byte, numIdentifiers*entryLengthBytes)
+	if _, err := io.ReadFull(rnd, entriesBytes[:]); err != nil {
 		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
+	entries := utils.ByteSliceToUint32Slice(entriesBytes)
 
 	// in this case lengths are all equal
-	info := NewInfo(1, numIdentifiers, entryLength)
+	info := NewInfo(1, numIdentifiers, entryLengthBytes)
 	info.BlockLengths = make([]int, numIdentifiers)
 	for i := range info.BlockLengths {
-		info.BlockLengths[i] = entryLength
+		info.BlockLengths[i] = entryLengthBytes
 	}
 
 	return &DB{
@@ -169,7 +170,7 @@ func (d *DB) GetEntry(i int) uint32 {
 
 */
 func (d *DB) Range(begin, end int) []uint32 {
-	return utils.ByteSliceToUint32Slice(d.Entries[begin:end])
+	return d.Entries[begin:end]
 }
 
 /*
