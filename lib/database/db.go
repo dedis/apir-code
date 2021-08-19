@@ -84,19 +84,14 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
 
-	// for random db use 2048 bits = 256 bytes of data = 64 uint32 elements
-	entryLengthBytes := 256
-	entryLengthUint := entryLengthBytes / field.Bytes
-	entriesBytes := make([]byte, numIdentifiers*entryLengthBytes)
-	if _, err := io.ReadFull(rnd, entriesBytes[:]); err != nil {
-		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
-	}
-	entries := field.ByteSliceToFieldElementSlice(entriesBytes)
+	// for random db use 2048 bits = 64 uint32 elements
+	entryLength := 64
+	entries := field.RandVectorWithPRG(numIdentifiers*entryLength, rnd)
 
 	// in this case lengths are all equal
-	info := NewInfo(1, numIdentifiers, entryLengthUint)
+	info := NewInfo(1, numIdentifiers, entryLength)
 	for i := range info.BlockLengths {
-		info.BlockLengths[i] = entryLengthUint
+		info.BlockLengths[i] = entryLength
 	}
 
 	return &DB{
