@@ -21,11 +21,18 @@ func NegateVector(in []uint32) []uint32 {
 
 func RandElementWithPRG(rnd io.Reader) uint32 {
 	var buf [Bytes]byte
-	_, err := rnd.Read(buf[:])
-	if err != nil {
-		panic("error in randomness")
+	var out = ModP
+	// Make sure that element is not equal 2^31 - 1
+	for out == ModP {
+		_, err := rnd.Read(buf[:])
+		if err != nil {
+			panic("error in randomness")
+		}
+		// Clearing the top most bit of uint32
+		buf[0] &= 127
+		out = binary.BigEndian.Uint32(buf[:])
 	}
-	return binary.BigEndian.Uint32(buf[:]) % ModP
+	return out
 }
 
 func RandElement() uint32 {
@@ -41,7 +48,12 @@ func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
 	}
 	out := make([]uint32, length)
 	for i := range out {
-		out[i] = binary.BigEndian.Uint32(buf[i*Bytes:(i+1)*Bytes]) % ModP
+		//Clearing the top most bit of uint32
+		buf[i*Bytes] &= 127
+		out[i] = binary.BigEndian.Uint32(buf[i*Bytes:(i+1)*Bytes])
+		for out[i] == ModP {
+			out[i] = RandElementWithPRG(rnd)
+		}
 	}
 
 	return out
