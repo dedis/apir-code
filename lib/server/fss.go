@@ -2,10 +2,12 @@ package server
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/gob"
 	"math/bits"
 	"runtime"
 
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/fss"
 )
@@ -20,16 +22,18 @@ type FSS struct {
 
 // use variadic argument for cores to achieve backward compatibility
 func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FSS {
-	if len(cores) == 0 {
-		return &FSS{db: db, cores: runtime.NumCPU()}
+	numCores := runtime.NumCPU()
+	if len(cores) > 0 {
+		numCores = cores[0]
 	}
 
 	return &FSS{
 		db:        db,
-		cores:     cores[0],
+		cores:     numCores,
 		serverNum: serverNum,
 		fss:       fss.ServerInitialize(prfKeys, uint(bits.Len(uint(db.Info.NumColumns)-1))),
 	}
+
 }
 
 func (s *FSS) DBInfo() *database.Info {
@@ -59,7 +63,14 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 }
 
 func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {
-	q := make([]uint32, s.db.NumColumns*(s.db.BlockSize+1))
-	//s.fss.EvaluatePF(s.serverNum, key, uint64(bits.Len(uint(s.db.NumColumns)-1)), s.db.BlockSize+1, q)
+	idLength := constants.IdentifierLength
+	q := make([]uint32, 0, (s.db.BlockSize+1)*len(s.db.Identifiers)/idLength)
+	numIdentifiers := len(s.db.Identifiers) / idLength
+	for i := 0; i < numIdentifiers; i++ {
+		tmp := make([]uint32, s.db.BlockSize+1)
+		id := binary.BigEndian.Uint32(s.db.Identifiers[i*idLength : (i+1)*idLength])
+		s.fss.EvaluatePF(s.serverNum, key, uint(id), tmp)
+		q = append(q, tmp...)
+	}
 	return answer(q, s.db, s.cores)
 }
