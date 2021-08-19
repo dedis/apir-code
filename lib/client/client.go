@@ -147,7 +147,8 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		}
 	}
 
-	return sum[st.ix][:len(sum[st.ix])-1], nil
+	//return sum[st.ix][:len(sum[st.ix])-1], nil
+	return sum[0][:len(sum[0])-1], nil
 }
 
 // reconstructPIR returns the database entry for the classical PIR schemes.
