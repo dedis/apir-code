@@ -3,13 +3,11 @@ package client
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"io"
 	"log"
 	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 )
 
@@ -58,13 +56,11 @@ func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2P {
 		log.Fatal("invalid query inputs")
 	}
 	var err error
-	if index > int(field.ModP) {
-		fmt.Println("error")
-	}
 	c.state, err = generateClientState(index, c.rnd, c.dbInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	// client initialization is the same for both single- and multi-bit scheme
 	return c.Fss.GenerateTreePF(uint32(index), c.state.a)
 	//return c.Fss.GenerateTreePF(uint32(c.state.iy), c.state.a)
