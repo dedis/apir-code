@@ -3,11 +3,10 @@ package database
 import (
 	"crypto"
 	"encoding/binary"
-	"io"
-	"math"
-
 	"github.com/si-co/vpir-code/lib/constants"
 	"golang.org/x/xerrors"
+	"io"
+	"math"
 
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
@@ -84,17 +83,14 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
 		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
-	identifiersFinal := make([]byte, 0)
 	for i := 0; i < numIdentifiers; i++ {
-		id := identifiers[i*field.Bytes : (i+1)*field.Bytes]
+		id := identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength]
 		idUint32 := binary.BigEndian.Uint32(id) % field.ModP
-		out := make([]byte, 4)
-		binary.BigEndian.PutUint32(out, idUint32)
-		identifiersFinal = append(identifiersFinal, out...)
+		binary.BigEndian.PutUint32(identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength], idUint32)
 	}
 	//idUint32 := make([]uint32, numIdentifiers)
 	//for i := range idUint32 {
-	//	idUint32[i] = uint32(i)
+	//	idUint32[i] = uint32(2147483647) - 100 + uint32(i)
 	//}
 	//identifiers := utils.Uint32SliceToByteSlice(idUint32)
 
@@ -109,7 +105,7 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	}
 
 	return &DB{
-		Identifiers: identifiersFinal,
+		Identifiers: identifiers,
 		Entries:     entries,
 		Info:        info,
 	}, nil
