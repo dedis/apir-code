@@ -26,8 +26,8 @@ type Info struct {
 	BlockSize  int
 	// The true length of data in each block,
 	// defined in the number of elements
-	BlockLengths []int
-	IdLen        int // length of each identifier
+	BlockLengths     []int
+	IdentifierLength int // length of each identifier in bytes
 
 	// PIR type: classical, merkle, signature
 	PIRType string

@@ -7,19 +7,17 @@ import (
 
 	"golang.org/x/crypto/blake2b"
 
+	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-const (
-	hashLength                     = 32
-	numKeysToDBLengthRatio float32 = 0.1
-)
+const numKeysToDBLengthRatio float32 = 0.1
 
-func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (*DB, error) {
-	log.Printf("Field db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
+func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
+	log.Printf("Loading keys: %v\n", dataPaths)
 
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
@@ -31,55 +29,26 @@ func GenerateRealKeyDB(dataPaths []string, elementLength int, rebalanced bool) (
 	sortById(keys)
 
 	// decide on the length of the hash table
-	preSquareNumBlocks := int(float32(len(keys)) * numKeysToDBLengthRatio)
-	numRows, numColumns := CalculateNumRowsAndColumns(preSquareNumBlocks, rebalanced)
+	numRows := 1
+	numColumns := len(keys) // one column per identifier
 
+	// create empty database
 	info := NewInfo(numRows, numColumns, maxKeyLength(keys))
 	db, err := NewEmptyDB(info)
 	if err != nil {
 		return nil, err
 	}
 
-	db.IdLen = hashLength
+	// iterate and
+	db.IdentifierLength = constants.IdentifierLength
 	for i := 0; i < len(keys); i++ {
+		// store id
 		db.Identifiers = append(db.Identifiers, IdToHash(keys[i].ID)...)
+
+		// TODO: here we are embedding simple uint32 elements, not field elements
 		db.Entries = append(db.Entries, field.ByteSliceToFieldElementSlice(keys[i].Packet)...)
 		db.BlockLengths[i] = len(keys[i].Packet)
 	}
-
-	//ht := makeHashTable(keys, numRows*numColumns)
-	//// get the maximum byte length of the values in the hashTable
-	//// +1 takes into account the padding 0x80 that is always added.
-	//maxBytes := utils.MaxBytesLength(ht) + 1
-	//blockLen := int(math.Ceil(float64(maxBytes) / float64(elementLength)))
-	//
-	//// embed data into field elements
-	//blocks := make([][]field.Element, numRows*numColumns)
-	//totalLength := 0
-	//for k, v := range ht {
-	//	// Pad the block to be a multiple of elementLength
-	//	v = PadBlock(v, elementLength)
-	//	elements := make([]field.Element, len(v)/elementLength)
-	//
-	//	// embed all the bytes
-	//	for j := 0; j < len(v); j += elementLength {
-	//		e := new(field.Element).SetBytes(v[j : j+elementLength])
-	//		elements[j/elementLength] = *e
-	//	}
-	//	blocks[k] = elements
-	//	totalLength += len(elements)
-	//}
-	//
-	//// create all zeros db
-	//db, err := InitMultiBitDBWithCapacity(numRows, numColumns, blockLen, totalLength)
-	//if err != nil {
-	//	return nil, xerrors.Errorf("failed to create zero db: %v", err)
-	//}
-	//
-	//for k, block := range blocks {
-	//	db.AppendBlock(block)
-	//	db.BlockLengths[k] = len(block)
-	//}
 
 	return db, nil
 }
@@ -235,5 +204,5 @@ func maxKeyLength(keys []*pgp.Key) int {
 
 func IdToHash(id string) []byte {
 	hash := blake2b.Sum256([]byte(id))
-	return hash[:]
+	return hash[:constants.IdentifierLength]
 }
