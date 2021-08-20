@@ -127,7 +127,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 		sum[i] = make([]uint32, dbInfo.BlockSize+1)
 		for b := 0; b < dbInfo.BlockSize+1; b++ {
 			for k := range answers {
-				sum[i][b] = (sum[i][b] + answers[k][i*(dbInfo.BlockSize+1)+b]%field.ModP) % field.ModP
+				sum[i][b] = (sum[i][b] + answers[k][i*(dbInfo.BlockSize+1)+b]) % field.ModP
 			}
 		}
 	}
