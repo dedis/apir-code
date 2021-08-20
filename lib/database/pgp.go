@@ -2,13 +2,13 @@ package database
 
 import (
 	"bytes"
+	"encoding/binary"
 	"log"
 	"sort"
 
 	"golang.org/x/crypto/blake2b"
 
 	"github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -45,8 +45,20 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 		// store id
 		db.Identifiers = append(db.Identifiers, IdToHash(keys[i].ID)...)
 
+		// embed 3 bytes at a time
+		elementSlice := make([]uint32, 0)
+		step := 3
+		for i := 0; i < len(keys[i].Packet); i += step {
+			end := i + step
+			if end > len(keys[i].Packet) {
+				end = len(keys[i].Packet)
+			}
+			el := binary.BigEndian.Uint32(keys[i].Packet[i:end])
+			elementSlice = append(elementSlice, el)
+		}
+
 		// TODO: here we are embedding simple uint32 elements, not field elements
-		db.Entries = append(db.Entries, field.ByteSliceToFieldElementSlice(keys[i].Packet)...)
+		db.Entries = append(db.Entries, elementSlice...)
 		db.BlockLengths[i] = len(keys[i].Packet)
 	}
 
