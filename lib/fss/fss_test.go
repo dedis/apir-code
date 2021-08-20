@@ -15,13 +15,14 @@ func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
 	numBits := uint(32)
 	fClient := ClientInitialize(numBits, testBlockLength)
-	// Test with if x = 10, evaluate to vector b
+	index := field.RandElement()
+	// Test with if x = index, evaluate to vector b
 	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
 		b[i] = field.RandElement()
 	}
-	fssKeys := fClient.GenerateTreePF(uint32(field.ModP+1), b)
+	fssKeys := fClient.GenerateTreePF(index, b)
 
 	// Simulate server
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
@@ -39,7 +40,7 @@ func TestPoint(t *testing.T) {
 			sum[i] = (out0[i] + out1[i]) % field.ModP
 		}
 
-		if j == 10 {
+		if j == index {
 			require.Equal(t, b, sum)
 		} else {
 			require.Equal(t, zeros, sum)
