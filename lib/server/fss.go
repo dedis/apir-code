@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
+	"fmt"
+	"github.com/si-co/vpir-code/lib/field"
 	"math/bits"
 	"runtime"
 
@@ -66,12 +68,15 @@ func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {
 	idLength := constants.IdentifierLength
 	numIdentifiers := len(s.db.Identifiers) / idLength
 
-	q := make([]uint32, 0, (s.db.BlockSize+1)*numIdentifiers)
+	sum := uint32(0)
+	q := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
 	for i := 0; i < numIdentifiers; i++ {
 		tmp := make([]uint32, s.db.BlockSize+1)
 		id := binary.BigEndian.Uint32(s.db.Identifiers[i*idLength : (i+1)*idLength])
 		s.fss.EvaluatePF(s.serverNum, key, uint(id), tmp)
+		sum = (sum + tmp[0]) % field.ModP
 		copy(q[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
 	}
+	fmt.Printf("%d - %d\n", s.serverNum, sum)
 	return answer(q, s.db, s.cores)
 }

@@ -6,7 +6,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/constants"
@@ -26,7 +28,7 @@ const (
 
 func TestMultiBitVPIR(t *testing.T) {
 	keyToDownload := 1
-	numIdentifiers := 3000000
+	numIdentifiers := 5
 
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
@@ -41,9 +43,12 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
 
+	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
+	var j int
 	for i := 0; i < numBlocks; i++ {
-		id := int(binary.BigEndian.Uint32(db.Identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength]))
+		j = rand.Intn(db.NumColumns)
+		id := int(binary.BigEndian.Uint32(db.Identifiers[j*constants.IdentifierLength : (j+1)*constants.IdentifierLength]))
 		fssKeys := c.Query(id, 2)
 
 		a0 := s0.Answer(fssKeys[0])
@@ -54,7 +59,7 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
 
-		elems := db.Range(i*db.BlockSize, (i+1)*db.BlockSize)
+		elems := db.Range(j*db.BlockSize, (j+1)*db.BlockSize)
 
 		require.Equal(t, elems, res)
 	}
