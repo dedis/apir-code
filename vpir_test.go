@@ -49,7 +49,6 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 	for i := 0; i < numBlocks; i++ {
 		j = rand.Intn(db.NumColumns)
 		id := int(binary.BigEndian.Uint32(db.Identifiers[j*constants.IdentifierLength : (j+1)*constants.IdentifierLength]))
-		fmt.Println(id)
 		fssKeys := c.Query(id, 2)
 
 		a0 := s0.Answer(fssKeys[0])
