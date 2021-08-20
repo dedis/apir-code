@@ -3,10 +3,11 @@ package database
 import (
 	"crypto"
 	"encoding/binary"
-	"github.com/si-co/vpir-code/lib/constants"
-	"golang.org/x/xerrors"
 	"io"
 	"math"
+
+	"github.com/si-co/vpir-code/lib/constants"
+	"golang.org/x/xerrors"
 
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
@@ -83,6 +84,14 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
 		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	}
+	identifiersFinal := make([]byte, 0)
+	for i := 0; i < numIdentifiers; i++ {
+		id := identifiers[i*field.Bytes : (i+1)*field.Bytes]
+		idUint32 := binary.BigEndian.Uint32(id) % field.ModP
+		out := make([]byte, 4)
+		binary.BigEndian.PutUint32(out, idUint32)
+		identifiersFinal = append(identifiersFinal, out...)
+	}
 	//idUint32 := make([]uint32, numIdentifiers)
 	//for i := range idUint32 {
 	//	idUint32[i] = uint32(i)
@@ -100,7 +109,7 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	}
 
 	return &DB{
-		Identifiers: identifiers,
+		Identifiers: identifiersFinal,
 		Entries:     entries,
 		Info:        info,
 	}, nil

@@ -13,20 +13,21 @@ const testBlockLength = 16
 
 func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
-	fClient := ClientInitialize(6, testBlockLength)
+	numBits := uint(32)
+	fClient := ClientInitialize(numBits, testBlockLength)
 	// Test with if x = 10, evaluate to vector b
 	bLen := testBlockLength
 	b := make([]uint32, bLen)
 	for i := range b {
 		b[i] = field.RandElement()
 	}
-	fssKeys := fClient.GenerateTreePF(10, b)
+	fssKeys := fClient.GenerateTreePF(uint32(field.ModP+1), b)
 
 	// Simulate server
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
 
 	zeros := make([]uint32, bLen)
-	for j := uint(0); j < (1 << 6); j++ {
+	for j := uint(0); j < (1 << numBits); j++ {
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)
