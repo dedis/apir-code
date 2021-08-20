@@ -47,7 +47,7 @@ type ServerKeyLt struct {
 // 0th position is the most significant bit
 // True if bit is 1 and False if bit is 0
 // N is the number of bits in uint
-func getBit(n, pos, N uint) byte {
+func getBit(n uint32, pos, N uint) byte {
 	return byte((n & (1 << (N - pos))) >> (N - pos))
 }
 

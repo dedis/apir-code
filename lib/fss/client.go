@@ -43,6 +43,9 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 // Generate Keys for 2-party point functions It creates keys for a function
 // that evaluates to vector b when input x = a.
 func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
+	if a > field.ModP {
+		panic("input too big")
+	}
 	fssKeys := make([]FssKeyEq2P, 2)
 	// Set up initial values
 	tempRand1 := make([]byte, aes.BlockSize+1)
@@ -87,7 +90,7 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 		t1Left := prfOut1[aes.BlockSize] % 2
 		t1Right := prfOut1[(aes.BlockSize*2)+1] % 2
 		// Find bit in a
-		aBit := getBit(uint(a), (f.N - f.NumBits + i + 1), f.N)
+		aBit := getBit(a, (f.N - f.NumBits + i + 1), f.N)
 
 		// Figure out which half of expanded seeds to keep and lose
 		keep := rightStart
@@ -177,7 +180,7 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 	k[0].v = make([][]uint32, 2)
 	k[1].v = make([][]uint32, 2)
 	// Figure out first bit
-	aBit := getBit(uint(a), (f.N - f.NumBits + 1), f.N)
+	aBit := getBit(a, (f.N - f.NumBits + 1), f.N)
 	naBit := aBit ^ 1
 
 	// Initialize seeds (store as an array for each server)
@@ -263,7 +266,7 @@ func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
 
 	for i := uint(0); i < f.NumBits-1; i++ {
 		// Figure out next bit
-		aBit = getBit(uint(a), (f.N - f.NumBits + i + 2), f.N)
+		aBit = getBit(a, (f.N - f.NumBits + i + 2), f.N)
 		naBit = aBit ^ 1
 
 		// TODO: check this until line 288

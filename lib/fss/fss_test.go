@@ -27,7 +27,7 @@ func TestPoint(t *testing.T) {
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
 
 	zeros := make([]uint32, bLen)
-	for j := uint(0); j < (1 << numBits); j++ {
+	for j := uint32(0); j < (1 << numBits); j++ {
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)

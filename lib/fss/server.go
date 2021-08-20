@@ -35,7 +35,10 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 	return f
 }
 
-func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
+func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint32, out []uint32) {
+	if x > field.ModP {
+		panic("input too big")
+	}
 	sCurr := make([]byte, aes.BlockSize)
 	copy(sCurr, k.SInit)
 	tCurr := k.TInit
@@ -88,7 +91,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint, out []uint32) {
 // This is the 2-party FSS evaluation function for interval functions, i.e. <,> functions.
 // The usage is similar to 2-party FSS for equality functions
 func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
-	xBit := getBit(uint(x), (f.N - f.NumBits + 1), f.N)
+	xBit := getBit(x, (f.N - f.NumBits + 1), f.N)
 	s := make([]byte, aes.BlockSize)
 	copy(s, k.s[xBit])
 	t := k.t[xBit]
@@ -96,7 +99,7 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
 	for i := uint(1); i < f.NumBits; i++ {
 		// Get current bit
 		if i != f.N {
-			xBit = getBit(uint(x), uint(f.N-f.NumBits+i+1), f.N)
+			xBit = getBit(x, uint(f.N-f.NumBits+i+1), f.N)
 		} else {
 			xBit = 0
 		}
