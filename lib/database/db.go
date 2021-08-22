@@ -3,10 +3,10 @@ package database
 import (
 	"crypto"
 	"encoding/binary"
-	"github.com/si-co/vpir-code/lib/constants"
-	"golang.org/x/xerrors"
 	"io"
 	"math"
+	"math/rand"
+	"time"
 
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
@@ -79,20 +79,21 @@ func NewInfo(nRows, nCols, bSize int) Info {
 }
 
 func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
-	identifiers := make([]byte, numIdentifiers*constants.IdentifierLength)
-	if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
-		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
-	}
-	for i := 0; i < numIdentifiers; i++ {
-		id := identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength]
-		idUint32 := binary.BigEndian.Uint32(id) % field.ModP
-		binary.BigEndian.PutUint32(identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength], idUint32)
-	}
-	//idUint32 := make([]uint32, numIdentifiers)
-	//for i := range idUint32 {
-	//	idUint32[i] = uint32(2147483647) - 100 + uint32(i)
+	//identifiers := make([]byte, numIdentifiers*constants.IdentifierLength)
+	//if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
+	//	return nil, xerrors.Errorf("failed to read random bytes: %v", err)
 	//}
-	//identifiers := utils.Uint32SliceToByteSlice(idUint32)
+	//for i := 0; i < numIdentifiers; i++ {
+	//	id := identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength]
+	//	idUint32 := binary.BigEndian.Uint32(id) % field.ModP
+	//	binary.BigEndian.PutUint32(identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength], idUint32)
+	//}
+	rand.Seed(time.Now().UnixNano())
+	idUint32 := make([]uint32, numIdentifiers)
+	for i := range idUint32 {
+		idUint32[i] = uint32(rand.Intn(int(field.ModP)))
+	}
+	identifiers := utils.Uint32SliceToByteSlice(idUint32)
 
 	// for random db use 2048 bits = 64 uint32 elements
 	entryLength := 64
