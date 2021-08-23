@@ -9,6 +9,7 @@ import (
 const (
 	ModP  = uint32(2147483647) // 2^31 - 1
 	Bytes = 4
+	Mask  = 127
 )
 
 func NegateVector(in []uint32) []uint32 {
@@ -29,7 +30,7 @@ func RandElementWithPRG(rnd io.Reader) uint32 {
 			panic("error in randomness")
 		}
 		// Clearing the top most bit of uint32
-		buf[0] &= 127
+		buf[0] &= Mask
 		out = binary.BigEndian.Uint32(buf[:])
 	}
 	return out
@@ -49,8 +50,8 @@ func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
 	out := make([]uint32, length)
 	for i := range out {
 		//Clearing the top most bit of uint32
-		buf[i*Bytes] &= 127
-		out[i] = binary.BigEndian.Uint32(buf[i*Bytes:(i+1)*Bytes])
+		buf[i*Bytes] &= Mask
+		out[i] = binary.BigEndian.Uint32(buf[i*Bytes : (i+1)*Bytes])
 		for out[i] == ModP {
 			out[i] = RandElementWithPRG(rnd)
 		}
