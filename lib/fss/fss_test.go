@@ -18,7 +18,10 @@ const (
 func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(numBits, testBlockLength)
-	index := field.RandElement()
+
+	// set index
+	index := uint32(10)
+
 	// Test with if x = index, evaluate to vector b
 	bLen := testBlockLength
 	b := make([]uint32, bLen)
@@ -54,7 +57,10 @@ func TestPoint(t *testing.T) {
 func TestPointWithAlphaVector(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(numBits, testBlockLength)
-	index := field.RandElement()
+
+	// fix index
+	index := uint32(10)
+
 	// Test with if x = index, evaluate to vector b
 	alpha := field.RandElementWithPRG(utils.RandomPRG())
 	bLen := testBlockLength
