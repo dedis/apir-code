@@ -1,9 +1,10 @@
 package field
 
 import (
-	"crypto/rand"
 	"encoding/binary"
 	"io"
+
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 const (
@@ -38,7 +39,7 @@ func RandElementWithPRG(rnd io.Reader) uint32 {
 }
 
 func RandElement() uint32 {
-	return RandElementWithPRG(rand.Reader)
+	return RandElementWithPRG(utils.RandomPRG())
 }
 
 func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
@@ -62,7 +63,7 @@ func RandVectorWithPRG(length int, rnd io.Reader) []uint32 {
 }
 
 func RandVector(length int) []uint32 {
-	return RandVectorWithPRG(length, rand.Reader)
+	return RandVectorWithPRG(length, utils.RandomPRG())
 }
 
 // TODO: fix this because of bias in randomness
