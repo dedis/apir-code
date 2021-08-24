@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/blake2b"
 
 	"github.com/si-co/vpir-code/lib/constants"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -53,13 +54,13 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 			if end > len(keys[i].Packet) {
 				end = len(keys[i].Packet)
 			}
-			el := binary.BigEndian.Uint32(keys[i].Packet[i:end])
+			el := binary.BigEndian.Uint32(append([]byte{0}, keys[i].Packet[i:end]...))
 			elementSlice = append(elementSlice, el)
 		}
 
-		// TODO: here we are embedding simple uint32 elements, not field elements
 		db.Entries = append(db.Entries, elementSlice...)
-		db.BlockLengths[i] = len(keys[i].Packet)
+		// block lengths are defined in number of elements
+		db.BlockLengths[i] = len(elementSlice)
 	}
 
 	return db, nil
@@ -214,7 +215,12 @@ func maxKeyLength(keys []*pgp.Key) int {
 	return max
 }
 
+// TODO: fix this
 func IdToHash(id string) []byte {
 	hash := blake2b.Sum256([]byte(id))
-	return hash[:constants.IdentifierLength]
+	// mod
+	idUint32 := binary.BigEndian.Uint32(hash[:constants.IdentifierLength]) % field.ModP
+	out := make([]byte, 4)
+	binary.BigEndian.PutUint32(out, idUint32)
+	return out
 }

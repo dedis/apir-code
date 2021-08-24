@@ -75,3 +75,23 @@ func ByteSliceToFieldElementSlice(in []byte) []uint32 {
 
 	return out
 }
+
+// VectorToBytes extracts bytes from a vector of field elements.  Assume that
+// only 3 bytes worth of data are embedded in each field element and therefore
+// strips the initial zero from each field element.
+func VectorToBytes(in interface{}) []byte {
+	switch vec := in.(type) {
+	case []uint32:
+		elemSize := Bytes - 1
+		out := make([]byte, len(vec)*elemSize)
+		for i, e := range vec {
+			fieldBytes := make([]byte, Bytes)
+			binary.BigEndian.PutUint32(fieldBytes, e)
+			// strip first zero and copy to the output
+			copy(out[i*elemSize:(i+1)*elemSize], fieldBytes[1:])
+		}
+		return out
+	default:
+		return nil
+	}
+}

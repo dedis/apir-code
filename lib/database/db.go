@@ -23,13 +23,11 @@ type DB struct {
 }
 
 type Info struct {
-	NumRows    int
-	NumColumns int
-	BlockSize  int
-	// The true length of data in each block,
-	// defined in the number of elements
-	BlockLengths     []int
-	IdentifierLength int // length of each identifier in bytes
+	NumRows          int
+	NumColumns       int
+	BlockSize        int
+	BlockLengths     []int // length of data in blocks defined in number of elements
+	IdentifierLength int   // length of each identifier in bytes
 
 	// PIR type: classical, merkle, signature
 	PIRType string
@@ -37,7 +35,7 @@ type Info struct {
 	*Auth
 	*Merkle
 
-	//Lattice parameters for the single-server data retrieval
+	// Lattice parameters for the single-server data retrieval
 	LatParams *bfv.Parameters
 }
 
@@ -80,6 +78,8 @@ func NewInfo(nRows, nCols, bSize int) Info {
 
 func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	rand.Seed(time.Now().UnixNano())
+
+	// create random identifiers
 	idUint32 := make([]uint32, numIdentifiers)
 	for i := range idUint32 {
 		idUint32[i] = uint32(rand.Intn(int(field.ModP)))

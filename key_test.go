@@ -4,6 +4,7 @@ package main
 // locally, the networking logic is not tested here.
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math/rand"
 	"path/filepath"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
@@ -24,7 +24,7 @@ import (
 // TestRetrieveRealKeysDPFVector tests the retrieval of real PGP keys using
 // the DPF-based multi-bit scheme. With DPF, the database is always represented
 // as a vector.
-func TestRetrieveRealKeysDPFVector(t *testing.T) {
+func TestRetrieveRealKeysFSS(t *testing.T) {
 	// math randomness used only for testing purposes
 	rand.Seed(time.Now().UnixNano())
 
@@ -32,7 +32,7 @@ func TestRetrieveRealKeysDPFVector(t *testing.T) {
 	filePaths := getDBFilePaths()
 
 	// generate db from sks key dump
-	db, err := database.GenerateRealKeyDB(filePaths, constants.ChunkBytesLength, false)
+	db, err := database.GenerateRealKeyDB(filePaths)
 	require.NoError(t, err)
 	numBlocks := db.NumColumns * db.NumRows
 
@@ -42,11 +42,98 @@ func TestRetrieveRealKeysDPFVector(t *testing.T) {
 
 	// client and servers
 	prg := utils.RandomPRG()
-	c := client.NewDPF(prg, &db.Info)
-	servers := makeDPFServers(db)
+	c := client.NewFSS(prg, &db.Info)
+	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
+	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
+	servers := []server.Server{s0, s1}
 
 	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
 }
+
+func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
+	// number of keys to retrieve for the test
+	numKeys := 10
+
+	start := time.Now()
+	for i := 0; i < numKeys; i++ {
+		// get random key
+		j := rand.Intn(len(realKeys))
+		fmt.Println(pgp.PrimaryEmail(realKeys[i]))
+		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
+
+		//result = database.UnPadBlock(result)
+		// Get a key from the block with the id of the search
+		retrievedKey, err := pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
+		require.NoError(t, err)
+		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
+		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
+	}
+	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
+}
+
+func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
+	// compute hash key for id
+	hashKey := database.IdToHash(id)
+	index := int(binary.BigEndian.Uint32(hashKey))
+
+	// query given hash key
+	queries, err := c.QueryBytes(index, len(ss))
+	require.NoError(t, err)
+
+	// get servers answers
+	answers := make([][]byte, len(ss))
+	for i := range ss {
+		answers[i], err = ss[i].AnswerBytes(queries[i])
+		require.NoError(t, err)
+	}
+
+	// reconstruct block
+	result, err := c.ReconstructBytes(answers)
+	require.NoError(t, err)
+
+	// return result bytes
+	switch result.(type) {
+	case []uint32:
+		return field.VectorToBytes(result.([]uint32))
+	default:
+		return result.([]byte)
+	}
+}
+
+func makeITServers(db *database.DB) []server.Server {
+	s0 := server.NewIT(db)
+	s1 := server.NewIT(db)
+	return []server.Server{s0, s1}
+}
+
+func makePIRDPFServers(db *database.Bytes) []server.Server {
+	s0 := server.NewPIRdpf(db)
+	s1 := server.NewPIRdpf(db)
+	return []server.Server{s0, s1}
+}
+
+func makePIRITServers(db *database.Bytes) []server.Server {
+	s0 := server.NewPIR(db)
+	s1 := server.NewPIR(db)
+	return []server.Server{s0, s1}
+}
+
+func getDBFilePaths() []string {
+	sksDir := filepath.Join("data", pgp.SksParsedFolder)
+	// get a random chunk of the key dump in the folder
+	//filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))
+	//filePaths := make([]string, 0)
+	//for i := 0; i < 10; i++ {
+	//fp := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", i))
+	//filePaths = append(filePaths, fp)
+	//}
+	//return filePaths
+	filePath := filepath.Join(sksDir, "sks-022.pgp")
+	fmt.Printf("Testing with %s\n", filePath)
+	return []string{filePath}
+}
+
+/*
 
 // TestRetrieveRealKeysITMatrix tests the retrieval of real PGP keys using the
 // matrix-based multi-bit scheme.
@@ -179,89 +266,4 @@ func TestRetrieveRealKeysMerkleITMatrix(t *testing.T) {
 
 	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
 }
-
-func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
-	// number of keys to retrieve for the test
-	numKeys := 100
-
-	start := time.Now()
-	for i := 0; i < numKeys; i++ {
-		j := rand.Intn(len(realKeys))
-		//fmt.Println(pgp.PrimaryEmail(realKeys[j]))
-		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
-		result = database.UnPadBlock(result)
-		// Get a key from the block with the id of the search
-		retrievedKey, err := pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
-		require.NoError(t, err)
-		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
-		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
-	}
-	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
-}
-
-func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
-	// compute hash key for id
-	hashKey := database.HashToIndex(id, dbLenBlocks)
-
-	// query given hash key
-	queries, err := c.QueryBytes(hashKey, len(ss))
-	require.NoError(t, err)
-
-	// get servers answers
-	answers := make([][]byte, len(ss))
-	for i := range ss {
-		answers[i], err = ss[i].AnswerBytes(queries[i])
-		require.NoError(t, err)
-	}
-
-	// reconstruct block
-	result, err := c.ReconstructBytes(answers)
-	require.NoError(t, err)
-
-	// return result bytes
-	switch result.(type) {
-	case []field.Element:
-		return field.VectorToBytes(result.([]field.Element))
-	default:
-		return result.([]byte)
-	}
-}
-
-func makeDPFServers(db *database.DB) []server.Server {
-	s0 := server.NewDPF(db)
-	s1 := server.NewDPF(db)
-	return []server.Server{s0, s1}
-}
-
-func makeITServers(db *database.DB) []server.Server {
-	s0 := server.NewIT(db)
-	s1 := server.NewIT(db)
-	return []server.Server{s0, s1}
-}
-
-func makePIRDPFServers(db *database.Bytes) []server.Server {
-	s0 := server.NewPIRdpf(db)
-	s1 := server.NewPIRdpf(db)
-	return []server.Server{s0, s1}
-}
-
-func makePIRITServers(db *database.Bytes) []server.Server {
-	s0 := server.NewPIR(db)
-	s1 := server.NewPIR(db)
-	return []server.Server{s0, s1}
-}
-
-func getDBFilePaths() []string {
-	sksDir := filepath.Join("data", pgp.SksParsedFolder)
-	// get a random chunk of the key dump in the folder
-	//filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))
-	//filePaths := make([]string, 0)
-	//for i := 0; i < 10; i++ {
-	//fp := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", i))
-	//filePaths = append(filePaths, fp)
-	//}
-	//return filePaths
-	filePath := filepath.Join(sksDir, "sks-022.pgp")
-	fmt.Printf("Testing with %s\n", filePath)
-	return []string{filePath}
-}
+*/
