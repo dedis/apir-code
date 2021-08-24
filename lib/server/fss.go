@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"math/bits"
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 )
 
@@ -31,7 +31,7 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		fss:       fss.ServerInitialize(prfKeys, uint(bits.Len(uint(db.Info.NumColumns)-1))),
+		fss:       fss.ServerInitialize(prfKeys, field.Bits),
 	}
 
 }
@@ -66,18 +66,13 @@ func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {
 	idLength := constants.IdentifierLength
 	numIdentifiers := s.db.NumColumns
 
-	//sum := uint32(0)
-	//alpha := uint32(0)
 	q := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
 	for i := 0; i < numIdentifiers; i++ {
 		tmp := make([]uint32, s.db.BlockSize+1)
 		id := binary.BigEndian.Uint32(s.db.Identifiers[i*idLength : (i+1)*idLength])
 		s.fss.EvaluatePF(s.serverNum, key, id, tmp)
-		//sum = (sum + tmp[0]) % field.ModP
-		//alpha = (alpha + tmp[1]) % field.ModP
 		copy(q[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
 	}
-	//fmt.Printf("%d - %d\n", s.serverNum, sum)
-	//fmt.Printf("%d - %d\n", s.serverNum, alpha)
+
 	return answer(q, s.db, s.cores)
 }
