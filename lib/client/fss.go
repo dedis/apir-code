@@ -5,9 +5,9 @@ import (
 	"encoding/gob"
 	"io"
 	"log"
-	"math/bits"
 
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 )
 
@@ -26,7 +26,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		Fss:    fss.ClientInitialize(uint(bits.Len(uint(info.NumColumns)-1)), info.BlockSize),
+		Fss:    fss.ClientInitialize(field.Bits, info.BlockSize),
 	}
 }
 
@@ -63,7 +63,6 @@ func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2P {
 
 	// client initialization is the same for both single- and multi-bit scheme
 	return c.Fss.GenerateTreePF(uint32(index), c.state.a)
-	//return c.Fss.GenerateTreePF(uint32(c.state.iy), c.state.a)
 }
 
 // ReconstructBytes decodes the answers from the servers and reconstruct the
