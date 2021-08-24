@@ -79,15 +79,6 @@ func NewInfo(nRows, nCols, bSize int) Info {
 }
 
 func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
-	//identifiers := make([]byte, numIdentifiers*constants.IdentifierLength)
-	//if _, err := io.ReadFull(rnd, identifiers[:]); err != nil {
-	//	return nil, xerrors.Errorf("failed to read random bytes: %v", err)
-	//}
-	//for i := 0; i < numIdentifiers; i++ {
-	//	id := identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength]
-	//	idUint32 := binary.BigEndian.Uint32(id) % field.ModP
-	//	binary.BigEndian.PutUint32(identifiers[i*constants.IdentifierLength : (i+1)*constants.IdentifierLength], idUint32)
-	//}
 	rand.Seed(time.Now().UnixNano())
 	idUint32 := make([]uint32, numIdentifiers)
 	for i := range idUint32 {
