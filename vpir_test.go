@@ -27,8 +27,8 @@ const (
 )
 
 func TestMultiBitVPIR(t *testing.T) {
-	keyToDownload := 1
-	numIdentifiers := 2
+	keyToDownload := 50
+	numIdentifiers := 100
 
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
