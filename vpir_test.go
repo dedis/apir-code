@@ -47,8 +47,12 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 	totalTimer := monitor.NewMonitor()
 	var j int
 	for i := 0; i < numBlocks; i++ {
+		// get random identifier number
 		j = rand.Intn(db.NumColumns)
+
+		// compute corresponding identifier
 		id := int(binary.BigEndian.Uint32(db.Identifiers[j*constants.IdentifierLength : (j+1)*constants.IdentifierLength]))
+
 		fssKeys := c.Query(id, 2)
 
 		a0 := s0.Answer(fssKeys[0])
