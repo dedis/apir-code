@@ -9,6 +9,7 @@ import (
 const (
 	ModP  = uint32(2147483647) // 2^31 - 1
 	Bytes = 4
+	Bits  = 31
 	Mask  = 127
 )
 
@@ -64,6 +65,7 @@ func RandVector(length int) []uint32 {
 	return RandVectorWithPRG(length, rand.Reader)
 }
 
+// TODO: fix this because of bias in randomness
 func ByteSliceToFieldElementSlice(in []byte) []uint32 {
 	out := make([]uint32, len(in)/4)
 
