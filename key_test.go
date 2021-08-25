@@ -57,10 +57,11 @@ func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Serve
 	start := time.Now()
 	for i := 0; i < numKeys; i++ {
 		// get random key
-		j := rand.Intn(len(realKeys))
+		//j := rand.Intn(len(realKeys))
+		j := 0
 		fmt.Println(pgp.PrimaryEmail(realKeys[i]))
 		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
-
+		fmt.Println(result)
 		//result = database.UnPadBlock(result)
 		// Get a key from the block with the id of the search
 		retrievedKey, err := pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))

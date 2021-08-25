@@ -2,6 +2,7 @@ package field
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 
 	"github.com/si-co/vpir-code/lib/utils"
@@ -83,6 +84,7 @@ func ByteSliceToFieldElementSlice(in []byte) []uint32 {
 func VectorToBytes(in interface{}) []byte {
 	switch vec := in.(type) {
 	case []uint32:
+		fmt.Println(vec)
 		elemSize := Bytes - 1
 		out := make([]byte, len(vec)*elemSize)
 		for i, e := range vec {
