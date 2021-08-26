@@ -42,6 +42,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint32, out []uint32) {
 	sCurr := make([]byte, aes.BlockSize)
 	copy(sCurr, k.SInit)
 	tCurr := k.TInit
+	tmp := make([]uint32, len(out))
 	for i := uint(0); i < f.NumBits; i++ {
 		var xBit byte = 0
 		if i != f.N {
@@ -73,10 +74,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint32, out []uint32) {
 		}
 	}
 
-	outLen := uint(len(out))
-
 	// convert block
-	tmp := make([]uint32, outLen)
 	convertBlock(f, sCurr, tmp)
 	for i := range out {
 		if serverNum == 0 {
