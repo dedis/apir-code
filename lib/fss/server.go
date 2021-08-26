@@ -77,7 +77,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint32, out []uint32) {
 
 	// convert block
 	tmp := make([]uint32, outLen)
-	convertBlock(f, sCurr, &tmp)
+	convertBlock(f, sCurr, tmp)
 	for i := range out {
 		if serverNum == 0 {
 			// tCurr is either 0 or 1, no need to mod
@@ -116,7 +116,7 @@ func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
 		}
 
 		conv := make([]uint32, len(v))
-		convertBlock(f, s, &conv)
+		convertBlock(f, s, conv)
 		for j := range v {
 			//v[j] = (v[j] + conv[j] + k.cw[t][i-1].cv[xBit][j]) % field.ModP
 			val := (v[j] + conv[j]) % field.ModP

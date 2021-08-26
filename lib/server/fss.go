@@ -67,8 +67,8 @@ func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {
 	numIdentifiers := s.db.NumColumns
 
 	q := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
+	tmp := make([]uint32, s.db.BlockSize+1)
 	for i := 0; i < numIdentifiers; i++ {
-		tmp := make([]uint32, s.db.BlockSize+1)
 		id := binary.BigEndian.Uint32(s.db.Identifiers[i*idLength : (i+1)*idLength])
 		s.fss.EvaluatePF(s.serverNum, key, id, tmp)
 		copy(q[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)

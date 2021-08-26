@@ -67,14 +67,10 @@ func RandVector(length int) []uint32 {
 }
 
 // TODO: fix this because of bias in randomness
-func ByteSliceToFieldElementSlice(in []byte) []uint32 {
-	out := make([]uint32, len(in)/4)
-
+func ByteSliceToFieldElementSlice(out []uint32, in []byte) {
 	for i := range out {
 		out[i] = binary.BigEndian.Uint32(in[i*Bytes:(i+1)*Bytes]) % ModP
 	}
-
-	return out
 }
 
 // VectorToBytes extracts bytes from a vector of field elements.  Assume that
