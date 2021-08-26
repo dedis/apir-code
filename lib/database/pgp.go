@@ -3,7 +3,6 @@ package database
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"log"
 	"sort"
 
@@ -47,27 +46,22 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 		// store id
 		db.Identifiers = append(db.Identifiers, IdToHash(keys[i].ID)...)
 
-		if i == 0 {
-			fmt.Println(keys[i].Packet)
-		}
+		// TODO: keep this?
+		v := PadBlock(keys[i].Packet, field.Bytes-1)
 		// embed 3 bytes at a time
 		elementSlice := make([]uint32, 0)
 		step := 3
-		for k := 0; k < len(keys[i].Packet); k += step {
+		for k := 0; k < len(v); k += step {
 			end := k + step
-			if end > len(keys[i].Packet) {
-				end = len(keys[i].Packet)
+			if end > len(v) {
+				end = len(v)
 			}
 
 			toEmbed := make([]byte, 4) // initialized at all zeros
-			copy(toEmbed[len(toEmbed)-len(keys[i].Packet[k:end]):len(toEmbed)], keys[i].Packet[k:end])
+			copy(toEmbed[len(toEmbed)-len(v[k:end]):len(toEmbed)], v[k:end])
 
 			el := binary.BigEndian.Uint32(toEmbed)
 			elementSlice = append(elementSlice, el)
-		}
-
-		if i == 0 {
-			fmt.Println(elementSlice)
 		}
 
 		db.Entries = append(db.Entries, elementSlice...)

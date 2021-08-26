@@ -61,8 +61,8 @@ func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Serve
 		j := 0
 		fmt.Println(pgp.PrimaryEmail(realKeys[i]))
 		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
+		result = database.UnPadBlock(result)
 		fmt.Println(result)
-		//result = database.UnPadBlock(result)
 		// Get a key from the block with the id of the search
 		retrievedKey, err := pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
 		require.NoError(t, err)
