@@ -26,7 +26,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		Fss:    fss.ClientInitialize(field.Bits, info.BlockSize),
+		Fss:    fss.ClientInitialize(field.Bits, info.BlockSize), // TODO: solve +1 here, only for VPIR
 	}
 }
 
