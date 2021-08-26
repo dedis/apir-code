@@ -34,6 +34,7 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	numColumns := len(keys) // one column per identifier
 
 	// create empty database
+	// TODO: problem here, maxKeyLength returns max number of bytes, but used as number of field elements
 	info := NewInfo(numRows, numColumns, maxKeyLength(keys))
 	db, err := NewEmptyDB(info)
 	if err != nil {
@@ -58,7 +59,7 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 			}
 
 			toEmbed := make([]byte, 4) // initialized at all zeros
-			copy(toEmbed[len(toEmbed)-len(v[k:end]):len(toEmbed)], v[k:end])
+			copy(toEmbed[len(toEmbed)-len(v[k:end]):], v[k:end])
 
 			el := binary.BigEndian.Uint32(toEmbed)
 			elementSlice = append(elementSlice, el)
