@@ -34,21 +34,22 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	numColumns := len(keys) // one column per identifier
 
 	// create empty database
-	// TODO: problem here, maxKeyLength returns max number of bytes, but used as number of field elements
-	info := NewInfo(numRows, numColumns, maxKeyLength(keys))
+	// TODO: here we set at zero the blockSize and we compute it later
+	info := NewInfo(numRows, numColumns, 0)
 	db, err := NewEmptyDB(info)
 	if err != nil {
 		return nil, err
 	}
 
-	// iterate and
+	// iterate and embed keys
+	maxKeyLengthElements := 0
 	db.IdentifierLength = constants.IdentifierLength
 	for i := 0; i < len(keys); i++ {
 		// store id
 		db.Identifiers = append(db.Identifiers, IdToHash(keys[i].ID)...)
 
-		// TODO: keep this?
 		v := PadBlock(keys[i].Packet, field.Bytes-1)
+
 		// embed 3 bytes at a time
 		elementSlice := make([]uint32, 0)
 		step := 3
@@ -68,7 +69,12 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 		db.Entries = append(db.Entries, elementSlice...)
 		// block lengths are defined in number of elements
 		db.BlockLengths[i] = len(elementSlice)
+		if len(elementSlice) > maxKeyLengthElements {
+			maxKeyLengthElements = len(elementSlice)
+		}
 	}
+
+	db.Info.BlockSize = maxKeyLengthElements
 
 	return db, nil
 }

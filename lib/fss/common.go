@@ -5,7 +5,6 @@ package fss
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"fmt"
 
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -71,7 +70,6 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 
 func convertBlock(f Fss, x []byte, out []uint32) {
 	bLen := uint(len(out))
-	fmt.Println(bLen)
 	randBytes := make([]byte, bLen*field.Bytes)
 
 	// we can generate four uint32 numbers with a 16-bytes AES block
