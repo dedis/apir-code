@@ -31,7 +31,7 @@ func TestPoint(t *testing.T) {
 	fssKeys := fClient.GenerateTreePF(index, b)
 
 	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
+	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	zeros := make([]uint32, bLen)
 	for j := uint32(0); j < (1 << numBits); j++ {
@@ -74,7 +74,7 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fssKeys := fClient.GenerateTreePF(index, b)
 
 	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
+	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	zeros := make([]uint32, bLen)
 	for j := uint32(0); j < (1 << numBits); j++ {
@@ -109,7 +109,7 @@ func TestInterval(t *testing.T) {
 	fssKeys := fClient.GenerateTreeLt(10, b)
 
 	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits)
+	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	sum := make([]uint32, bLen)
 

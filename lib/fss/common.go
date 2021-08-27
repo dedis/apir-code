@@ -17,6 +17,9 @@ type Fss struct {
 	NumBits     uint   // number of bits in domain
 	Temp        []byte // temporary slices so that we only need to allocate memory at the beginning
 	Out         []byte
+
+	BlockLength     int    // block length in number of elements
+	OutConvertBlock []byte // to gather random bytes in convertBlock, allocate once for performance
 }
 
 //const initPRFLen uint = 4
@@ -69,10 +72,7 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 }
 
 func convertBlock(f Fss, x []byte, out []uint32) {
-	bLen := uint(len(out))
-	randBytes := make([]byte, bLen*field.Bytes)
-
 	// we can generate four uint32 numbers with a 16-bytes AES block
-	prf(x, f.FixedBlocks, bLen/4, f.Temp, randBytes)
-	field.ByteSliceToFieldElementSlice(out, randBytes)
+	prf(x, f.FixedBlocks, uint(len(out)/4), f.Temp, f.OutConvertBlock)
+	field.ByteSliceToFieldElementSlice(out, f.OutConvertBlock)
 }

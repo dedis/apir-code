@@ -13,7 +13,7 @@ import (
 // Upon receiving query from client, initialize server with
 // this function. The server, unlike the client
 // receives prfKeys, so it doesn't need to pick random ones
-func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
+func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
 	f := new(Fss)
 	initPRFLen := len(prfKeys)
 	f.NumBits = numBits
@@ -31,6 +31,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint) *Fss {
 	f.N = field.Bytes * 8
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
+	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
 
 	return f
 }

@@ -31,7 +31,7 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		fss:       fss.ServerInitialize(prfKeys, field.Bits),
+		fss:       fss.ServerInitialize(prfKeys, field.Bits, db.BlockSize),
 	}
 
 }
