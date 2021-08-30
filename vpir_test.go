@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"runtime"
 	"testing"
 	"time"
 
@@ -36,6 +37,48 @@ func TestMultiBitVPIR(t *testing.T) {
 	require.NoError(t, err)
 
 	retrieveBlocksFSS(t, xof, db, keyToDownload, "FSSMultiBitVectorVPIR")
+}
+
+func TestFSSThreads(t *testing.T) {
+	numIdentifiers := 100000
+	rndDB := utils.RandomPRG()
+	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	require.NoError(t, err)
+
+	prg := utils.RandomPRG()
+	for cores := 1; cores <= runtime.NumCPU(); cores++ {
+		c := client.NewFSS(prg, &db.Info)
+		s0 := server.NewFSS(db, 0, c.Fss.PrfKeys, cores)
+		s1 := server.NewFSS(db, 1, c.Fss.PrfKeys, cores)
+		fmt.Printf("Cores: %d ", cores)
+
+		// get random identifier number
+		j := 2 // hardcode identifier for test
+
+		// compute corresponding identifier
+		id := int(binary.BigEndian.Uint32(db.Identifiers[j*constants.IdentifierLength : (j+1)*constants.IdentifierLength]))
+
+		// start user clock
+		clock := time.Now()
+
+		fssKeys, err := c.QueryBytes(id, 2)
+		require.NoError(t, err)
+
+		a0, err := s0.AnswerBytes(fssKeys[0])
+		require.NoError(t, err)
+		a1, err := s1.AnswerBytes(fssKeys[1])
+		require.NoError(t, err)
+
+		answers := [][]byte{a0, a1}
+
+		_, err = c.ReconstructBytes(answers)
+		require.NoError(t, err)
+
+		fmt.Printf("Total time: %v  \n", time.Since(clock))
+		// GC after each repetition
+		runtime.GC()
+
+	}
 }
 
 func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int, testName string) {

@@ -79,7 +79,7 @@ func saveKeyIfValid(e *openpgp.Entity, keyMap map[string]*openpgp.Entity) {
 	//	return
 	//}
 
-	//Remove subkeys (as a PoC) so that only the primary key is left
+	// remove subkeys (as a PoC) so that only the primary key is left
 	e.Subkeys = nil
 	// we index the keyMap by the primary identity and keep only
 	// the latest key if there are multiple for a given identity

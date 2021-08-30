@@ -48,17 +48,18 @@ func TestRetrieveRealKeysFSS(t *testing.T) {
 	servers := []server.Server{s0, s1}
 
 	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
+
 }
 
 func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
 	// number of keys to retrieve for the test
-	numKeys := 1
+	numKeys := 10
 
 	start := time.Now()
 	for i := 0; i < numKeys; i++ {
 		// get random key
 		j := rand.Intn(len(realKeys))
-		fmt.Println(pgp.PrimaryEmail(realKeys[i]))
+		//fmt.Println(pgp.PrimaryEmail(realKeys[i]))
 		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
 		result = database.UnPadBlock(result)
 
