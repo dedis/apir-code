@@ -10,3 +10,11 @@ func Uint32SliceToByteSlice(in []uint32) []byte {
 
 	return out
 }
+
+func ByteSliceToUint32Slice(in []byte) []uint32 {
+	out := make([]uint32, len(in)/4)
+	for i := range out {
+		out[i] = binary.BigEndian.Uint32(in[i*4:])
+	}
+	return out
+}

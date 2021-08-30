@@ -10,6 +10,7 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 type FSS struct {
@@ -53,13 +54,9 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 	a := s.Answer(query)
 
 	// encode answer
-	buf.Reset()
-	enc := gob.NewEncoder(buf)
-	if err := enc.Encode(a); err != nil {
-		return nil, err
-	}
+	out := utils.Uint32SliceToByteSlice(a)
 
-	return buf.Bytes(), nil
+	return out, nil
 }
 
 func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {

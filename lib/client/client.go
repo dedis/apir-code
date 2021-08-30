@@ -1,8 +1,6 @@
 package client
 
 import (
-	"bytes"
-	"encoding/gob"
 	"errors"
 	"io"
 	"log"
@@ -14,6 +12,7 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Client represents the client instance in both the IT and DPF-based schemes.
@@ -39,17 +38,11 @@ type state struct {
 
 // decodeAnswer decodes the gob-encoded answers from the servers and return
 // them as slices of field elements.
-func decodeAnswer(a [][]byte) ([][]uint32, error) {
+func decodeAnswer(in [][]byte) ([][]uint32, error) {
 	// decode all the answers one by one
-	answer := make([][]uint32, len(a))
-	for i, ans := range a {
-		buf := bytes.NewBuffer(ans)
-		dec := gob.NewDecoder(buf)
-		var serverAnswer []uint32
-		if err := dec.Decode(&serverAnswer); err != nil {
-			return nil, err
-		}
-		answer[i] = serverAnswer
+	answer := make([][]uint32, len(in))
+	for i, a := range in {
+		answer[i] = utils.ByteSliceToUint32Slice(a)
 	}
 
 	return answer, nil
