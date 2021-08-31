@@ -6,6 +6,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 
+	"github.com/lukechampine/fastxor"
 	"github.com/si-co/vpir-code/lib/field"
 )
 
@@ -65,9 +66,7 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 		// get AES_k[i](x)
 		aesBlocks[i].Encrypt(temp, x)
 		// get AES_k[i](x) ^ x
-		for j := range temp {
-			out[i*aes.BlockSize+uint(j)] = temp[j] ^ x[j]
-		}
+		fastxor.Bytes(out[i*aes.BlockSize:], temp, x)
 	}
 }
 

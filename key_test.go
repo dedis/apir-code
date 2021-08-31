@@ -14,6 +14,7 @@ import (
 	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -82,38 +83,25 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	queries, err := c.QueryBytes(index, len(ss))
 	require.NoError(t, err)
 
-	// init channel for answers
-	answersChannel := make(chan [][]byte, parallelExecutions)
-
 	// get servers answers
-	for i := 0; i < parallelExecutions; i++ {
-		go func(queries [][]byte) {
-			answers := make([][]byte, len(ss))
-			for i := range ss {
-				answers[i], err = ss[i].AnswerBytes(queries[i])
-				require.NoError(t, err)
-			}
-			answersChannel <- answers
-		}(queries)
+	answers := make([][]byte, len(ss))
+	for i := range ss {
+		answers[i], err = ss[i].AnswerBytes(queries[i])
+		require.NoError(t, err)
+
 	}
 
-	for a := range answersChannel {
-		fmt.Println(a)
+	// reconstruct block
+	result, err := c.ReconstructBytes(answers)
+	require.NoError(t, err)
+
+	// return result bytes
+	switch result.(type) {
+	case []uint32:
+		return field.VectorToBytes(result.([]uint32))
+	default:
+		return result.([]byte)
 	}
-
-	/* 	// reconstruct block
-	   	result, err := c.ReconstructBytes(answers)
-	   	require.NoError(t, err)
-
-	   	// return result bytes
-	   	switch result.(type) {
-	   	case []uint32:
-	   		return field.VectorToBytes(result.([]uint32))
-	   	default:
-	   		return result.([]byte)
-	   	} */
-
-	return nil
 }
 
 func makeITServers(db *database.DB) []server.Server {
