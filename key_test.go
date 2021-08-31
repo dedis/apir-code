@@ -24,8 +24,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const parallelExecutions = 4
-
 // TestRetrieveRealKeysDPFVector tests the retrieval of real PGP keys using
 // the DPF-based multi-bit scheme. With DPF, the database is always represented
 // as a vector.
@@ -94,30 +92,6 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	queries, err := c.QueryBytes(index, len(ss))
 	require.NoError(t, err)
 
-	/* // init channel for answers
-	answersChannel := make(chan [][]byte, parallelExecutions)
-
-	wg := sync.WaitGroup{}
-	// get servers answers
-	for i := 0; i < parallelExecutions; i++ {
-		wg.Add(1)
-		go func(queries [][]byte) {
-			answers := make([][]byte, len(ss))
-			for i := range ss {
-				answers[i], err = ss[i].AnswerBytes(queries[i])
-				require.NoError(t, err)
-			}
-			answersChannel <- answers
-			wg.Done()
-		}(queries)
-	}
-
-	for a := range answersChannel {
-		fmt.Println(a)
-	}
-
-	return nil */
-
 	// get servers answers
 	answers := make([][]byte, len(ss))
 	for i := range ss {
@@ -161,12 +135,13 @@ func getDBFilePaths() []string {
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)
 	// get a random chunk of the key dump in the folder
 	//filePath := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", rand.Intn(31)))
-	//filePaths := make([]string, 0)
-	//for i := 0; i < 10; i++ {
-	//fp := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", i))
-	//filePaths = append(filePaths, fp)
-	//}
-	//return filePaths
+	// filePaths := make([]string, 0)
+	// for i := 0; i < 3; i++ {
+	// 	fp := filepath.Join(sksDir, fmt.Sprintf("sks-%03d.pgp", i))
+	// 	filePaths = append(filePaths, fp)
+	// }
+	// fmt.Println("Testing with", filePaths)
+	// return filePaths
 	filePath := filepath.Join(sksDir, "sks-022.pgp")
 	fmt.Printf("Testing with %s\n", filePath)
 	return []string{filePath}
