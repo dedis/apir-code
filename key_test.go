@@ -6,8 +6,11 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
 	"path/filepath"
+	"runtime/pprof"
 	"testing"
 	"time"
 
@@ -49,8 +52,16 @@ func TestRetrieveRealKeysFSS(t *testing.T) {
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
 	servers := []server.Server{s0, s1}
 
-	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
+	f, err := os.Create("retrieve_profile.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+	defer pprof.StopCPUProfile()
 
+	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
 }
 
 func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
@@ -82,6 +93,30 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	// query given hash key
 	queries, err := c.QueryBytes(index, len(ss))
 	require.NoError(t, err)
+
+	/* // init channel for answers
+	answersChannel := make(chan [][]byte, parallelExecutions)
+
+	wg := sync.WaitGroup{}
+	// get servers answers
+	for i := 0; i < parallelExecutions; i++ {
+		wg.Add(1)
+		go func(queries [][]byte) {
+			answers := make([][]byte, len(ss))
+			for i := range ss {
+				answers[i], err = ss[i].AnswerBytes(queries[i])
+				require.NoError(t, err)
+			}
+			answersChannel <- answers
+			wg.Done()
+		}(queries)
+	}
+
+	for a := range answersChannel {
+		fmt.Println(a)
+	}
+
+	return nil */
 
 	// get servers answers
 	answers := make([][]byte, len(ss))

@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"runtime"
+	"sync"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
@@ -19,6 +20,8 @@ type FSS struct {
 
 	serverNum byte
 	fss       *fss.Fss
+
+	sync.Mutex // TODO
 }
 
 // use variadic argument for cores to achieve backward compatibility
@@ -67,8 +70,10 @@ func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {
 	tmp := make([]uint32, s.db.BlockSize+1)
 	for i := 0; i < numIdentifiers; i++ {
 		id := binary.BigEndian.Uint32(s.db.Identifiers[i*idLength : (i+1)*idLength])
+		s.Lock() // TODO
 		s.fss.EvaluatePF(s.serverNum, key, id, tmp)
 		copy(q[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
+		s.Unlock() // TODO
 	}
 
 	return answer(q, s.db, s.cores)

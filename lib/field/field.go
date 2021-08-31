@@ -3,6 +3,7 @@ package field
 import (
 	"encoding/binary"
 	"io"
+	"unsafe"
 
 	"github.com/si-co/vpir-code/lib/utils"
 )
@@ -66,11 +67,12 @@ func RandVector(length int) []uint32 {
 	return RandVectorWithPRG(length, utils.RandomPRG())
 }
 
-// TODO: fix this because of bias in randomness
+// TODO: FIX THIS, NOT FIELD ELEMENT
 func ByteSliceToFieldElementSlice(out []uint32, in []byte) {
-	for i := range out {
-		out[i] = binary.BigEndian.Uint32(in[i*Bytes:(i+1)*Bytes]) % ModP
-	}
+	// for i := range out {
+	// 	out[i] = binary.BigEndian.Uint32(in[i*Bytes:(i+1)*Bytes]) % ModP
+	// }
+	out = *(*[]uint32)(unsafe.Pointer(&in))
 }
 
 // VectorToBytes extracts bytes from a vector of field elements.  Assume that
