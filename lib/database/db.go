@@ -10,24 +10,35 @@ import (
 
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
+	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 )
 
 type DB struct {
-	Identifiers []byte
-	Entries     []uint32
+	KeysInfo []*KeyInfo
+	Entries  []uint32
 
 	Info
 }
 
+type KeyInfo struct {
+	// subset of openpgp.PublicKey
+	CreationTime time.Time
+	PubKeyAlgo   packet.PublicKeyAlgorithm
+	KeyId        uint64
+	BlockLength  int // length of data in blocks defined in number of elements
+
+}
+
 type Info struct {
-	NumRows          int
-	NumColumns       int
-	BlockSize        int
-	BlockLengths     []int // length of data in blocks defined in number of elements
-	IdentifierLength int   // length of each identifier in bytes
+	NumRows    int
+	NumColumns int
+	BlockSize  int
+	// TODO: we really need this? Seems like not since set to uint64 by default
+	// IdentifierLength int // length of each identifier in bytes
+	// BlockLengths  []int // length of data in blocks defined in number of elements
 
 	// PIR type: classical, merkle, signature
 	PIRType string
@@ -61,9 +72,9 @@ type Merkle struct {
 
 func NewEmptyDB(info Info) (*DB, error) {
 	return &DB{
-		Info:        info,
-		Identifiers: make([]byte, 0),
-		Entries:     make([]uint32, 0),
+		Info:     info,
+		KeysInfo: make([]*KeyInfo, 0),
+		Entries:  make([]uint32, 0),
 	}, nil
 }
 
