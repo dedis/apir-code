@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math/rand"
 	"path/filepath"
-	"sync"
 	"testing"
 	"time"
 
@@ -55,7 +54,7 @@ func TestRetrieveRealKeysFSS(t *testing.T) {
 
 func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
 	// number of keys to retrieve for the test
-	numKeys := 10
+	numKeys := 1
 
 	start := time.Now()
 	for i := 0; i < numKeys; i++ {
@@ -86,10 +85,8 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 	// init channel for answers
 	answersChannel := make(chan [][]byte, parallelExecutions)
 
-	wg := sync.WaitGroup{}
 	// get servers answers
 	for i := 0; i < parallelExecutions; i++ {
-		wg.Add(1)
 		go func(queries [][]byte) {
 			answers := make([][]byte, len(ss))
 			for i := range ss {
@@ -97,7 +94,6 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 				require.NoError(t, err)
 			}
 			answersChannel <- answers
-			wg.Done()
 		}(queries)
 	}
 
