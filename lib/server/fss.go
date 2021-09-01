@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -61,23 +60,21 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 // TODO: how to do here? It is quite strange that the server imports the client
 // Define the query to be outside of the function?
 func (s *FSS) Answer(q *query.FSS) []uint32 {
-	fmt.Println(q)
 	numIdentifiers := s.db.NumColumns
-
 	qEval := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
 
-	switch q.QueryType {
-	case query.KeyId:
-		tmp := make([]uint32, s.db.BlockSize+1)
-		for i := 0; i < numIdentifiers; i++ {
-			id := s.db.KeysInfo[i].KeyId
-			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-			copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
-		}
-		return answer(qEval, s.db, s.cores)
-
-	default:
-		panic("not yet implemented")
+	// switch q.QueryType {
+	// case query.KeyId:
+	tmp := make([]uint32, s.db.BlockSize+1)
+	for i := 0; i < numIdentifiers; i++ {
+		id := s.db.KeysInfo[i].KeyId
+		s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+		copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
 	}
+	return answer(qEval, s.db, s.cores)
+
+	// default:
+	// 	panic("not yet implemented")
+	// }
 
 }

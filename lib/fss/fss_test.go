@@ -3,6 +3,7 @@ package fss
 // Source: https://github.com/frankw2/libfss/blob/master/go/test_fss/test_fss.go
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/field"
@@ -12,7 +13,7 @@ import (
 
 const (
 	testBlockLength = 17
-	numBits         = uint(10)
+	numBits         = uint(64)
 )
 
 func TestPoint(t *testing.T) {
@@ -20,7 +21,7 @@ func TestPoint(t *testing.T) {
 	fClient := ClientInitialize(numBits, testBlockLength)
 
 	// set index
-	index := uint64(10)
+	index := rand.Uint64()
 
 	// Test with if x = index, evaluate to vector b
 	bLen := testBlockLength
@@ -34,7 +35,9 @@ func TestPoint(t *testing.T) {
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	zeros := make([]uint32, bLen)
-	for j := uint64(0); j < (1 << numBits); j++ {
+	// test only part of the input space, impossible to do a complete test
+	// over 64 bits
+	for j := index - 10000; j <= index; j++ {
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)
@@ -59,7 +62,7 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fClient := ClientInitialize(numBits, testBlockLength)
 
 	// fix index
-	index := uint64(10)
+	index := rand.Uint64()
 
 	// Test with if x = index, evaluate to vector b
 	alpha := field.RandElementWithPRG(utils.RandomPRG())
@@ -77,7 +80,9 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	zeros := make([]uint32, bLen)
-	for j := uint64(0); j < (1 << numBits); j++ {
+	// test only part of the input space, impossible to do a complete test
+	// over 64 bits
+	for j := index - 10e4; j <= index; j++ {
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)
