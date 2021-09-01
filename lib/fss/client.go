@@ -36,7 +36,7 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	f.N = field.Bytes * 8
+	f.N = 64 // TODO: use a constant
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
@@ -46,10 +46,7 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 
 // Generate Keys for 2-party point functions It creates keys for a function
 // that evaluates to vector b when input x = a.
-func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
-	if a > field.ModP {
-		panic("input too big")
-	}
+func (f Fss) GenerateTreePF(a uint64, b []uint32) []FssKeyEq2P {
 	fssKeys := make([]FssKeyEq2P, 2)
 	// Set up initial values
 	tempRand1 := make([]byte, aes.BlockSize+1)
@@ -160,7 +157,7 @@ func (f Fss) GenerateTreePF(a uint32, b []uint32) []FssKeyEq2P {
 // functions, i.e. <, > functions.  The usage is similar to 2-party FSS for
 // equality functions.
 // From: Boyle et al., Function Secret Sharing, EUROCRYPT'15, pag. 19
-func (f Fss) GenerateTreeLt(a uint32, b []uint32) []ServerKeyLt {
+func (f Fss) GenerateTreeLt(a uint64, b []uint32) []ServerKeyLt {
 	lenb := len(b)
 
 	k := make([]ServerKeyLt, 2)

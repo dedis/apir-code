@@ -6,11 +6,8 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"log"
 	"math/rand"
-	"os"
 	"path/filepath"
-	"runtime/pprof"
 	"testing"
 	"time"
 
@@ -20,13 +17,13 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/server"
-	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 )
 
 // TestRetrieveRealKeysDPFVector tests the retrieval of real PGP keys using
 // the DPF-based multi-bit scheme. With DPF, the database is always represented
 // as a vector.
+/*
 func TestRetrieveRealKeysFSS(t *testing.T) {
 	// math randomness used only for testing purposes
 	rand.Seed(time.Now().UnixNano())
@@ -61,7 +58,7 @@ func TestRetrieveRealKeysFSS(t *testing.T) {
 
 	retrieveRealKeyBlocks(t, c, servers, realKeys, numBlocks)
 }
-
+*/
 func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
 	// number of keys to retrieve for the test
 	numKeys := 1

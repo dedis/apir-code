@@ -36,9 +36,8 @@ type Info struct {
 	NumRows    int
 	NumColumns int
 	BlockSize  int
-	// TODO: we really need this? Seems like not since set to uint64 by default
-	// IdentifierLength int // length of each identifier in bytes
-	// BlockLengths  []int // length of data in blocks defined in number of elements
+	// TODO: remove this, should use the block length defined in the KeyInfo struct
+	BlockLengths []int // length of data in blocks defined in number of elements
 
 	// PIR type: classical, merkle, signature
 	PIRType string
@@ -121,7 +120,11 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	}
 
 	// in this case lengths are all equal
+	// TODO: here for compataibility reasons, FIX
 	info := NewInfo(1, numIdentifiers, entryLength)
+	for i := range info.BlockLengths {
+		info.BlockLengths[i] = entryLength
+	}
 
 	return &DB{
 		KeysInfo: keysInfo,
@@ -149,92 +152,6 @@ func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns
 	return
 }
 
-/*
-func (d *DB) SetEntry(i int, el uint32) {
-	d.Entries[i] = []byte(el)
-}
-
-func (d *DB) AppendBlock(bl []uint32) {
-	d.Entries = append(d.Entries, bl...)
-}
-
-func (d *DB) GetEntry(i int) uint32 {
-	return d.Entries[i]
-}
-
-*/
 func (d *DB) Range(begin, end int) []uint32 {
 	return d.Entries[begin:end]
 }
-
-/*
-func InitMultiBitDBWithCapacity(numRows, numColumns, blockSize, cap int) (*DB, error) {
-	info := Info{NumColumns: numColumns,
-		NumRows:   numRows,
-		BlockSize: blockSize,
-	}
-
-	db, err := NewEmptyDBWithCapacity(info, cap)
-	if err != nil {
-		return nil, xerrors.Errorf("failed to create db: %v", err)
-	}
-
-	db.BlockLengths = make([]int, numRows*numColumns)
-
-	return db, nil
-}
-
-/*
-func InitMultiBitDB(numRows, numColumns, blockSize int) (*DB, error) {
-	info := Info{NumColumns: numColumns,
-		NumRows:   numRows,
-		BlockSize: blockSize,
-	}
-
-	db, err := NewEmptyDB(info)
-	if err != nil {
-		return nil, xerrors.Errorf("failed to create db: %v", err)
-	}
-
-	return db, nil
-}
-
-func CreateRandomMultiBitDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, error) {
-	numColumns := dbLen / (8 * field.Bytes * numRows * blockLen)
-	// handle very small db
-	if numColumns == 0 {
-		numColumns = 1
-	}
-
-	info := Info{
-		NumColumns: numColumns,
-		NumRows:    numRows,
-		BlockSize:  blockLen,
-	}
-
-	n := numRows * numColumns * blockLen
-
-	bytesLength := n*field.Bytes + 1
-	bytes := make([]byte, bytesLength)
-
-	if _, err := io.ReadFull(rnd, bytes[:]); err != nil {
-		return nil, xerrors.Errorf("failed to read random bytes: %v", err)
-	}
-
-	db, err := NewDB(info)
-	if err != nil {
-		return nil, xerrors.Errorf("failed to create db: %v", err)
-	}
-
-	// add block lengths also in this case for compatibility
-	db.BlockLengths = make([]int, numRows*numColumns)
-
-	for i := 0; i < n; i++ {
-		element := binary.BigEndian.Uint32(bytes[i*field.Bytes:(i+1)*field.Bytes]) % field.ModP
-		db.SetEntry(i, element)
-		db.BlockLengths[i/blockLen] = blockLen
-	}
-
-	return db, nil
-}
-*/

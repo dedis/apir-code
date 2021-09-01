@@ -3,20 +3,16 @@ package database
 import (
 	"bytes"
 	"encoding/binary"
-	"log"
 	"sort"
 
 	"golang.org/x/crypto/blake2b"
 
 	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
-const numKeysToDBLengthRatio float32 = 0.1
-
+/*
 func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	log.Printf("Loading keys: %v\n", dataPaths)
 
@@ -78,7 +74,9 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 
 	return db, nil
 }
+*/
 
+/*
 func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	log.Printf("Bytes db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
 
@@ -176,6 +174,7 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 
 	return m, nil
 }
+*/
 
 func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 	// prepare db

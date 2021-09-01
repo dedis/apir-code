@@ -28,7 +28,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	f.N = field.Bytes * 8
+	f.N = 64 // TODO: use a constant
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
@@ -36,10 +36,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
 	return f
 }
 
-func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint32, out []uint32) {
-	if x > field.ModP {
-		panic("input too big")
-	}
+func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint64, out []uint32) {
 	sCurr := make([]byte, aes.BlockSize)
 	copy(sCurr, k.SInit)
 	tCurr := k.TInit
@@ -89,7 +86,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint32, out []uint32) {
 
 // This is the 2-party FSS evaluation function for interval functions, i.e. <,> functions.
 // The usage is similar to 2-party FSS for equality functions
-func (f Fss) EvaluateLt(k ServerKeyLt, x uint32) []uint32 {
+func (f Fss) EvaluateLt(k ServerKeyLt, x uint64) []uint32 {
 	xBit := getBit(x, (f.N - f.NumBits + 1), f.N)
 	s := make([]byte, aes.BlockSize)
 	copy(s, k.s[xBit])

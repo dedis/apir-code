@@ -1,9 +1,16 @@
-package main
+package query
 
-type Query uint8
+import "github.com/si-co/vpir-code/lib/fss"
+
+type Type uint8
 
 const (
-	QueryKeyId Query = iota
-	QueryCreationTime
-	QueryPubKeyAlgo
+	KeyId Type = iota
+	CreationTime
+	PubKeyAlgo
 )
+
+type FSS struct {
+	QueryType Type
+	FssKey    fss.FssKeyEq2P
+}

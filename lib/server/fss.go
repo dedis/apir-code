@@ -2,15 +2,13 @@ package server
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/gob"
+	"fmt"
 	"runtime"
-	"sync"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
+	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
@@ -20,8 +18,6 @@ type FSS struct {
 
 	serverNum byte
 	fss       *fss.Fss
-
-	sync.Mutex // TODO
 }
 
 // use variadic argument for cores to achieve backward compatibility
@@ -35,7 +31,7 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		fss:       fss.ServerInitialize(prfKeys, field.Bits, db.BlockSize),
+		fss:       fss.ServerInitialize(prfKeys, 64, db.BlockSize),
 	}
 
 }
@@ -48,7 +44,7 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query
 	buf := bytes.NewBuffer(q)
 	dec := gob.NewDecoder(buf)
-	var query fss.FssKeyEq2P
+	var query *query.FSS
 	if err := dec.Decode(&query); err != nil {
 		return nil, err
 	}
@@ -62,19 +58,26 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 	return out, nil
 }
 
-func (s *FSS) Answer(key fss.FssKeyEq2P) []uint32 {
-	idLength := constants.IdentifierLength
+// TODO: how to do here? It is quite strange that the server imports the client
+// Define the query to be outside of the function?
+func (s *FSS) Answer(q *query.FSS) []uint32 {
+	fmt.Println(q)
 	numIdentifiers := s.db.NumColumns
 
-	q := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
-	tmp := make([]uint32, s.db.BlockSize+1)
-	for i := 0; i < numIdentifiers; i++ {
-		id := binary.BigEndian.Uint32(s.db.Identifiers[i*idLength : (i+1)*idLength])
-		s.Lock() // TODO
-		s.fss.EvaluatePF(s.serverNum, key, id, tmp)
-		copy(q[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
-		s.Unlock() // TODO
+	qEval := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
+
+	switch q.QueryType {
+	case query.KeyId:
+		tmp := make([]uint32, s.db.BlockSize+1)
+		for i := 0; i < numIdentifiers; i++ {
+			id := s.db.KeysInfo[i].KeyId
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+			copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
+		}
+		return answer(qEval, s.db, s.cores)
+
+	default:
+		panic("not yet implemented")
 	}
 
-	return answer(q, s.db, s.cores)
 }

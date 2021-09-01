@@ -7,8 +7,8 @@ import (
 	"log"
 
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
+	"github.com/si-co/vpir-code/lib/query"
 )
 
 // FSS represent the client for the FSS-based single- and multi-bit schemes
@@ -26,14 +26,18 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		Fss:    fss.ClientInitialize(field.Bits, info.BlockSize), // TODO: solve +1 here, only for VPIR
+		Fss:    fss.ClientInitialize(64, info.BlockSize), // TODO: solve +1 here, only for VPIR
 	}
 }
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
+// TODO: this should be changed, how should we manage the new interface?
+// Should we add the query typo to the FSS client, or drop the idea of interface
+// since now we should have less schemes? To discuss
 func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
-	queries := c.Query(index, numServers)
+	// TODO: fix this, here query.Type is hardcoded
+	queries := c.Query(index, query.KeyId, numServers)
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
@@ -51,7 +55,7 @@ func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2P {
+func (c *FSS) Query(index int, qt query.Type, numServers int) []*query.FSS {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -62,7 +66,12 @@ func (c *FSS) Query(index, numServers int) []fss.FssKeyEq2P {
 	}
 
 	// client initialization is the same for both single- and multi-bit scheme
-	return c.Fss.GenerateTreePF(uint32(index), c.state.a)
+	fssKeys := c.Fss.GenerateTreePF(uint64(index), c.state.a)
+
+	return []*query.FSS{
+		{QueryType: qt, FssKey: fssKeys[1]},
+		{QueryType: qt, FssKey: fssKeys[1]},
+	}
 }
 
 // ReconstructBytes decodes the answers from the servers and reconstruct the

@@ -20,7 +20,7 @@ func TestPoint(t *testing.T) {
 	fClient := ClientInitialize(numBits, testBlockLength)
 
 	// set index
-	index := uint32(10)
+	index := uint64(10)
 
 	// Test with if x = index, evaluate to vector b
 	bLen := testBlockLength
@@ -34,7 +34,7 @@ func TestPoint(t *testing.T) {
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	zeros := make([]uint32, bLen)
-	for j := uint32(0); j < (1 << numBits); j++ {
+	for j := uint64(0); j < (1 << numBits); j++ {
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)
@@ -59,7 +59,7 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fClient := ClientInitialize(numBits, testBlockLength)
 
 	// fix index
-	index := uint32(10)
+	index := uint64(10)
 
 	// Test with if x = index, evaluate to vector b
 	alpha := field.RandElementWithPRG(utils.RandomPRG())
@@ -77,7 +77,7 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	zeros := make([]uint32, bLen)
-	for j := uint32(0); j < (1 << numBits); j++ {
+	for j := uint64(0); j < (1 << numBits); j++ {
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)
