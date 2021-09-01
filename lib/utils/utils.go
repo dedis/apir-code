@@ -2,6 +2,8 @@ package utils
 
 import (
 	"math"
+	"math/rand"
+	"time"
 )
 
 // MaxBytesLength get maximal []byte length in map[int][]byte
@@ -30,4 +32,15 @@ func IncreaseToNextSquare(num *int) {
 		return
 	}
 	*num = int(math.Pow(i+1, 2))
+}
+
+// source: https://stackoverflow.com/questions/43495745/how-to-generate-random-date-in-go-lang/43497333
+// this is probably biased, but we don't care since it is only for tests
+func Randate() time.Time {
+	min := time.Date(2000, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	max := time.Date(2021, 12, 0, 0, 0, 0, 0, time.UTC).Unix()
+	delta := max - min
+
+	sec := rand.Int63n(delta) + min
+	return time.Unix(sec, 0)
 }

@@ -89,61 +89,46 @@ func NewInfo(nRows, nCols, bSize int) Info {
 
 func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	rand.Seed(time.Now().UnixNano())
-
-	// create random identifiers
-	idUint32 := make([]uint32, numIdentifiers)
-	for i := range idUint32 {
-		idUint32[i] = uint32(rand.Intn(int(field.ModP)))
-	}
-	identifiers := utils.Uint32SliceToByteSlice(idUint32)
-
-	// for random db use 2048 bits = 64 uint32 elements
 	entryLength := 64
+
+	// create random keys
+	// for random db use 2048 bits = 64 uint32 elements
 	entries := field.RandVectorWithPRG(numIdentifiers*entryLength, rnd)
+
+	keysInfo := make([]*KeyInfo, numIdentifiers)
+	for i := 0; i < numIdentifiers; i++ {
+		// random creation date
+		ct := utils.Randate()
+
+		// random algorithm, taken from random permutation of
+		// https://pkg.go.dev/golang.org/x/crypto/openpgp/packet#PublicKeyAlgorithm
+		algorithms := []packet.PublicKeyAlgorithm{1, 16, 17, 18, 19}
+		pka := algorithms[rand.Intn(len(algorithms))]
+
+		// random id
+		id := rand.Uint64()
+
+		// in this case lengths are all equal, 2048 bits = 64 uint32 elements
+		bl := entryLength
+
+		keysInfo[i] = &KeyInfo{
+			CreationTime: ct,
+			PubKeyAlgo:   pka,
+			KeyId:        id,
+			BlockLength:  bl,
+		}
+
+	}
 
 	// in this case lengths are all equal
 	info := NewInfo(1, numIdentifiers, entryLength)
-	for i := range info.BlockLengths {
-		info.BlockLengths[i] = entryLength
-	}
 
 	return &DB{
-		Identifiers: identifiers,
-		Entries:     entries,
-		Info:        info,
+		KeysInfo: keysInfo,
+		Entries:  entries,
+		Info:     info,
 	}, nil
 }
-
-//func CreateRandomSingleBitDB(rnd io.Reader, dbLen, numRows int) (*DB, error) {
-//	numColumns := dbLen / numRows
-//
-//	info := Info{
-//		NumColumns: numColumns,
-//		NumRows:    numRows,
-//		BlockSize:  constants.SingleBitBlockLength,
-//	}
-//
-//	db, err := NewDB(info)
-//	if err != nil {
-//		return nil, xerrors.Errorf("failed to create db: %v", err)
-//	}
-//
-//	buf := make([]byte, dbLen)
-//	if _, err := io.ReadFull(rnd, buf[:]); err != nil {
-//		return nil, xerrors.Errorf("failed to read random buf: %v", err)
-//	}
-//
-//	for i := 0; i < dbLen; i++ {
-//		element := uint32(0)
-//		if buf[i]>>7 == 1 {
-//			element = 1
-//		}
-//
-//		db.SetEntry(i, element)
-//	}
-//
-//	return db, nil
-//}
 
 // HashToIndex hashes the given id to an index for a database of the given
 // length
