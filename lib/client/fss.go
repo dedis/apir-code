@@ -70,7 +70,7 @@ func (c *FSS) Query(index int, qt query.Type, numServers int) []*query.FSS {
 	fssKeys := c.Fss.GenerateTreePF(uint64(index), c.state.a)
 
 	return []*query.FSS{
-		{QueryType: qt, FssKey: fssKeys[1]},
+		{QueryType: qt, FssKey: fssKeys[0]},
 		{QueryType: qt, FssKey: fssKeys[1]},
 	}
 }

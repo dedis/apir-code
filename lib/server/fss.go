@@ -63,18 +63,18 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns
 	qEval := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
 
-	// switch q.QueryType {
-	// case query.KeyId:
-	tmp := make([]uint32, s.db.BlockSize+1)
-	for i := 0; i < numIdentifiers; i++ {
-		id := s.db.KeysInfo[i].KeyId
-		s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-		copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
-	}
-	return answer(qEval, s.db, s.cores)
+	switch q.QueryType {
+	case query.KeyId:
+		tmp := make([]uint32, s.db.BlockSize+1)
+		for i := 0; i < numIdentifiers; i++ {
+			id := s.db.KeysInfo[i].KeyId
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+			copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
+		}
+		return answer(qEval, s.db, s.cores)
 
-	// default:
-	// 	panic("not yet implemented")
-	// }
+	default:
+		panic("not yet implemented")
+	}
 
 }
