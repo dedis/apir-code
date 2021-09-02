@@ -62,18 +62,21 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 // Define the query to be outside of the function?
 func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns
-	qEval := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
-
+	//qEval := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
+	out := make([]uint32, numIdentifiers)
 	switch q.QueryType {
 	case query.KeyId:
-		tmp := make([]uint32, s.db.BlockSize+1)
+		//tmp := make([]uint32, s.db.BlockSize+1)
+		tmp := make([]uint32, 1)
 		for i := 0; i < numIdentifiers; i++ {
 			id := binary.BigEndian.Uint64([]byte(s.db.KeysInfo[i].UserId.Email))
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-			copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
-		}
-		return answer(qEval, s.db, s.cores)
+			out[i] = tmp[0]
 
+			//copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
+		}
+		//return answer(qEval, s.db, s.cores)
+		return out
 	default:
 		panic("not yet implemented")
 	}

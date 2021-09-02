@@ -24,6 +24,9 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 	f.NumBits = numBits
 	f.BlockLength = blockLength
 	initPRFLen := int(math.Ceil(float64(blockLength / field.Bytes)))
+	if initPRFLen < 4 {
+		initPRFLen = 4
+	}
 	f.PrfKeys = make([][]byte, initPRFLen)
 	// Create fixed AES blocks
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)

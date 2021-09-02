@@ -3,10 +3,13 @@ package client
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 )
@@ -62,6 +65,8 @@ func (c *FSS) Query(index int, qt query.Type, numServers int) []*query.FSS {
 	}
 	var err error
 	c.state, err = generateClientState(index, c.rnd, c.dbInfo)
+	c.state.a = make([]uint32, 1)
+	c.state.a[0] = c.state.alpha
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,5 +94,17 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 // Reconstruct takes as input the answers from the client and returns the
 // reconstructed entry after the appropriate integrity check.
 func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
-	return reconstruct(answers, c.dbInfo, c.state)
+	count := make([]uint32, 1)
+	for i := range answers[0] {
+		out := (answers[0][i] + answers[1][i]) % field.ModP
+		if out != 0 && out != c.state.a[0] {
+			fmt.Println("reject here")
+			return nil, errors.New("REJECT")
+		}
+		if out == c.state.alpha {
+			count[0]++
+		}
+	}
+	return count, nil
+	//return reconstruct(answers, c.dbInfo, c.state)
 }
