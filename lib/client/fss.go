@@ -65,8 +65,9 @@ func (c *FSS) Query(index int, qt query.Type, numServers int) []*query.FSS {
 	}
 	var err error
 	c.state, err = generateClientState(index, c.rnd, c.dbInfo)
-	c.state.a = make([]uint32, 1)
-	c.state.a[0] = c.state.alpha
+	c.state.a = make([]uint32, 2)
+	c.state.a[0] = 1
+	c.state.a[1] = c.state.alpha
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,16 +96,17 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 // reconstructed entry after the appropriate integrity check.
 func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
 	count := make([]uint32, 1)
-	for i := range answers[0] {
-		out := (answers[0][i] + answers[1][i]) % field.ModP
-		if out != 0 && out != c.state.a[0] {
-			fmt.Println("reject here")
-			return nil, errors.New("REJECT")
-		}
-		if out == c.state.alpha {
-			count[0]++
-		}
+	out := (answers[0][0] + answers[1][0]) % field.ModP
+	tmp := (uint64(out) * uint64(c.state.alpha)) % uint64(field.ModP)
+	tag := uint32(tmp)
+	fmt.Println("tag", tag)
+	reconstructedTag := (answers[0][1] + answers[1][1]) % field.ModP
+	fmt.Println("reconstructedTag:", reconstructedTag)
+	if tag == reconstructedTag {
+		count[0] = out
+		return count, nil
 	}
-	return count, nil
+
+	return nil, errors.New("REJECT")
 	//return reconstruct(answers, c.dbInfo, c.state)
 }

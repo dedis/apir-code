@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -63,15 +64,16 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns
 	//qEval := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
-	out := make([]uint32, numIdentifiers)
+	out := make([]uint32, s.db.BlockSize)
 	switch q.QueryType {
 	case query.KeyId:
 		//tmp := make([]uint32, s.db.BlockSize+1)
-		tmp := make([]uint32, 1)
+		tmp := make([]uint32, 2)
 		for i := 0; i < numIdentifiers; i++ {
 			id := binary.BigEndian.Uint64([]byte(s.db.KeysInfo[i].UserId.Email))
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-			out[i] = tmp[0]
+			out[0] = (out[0] + tmp[0]) % field.ModP
+			out[1] = (out[1] + tmp[1]) % field.ModP
 
 			//copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
 		}

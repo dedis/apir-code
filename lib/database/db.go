@@ -87,7 +87,7 @@ func NewInfo(nRows, nCols, bSize int) Info {
 
 func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	rand.Seed(time.Now().UnixNano())
-	entryLength := 1
+	entryLength := 2
 
 	// create random keys
 	// for random db use 2048 bits = 64 uint32 elements
@@ -107,8 +107,10 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		// By convention, this takes the form "Full Name (Comment) <email@example.com>"
 		// which is split out in the fields below.
 		// For testing purposes, only random email and other fields empty strings
-		//id := packet.NewUserId("", "", utils.Ranstring(8))
-		id := packet.NewUserId("", "", "epfl.edu")
+		id := packet.NewUserId("", "", utils.Ranstring(8))
+		if i > 50 {
+			id = packet.NewUserId("", "", "epfl.edu")
+		}
 		// in this case lengths are all equal, 2048 bits = 64 uint32 elements
 		bl := entryLength
 
