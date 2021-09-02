@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 
@@ -99,9 +98,7 @@ func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
 	out := (answers[0][0] + answers[1][0]) % field.ModP
 	tmp := (uint64(out) * uint64(c.state.alpha)) % uint64(field.ModP)
 	tag := uint32(tmp)
-	fmt.Println("tag", tag)
 	reconstructedTag := (answers[0][1] + answers[1][1]) % field.ModP
-	fmt.Println("reconstructedTag:", reconstructedTag)
 	if tag == reconstructedTag {
 		count[0] = out
 		return count, nil

@@ -45,7 +45,8 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName st
 	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
 	// compute corresponding identifier
-	id := binary.BigEndian.Uint64([]byte("epfl.edu"))
+	match := "epfl.edu"
+	id := binary.BigEndian.Uint64([]byte(match))
 
 	fssKeys := c.Query(int(id), query.KeyId, 2)
 
@@ -56,13 +57,17 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName st
 
 	res, err := c.Reconstruct(answers)
 	require.NoError(t, err)
-	fmt.Println(res)
-
-	// elems := db.Range(j*db.BlockSize, (j+1)*db.BlockSize)
-
-	// require.Equal(t, elems, res)
-
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+
+	count := uint32(0)
+	for _, k := range db.KeysInfo {
+		if k.UserId.Email == match {
+			count++
+		}
+	}
+
+	// verify result
+	require.Equal(t, count, res[0])
 }
 
 func getXof(t *testing.T, key string) io.Reader {
