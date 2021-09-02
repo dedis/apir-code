@@ -24,10 +24,9 @@ type DB struct {
 }
 
 type KeyInfo struct {
-	// subset of openpgp.PublicKey
+	UserId       *packet.UserId
 	CreationTime time.Time
 	PubKeyAlgo   packet.PublicKeyAlgorithm
-	KeyId        uint64
 	BlockLength  int // length of data in blocks defined in number of elements
 
 }
@@ -104,19 +103,20 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		algorithms := []packet.PublicKeyAlgorithm{1, 16, 17, 18, 19}
 		pka := algorithms[rand.Intn(len(algorithms))]
 
-		// random id
-		id := rand.Uint64()
-
+		// random userd id
+		// By convention, this takes the form "Full Name (Comment) <email@example.com>"
+		// which is split out in the fields below.
+		// For testing purposes, only random email and other fields empty strings
+		id := packet.NewUserId("", "", utils.Ranstring(8))
 		// in this case lengths are all equal, 2048 bits = 64 uint32 elements
 		bl := entryLength
 
 		keysInfo[i] = &KeyInfo{
+			UserId:       id,
 			CreationTime: ct,
 			PubKeyAlgo:   pka,
-			KeyId:        id,
 			BlockLength:  bl,
 		}
-
 	}
 
 	// in this case lengths are all equal

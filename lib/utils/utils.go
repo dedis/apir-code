@@ -44,3 +44,13 @@ func Randate() time.Time {
 	sec := rand.Int63n(delta) + min
 	return time.Unix(sec, 0)
 }
+
+func Ranstring(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
+}

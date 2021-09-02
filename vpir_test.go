@@ -3,6 +3,7 @@ package main
 // Test suite for integrated VPIR.
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 	"math/rand"
@@ -26,7 +27,7 @@ const (
 )
 
 func TestMultiBitVPIR(t *testing.T) {
-	keyToDownload := 50
+	keyToDownload := 100
 	numIdentifiers := 100
 
 	rndDB := utils.RandomPRG()
@@ -50,7 +51,7 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, numBlocks i
 		j = rand.Intn(db.NumColumns)
 
 		// compute corresponding identifier
-		id := db.KeysInfo[j].KeyId
+		id := binary.BigEndian.Uint64([]byte(db.KeysInfo[j].UserId.Email))
 
 		fssKeys := c.Query(int(id), query.KeyId, 2)
 
