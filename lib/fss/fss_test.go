@@ -13,15 +13,15 @@ import (
 
 const (
 	testBlockLength = 17
-	numBits         = uint(64)
+	numBits         = 64
 )
 
 func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(numBits, testBlockLength)
 
-	// set index
-	index := rand.Uint64()
+	// random index, biased but fine for this test
+	index := randomIndex(numBits)
 
 	// Test with if x = index, evaluate to vector b
 	bLen := testBlockLength
@@ -37,19 +37,23 @@ func TestPoint(t *testing.T) {
 	zeros := make([]uint32, bLen)
 	// test only part of the input space, impossible to do a complete test
 	// over 64 bits
-	for j := index - 10000; j <= index; j++ {
+	for j := 0; j <= 10000; j++ {
+		indexToTest := randomIndex(numBits)
+		if j == 0 {
+			indexToTest = index
+		}
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)
 
-		fServer.EvaluatePF(0, fssKeys[0], j, out0)
-		fServer.EvaluatePF(1, fssKeys[1], j, out1)
+		fServer.EvaluatePF(0, fssKeys[0], indexToTest, out0)
+		fServer.EvaluatePF(1, fssKeys[1], indexToTest, out1)
 
 		for i := range sum {
 			sum[i] = (out0[i] + out1[i]) % field.ModP
 		}
 
-		if j == index {
+		if equalIndices(index, indexToTest) {
 			require.Equal(t, b, sum)
 		} else {
 			require.Equal(t, zeros, sum)
@@ -61,8 +65,11 @@ func TestPointWithAlphaVector(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(numBits, testBlockLength)
 
-	// fix index
-	index := rand.Uint64()
+	// random index, biased but fine for this test
+	index := make([]bool, 64)
+	for i := range index {
+		index[i] = (rand.Intn(2) % 2) != 0
+	}
 
 	// Test with if x = index, evaluate to vector b
 	alpha := field.RandElementWithPRG(utils.RandomPRG())
@@ -80,21 +87,25 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
 
 	zeros := make([]uint32, bLen)
-	// test only part of the input space, impossible to do a complete test
+	// test only random samples of the input space, impossible to do a complete test
 	// over 64 bits
-	for j := index - 10e4; j <= index; j++ {
+	for j := 0; j <= 10000; j++ {
+		indexToTest := randomIndex(numBits)
+		if j == 0 {
+			indexToTest = index
+		}
 		out0 := make([]uint32, bLen)
 		out1 := make([]uint32, bLen)
 		sum := make([]uint32, bLen)
 
-		fServer.EvaluatePF(0, fssKeys[0], j, out0)
-		fServer.EvaluatePF(1, fssKeys[1], j, out1)
+		fServer.EvaluatePF(0, fssKeys[0], indexToTest, out0)
+		fServer.EvaluatePF(1, fssKeys[1], indexToTest, out1)
 
 		for i := range sum {
 			sum[i] = (out0[i] + out1[i]) % field.ModP
 		}
 
-		if j == index {
+		if equalIndices(index, indexToTest) {
 			require.Equal(t, b, sum)
 		} else {
 			require.Equal(t, zeros, sum)
@@ -102,33 +113,21 @@ func TestPointWithAlphaVector(t *testing.T) {
 	}
 }
 
-func TestInterval(t *testing.T) {
-	// Generate fss Keys on client
-	fClient := ClientInitialize(6, testBlockLength)
-	// Test with if x < 10, evaluate to vector b
-	bLen := testBlockLength
-	b := make([]uint32, bLen)
-	for i := range b {
-		b[i] = field.RandElement()
+func randomIndex(bits int) []bool {
+	index := make([]bool, bits)
+	for i := range index {
+		index[i] = (rand.Intn(2) % 2) != 0
 	}
-	fssKeys := fClient.GenerateTreeLt(10, b)
 
-	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, fClient.NumBits, testBlockLength)
+	return index
+}
 
-	sum := make([]uint32, bLen)
-
-	out0 := fServer.EvaluateLt(fssKeys[0], 1)
-	out1 := fServer.EvaluateLt(fssKeys[1], 1)
-	for i := range sum {
-		sum[i] = (out0[i] + out1[i]) % field.ModP
+func equalIndices(a, b []bool) bool {
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
 	}
-	require.Equal(t, b, sum)
 
-	out0 = fServer.EvaluateLt(fssKeys[0], 11)
-	out1 = fServer.EvaluateLt(fssKeys[1], 11)
-	for i := range sum {
-		sum[i] = (out0[i] + out1[i]) % field.ModP
-	}
-	require.NotEqual(t, b, sum)
+	return true
 }

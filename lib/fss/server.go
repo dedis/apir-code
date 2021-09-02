@@ -28,7 +28,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	f.N = 64 // TODO: use a constant
+	f.N = 64 // TODO: use a constant // TODO change this FIX
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
@@ -36,7 +36,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
 	return f
 }
 
-func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint64, out []uint32) {
+func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x []bool, out []uint32) {
 	sCurr := make([]byte, aes.BlockSize)
 	copy(sCurr, k.SInit)
 	tCurr := k.TInit
@@ -44,7 +44,10 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x uint64, out []uint32) {
 	for i := uint(0); i < f.NumBits; i++ {
 		var xBit byte = 0
 		if i != f.N {
-			xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
+			//xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
+			if x[i] {
+				xBit = 1
+			}
 		}
 
 		prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
