@@ -44,7 +44,7 @@ func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x []bool, out []uint32) {
 	tmp := make([]uint32, len(out))
 	for i := uint(0); i < f.NumBits; i++ {
 		var xBit byte = 0
-		if i != f.N {
+		if i != f.N { // THIS CAN PROBABLY BE REMOVED
 			//xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
 			if x[i] {
 				xBit = 1

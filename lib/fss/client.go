@@ -40,7 +40,7 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 		f.FixedBlocks[i] = block
 	}
 	//f.N = 64 // TODO: use a constant // TODO: change this // FIX
-	f.N = 256
+	f.N = 256 // this can be removed and only work with numbits
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
