@@ -17,6 +17,8 @@ import (
 
 // Client represents the client instance in both the IT and DPF-based schemes.
 type Client interface {
+	// TODO: modify interface to take []byte instead of index for the first
+	// parameter, so that we can encode more complex queries here
 	QueryBytes(int, int) ([][]byte, error)
 	ReconstructBytes([][]byte) (interface{}, error)
 }

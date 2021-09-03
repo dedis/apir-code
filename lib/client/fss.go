@@ -38,7 +38,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 // TODO: this should be changed, how should we manage the new interface?
 // Should we add the query typo to the FSS client, or drop the idea of interface
 // since now we should have less schemes? To discuss
-func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
+func (c *FSS) QueryBytes(q []byte, numServers int) ([][]byte, error) {
 	// TODO: fix this, here query.Type is hardcoded
 	// FIX THIS
 	queries := c.Query(index, []bool{false}, query.UserId, numServers)
@@ -59,14 +59,14 @@ func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(q []bool, t query.Target, numServers int) []*query.FSS {
+func (c *FSS) Query(q query.ClientFSS, numServers int) []*query.FSS {
 	if numServers != 2 {
 		log.Fatal("invalid query inputs")
 	}
 	// initialize empty client state
 	c.state = &state{}
 	// crete state for retrieving a single key, i.e. exact match
-	if t == query.Key {
+	if q.Target == query.Key {
 		// var err error
 		// c.state, err = generateClientState(index, c.rnd, c.dbInfo)
 		panic("not yet implemented")
@@ -76,11 +76,11 @@ func (c *FSS) Query(q []bool, t query.Target, numServers int) []*query.FSS {
 	}
 
 	// client initialization is the same for both single- and multi-bit scheme
-	fssKeys := c.Fss.GenerateTreePF(q, c.state.a)
+	fssKeys := c.Fss.GenerateTreePF(q.Input, c.state.a)
 
 	return []*query.FSS{
-		{Target: t, FssKey: fssKeys[0]},
-		{Target: t, FssKey: fssKeys[1]},
+		{Target: q.Target, FssKey: fssKeys[0]},
+		{Target: q.Target, FssKey: fssKeys[1]},
 	}
 }
 

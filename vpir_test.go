@@ -43,13 +43,16 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName st
 
 	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
-	// compute corresponding identifier
-	match := "epflepflepflepflepflepflepflepfl"
-	//id := binary.BigEndian.Uint64([]byte(match))
-	id := 10
-	idBool := utils.ByteToBits([]byte(match))
 
-	fssKeys := c.Query(int(id), idBool, query.UserId, 2)
+	// compute the input of the query
+	match := "epflepflepflepflepflepflepflepfl"
+	in := utils.ByteToBits([]byte(match))
+	q := query.ClientFSS{
+		Target: query.UserId,
+		Input:  in,
+	}
+
+	fssKeys := c.Query(q, 2)
 
 	a0 := s0.Answer(fssKeys[0])
 	a1 := s1.Answer(fssKeys[1])
