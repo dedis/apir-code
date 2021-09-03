@@ -59,11 +59,13 @@ func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(index int, q []bool, t query.Target, numServers int) []*query.FSS {
-	if invalidQueryInputsDPF(index, numServers) {
+func (c *FSS) Query(q []bool, t query.Target, numServers int) []*query.FSS {
+	if numServers != 2 {
 		log.Fatal("invalid query inputs")
 	}
+	// initialize empty client state
 	c.state = &state{}
+	// crete state for retrieving a single key, i.e. exact match
 	if t == query.Key {
 		// var err error
 		// c.state, err = generateClientState(index, c.rnd, c.dbInfo)

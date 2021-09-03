@@ -109,7 +109,7 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		// For testing purposes, only random email and other fields empty strings
 		id := packet.NewUserId("", "", utils.Ranstring(32))
 		if i > 50 {
-			id = packet.NewUserId("", "", "epfl.edu")
+			id.Email = "epflepflepflepflepflepflepflepfl"
 		}
 		// in this case lengths are all equal, 2048 bits = 64 uint32 elements
 		bl := entryLength

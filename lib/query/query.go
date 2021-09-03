@@ -11,6 +11,12 @@ const (
 	Key
 )
 
+type ClientFSS struct {
+	Target             Target
+	FromStart, FromEnd int
+	Input              []bool
+}
+
 type FSS struct {
 	Target             Target
 	FromStart, FromEnd int // start and end of the target

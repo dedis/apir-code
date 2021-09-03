@@ -3,7 +3,6 @@ package main
 // Test suite for integrated VPIR.
 
 import (
-	"encoding/binary"
 	"fmt"
 	"io"
 	"math/rand"
@@ -45,8 +44,9 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName st
 	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
 	// compute corresponding identifier
-	match := "epfl.edu"
-	id := binary.BigEndian.Uint64([]byte(match))
+	match := "epflepflepflepflepflepflepflepfl"
+	//id := binary.BigEndian.Uint64([]byte(match))
+	id := 10
 	idBool := utils.ByteToBits([]byte(match))
 
 	fssKeys := c.Query(int(id), idBool, query.UserId, 2)
