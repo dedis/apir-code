@@ -12,7 +12,7 @@ const (
 )
 
 type FSS struct {
-	Target     Target
-	Start, End int // start and end of the target
-	FssKey     fss.FssKeyEq2P
+	Target             Target
+	FromStart, FromEnd int // start and end of the target
+	FssKey             fss.FssKeyEq2P
 }

@@ -68,7 +68,14 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 		out := make([]uint32, s.db.BlockSize)
 		tmp := make([]uint32, s.db.BlockSize)
 		for i := 0; i < numIdentifiers; i++ {
-			id := utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email[q.Start:q.End]))
+			var id []bool
+			if q.FromStart != 0 {
+				id = utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email[:q.FromStart]))
+			} else if q.FromEnd != 0 {
+				id = utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email[len(s.db.KeysInfo[i].UserId.Email)-q.FromEnd:]))
+			} else {
+				id = utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email))
+			}
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 			for i := range out {
 				out[i] = (out[i] + tmp[i]) % field.ModP

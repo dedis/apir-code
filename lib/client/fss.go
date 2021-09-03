@@ -41,7 +41,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 	// TODO: fix this, here query.Type is hardcoded
 	// FIX THIS
-	queries := c.Query(index, []bool{false}, query.KeyId, numServers)
+	queries := c.Query(index, []bool{false}, query.UserId, numServers)
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
@@ -63,13 +63,14 @@ func (c *FSS) Query(index int, q []bool, t query.Target, numServers int) []*quer
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
-	var err error
-	c.state, err = generateClientState(index, c.rnd, c.dbInfo)
-	c.state.a = make([]uint32, 2)
-	c.state.a[0] = 1
-	c.state.a[1] = c.state.alpha
-	if err != nil {
-		log.Fatal(err)
+	c.state = &state{}
+	if t == query.Key {
+		// var err error
+		// c.state, err = generateClientState(index, c.rnd, c.dbInfo)
+		panic("not yet implemented")
+	} else {
+		c.state.alpha = field.RandElementWithPRG(c.rnd)
+		c.state.a = []uint32{1, c.state.alpha}
 	}
 
 	// client initialization is the same for both single- and multi-bit scheme
@@ -100,7 +101,6 @@ func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
 	tag := uint32(tmp)
 	reconstructedTag := (answers[0][1] + answers[1][1]) % field.ModP
 	if tag == reconstructedTag {
-		count[0] = out
 		return []uint32{out}, nil
 	}
 

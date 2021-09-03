@@ -49,7 +49,7 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName st
 	id := binary.BigEndian.Uint64([]byte(match))
 	idBool := utils.ByteToBits([]byte(match))
 
-	fssKeys := c.Query(int(id), idBool, query.KeyId, 2)
+	fssKeys := c.Query(int(id), idBool, query.UserId, 2)
 
 	a0 := s0.Answer(fssKeys[0])
 	a1 := s1.Answer(fssKeys[1])
