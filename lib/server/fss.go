@@ -60,23 +60,31 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 
 // TODO: how to do here? It is quite strange that the server imports the client
 // Define the query to be outside of the function?
+// TODO: refactor this function
 func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns
-	//qEval := make([]uint32, (s.db.BlockSize+1)*numIdentifiers)
-	out := make([]uint32, s.db.BlockSize)
-	switch q.QueryType {
-	case query.KeyId:
-		//tmp := make([]uint32, s.db.BlockSize+1)
-		tmp := make([]uint32, 2)
+	switch q.Target {
+	case query.UserId:
+		out := make([]uint32, s.db.BlockSize)
+		tmp := make([]uint32, s.db.BlockSize)
 		for i := 0; i < numIdentifiers; i++ {
-			id := utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email))
+			id := utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email[q.Start:q.End]))
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-			out[0] = (out[0] + tmp[0]) % field.ModP
-			out[1] = (out[1] + tmp[1]) % field.ModP
-
-			//copy(qEval[i*(s.db.BlockSize+1):(i+1)*(s.db.BlockSize+1)], tmp)
+			for i := range out {
+				out[i] = (out[i] + tmp[i]) % field.ModP
+			}
 		}
-		//return answer(qEval, s.db, s.cores)
+		return out
+	case query.PubKeyAlgo:
+		out := make([]uint32, s.db.BlockSize)
+		tmp := make([]uint32, s.db.BlockSize)
+		for i := 0; i < numIdentifiers; i++ {
+			id := utils.ByteToBits([]byte{uint8(s.db.KeysInfo[i].PubKeyAlgo)})
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+			for i := range out {
+				out[i] = (out[i] + tmp[i]) % field.ModP
+			}
+		}
 		return out
 	default:
 		panic("not yet implemented")

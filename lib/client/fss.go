@@ -59,7 +59,7 @@ func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(index int, q []bool, qt query.Type, numServers int) []*query.FSS {
+func (c *FSS) Query(index int, q []bool, t query.Target, numServers int) []*query.FSS {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -76,8 +76,8 @@ func (c *FSS) Query(index int, q []bool, qt query.Type, numServers int) []*query
 	fssKeys := c.Fss.GenerateTreePF(q, c.state.a)
 
 	return []*query.FSS{
-		{QueryType: qt, FssKey: fssKeys[0]},
-		{QueryType: qt, FssKey: fssKeys[1]},
+		{Target: t, FssKey: fssKeys[0]},
+		{Target: t, FssKey: fssKeys[1]},
 	}
 }
 
@@ -95,14 +95,13 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 // Reconstruct takes as input the answers from the client and returns the
 // reconstructed entry after the appropriate integrity check.
 func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
-	count := make([]uint32, 1)
 	out := (answers[0][0] + answers[1][0]) % field.ModP
 	tmp := (uint64(out) * uint64(c.state.alpha)) % uint64(field.ModP)
 	tag := uint32(tmp)
 	reconstructedTag := (answers[0][1] + answers[1][1]) % field.ModP
 	if tag == reconstructedTag {
 		count[0] = out
-		return count, nil
+		return []uint32{out}, nil
 	}
 
 	return nil, errors.New("REJECT")

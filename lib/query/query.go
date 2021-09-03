@@ -2,15 +2,17 @@ package query
 
 import "github.com/si-co/vpir-code/lib/fss"
 
-type Type uint8
+type Target uint8
 
 const (
-	KeyId Type = iota
+	UserId Target = iota
 	CreationTime
 	PubKeyAlgo
+	Key
 )
 
 type FSS struct {
-	QueryType Type
-	FssKey    fss.FssKeyEq2P
+	Target     Target
+	Start, End int // start and end of the target
+	FssKey     fss.FssKeyEq2P
 }

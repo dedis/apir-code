@@ -20,7 +20,7 @@ func TestPoint(t *testing.T) {
 	// Generate fss Keys on client
 	fClient := ClientInitialize(numBits, testBlockLength)
 
-	// random index, biased but fine for this test
+	// random index,
 	index := randomIndex(numBits)
 
 	// Test with if x = index, evaluate to vector b
@@ -66,10 +66,7 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fClient := ClientInitialize(numBits, testBlockLength)
 
 	// random index, biased but fine for this test
-	index := make([]bool, 64)
-	for i := range index {
-		index[i] = (rand.Intn(2) % 2) != 0
-	}
+	index := randomIndex(numBits)
 
 	// Test with if x = index, evaluate to vector b
 	alpha := field.RandElementWithPRG(utils.RandomPRG())
@@ -113,6 +110,7 @@ func TestPointWithAlphaVector(t *testing.T) {
 	}
 }
 
+// return random index, biased but fine for this test
 func randomIndex(bits int) []bool {
 	index := make([]bool, bits)
 	for i := range index {
