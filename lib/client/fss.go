@@ -40,7 +40,8 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 // since now we should have less schemes? To discuss
 func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 	// TODO: fix this, here query.Type is hardcoded
-	queries := c.Query(index, query.KeyId, numServers)
+	// FIX THIS
+	queries := c.Query(index, []bool{false}, query.KeyId, numServers)
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
@@ -58,7 +59,7 @@ func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(index int, qt query.Type, numServers int) []*query.FSS {
+func (c *FSS) Query(index int, q []bool, qt query.Type, numServers int) []*query.FSS {
 	if invalidQueryInputsDPF(index, numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -72,7 +73,7 @@ func (c *FSS) Query(index int, qt query.Type, numServers int) []*query.FSS {
 	}
 
 	// client initialization is the same for both single- and multi-bit scheme
-	fssKeys := c.Fss.GenerateTreePF(uint64(index), c.state.a)
+	fssKeys := c.Fss.GenerateTreePF(q, c.state.a)
 
 	return []*query.FSS{
 		{QueryType: qt, FssKey: fssKeys[0]},

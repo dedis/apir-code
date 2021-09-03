@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/gob"
 	"runtime"
 
@@ -70,7 +69,7 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 		//tmp := make([]uint32, s.db.BlockSize+1)
 		tmp := make([]uint32, 2)
 		for i := 0; i < numIdentifiers; i++ {
-			id := binary.BigEndian.Uint64([]byte(s.db.KeysInfo[i].UserId.Email))
+			id := utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email))
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 			out[0] = (out[0] + tmp[0]) % field.ModP
 			out[1] = (out[1] + tmp[1]) % field.ModP
