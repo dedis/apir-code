@@ -61,10 +61,12 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 // TODO: refactor this function
 func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns
+
+	out := make([]uint32, s.db.BlockSize)
+	tmp := make([]uint32, s.db.BlockSize)
+
 	switch q.Target {
 	case query.UserId:
-		out := make([]uint32, s.db.BlockSize)
-		tmp := make([]uint32, s.db.BlockSize)
 		for i := 0; i < numIdentifiers; i++ {
 			var id []bool
 			if q.FromStart != 0 {
@@ -81,8 +83,6 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 		}
 		return out
 	case query.PubKeyAlgo:
-		out := make([]uint32, s.db.BlockSize)
-		tmp := make([]uint32, s.db.BlockSize)
 		for i := 0; i < numIdentifiers; i++ {
 			id := utils.ByteToBits([]byte{uint8(s.db.KeysInfo[i].PubKeyAlgo)})
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
@@ -92,8 +92,7 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 		}
 		return out
 	case query.CreationTime:
-		out := make([]uint32, s.db.BlockSize)
-		tmp := make([]uint32, s.db.BlockSize)
+
 		for i := 0; i < numIdentifiers; i++ {
 			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
 			if err != nil {
