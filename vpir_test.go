@@ -75,7 +75,7 @@ func TestCountEndsWithEmail(t *testing.T) {
 	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
-		newEmail := db.KeysInfo[i].UserId.Email[:len(db.KeysInfo[i].UserId.Email)-3] + match
+		newEmail := db.KeysInfo[i].UserId.Email[:len(db.KeysInfo[i].UserId.Email)-len(match)] + match
 		db.KeysInfo[i].UserId.Email = newEmail
 	}
 
@@ -126,8 +126,32 @@ func TestCountCreationTime(t *testing.T) {
 		Input:  in,
 	}
 
-	retrieveBlocksFSS(t, xof, db, q, match, "TestCountPublicKeyAlgorithm")
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCreationDate")
+}
 
+func TestCountAndQuery(t *testing.T) {
+	match := []interface{}{time.Date(2009, time.November, 0, 0, 0, 0, 0, time.UTC), packet.PubKeyAlgoRSA}
+	rndDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
+	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	require.NoError(t, err)
+	for i := 0; i < 50; i++ {
+		db.KeysInfo[i].CreationTime = match[0].(time.Time)
+		db.KeysInfo[i].PubKeyAlgo = match[1].(packet.PublicKeyAlgorithm)
+	}
+
+	//matchByte:= append([]byte(match[0].(string)), byte(match[1].(packet.PublicKeyAlgorithm)))
+	matchBytes, err := match[0].(time.Time).MarshalBinary()
+	require.NoError(t, err)
+	matchBytes = append(matchBytes, byte(match[1].(packet.PublicKeyAlgorithm)))
+	in := utils.ByteToBits(matchBytes)
+	q := query.ClientFSS{
+		And:     true,
+		Targets: []query.Target{query.PubKeyAlgo, query.CreationTime},
+		Input:   in,
+	}
+
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCountAndQuery")
 }
 
 func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.ClientFSS, match interface{}, testName string) {
@@ -150,6 +174,7 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.Cli
 	require.NoError(t, err)
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 
+	// verify output
 	count := uint32(0)
 	for _, k := range db.KeysInfo {
 		switch q.Target {
@@ -175,7 +200,7 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.Cli
 				count++
 			}
 		default:
-			panic("not yet implemented")
+			panic("unknow query type")
 		}
 	}
 
