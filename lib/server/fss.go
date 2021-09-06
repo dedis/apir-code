@@ -58,8 +58,6 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 	return out, nil
 }
 
-// TODO: how to do here? It is quite strange that the server imports the client
-// Define the query to be outside of the function?
 // TODO: refactor this function
 func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns

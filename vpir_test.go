@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/monitor"
@@ -23,7 +24,7 @@ const (
 	oneKB           = 1024 * oneB
 	oneMB           = 1024 * oneKB
 	testBlockLength = 64
-	numIdentifiers  = 100
+	numIdentifiers  = 1000
 )
 
 func TestCountEntireEmail(t *testing.T) {
@@ -85,10 +86,29 @@ func TestCountEndsWithEmail(t *testing.T) {
 		Input:   in,
 	}
 
-	retrieveBlocksFSS(t, xof, db, q, match, "TestCountStartsWithEmail")
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCountEndsWithEmail")
 }
 
-func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.ClientFSS, match, testName string) {
+func TestCountPublicKeyAlgorithm(t *testing.T) {
+	match := packet.PubKeyAlgoRSA
+	rndDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
+	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	require.NoError(t, err)
+	for i := 0; i < 50; i++ {
+		db.KeysInfo[i].PubKeyAlgo = match
+	}
+
+	in := utils.ByteToBits([]byte{byte(match)})
+	q := query.ClientFSS{
+		Target: query.PubKeyAlgo,
+		Input:  in,
+	}
+
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCountPublicKeyAlgorithm")
+}
+
+func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.ClientFSS, match interface{}, testName string) {
 	c := client.NewFSS(rnd, &db.Info)
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
@@ -124,6 +144,12 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.Cli
 			if toMatch == match {
 				count++
 			}
+		case query.PubKeyAlgo:
+			if k.PubKeyAlgo == match {
+				count++
+			}
+		default:
+			panic("not yet implemented")
 		}
 	}
 
