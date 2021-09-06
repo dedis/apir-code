@@ -12,9 +12,10 @@ const (
 )
 
 type ClientFSS struct {
-	Target             Target
-	FromStart, FromEnd int
-	Input              []bool
+	Target    Target
+	FromStart int
+	FromEnd   int
+	Input     []bool
 }
 
 type FSS struct {

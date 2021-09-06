@@ -107,10 +107,8 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		// By convention, this takes the form "Full Name (Comment) <email@example.com>"
 		// which is split out in the fields below.
 		// For testing purposes, only random email and other fields empty strings
-		id := packet.NewUserId("", "", utils.Ranstring(32))
-		if i > 50 {
-			id.Email = "epflepflepflepflepflepflepflepfl"
-		}
+		id := packet.NewUserId("", "", utils.Ranstring(16))
+
 		// in this case lengths are all equal, 2048 bits = 64 uint32 elements
 		bl := entryLength
 

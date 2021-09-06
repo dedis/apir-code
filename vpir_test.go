@@ -23,20 +23,72 @@ const (
 	oneKB           = 1024 * oneB
 	oneMB           = 1024 * oneKB
 	testBlockLength = 64
+	numIdentifiers  = 100
 )
 
-func TestMultiBitVPIR(t *testing.T) {
-	numIdentifiers := 100
+func TestCountEntireEmail(t *testing.T) {
+	match := "epflepflepflepflepflepflepflepfl"
 
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
 	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
+	for i := 0; i < 50; i++ {
+		db.KeysInfo[i].UserId.Email = match
+	}
 
-	retrieveBlocksFSS(t, xof, db, "FSSMultiBitVectorVPIR")
+	in := utils.ByteToBits([]byte(match))
+	q := query.ClientFSS{
+		Target: query.UserId,
+		Input:  in,
+	}
+
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCountEntireEmail")
 }
 
-func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName string) {
+func TestCountStartsWithEmail(t *testing.T) {
+	match := "START"
+	rndDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
+	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	require.NoError(t, err)
+	for i := 0; i < 50; i++ {
+		newEmail := match + db.KeysInfo[i].UserId.Email[5:]
+		db.KeysInfo[i].UserId.Email = newEmail
+	}
+
+	in := utils.ByteToBits([]byte(match))
+	q := query.ClientFSS{
+		Target:    query.UserId,
+		FromStart: len(match),
+		Input:     in,
+	}
+
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCountStartsWithEmail")
+}
+
+func TestCountEndsWithEmail(t *testing.T) {
+	match := "END"
+	rndDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
+	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	require.NoError(t, err)
+	for i := 0; i < 50; i++ {
+		newEmail := db.KeysInfo[i].UserId.Email[:len(db.KeysInfo[i].UserId.Email)-3] + match
+		db.KeysInfo[i].UserId.Email = newEmail
+	}
+
+	in := utils.ByteToBits([]byte(match))
+	q := query.ClientFSS{
+		Target:  query.UserId,
+		FromEnd: len(match),
+		Input:   in,
+	}
+
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCountStartsWithEmail")
+}
+
+func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.ClientFSS, match, testName string) {
 	c := client.NewFSS(rnd, &db.Info)
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
@@ -45,13 +97,6 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName st
 	totalTimer := monitor.NewMonitor()
 
 	// compute the input of the query
-	match := "epflepflepflepflepflepflepflepfl"
-	in := utils.ByteToBits([]byte(match))
-	q := query.ClientFSS{
-		Target: query.UserId,
-		Input:  in,
-	}
-
 	fssKeys := c.Query(q, 2)
 
 	a0 := s0.Answer(fssKeys[0])
@@ -65,8 +110,21 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, testName st
 
 	count := uint32(0)
 	for _, k := range db.KeysInfo {
-		if k.UserId.Email == match {
-			count++
+		switch q.Target {
+		case query.UserId:
+			if q.FromStart != 0 {
+				if k.UserId.Email[:q.FromStart] == match {
+					count++
+				}
+			} else if q.FromEnd != 0 {
+				if k.UserId.Email[len(k.UserId.Email)-q.FromEnd:] == match {
+					count++
+				}
+			} else {
+				if k.UserId.Email == match {
+					count++
+				}
+			}
 		}
 	}
 

@@ -39,8 +39,7 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	//f.N = 64 // TODO: use a constant // TODO: change this // FIX
-	f.N = 256 // this can be removed and only work with numbits
+	f.N = 256 // maximum number of bits supported by FSS
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
@@ -51,6 +50,9 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 // Generate Keys for 2-party point functions It creates keys for a function
 // that evaluates to vector b when input x = a.
 func (f Fss) GenerateTreePF(a []bool, b []uint32) []FssKeyEq2P {
+	// reinitialize f.NumBits because we have different input lengths
+	f.NumBits = uint(len(a))
+
 	fssKeys := make([]FssKeyEq2P, 2)
 	// Set up initial values
 	tempRand1 := make([]byte, aes.BlockSize+1)
@@ -95,7 +97,7 @@ func (f Fss) GenerateTreePF(a []bool, b []uint32) []FssKeyEq2P {
 		t1Left := prfOut1[aes.BlockSize] % 2
 		t1Right := prfOut1[(aes.BlockSize*2)+1] % 2
 		// Find bit in a
-		//aBit := getBit(a, (f.N - f.NumBits + i + 1), f.N)
+		// original: aBit := getBit(a, (f.N - f.NumBits + i + 1), f.N)
 		aBit := byte(0)
 		if a[i] {
 			aBit = byte(1)

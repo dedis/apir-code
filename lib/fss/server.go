@@ -28,8 +28,7 @@ func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	//f.N = 64 // TODO: use a constant // TODO change this FIX
-	f.N = 256
+	f.N = 256 // maximum number of bits supported by FSS
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
@@ -38,14 +37,17 @@ func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
 }
 
 func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x []bool, out []uint32) {
+	// reinitialize f.NumBits because we have different input lengths
+	f.NumBits = uint(len(x))
+
 	sCurr := make([]byte, aes.BlockSize)
 	copy(sCurr, k.SInit)
 	tCurr := k.TInit
 	tmp := make([]uint32, len(out))
 	for i := uint(0); i < f.NumBits; i++ {
 		var xBit byte = 0
-		if i != f.N { // THIS CAN PROBABLY BE REMOVED
-			//xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
+		if i != f.N {
+			// original: xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
 			if x[i] {
 				xBit = 1
 			}

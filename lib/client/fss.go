@@ -77,8 +77,8 @@ func (c *FSS) Query(q query.ClientFSS, numServers int) []*query.FSS {
 	fssKeys := c.Fss.GenerateTreePF(q.Input, c.state.a)
 
 	return []*query.FSS{
-		{Target: q.Target, FssKey: fssKeys[0]},
-		{Target: q.Target, FssKey: fssKeys[1]},
+		{Target: q.Target, FromStart: q.FromStart, FromEnd: q.FromEnd, FssKey: fssKeys[0]},
+		{Target: q.Target, FromStart: q.FromStart, FromEnd: q.FromEnd, FssKey: fssKeys[1]},
 	}
 }
 
