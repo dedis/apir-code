@@ -112,18 +112,17 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.Cli
 	for _, k := range db.KeysInfo {
 		switch q.Target {
 		case query.UserId:
+			toMatch := ""
 			if q.FromStart != 0 {
-				if k.UserId.Email[:q.FromStart] == match {
-					count++
-				}
+				toMatch = k.UserId.Email[:q.FromStart]
 			} else if q.FromEnd != 0 {
-				if k.UserId.Email[len(k.UserId.Email)-q.FromEnd:] == match {
-					count++
-				}
+				toMatch = k.UserId.Email[len(k.UserId.Email)-q.FromEnd:]
 			} else {
-				if k.UserId.Email == match {
-					count++
-				}
+				toMatch = k.UserId.Email
+			}
+
+			if toMatch == match {
+				count++
 			}
 		}
 	}
