@@ -91,6 +91,21 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 			}
 		}
 		return out
+	case query.CreationTime:
+		out := make([]uint32, s.db.BlockSize)
+		tmp := make([]uint32, s.db.BlockSize)
+		for i := 0; i < numIdentifiers; i++ {
+			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
+			if err != nil {
+				panic("impossible to mashal creation date")
+			}
+			id := utils.ByteToBits(binaryMatch)
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+			for i := range out {
+				out[i] = (out[i] + tmp[i]) % field.ModP
+			}
+		}
+		return out
 	default:
 		panic("not yet implemented")
 	}

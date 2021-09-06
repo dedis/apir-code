@@ -108,6 +108,28 @@ func TestCountPublicKeyAlgorithm(t *testing.T) {
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCountPublicKeyAlgorithm")
 }
 
+func TestCountCreationTime(t *testing.T) {
+	match := time.Date(2009, time.November, 0, 0, 0, 0, 0, time.UTC)
+	rndDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
+	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	require.NoError(t, err)
+	for i := 0; i < 50; i++ {
+		db.KeysInfo[i].CreationTime = match
+	}
+
+	binaryMatch, err := match.MarshalBinary()
+	require.NoError(t, err)
+	in := utils.ByteToBits(binaryMatch)
+	q := query.ClientFSS{
+		Target: query.CreationTime,
+		Input:  in,
+	}
+
+	retrieveBlocksFSS(t, xof, db, q, match, "TestCountPublicKeyAlgorithm")
+
+}
+
 func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.ClientFSS, match interface{}, testName string) {
 	c := client.NewFSS(rnd, &db.Info)
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
@@ -146,6 +168,10 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.Cli
 			}
 		case query.PubKeyAlgo:
 			if k.PubKeyAlgo == match {
+				count++
+			}
+		case query.CreationTime:
+			if k.CreationTime.Equal(match.(time.Time)) {
 				count++
 			}
 		default:
