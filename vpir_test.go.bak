@@ -42,20 +42,6 @@ func TestMultiBitVectorOneMbVPIR(t *testing.T) {
 	retrieveBlocks(t, xof, db, nRows*nCols, "MultiBitVectorOneMbVPIR")
 }
 
-func TestSingleBitVectorOneKbVPIR(t *testing.T) {
-	dbLen := oneKB
-	nRows := 1
-	nCols := dbLen
-
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
-
-	db, err := database.CreateRandomSingleBitDB(xofDB, dbLen, nRows)
-	require.NoError(t, err)
-
-	retrieveBlocks(t, xof, db, nRows*nCols, "SingleBitVectorOneKbVPIR")
-}
-
 func TestMultiBitMatrixOneMbVPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength

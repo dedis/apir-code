@@ -3,7 +3,6 @@ package server
 import (
 	"runtime"
 
-	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 )
 
@@ -21,9 +20,6 @@ type PIR struct {
 // scheme, working both with the vector and the rebalanced representation of
 // the database.
 func NewPIR(db *database.Bytes, cores ...int) *PIR {
-	if db.BlockSize == cst.SingleBitBlockLength {
-		panic("single-bit classical PIR protocol not implemented")
-	}
 	if len(cores) == 0 {
 		return &PIR{db: db, cores: runtime.NumCPU()}
 	}

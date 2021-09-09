@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/lukechampine/fastxor"
-	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 )
 
@@ -24,9 +23,6 @@ type PIR struct {
 // GF(2), working both with the vector and the rebalanced representation of the
 // database.
 func NewPIR(rnd io.Reader, info *database.Info) *PIR {
-	if info.BlockSize == cst.SingleBitBlockLength {
-		panic("single-bit classical PIR protocol not implemented")
-	}
 	return &PIR{
 		rnd:    rnd,
 		dbInfo: info,
@@ -72,7 +68,7 @@ func (c *PIR) Reconstruct(answers [][]byte) ([]byte, error) {
 func (c *PIR) secretShare(numServers int) ([][]byte, error) {
 	// length of query vector
 	// one query bit per column
-	vectorLen := c.dbInfo.NumColumns / 8 + 1
+	vectorLen := c.dbInfo.NumColumns/8 + 1
 
 	// create query vectors for all the servers
 	vectors := make([][]byte, numServers)

@@ -6,7 +6,6 @@ import (
 	"math/bits"
 
 	"github.com/dimakogan/dpf-go/dpf"
-	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 )
 
@@ -20,11 +19,6 @@ type PIRdpf struct {
 // NewPIRdpf returns a new client for the DPF-base multi-bit classical PIR
 // scheme
 func NewPIRdpf(rnd io.Reader, info *database.Info) *PIRdpf {
-	// classical PIR protocols are implemented only for multi-bit
-	if info.BlockSize == cst.SingleBitBlockLength {
-		panic("single-bit classical PIR protocol not implemented")
-	}
-
 	return &PIRdpf{
 		rnd:    rnd,
 		dbInfo: info,

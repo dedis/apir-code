@@ -5,7 +5,6 @@ import (
 	"runtime"
 
 	"github.com/dimakogan/dpf-go/dpf"
-	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 )
 
@@ -21,9 +20,6 @@ type PIRdpf struct {
 
 // NewPIRdpf initializes and returns a new server for DPF-based classical PIR
 func NewPIRdpf(db *database.Bytes, cores ...int) *PIRdpf {
-	if db.BlockSize == cst.SingleBitBlockLength {
-		panic("single-bit classical PIR protocol not implemented")
-	}
 	if len(cores) == 0 {
 		return &PIRdpf{db: db, cores: runtime.NumCPU()}
 	}

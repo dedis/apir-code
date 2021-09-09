@@ -17,7 +17,6 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/dpf"
 	"github.com/si-co/vpir-code/lib/field"
@@ -111,15 +110,12 @@ func main() {
 
 		var numBlocks int
 		// Find the total number of blocks in the db
-		if s.BlockLength == constants.SingleBitBlockLength {
-			numBlocks = dbLen
-		} else {
-			numBlocks = dbLen / (elemBitSize * blockLen)
-			// for really small db
-			if numBlocks == 0 {
-				numBlocks = 1
-			}
+		numBlocks = dbLen / (elemBitSize * blockLen)
+		// for really small db
+		if numBlocks == 0 {
+			numBlocks = 1
 		}
+
 		// rebalanced db
 		if nRows != 1 {
 			utils.IncreaseToNextSquare(&numBlocks)
@@ -134,17 +130,11 @@ func main() {
 		dbElliptic := new(database.Elliptic)
 		switch s.Primitive[:3] {
 		case "vpi":
-			if s.BlockLength == constants.SingleBitBlockLength {
-				db, err = database.CreateRandomSingleBitDB(dbPRG, dbLen, nRows)
-				if err != nil {
-					panic(err)
-				}
-			} else {
-				db, err = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
-				if err != nil {
-					panic(err)
-				}
+			db, err = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
+			if err != nil {
+				panic(err)
 			}
+
 		case "pir":
 			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
 				dbBytes = database.CreateRandomMultiBitMerkle(dbPRG, dbLen, nRows, blockLen)
@@ -554,9 +544,6 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 
 // Converts number of bits to retrieve into the number of db blocks
 func bitsToBlocks(blockSize, elemSize, numBits int) int {
-	if blockSize == constants.SingleBitBlockLength {
-		return numBits
-	}
 	return numBits / (blockSize * elemSize)
 }
 

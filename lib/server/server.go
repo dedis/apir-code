@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/lukechampine/fastxor"
-	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -22,37 +21,6 @@ type Server interface {
 
 // Answer computes the VPIR answer for the given query
 func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
-	// Doing simplified scheme if block consists of a single bit
-	if db.BlockSize == cst.SingleBitBlockLength {
-		// make sure that we do not need up with routines processing 0 elements
-		if NGoRoutines > db.NumColumns {
-			NGoRoutines = db.NumColumns
-		}
-		columnsPerRoutine := db.NumColumns / NGoRoutines
-		replies := make([]chan uint32, NGoRoutines)
-		m := make([]uint32, db.NumRows)
-		var begin, end int
-		for i := 0; i < db.NumRows; i++ {
-			for j := 0; j < NGoRoutines; j++ {
-				begin, end = j*columnsPerRoutine, (j+1)*columnsPerRoutine
-				// make the last routine take all the left-over (from division) columns
-				if j == NGoRoutines-1 {
-					end = db.NumColumns
-				}
-				replyChan := make(chan uint32)
-				replies[j] = replyChan
-				go processSingleBitColumns(db.Range(begin, end), q[begin:end], replyChan)
-			}
-
-			for j, reply := range replies {
-				element := <-reply
-				m[i] = (m[i] + element) % field.ModP
-				close(replies[j])
-			}
-		}
-		return m
-	}
-
 	// %%% Logic %%%
 	// compute the matrix-vector inner products,
 	// addition and multiplication of elements

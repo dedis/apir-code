@@ -8,7 +8,6 @@ import (
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/lukechampine/fastxor"
-	cst "github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
@@ -63,20 +62,14 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	st.ix = index / dbInfo.NumColumns
 	st.iy = index % dbInfo.NumColumns
 
-	if dbInfo.BlockSize != cst.SingleBitBlockLength {
-		// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
-		// multi-bit scheme
-		// +1 to BlockSize for recovering true value
-		st.a = make([]uint32, dbInfo.BlockSize+1)
-		st.a[0] = 1
-		for i := 1; i < len(st.a); i++ {
-			a := (uint64(st.a[i-1]) * uint64(st.alpha)) % uint64(field.ModP)
-			st.a[i] = uint32(a)
-		}
-	} else {
-		// the single-bit scheme needs a single alpha
-		st.a = make([]uint32, 1)
-		st.a[0] = st.alpha
+	// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
+	// multi-bit scheme
+	// +1 to BlockSize for recovering true value
+	st.a = make([]uint32, dbInfo.BlockSize+1)
+	st.a[0] = 1
+	for i := 1; i < len(st.a); i++ {
+		a := (uint64(st.a[i-1]) * uint64(st.alpha)) % uint64(field.ModP)
+		st.a[i] = uint32(a)
 	}
 
 	return st, nil
@@ -87,34 +80,6 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 // The integrity check is performed in this function.
 func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32, error) {
 	sum := make([][]uint32, dbInfo.NumRows)
-
-	// single-bit scheme
-	if dbInfo.BlockSize == cst.SingleBitBlockLength {
-		// sum answers as vectors in F^b
-		for i := 0; i < dbInfo.NumRows; i++ {
-			sum[i] = make([]uint32, 1)
-			for k := range answers {
-				sum[i][0] = (sum[i][0] + answers[k][i]) % field.ModP
-			}
-		}
-		// verify integrity and return database entry if accept
-		for i := 0; i < dbInfo.NumRows; i++ {
-			if i == st.ix {
-				switch {
-				case sum[i][0] == st.alpha:
-					return []uint32{1}, nil
-				case sum[i][0] == 0:
-					return []uint32{0}, nil
-				default:
-					return nil, errors.New("REJECT!")
-				}
-			} else {
-				if sum[i][0] != st.alpha && sum[i][0] != 0 {
-					return nil, errors.New("REJECT!")
-				}
-			}
-		}
-	}
 
 	// mutli-bit scheme
 	// sum answers as vectors in F^(b+1)
