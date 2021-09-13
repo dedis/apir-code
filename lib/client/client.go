@@ -167,3 +167,7 @@ func invalidQueryInputsIT(index, numServers int) bool {
 func invalidQueryInputsDPF(index, numServers int) bool {
 	return index < 0 && numServers != 2
 }
+
+func invalidQueryInputsFSS(numServers int) bool {
+	return numServers != 2
+}

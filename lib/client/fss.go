@@ -58,7 +58,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
 func (c *FSS) Query(q query.ClientFSS, numServers int) []*query.FSS {
-	if numServers != 2 {
+	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
 	}
 	// initialize empty client state
