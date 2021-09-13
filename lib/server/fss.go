@@ -96,7 +96,7 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 			for i := 0; i < numIdentifiers; i++ {
 				binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
 				if err != nil {
-					panic("impossible to mashal creation date")
+					panic("impossible to marshal creation date")
 				}
 				id := utils.ByteToBits(binaryMatch)
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
@@ -108,7 +108,7 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 		default:
 			panic("not yet implemented")
 		}
-	} else {
+	} else { // conjunction
 		for i := 0; i < numIdentifiers; i++ {
 			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
 			if err != nil {
