@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"io"
 	"log"
 
 	"github.com/cloudflare/circl/group"
@@ -24,12 +23,13 @@ type Client interface {
 
 // state of the client, used for all the schemes.
 type state struct {
+	// only used for Merkle tree-based approach and classic PIR
 	ix int
 	iy int
 
 	// for multi-server
-	alpha uint32
-	a     []uint32
+	alphas []uint32 // four alphas to meet desired soundness
+	a      []uint32 // cointains the four [1, alpha_i] sub-vectors
 
 	// for single-server (DH)
 	r   group.Scalar
@@ -49,7 +49,7 @@ func decodeAnswer(in [][]byte) ([][]uint32, error) {
 	return answer, nil
 }
 
-// generateClientState returns the client state with all the needed settings.
+/* // generateClientState returns the client state with all the needed settings.
 func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*state, error) {
 	// initialize state
 	st := &state{}
@@ -73,7 +73,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	}
 
 	return st, nil
-}
+} */
 
 // reconstruct takes as input the answers fro mthe servers, the info about the
 // database and the client state to return the reconstructed database entry.

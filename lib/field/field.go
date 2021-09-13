@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	ModP  = uint32(2147483647) // 2^31 - 1
-	Bytes = 4
-	Bits  = 31
-	Mask  = 127
+	ModP                 = uint32(2147483647) // 2^31 - 1
+	Bytes                = 4
+	Bits                 = 31
+	Mask                 = 127
+	ConcurrentExecutions = 4
 )
 
 func NegateVector(in []uint32) []uint32 {

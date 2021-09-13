@@ -27,7 +27,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		dbInfo: info,
 		state:  nil,
 		// TODO: avoid hardcoded 64
-		Fss: fss.ClientInitialize(64, info.BlockSize), // TODO: solve +1 here, only for VPIR
+		Fss: fss.ClientInitialize(64, info.BlockSize*field.ConcurrentExecutions), // TODO: solve +1 here, only for VPIR
 	}
 }
 
@@ -65,12 +65,15 @@ func (c *FSS) Query(q query.ClientFSS, numServers int) []*query.FSS {
 	c.state = &state{}
 	// crete state for retrieving a single key, i.e. exact match
 	if q.Target == query.Key {
-		// var err error
-		// c.state, err = generateClientState(index, c.rnd, c.dbInfo)
 		panic("not yet implemented")
 	} else {
-		c.state.alpha = field.RandElementWithPRG(c.rnd)
-		c.state.a = []uint32{1, c.state.alpha}
+		c.state.alphas = make([]uint32, field.ConcurrentExecutions)
+		c.state.a = make([]uint32, field.ConcurrentExecutions*2)
+		for i := 0; i < field.ConcurrentExecutions; i++ {
+			c.state.alphas[i] = field.RandElementWithPRG(c.rnd)
+			// c.state.a contains [1, alpha_i] for i = 0, 1, 2, 3
+			copy(c.state.a[i*2:i*2+2], []uint32{1, c.state.alphas[i]})
+		}
 	}
 
 	// client initialization is the same for both single- and multi-bit scheme
@@ -96,14 +99,18 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 // Reconstruct takes as input the answers from the client and returns the
 // reconstructed entry after the appropriate integrity check.
 func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
-	out := (answers[0][0] + answers[1][0]) % field.ModP
-	tmp := (uint64(out) * uint64(c.state.alpha)) % uint64(field.ModP)
-	tag := uint32(tmp)
-	reconstructedTag := (answers[0][1] + answers[1][1]) % field.ModP
-	if tag == reconstructedTag {
-		return []uint32{out}, nil
+	// we keep only the last value of out: if all the answers accepts, then
+	// the out value is the same for all of them
+	out := uint32(0)
+	for i := 0; i < field.ConcurrentExecutions; i++ {
+		out = (answers[0][i*2] + answers[1][i*2]) % field.ModP
+		tmp := (uint64(out) * uint64(c.state.alphas[i])) % uint64(field.ModP)
+		tag := uint32(tmp)
+		reconstructedTag := (answers[0][i*2+1] + answers[1][i*2+1]) % field.ModP
+		if tag != reconstructedTag {
+			return nil, errors.New("REJECT")
+		}
 	}
 
-	return nil, errors.New("REJECT")
-	//return reconstruct(answers, c.dbInfo, c.state)
+	return []uint32{out}, nil
 }
