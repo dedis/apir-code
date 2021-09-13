@@ -123,18 +123,6 @@ func computeMessageAndTag(elements []uint32, blockLens []int, q []uint32, blockL
 	return append(sum, sumTag)
 }
 
-// Processing of columns for a database where each field element
-// encodes just a single bit
-func processSingleBitColumns(elements []uint32, q []uint32, replyTo chan<- uint32) {
-	reply := uint32(0)
-	for j := 0; j < len(elements); j++ {
-		if elements[j] == 1 {
-			reply = (reply + q[j]) % field.ModP
-		}
-	}
-	replyTo <- reply
-}
-
 /*
 %%	PIR primitives
 */

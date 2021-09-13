@@ -19,7 +19,7 @@ type PIR struct {
 	state  *state
 }
 
-// NewItSingleByte return a client for the classical PIR multi-bit scheme in
+// NewPIR return a client for the classical PIR multi-bit scheme in
 // GF(2), working both with the vector and the rebalanced representation of the
 // database.
 func NewPIR(rnd io.Reader, info *database.Info) *PIR {

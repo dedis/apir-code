@@ -8,7 +8,6 @@ import (
 	"math"
 	"testing"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/field"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -112,11 +111,7 @@ func retrieveBlocks(t *testing.T, rnd io.Reader, db *database.DB, numBlocks int,
 
 		res, err := c.Reconstruct(answers)
 		require.NoError(t, err)
-		if db.BlockSize == constants.SingleBitBlockLength {
-			elems = db.Range(i, i+1)
-		} else {
-			elems = db.Range(i*db.BlockSize, (i+1)*db.BlockSize)
-		}
+		elems = db.Range(i*db.BlockSize, (i+1)*db.BlockSize)
 		require.Equal(t, elems, res)
 	}
 	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
