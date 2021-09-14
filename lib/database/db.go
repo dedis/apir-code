@@ -121,7 +121,7 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	}
 
 	// in this case lengths are all equal
-	// TODO: here for compataibility reasons, FIX
+	// TODO: here for compatibility reasons, FIX
 	info := NewInfo(1, numIdentifiers, entryLength)
 	for i := range info.BlockLengths {
 		info.BlockLengths[i] = entryLength

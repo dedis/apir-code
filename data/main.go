@@ -6,19 +6,16 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"golang.org/x/xerrors"
 )
 
 const hundredMb = 104857600
-const usage = `go run main.go {-rabalanced} -cmd genChunks|genDB -path PATH -out PATH`
+const usage = `go run main.go {-rabalanced} -cmd genChunks|genDB|parseDump -path PATH -out PATH`
 
 func main() {
 	var cmd string
@@ -26,7 +23,7 @@ func main() {
 	var out string
 	var rebalanced bool
 
-	flag.StringVar(&cmd, "cmd", "", "genChunks|genDB")
+	flag.StringVar(&cmd, "cmd", "", "genChunks|genDB|parseDump")
 	flag.StringVar(&path, "path", "", "input file")
 	flag.StringVar(&out, "out", "", "output file/folder")
 	flag.BoolVar(&rebalanced, "rebalanced", false, "rebalanced db or not")
@@ -50,26 +47,33 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to generate DB: %v", err)
 		}
+	case "parseDump":
+		err := parseSksDump()
+		if err != nil {
+			log.Fatalf("failed to parse SKS key dump: %v", err)
+		}
 	default:
 		log.Fatalf("unknown command: %s", cmd)
 	}
 }
 
-// func parseSksDump() {
-// 	var err error
-// 	fileList, err := pgp.GetSksOriginalDumpFiles(pgp.SksOriginalFolder)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	m, err := pgp.AnalyzeKeyDump(fileList)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	err = pgp.WriteKeysOnDisk(pgp.SksParsedFolder, m)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
+func parseSksDump() error {
+	var err error
+	fileList, err := pgp.GetSksOriginalDumpFiles(pgp.SksOriginalFolder)
+	if err != nil {
+		return err
+	}
+	m, err := pgp.AnalyzeKeyDump(fileList)
+	if err != nil {
+		return err
+	}
+	err = pgp.WriteKeysOnDisk(pgp.SksParsedFolder, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func splitFullDumpIntoChunks(path, out string) error {
 	f, err := os.Open(path)
@@ -130,30 +134,30 @@ func splitFullDumpIntoChunks(path, out string) error {
 }
 
 func generateDB(root, out string, rebalanced bool) error {
-	filesInfo, err := ioutil.ReadDir(root)
-	if err != nil {
-		return xerrors.Errorf("failed to read files: %v", err)
-	}
-
-	var files []string
-
-	for _, info := range filesInfo {
-		if info.IsDir() {
-			continue
-		}
-
-		files = append(files, filepath.Join(root, info.Name()))
-	}
-
-	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
-	if err != nil {
-		return xerrors.Errorf("failed to generate DB: %v", err)
-	}
-
-	err = db.SaveDBFileSingle(out)
-	if err != nil {
-		return xerrors.Errorf("failed to save db: %v", err)
-	}
+	//filesInfo, err := ioutil.ReadDir(root)
+	//if err != nil {
+	//	return xerrors.Errorf("failed to read files: %v", err)
+	//}
+	//
+	//var files []string
+	//
+	//for _, info := range filesInfo {
+	//	if info.IsDir() {
+	//		continue
+	//	}
+	//
+	//	files = append(files, filepath.Join(root, info.Name()))
+	//}
+	//
+	//db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
+	//if err != nil {
+	//	return xerrors.Errorf("failed to generate DB: %v", err)
+	//}
+	//
+	//err = db.SaveDBFileSingle(out)
+	//if err != nil {
+	//	return xerrors.Errorf("failed to save db: %v", err)
+	//}
 
 	return nil
 }

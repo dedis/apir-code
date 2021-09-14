@@ -40,7 +40,7 @@ func AnalyzeKeyDump(files []string) (map[string]*openpgp.Entity, error) {
 
 	for _, file := range files {
 		fmt.Printf("Processing %s\n", file)
-		in, err := os.Open(filepath.Join(SksOriginalFolder, file))
+		in, err := os.Open(file)
 		if err != nil {
 			return nil, err
 		}
@@ -52,7 +52,7 @@ func AnalyzeKeyDump(files []string) (map[string]*openpgp.Entity, error) {
 			saveKeyIfValid(e, keys)
 		}
 		if err = in.Close(); err != nil {
-			log.Printf("Unable to close file %s", file)
+			log.Printf("Unable to close file %s\n", file)
 			return nil, err
 		}
 	}
