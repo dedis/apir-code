@@ -4,7 +4,6 @@ package main
 // locally, the networking logic is not tested here.
 
 import (
-	"encoding/binary"
 	"fmt"
 	"math/rand"
 	"path/filepath"
@@ -14,7 +13,6 @@ import (
 	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/stretchr/testify/require"
@@ -80,6 +78,7 @@ func retrieveRealKeyBlocks(t *testing.T, c client.Client, servers []server.Serve
 	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
 }
 
+/*
 func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
 	// compute hash key for id
 	hashKey := database.IdToHash(id)
@@ -109,6 +108,7 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 		return result.([]byte)
 	}
 }
+*/
 
 func makeITServers(db *database.DB) []server.Server {
 	s0 := server.NewIT(db)

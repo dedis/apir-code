@@ -18,7 +18,7 @@ func BenchmarkMerkleTree(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		CreateRandomMultiBitMerkle(rng, dbLen, numRows, blockLen)
+		CreateRandomMerkle(rng, dbLen, numRows, blockLen)
 	}
 }
 

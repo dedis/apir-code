@@ -28,7 +28,6 @@ type KeyInfo struct {
 	CreationTime time.Time
 	PubKeyAlgo   packet.PublicKeyAlgorithm
 	BlockLength  int // length of data in blocks defined in number of elements
-
 }
 
 type Info struct {

@@ -3,15 +3,6 @@ This repository contains the code for the verifiable PIR schemes and the code
 for the proof of concept application, Keyd. 
 Keyd is a privacy-preserving PGP public keys directory based on verifiable PIR.
 
-### TODO
-The current priorities for the implementation are:
- * Reduce memory consumption of Keyd and (if possible) improve its performance.
- * Fix the bugs in the gRPC logic to perform last part of the empirical
-     evaluation for the paper.
- * If the memory consumption can be reduced to an acceptable level, setup two
-     AWS instances (Lambda is not the appropriate solution) and design a client
-     for Keyd.
-
 ### Verifiable PIR taxonomy
 The repository contains different verifiable PIR schemes. Keyd will be based
 either on the multi-bit DPF-based scheme or on the multi-bit matrix-based

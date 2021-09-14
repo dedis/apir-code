@@ -2,13 +2,8 @@ package database
 
 import (
 	"bytes"
-	"encoding/binary"
 	"sort"
 
-	"golang.org/x/crypto/blake2b"
-
-	"github.com/si-co/vpir-code/lib/constants"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 )
 
@@ -175,7 +170,7 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 	return m, nil
 }
 */
-
+/*
 func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 	// prepare db
 	db := make(map[int][]byte)
@@ -188,6 +183,7 @@ func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 
 	return db
 }
+*/
 
 // Simple ISO/IEC 7816-4 padding where 0x80 is appended to the block, then
 // zeros to make up to blockLen
@@ -227,7 +223,7 @@ func maxKeyLength(keys []*pgp.Key) int {
 	return max
 }
 
-// TODO: fix this
+/*
 func IdToHash(id string) []byte {
 	hash := blake2b.Sum256([]byte(id))
 	// mod
@@ -236,3 +232,4 @@ func IdToHash(id string) []byte {
 	binary.BigEndian.PutUint32(out, idUint32)
 	return out
 }
+*/
