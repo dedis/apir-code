@@ -151,7 +151,3 @@ func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns
 	}
 	return
 }
-
-func (d *DB) Range(begin, end int) []uint32 {
-	return d.Entries[begin:end]
-}

@@ -41,7 +41,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 			}
 			replyChan := make(chan []uint32, db.BlockSize+1)
 			replies[i] = replyChan
-			go processColumns(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin:end], q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
+			go processColumns(db.Entries[prevElemPos:nextElemPos], db.BlockLengths[begin:end], q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
 		}
 		m := make([]uint32, db.BlockSize+1)
@@ -65,7 +65,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 			}
 			replyChan := make(chan []uint32, (end-begin)*(db.BlockSize+1))
 			replies[i] = replyChan
-			go processRows(db.Range(prevElemPos, nextElemPos), db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
+			go processRows(db.Entries[prevElemPos:nextElemPos], db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
 		}
 		m := make([]uint32, 0, db.NumRows*(db.BlockSize+1))
