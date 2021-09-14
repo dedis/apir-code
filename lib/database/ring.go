@@ -2,10 +2,11 @@ package database
 
 import (
 	"encoding/binary"
-	"github.com/ldsec/lattigo/v2/bfv"
 	"io"
 	"log"
 	"math"
+
+	"github.com/ldsec/lattigo/v2/bfv"
 )
 
 type Ring struct {

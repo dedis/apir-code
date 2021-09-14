@@ -1,16 +1,17 @@
 package database
 
 import (
-	"github.com/si-co/vpir-code/lib/merkle"
 	"io"
 	"log"
 	"runtime"
+
+	"github.com/si-co/vpir-code/lib/merkle"
 )
 
-// CreateRandomMultiBitMerkle
+// CreateRandomMerkle
 // blockLen is the number of byte in a block,
 // as byte is viewed as an element in this case
-func CreateRandomMultiBitMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
+func CreateRandomMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	numBlocks := dbLen / (8 * blockLen)
 	// generate random numBlocks blocks
 	data := make([]byte, numBlocks*blockLen)

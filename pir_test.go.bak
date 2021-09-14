@@ -15,10 +15,11 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func TestMultiBitVectorOneMbPIR(t *testing.T) {
+func TestVectorOneMbPIR(t *testing.T) {
 	dbLen := oneMB
 	// we want to download the same number of bytes
 	// as in the field representation
@@ -28,15 +29,15 @@ func TestMultiBitVectorOneMbPIR(t *testing.T) {
 	nCols := dbLen / (elemBitSize * blockLen * nRows)
 
 	// functions defined in vpir_test.go
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
+	xofDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, nRows*nCols, "MultiBitVectorOneMbPIR")
+	retrieveBlocksBytes(t, xof, db, nRows*nCols, "VectorOneMbPIR")
 }
 
-func TestMultiBitMatrixOneMbPIR(t *testing.T) {
+func TestMatrixOneMbPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
@@ -45,26 +46,26 @@ func TestMultiBitMatrixOneMbPIR(t *testing.T) {
 	nRows := nCols
 
 	// functions defined in vpir_test.go
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
+	xofDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, numBlocks, "MultiBitMatrixOneMbPIR")
+	retrieveBlocksBytes(t, xof, db, numBlocks, "MatrixOneMbPIR")
 }
 
-func TestDPFMultiBitVectorPIR(t *testing.T) {
+func TestDPFVectorPIR(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
 	numBlocks := dbLen / (elemBitSize * blockLen)
 	nRows := 1
 
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
+	xofDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksDPFBytes(t, xof, db, numBlocks, "DPFMultiBitVectorPIR")
+	retrieveBlocksDPFBytes(t, xof, db, numBlocks, "DPFVectorPIR")
 }
 
 func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
@@ -127,8 +128,8 @@ func TestPIRNumberThreads(t *testing.T) {
 	nRows := nCols
 
 	// functions defined in vpir_test.go
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
+	xofDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
 
 	db := database.CreateRandomMultiBitBytes(xofDB, dbLen, nRows, blockLen)
 	for cores := 1; cores <= runtime.NumCPU(); cores++ {

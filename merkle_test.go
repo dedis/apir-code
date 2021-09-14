@@ -14,10 +14,11 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
+	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func TestMultiBitVectorOneMbMerkle(t *testing.T) {
+func TestVectorOneMbMerkle(t *testing.T) {
 	dbLen := oneMB // specified in bits
 	// blockLen is computed such that a block contains the same amount of
 	// bytes as in the integrated approach, which uses the finite filed in
@@ -26,15 +27,15 @@ func TestMultiBitVectorOneMbMerkle(t *testing.T) {
 	nRows := 1
 
 	// functions defined in vpir_test.go
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
+	xofDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
 
-	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksITMerkle(t, xof, db, db.NumRows*db.NumColumns, "DPFMultiBitVectorMerkle")
+	retrieveBlocksITMerkle(t, xof, db, db.NumRows*db.NumColumns, "DPFVectorMerkle")
 }
 
-func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
+func TestMatrixOneMbMerkle(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
 	// since this scheme works on bytes, the bit size of one element is 8
@@ -44,15 +45,15 @@ func TestMultiBitMatrixOneMbMerkle(t *testing.T) {
 	nRows := nCols
 
 	// functions defined in vpir_test.go
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
+	xofDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
 
-	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MultiBitMatrixOneMbMerkle")
+	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MatrixOneMbMerkle")
 }
 
-func TestDPFMultiBitVectorMerkle(t *testing.T) {
+func TestDPFVectorMerkle(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
@@ -60,12 +61,12 @@ func TestDPFMultiBitVectorMerkle(t *testing.T) {
 	nRows := 1
 
 	// getXof is defined in vpir_test.go
-	xofDB := getXof(t, "db key")
-	xof := getXof(t, "client key")
+	xofDB := utils.RandomPRG()
+	xof := utils.RandomPRG()
 
-	db := database.CreateRandomMultiBitMerkle(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksDPFMerkle(t, xof, db, numBlocks, "DPFMultiBitVectorMerkle")
+	retrieveBlocksDPFMerkle(t, xof, db, numBlocks, "DPFVectorMerkle")
 }
 
 func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {

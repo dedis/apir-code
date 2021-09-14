@@ -207,7 +207,3 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.Cli
 	// verify result
 	require.Equal(t, count, res[0])
 }
-
-func getXof(t *testing.T, key string) io.Reader {
-	return utils.RandomPRG()
-}

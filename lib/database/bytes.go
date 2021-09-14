@@ -12,7 +12,7 @@ type Bytes struct {
 
 // CreateRandomMultiBitBytes return a random bytes database.
 // blockLen must be the number of bytes in a block, as a byte is the element
-func CreateZeroMultiBitBytes(numRows, numColumns, blockLen int) *Bytes {
+func CreateZeroBytes(numRows, numColumns, blockLen int) *Bytes {
 	// sample random entries
 	entries := make([]byte, numRows*numColumns*blockLen)
 
@@ -26,10 +26,10 @@ func CreateZeroMultiBitBytes(numRows, numColumns, blockLen int) *Bytes {
 	}
 }
 
-// InitMultiBitBytes return an empty database with a initial zero capacity, to
+// InitBytes return an empty database with a initial zero capacity, to
 // be used when embedding keys into a bytes database.
 // blockLen must be the number of bytes in a block, as a byte is the element
-func InitMultiBitBytes(numRows, numColumns, blockLen int) *Bytes {
+func InitBytes(numRows, numColumns, blockLen int) *Bytes {
 	// sample random entries
 	entries := make([]byte, 0)
 
@@ -44,9 +44,9 @@ func InitMultiBitBytes(numRows, numColumns, blockLen int) *Bytes {
 	}
 }
 
-// CreateRandomMultiBitBytes return a random bytes database.
+// CreateRandomBytes return a random bytes database.
 // blockLen must be the number of bytes in a block, as a byte is the element
-func CreateRandomMultiBitBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
+func CreateRandomBytes(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	// sample random entries
 	entries := make([]byte, dbLen/8)
 	if _, err := rnd.Read(entries); err != nil {
