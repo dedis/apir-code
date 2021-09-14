@@ -48,7 +48,7 @@ func main() {
 			log.Fatalf("failed to generate DB: %v", err)
 		}
 	case "parseDump":
-		err := parseSksDump()
+		err := parseSksDump(path, out)
 		if err != nil {
 			log.Fatalf("failed to parse SKS key dump: %v", err)
 		}
@@ -57,9 +57,9 @@ func main() {
 	}
 }
 
-func parseSksDump() error {
+func parseSksDump(path, out string) error {
 	var err error
-	fileList, err := pgp.GetSksOriginalDumpFiles(pgp.SksOriginalFolder)
+	fileList, err := pgp.GetSksOriginalDumpFiles(path)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func parseSksDump() error {
 	if err != nil {
 		return err
 	}
-	err = pgp.WriteKeysOnDisk(pgp.SksParsedFolder, m)
+	err = pgp.WriteKeysOnDisk(out, m)
 	if err != nil {
 		return err
 	}
