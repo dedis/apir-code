@@ -27,7 +27,6 @@ type KeyInfo struct {
 	UserId       *packet.UserId
 	CreationTime time.Time
 	PubKeyAlgo   packet.PublicKeyAlgorithm
-	BlockLength  int // length of data in blocks defined in number of elements
 }
 
 type Info struct {
@@ -108,14 +107,10 @@ func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		// For testing purposes, only random email and other fields empty strings
 		id := packet.NewUserId("", "", utils.Ranstring(16))
 
-		// in this case lengths are all equal, 2048 bits = 64 uint32 elements
-		bl := entryLength
-
 		keysInfo[i] = &KeyInfo{
 			UserId:       id,
 			CreationTime: ct,
 			PubKeyAlgo:   pka,
-			BlockLength:  bl,
 		}
 	}
 

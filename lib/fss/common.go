@@ -58,10 +58,6 @@ func getBit(n uint64, pos, N uint) byte {
 // fixed key PRF (Matyas–Meyer–Oseas one way compression function)
 // numBlocks represents the number
 func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
-	//// If request blocks greater than actual needed blocks, grow output array
-	//if numBlocks > initPRFLen {
-	//out = make([]byte, numBlocks*aes.BlockSize)
-	//}
 	for i := uint(0); i < numBlocks; i++ {
 		// get AES_k[i](x)
 		aesBlocks[i].Encrypt(temp, x)

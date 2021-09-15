@@ -42,7 +42,7 @@ func ClientInitialize(numBits uint, blockLength int) *Fss {
 	f.N = 256 // maximum number of bits supported by FSS
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
-	f.OutConvertBlock = make([]byte, (blockLength+1)*field.Bytes)
+	f.OutConvertBlock = make([]byte, blockLength*field.Bytes)
 
 	return f
 }

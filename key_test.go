@@ -20,10 +20,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestRetrieveRealKeysDPFVector tests the retrieval of real PGP keys using
-// the DPF-based multi-bit scheme. With DPF, the database is always represented
-// as a vector.
-
 func TestRealCountEmailMatch(t *testing.T) {
 	// math randomness used only for testing purposes
 	rand.Seed(time.Now().UnixNano())
@@ -35,11 +31,6 @@ func TestRealCountEmailMatch(t *testing.T) {
 	db, err := database.GenerateRealKeyDB(filePaths)
 	require.NoError(t, err)
 
-	//// read in the real pgp key values
-	//realKeys, err := pgp.LoadAndParseKeys(filePaths)
-	//require.NoError(t, err)
-	rand.Seed(time.Now().UnixNano())
-
 	match := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
 	in := utils.ByteToBits([]byte(match))
 	q := &query.ClientFSS{
@@ -47,8 +38,29 @@ func TestRealCountEmailMatch(t *testing.T) {
 		Input:  in,
 	}
 
+	retrieveKeysFSS(t, db, q, match, "TestRealCountEntireEmail")
+}
 
-	retrieveKeysFSS(t, db, q, match, "TestCountEntireEmail")
+func TestRealCountStartsWithEmail(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	// get file paths for key dump
+	filePaths := getDBFilePaths()
+
+	// generate db from sks key dump
+	db, err := database.GenerateRealKeyDB(filePaths)
+	require.NoError(t, err)
+
+	match := "bryan"
+	in := utils.ByteToBits([]byte(match))
+	q := &query.ClientFSS{
+		Target:    query.UserId,
+		FromStart: len(match),
+		Input:     in,
+	}
+
+	retrieveKeysFSS(t, db, q, match, "TestRealCountStartsWithEmail")
 }
 
 func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
@@ -62,14 +74,17 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	totalTimer := monitor.NewMonitor()
 
 	// compute the input of the query
-	fssKeys := c.Query(q, 2)
+	fssKeys, err := c.QueryBytes(q, 2)
+	require.NoError(t, err)
 
-	a0 := s0.Answer(fssKeys[0])
-	a1 := s1.Answer(fssKeys[1])
+	a0, err := s0.AnswerBytes(fssKeys[0])
+	require.NoError(t, err)
+	a1, err := s1.AnswerBytes(fssKeys[1])
+	require.NoError(t, err)
 
-	answers := [][]uint32{a0, a1}
+	answers := [][]byte{a0, a1}
 
-	res, err := c.Reconstruct(answers)
+	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 	// verify output
@@ -78,12 +93,19 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 		switch q.Target {
 		case query.UserId:
 			toMatch := ""
+			email := k.UserId.Email
 			if q.FromStart != 0 {
-				toMatch = k.UserId.Email[:q.FromStart]
+				if q.FromStart > len(email) {
+					continue
+				}
+				toMatch = email[:q.FromStart]
 			} else if q.FromEnd != 0 {
-				toMatch = k.UserId.Email[len(k.UserId.Email)-q.FromEnd:]
+				if q.FromEnd > len(email) {
+					continue
+				}
+				toMatch = email[len(email)-q.FromEnd:]
 			} else {
-				toMatch = k.UserId.Email
+				toMatch = email
 			}
 
 			if toMatch == match {
@@ -103,7 +125,7 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	}
 
 	// verify result
-	require.Equal(t, count, res[0])
+	require.Equal(t, count, res.([]uint32)[0])
 }
 
 func getDBFilePaths() []string {

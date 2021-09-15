@@ -28,21 +28,15 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		// TODO: avoid hardcoded 64
-		Fss: fss.ClientInitialize(64, info.BlockSize*field.ConcurrentExecutions), // TODO: solve +1 here, only for VPIR
+		// TODO: avoid hardcoded 64 and 2
+		Fss: fss.ClientInitialize(64, 2*field.ConcurrentExecutions),
 	}
 }
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-func (c *FSS) QueryBytes(in []byte, numServers int) ([][]byte, error) {
-	// decode the input query previously encoded as bytes
-	q, err := query.DecodeClientFSS(in)
-	if err != nil {
-		return nil, err
-	}
-
-	queries := c.Query(q, numServers)
+func (c *FSS) QueryBytes(inQuery *query.ClientFSS, numServers int) ([][]byte, error) {
+	queries := c.Query(inQuery, numServers)
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))

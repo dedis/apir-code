@@ -8,7 +8,6 @@ import (
 
 	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/pgp"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
 func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
@@ -34,27 +33,21 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 		return nil, err
 	}
 
-	maxBlockLen := 0
 	// iterate and embed keys
 	for i := 0; i < len(keys); i++ {
-		key := utils.ByteSliceToUint32Slice(keys[i].Packet)
-		db.Entries = append(db.Entries, key...)
+		// useless to store keys for FSS queries
+		//key := utils.ByteSliceToUint32Slice(keys[i].Packet)
+		//db.Entries = append(db.Entries, key...)
 
 		keyInfo, err := GetKeyInfoFromPacket(keys[i].Packet)
 		if err != nil {
 			log.Fatalf("error getting info from a key block: %v", err)
 		}
-		keyInfo.BlockLength = len(key)
-		db.KeysInfo = append(db.KeysInfo, keyInfo)
-		if keyInfo.BlockLength > maxBlockLen {
-			maxBlockLen = keyInfo.BlockLength
-		}
 
-		//TODO: For compatibility---remove later
-		db.Info.BlockLengths[i] = keyInfo.BlockLength
+		db.KeysInfo = append(db.KeysInfo, keyInfo)
 	}
 
-	db.Info.BlockSize = maxBlockLen
+	db.Info.BlockSize = 2
 
 	return db, nil
 }
@@ -219,7 +212,7 @@ func GetKeyInfoFromPacket(pkt []byte) (*KeyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	//the key ring is supposed to have only one Entity
+	// the key ring is supposed to have only one Entity
 	if len(el) != 1 {
 		return nil, errors.New("more than one openpgp entity in a key block")
 	}
@@ -228,17 +221,5 @@ func GetKeyInfoFromPacket(pkt []byte) (*KeyInfo, error) {
 		UserId:       el[0].PrimaryIdentity().UserId,
 		CreationTime: el[0].PrimaryKey.CreationTime,
 		PubKeyAlgo:   el[0].PrimaryKey.PubKeyAlgo,
-		BlockLength:  0,
 	}, nil
 }
-
-/*
-func IdToHash(id string) []byte {
-	hash := blake2b.Sum256([]byte(id))
-	// mod
-	idUint32 := binary.BigEndian.Uint32(hash[:constants.IdentifierLength]) % field.ModP
-	out := make([]byte, 4)
-	binary.BigEndian.PutUint32(out, idUint32)
-	return out
-}
-*/

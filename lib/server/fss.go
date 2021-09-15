@@ -31,7 +31,8 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		fss:       fss.ServerInitialize(prfKeys, 64, db.BlockSize*field.ConcurrentExecutions),
+		//fss:       fss.ServerInitialize(prfKeys, 64, db.BlockSize*field.ConcurrentExecutions),
+		fss: fss.ServerInitialize(prfKeys, 64, 2*field.ConcurrentExecutions),
 	}
 
 }
@@ -70,12 +71,19 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 		case query.UserId:
 			for i := 0; i < numIdentifiers; i++ {
 				var id []bool
+				email := s.db.KeysInfo[i].UserId.Email
 				if q.FromStart != 0 {
-					id = utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email[:q.FromStart]))
+					if q.FromStart > len(email) {
+						continue
+					}
+					id = utils.ByteToBits([]byte(email[:q.FromStart]))
 				} else if q.FromEnd != 0 {
-					id = utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email[len(s.db.KeysInfo[i].UserId.Email)-q.FromEnd:]))
+					if q.FromEnd > len(email) {
+						continue
+					}
+					id = utils.ByteToBits([]byte(email[len(email)-q.FromEnd:]))
 				} else {
-					id = utils.ByteToBits([]byte(s.db.KeysInfo[i].UserId.Email))
+					id = utils.ByteToBits([]byte(email))
 				}
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 				for i := range out {
