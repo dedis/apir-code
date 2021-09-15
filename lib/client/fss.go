@@ -13,6 +13,8 @@ import (
 	"github.com/si-co/vpir-code/lib/query"
 )
 
+const BlockLength = 2
+
 // FSS represent the client for the FSS-based single- and multi-bit schemes
 type FSS struct {
 	rnd    io.Reader
@@ -28,8 +30,8 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		// TODO: avoid hardcoded 64 and 2
-		Fss: fss.ClientInitialize(64, 2*field.ConcurrentExecutions),
+		// TODO: avoid hardcoded 64
+		Fss: fss.ClientInitialize(64, BlockLength*field.ConcurrentExecutions),
 	}
 }
 

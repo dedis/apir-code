@@ -24,11 +24,7 @@ func TestRealCountEmailMatch(t *testing.T) {
 	// math randomness used only for testing purposes
 	rand.Seed(time.Now().UnixNano())
 
-	// get file paths for key dump
-	filePaths := getDBFilePaths()
-
-	// generate db from sks key dump
-	db, err := database.GenerateRealKeyDB(filePaths)
+	db, err := getDB()
 	require.NoError(t, err)
 
 	match := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
@@ -45,11 +41,7 @@ func TestRealCountStartsWithEmail(t *testing.T) {
 	// math randomness used only for testing purposes
 	rand.Seed(time.Now().UnixNano())
 
-	// get file paths for key dump
-	filePaths := getDBFilePaths()
-
-	// generate db from sks key dump
-	db, err := database.GenerateRealKeyDB(filePaths)
+	db, err := getDB()
 	require.NoError(t, err)
 
 	match := "bryan"
@@ -63,6 +55,23 @@ func TestRealCountStartsWithEmail(t *testing.T) {
 	retrieveKeysFSS(t, db, q, match, "TestRealCountStartsWithEmail")
 }
 
+func TestRealCountEndsWithEmail(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	db, err := getDB()
+	require.NoError(t, err)
+
+	match := "com"
+	in := utils.ByteToBits([]byte(match))
+	q := &query.ClientFSS{
+		Target:  query.UserId,
+		FromEnd: len(match),
+		Input:   in,
+	}
+
+	retrieveKeysFSS(t, db, q, match, "TestRealCountEndsWithEmail")
+}
 func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
 	rnd := utils.RandomPRG()
 
@@ -126,6 +135,14 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 
 	// verify result
 	require.Equal(t, count, res.([]uint32)[0])
+}
+
+func getDB() (*database.DB, error) {
+	// get file paths for key dump
+	filePaths := getDBFilePaths()
+
+	// generate db from sks key dump
+	return database.GenerateRealKeyDB(filePaths)
 }
 
 func getDBFilePaths() []string {

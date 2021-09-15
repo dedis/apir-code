@@ -47,6 +47,7 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 		db.KeysInfo = append(db.KeysInfo, keyInfo)
 	}
 
+	// TODO: avoid constant here
 	db.Info.BlockSize = 2
 
 	return db, nil
