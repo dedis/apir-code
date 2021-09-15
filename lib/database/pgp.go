@@ -2,12 +2,15 @@ package database
 
 import (
 	"bytes"
+	"errors"
+	"github.com/nikirill/go-crypto/openpgp"
+	"log"
 	"sort"
 
 	"github.com/si-co/vpir-code/lib/pgp"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
-/*
 func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	log.Printf("Loading keys: %v\n", dataPaths)
 
@@ -25,51 +28,36 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	numColumns := len(keys) // one column per identifier
 
 	// create empty database
-	// TODO: here we set at zero the blockSize and we compute it later
 	info := NewInfo(numRows, numColumns, 0)
 	db, err := NewEmptyDB(info)
 	if err != nil {
 		return nil, err
 	}
 
+	maxBlockLen := 0
 	// iterate and embed keys
-	maxKeyLengthElements := 0
-	db.IdentifierLength = constants.IdentifierLength
 	for i := 0; i < len(keys); i++ {
-		// store id
-		db.Identifiers = append(db.Identifiers, IdToHash(keys[i].ID)...)
+		key := utils.ByteSliceToUint32Slice(keys[i].Packet)
+		db.Entries = append(db.Entries, key...)
 
-		v := PadBlock(keys[i].Packet, field.Bytes-1)
-
-		// embed 3 bytes at a time
-		elementSlice := make([]uint32, 0)
-		step := 3
-		for k := 0; k < len(v); k += step {
-			end := k + step
-			if end > len(v) {
-				end = len(v)
-			}
-
-			toEmbed := make([]byte, 4) // initialized at all zeros
-			copy(toEmbed[len(toEmbed)-len(v[k:end]):], v[k:end])
-
-			el := binary.BigEndian.Uint32(toEmbed)
-			elementSlice = append(elementSlice, el)
+		keyInfo, err := GetKeyInfoFromPacket(keys[i].Packet)
+		if err != nil {
+			log.Fatalf("error getting info from a key block: %v", err)
+		}
+		keyInfo.BlockLength = len(key)
+		db.KeysInfo = append(db.KeysInfo, keyInfo)
+		if keyInfo.BlockLength > maxBlockLen {
+			maxBlockLen = keyInfo.BlockLength
 		}
 
-		db.Entries = append(db.Entries, elementSlice...)
-		// block lengths are defined in number of elements
-		db.BlockLengths[i] = len(elementSlice)
-		if len(elementSlice) > maxKeyLengthElements {
-			maxKeyLengthElements = len(elementSlice)
-		}
+		//TODO: For compatibility---remove later
+		db.Info.BlockLengths[i] = keyInfo.BlockLength
 	}
 
-	db.Info.BlockSize = maxKeyLengthElements
+	db.Info.BlockSize = maxBlockLen
 
 	return db, nil
 }
-*/
 
 /*
 func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
@@ -221,6 +209,27 @@ func maxKeyLength(keys []*pgp.Key) int {
 	}
 
 	return max
+}
+
+// GetKeyInfoFromPacket parses packet bytes and returns information about the key
+func GetKeyInfoFromPacket(pkt []byte) (*KeyInfo, error) {
+	// parse the input bytes as a key ring
+	reader := bytes.NewReader(pkt)
+	el, err := openpgp.ReadKeyRing(reader)
+	if err != nil {
+		return nil, err
+	}
+	//the key ring is supposed to have only one Entity
+	if len(el) != 1 {
+		return nil, errors.New("more than one openpgp entity in a key block")
+	}
+
+	return &KeyInfo{
+		UserId:       el[0].PrimaryIdentity().UserId,
+		CreationTime: el[0].PrimaryKey.CreationTime,
+		PubKeyAlgo:   el[0].PrimaryKey.PubKeyAlgo,
+		BlockLength:  0,
+	}, nil
 }
 
 /*

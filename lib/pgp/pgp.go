@@ -132,6 +132,7 @@ func WriteKeysOnDisk(dir string, entities map[string]*openpgp.Entity) error {
 // matching the sks dump description
 func GetSksOriginalDumpFiles(dir string) ([]string, error) {
 	sksRgx := `sks-dump-[0-9]{4}\.pgp`
+	//sksRgx := `sks-dump-0000.pgp`
 	return GetFilesThatMatch(dir, sksRgx)
 }
 
@@ -298,24 +299,3 @@ func compileRegexToMatchEmail() *regexp.Regexp {
 	email := `([a-zA-Z0-9_+\.-]+)@([a-zA-Z0-9\.-]+)\.([a-zA-Z\.]{2,10})`
 	return regexp.MustCompile(`\<` + email + `\>`)
 }
-
-/*func marshalPublicKeys(primaryKeys map[string]*packet.PublicKey) map[string][]byte {
-	m := make(map[string][]byte)
-	for e, pk := range primaryKeys {
-		//  MarshalPKIXPublicKey converts a public key to PKIX, ASN.1
-		//  DER form. The encoded public key is a SubjectPublicKeyInfo
-		//  structure (see RFC 5280, Section 4.1).
-		// The following key types are currently supported: *rsa.PublicKey,
-		// *ecdsa.PublicKey and ed25519.PublicKey. Unsupported key types result in an
-		// error.
-		// TODO: find a way to marshal *dsa.PublicKey
-		b, err := x509.MarshalPKIXPublicKey(pk.PublicKey)
-		if err != nil {
-			fmt.Println("unsupported key", err)
-			continue
-		}
-		m[e] = b
-	}
-
-	return m
-}*/
