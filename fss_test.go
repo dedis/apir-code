@@ -200,7 +200,7 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q *query.Cl
 				count++
 			}
 		default:
-			panic("unknow query type")
+			panic("unknown query type")
 		}
 	}
 

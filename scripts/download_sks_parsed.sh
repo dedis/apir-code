@@ -4,5 +4,5 @@ BASE_FOLDER="data"
 SKS_FOLDER="sks-tmp"
 cd $BASE_FOLDER
 mkdir -p $SKS_FOLDER && cd $_
-wget --no-check-certificate "https://onedrive.live.com/download?cid=8A5265D3F8F8F076&resid=8A5265D3F8F8F076%212075&authkey=AA0wsCEdJaZs6X0"
+wget --no-check-certificate "https://1drv.ms/u/s!Anbw-PjTZVKKkBu-tGVJDIe0q_L4?e=7m83gq"
 unzip sks.zip

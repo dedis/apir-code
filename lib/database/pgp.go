@@ -3,10 +3,10 @@ package database
 import (
 	"bytes"
 	"errors"
-	"github.com/nikirill/go-crypto/openpgp"
 	"log"
 	"sort"
 
+	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
 )
