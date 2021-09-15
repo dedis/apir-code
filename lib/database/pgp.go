@@ -7,8 +7,12 @@ import (
 	"sort"
 
 	"github.com/nikirill/go-crypto/openpgp"
+	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/pgp"
+	"github.com/si-co/vpir-code/lib/utils"
 )
+
+const numKeysToDBLengthRatio float32 = 0.1
 
 func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	log.Printf("Loading keys: %v\n", dataPaths)
@@ -53,7 +57,6 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	return db, nil
 }
 
-/*
 func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	log.Printf("Bytes db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
 
@@ -75,7 +78,7 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 	blockLen := utils.MaxBytesLength(ht) + 1
 
 	// create all zeros db
-	db := InitMultiBitBytes(numRows, numColumns, blockLen)
+	db := InitBytes(numRows, numColumns, blockLen)
 
 	// order blocks because of map
 	blocks := make([][]byte, numRows*numColumns)
@@ -141,18 +144,14 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 			NumRows:      numRows,
 			NumColumns:   numColumns,
 			BlockLengths: blockLens,
-			// BlockSize here is simply to differentiate from the single-bit scheme,
-			// not used otherwise.
-			BlockSize: maxBlockLen,
-			PIRType:   "merkle",
-			Merkle:    &Merkle{Root: tree.Root(), ProofLen: proofLen},
+			PIRType:      "merkle",
+			Merkle:       &Merkle{Root: tree.Root(), ProofLen: proofLen},
 		},
 	}
 
 	return m, nil
 }
-*/
-/*
+
 func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 	// prepare db
 	db := make(map[int][]byte)
@@ -165,7 +164,6 @@ func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 
 	return db
 }
-*/
 
 // Simple ISO/IEC 7816-4 padding where 0x80 is appended to the block, then
 // zeros to make up to blockLen
