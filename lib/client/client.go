@@ -8,7 +8,6 @@ import (
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/lukechampine/fastxor"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/utils"
 )
@@ -76,6 +75,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 // reconstruct takes as input the answers from he servers, the info about the
 // database and the client state to return the reconstructed database entry.
 // The integrity check is performed in this function.
+/*
 func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32, error) {
 	sum := make([][]uint32, dbInfo.NumRows)
 
@@ -109,6 +109,7 @@ func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32
 	//return sum[st.ix][:len(sum[st.ix])-1], nil
 	return sum[0][:len(sum[0])-1], nil
 }
+*/
 
 // reconstructPIR returns the database entry for the classical PIR schemes.
 // These schemes are used as a baseline for the evaluation of the VPIR schemes.
