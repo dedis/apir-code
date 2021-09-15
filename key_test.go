@@ -38,8 +38,9 @@ func TestRealCountEmailMatch(t *testing.T) {
 	//// read in the real pgp key values
 	//realKeys, err := pgp.LoadAndParseKeys(filePaths)
 	//require.NoError(t, err)
+	rand.Seed(time.Now().UnixNano())
 
-	match := "arthurthompson@google.com"
+	match := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
 	in := utils.ByteToBits([]byte(match))
 	q := &query.ClientFSS{
 		Target: query.UserId,
