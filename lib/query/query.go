@@ -1,6 +1,11 @@
 package query
 
-import "github.com/si-co/vpir-code/lib/fss"
+import (
+	"bytes"
+	"encoding/gob"
+
+	"github.com/si-co/vpir-code/lib/fss"
+)
 
 type Target uint8
 
@@ -29,4 +34,24 @@ type FSS struct {
 
 	And     bool
 	Targets []Target
+}
+
+func (q *ClientFSS) Encode() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	enc := gob.NewEncoder(buf)
+	if err := enc.Encode(q); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func DecodeClientFSS(in []byte) (*ClientFSS, error) {
+	dec := gob.NewDecoder(bytes.NewBuffer(in))
+	var v *ClientFSS
+	err := dec.Decode(v)
+	if err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }

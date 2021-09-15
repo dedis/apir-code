@@ -35,16 +35,14 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-func (c *FSS) QueryBytes(inQuery []byte, numServers int) ([][]byte, error) {
+func (c *FSS) QueryBytes(in []byte, numServers int) ([][]byte, error) {
 	// decode the input query previously encoded as bytes
-	dec := gob.NewDecoder(bytes.NewBuffer(inQuery))
-	var v query.ClientFSS
-	err := dec.Decode(&v)
+	q, err := query.DecodeClientFSS(in)
 	if err != nil {
 		return nil, err
 	}
 
-	queries := c.Query(v, numServers)
+	queries := c.Query(q, numServers)
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
@@ -62,7 +60,7 @@ func (c *FSS) QueryBytes(inQuery []byte, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(q query.ClientFSS, numServers int) []*query.FSS {
+func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
 	}

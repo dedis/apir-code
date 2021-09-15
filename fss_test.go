@@ -39,7 +39,7 @@ func TestCountEntireEmail(t *testing.T) {
 	}
 
 	in := utils.ByteToBits([]byte(match))
-	q := query.ClientFSS{
+	q := &query.ClientFSS{
 		Target: query.UserId,
 		Input:  in,
 	}
@@ -59,7 +59,7 @@ func TestCountStartsWithEmail(t *testing.T) {
 	}
 
 	in := utils.ByteToBits([]byte(match))
-	q := query.ClientFSS{
+	q := &query.ClientFSS{
 		Target:    query.UserId,
 		FromStart: len(match),
 		Input:     in,
@@ -80,7 +80,7 @@ func TestCountEndsWithEmail(t *testing.T) {
 	}
 
 	in := utils.ByteToBits([]byte(match))
-	q := query.ClientFSS{
+	q := &query.ClientFSS{
 		Target:  query.UserId,
 		FromEnd: len(match),
 		Input:   in,
@@ -100,7 +100,7 @@ func TestCountPublicKeyAlgorithm(t *testing.T) {
 	}
 
 	in := utils.ByteToBits([]byte{byte(match)})
-	q := query.ClientFSS{
+	q := &query.ClientFSS{
 		Target: query.PubKeyAlgo,
 		Input:  in,
 	}
@@ -121,7 +121,7 @@ func TestCountCreationTime(t *testing.T) {
 	binaryMatch, err := match.MarshalBinary()
 	require.NoError(t, err)
 	in := utils.ByteToBits(binaryMatch)
-	q := query.ClientFSS{
+	q := &query.ClientFSS{
 		Target: query.CreationTime,
 		Input:  in,
 	}
@@ -145,7 +145,7 @@ func TestCountAndQuery(t *testing.T) {
 	require.NoError(t, err)
 	matchBytes = append(matchBytes, byte(match[1].(packet.PublicKeyAlgorithm)))
 	in := utils.ByteToBits(matchBytes)
-	q := query.ClientFSS{
+	q := &query.ClientFSS{
 		And:     true,
 		Targets: []query.Target{query.PubKeyAlgo, query.CreationTime},
 		Input:   in,
@@ -154,7 +154,7 @@ func TestCountAndQuery(t *testing.T) {
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCountAndQuery")
 }
 
-func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q query.ClientFSS, match interface{}, testName string) {
+func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
 	c := client.NewFSS(rnd, &db.Info)
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
