@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/monitor"
@@ -72,6 +73,24 @@ func TestRealCountEndsWithEmail(t *testing.T) {
 
 	retrieveKeysFSS(t, db, q, match, "TestRealCountEndsWithEmail")
 }
+
+func TestRealCountPublicKeyAlgorithm(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	db, err := getDB()
+	require.NoError(t, err)
+
+	match := packet.PubKeyAlgoRSA
+	in := utils.ByteToBits([]byte{byte(match)})
+	q := &query.ClientFSS{
+		Target: query.PubKeyAlgo,
+		Input:  in,
+	}
+
+	retrieveKeysFSS(t, db, q, match, "TestRealCountPublicKeyAlgorithm")
+}
+
 func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
 	rnd := utils.RandomPRG()
 
