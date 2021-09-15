@@ -13,11 +13,9 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-// Client represents the client instance in both the IT and DPF-based schemes.
+// Client represents the client instance in both the IT and FSS based schemes.
 type Client interface {
-	// TODO: modify interface to take []byte instead of index for the first
-	// parameter, so that we can encode more complex queries here
-	QueryBytes(int, int) ([][]byte, error)
+	QueryBytes([]byte, int) ([][]byte, error)
 	ReconstructBytes([][]byte) (interface{}, error)
 }
 
@@ -75,7 +73,7 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	return st, nil
 } */
 
-// reconstruct takes as input the answers fro mthe servers, the info about the
+// reconstruct takes as input the answers from he servers, the info about the
 // database and the client state to return the reconstructed database entry.
 // The integrity check is performed in this function.
 func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32, error) {

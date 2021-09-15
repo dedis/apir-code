@@ -10,7 +10,7 @@ type Bytes struct {
 	Info
 }
 
-// CreateRandomMultiBitBytes return a random bytes database.
+// CreateBitBytes return a random bytes database.
 // blockLen must be the number of bytes in a block, as a byte is the element
 func CreateZeroBytes(numRows, numColumns, blockLen int) *Bytes {
 	// sample random entries

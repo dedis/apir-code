@@ -1,6 +1,8 @@
 package client
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
 	"io"
 	"log"
@@ -33,13 +35,16 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-// TODO: this should be changed, how should we manage the new interface?
-// Should we add the query typo to the FSS client, or drop the idea of interface
-// since now we should have less schemes? To discuss
-/* func (c *FSS) QueryBytes(index, numServers int) ([][]byte, error) {
-	// TODO: fix this, here query.Type is hardcoded
-	// FIX THIS
-	queries := c.Query(index, []bool{false}, query.UserId, numServers)
+func (c *FSS) QueryBytes(inQuery []byte, numServers int) ([][]byte, error) {
+	// decode the input query previously encoded as bytes
+	dec := gob.NewDecoder(bytes.NewBuffer(inQuery))
+	var v query.ClientFSS
+	err := dec.Decode(&v)
+	if err != nil {
+		return nil, err
+	}
+
+	queries := c.Query(v, numServers)
 
 	// encode all the queries in bytes
 	out := make([][]byte, len(queries))
@@ -53,7 +58,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 	}
 
 	return out, nil
-} */
+}
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
