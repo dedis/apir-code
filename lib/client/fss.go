@@ -101,10 +101,11 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
 	// compute data
 	data := (answers[0][0] + answers[1][0]) % field.ModP
+	dataCasted := uint64(data)
 
 	// check tags
 	for i := 0; i < field.ConcurrentExecutions; i++ {
-		tmp := (uint64(data) * uint64(c.state.alphas[i])) % uint64(field.ModP)
+		tmp := (dataCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
 		tag := uint32(tmp)
 		reconstructedTag := (answers[0][i+1] + answers[1][i+1]) % field.ModP
 		if tag != reconstructedTag {
