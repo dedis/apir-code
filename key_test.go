@@ -116,7 +116,8 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 
 	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+	totalTime := totalTimer.Record()
+	fmt.Printf("TotalCPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
 	// verify output
 	count := uint32(0)
 	for _, k := range db.KeysInfo {
