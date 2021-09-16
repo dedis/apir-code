@@ -31,7 +31,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		dbInfo: info,
 		state:  nil,
 		// TODO: avoid hardcoded 64
-		Fss: fss.ClientInitialize(64, BlockLength*field.ConcurrentExecutions),
+		Fss: fss.ClientInitialize(64, 1+field.ConcurrentExecutions),
 	}
 }
 
@@ -41,17 +41,17 @@ func (c *FSS) QueryBytes(inQuery *query.ClientFSS, numServers int) ([][]byte, er
 	queries := c.Query(inQuery, numServers)
 
 	// encode all the queries in bytes
-	out := make([][]byte, len(queries))
+	data := make([][]byte, len(queries))
 	for i, q := range queries {
 		buf := new(bytes.Buffer)
 		enc := gob.NewEncoder(buf)
 		if err := enc.Encode(q); err != nil {
 			return nil, err
 		}
-		out[i] = buf.Bytes()
+		data[i] = buf.Bytes()
 	}
 
-	return out, nil
+	return data, nil
 }
 
 // Query takes as input the index of the entry to be retrieved and the number
@@ -67,11 +67,12 @@ func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 		panic("not yet implemented")
 	} else {
 		c.state.alphas = make([]uint32, field.ConcurrentExecutions)
-		c.state.a = make([]uint32, field.ConcurrentExecutions*2)
+		c.state.a = make([]uint32, field.ConcurrentExecutions+1)
+		c.state.a[0] = 1
 		for i := 0; i < field.ConcurrentExecutions; i++ {
 			c.state.alphas[i] = field.RandElementWithPRG(c.rnd)
-			// c.state.a contains [1, alpha_i] for i = 0, 1, 2, 3
-			copy(c.state.a[i*2:i*2+2], []uint32{1, c.state.alphas[i]})
+			// c.state.a contains [1, alpha_i] for i = 0, .., 3
+			c.state.a[i+1] = c.state.alphas[i]
 		}
 	}
 
@@ -98,18 +99,18 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 // Reconstruct takes as input the answers from the client and returns the
 // reconstructed entry after the appropriate integrity check.
 func (c *FSS) Reconstruct(answers [][]uint32) ([]uint32, error) {
-	// we keep only the last value of out: if all the answers accepts, then
-	// the out value is the same for all of them
-	out := uint32(0)
+	// compute data
+	data := (answers[0][0] + answers[1][0]) % field.ModP
+
+	// check tags
 	for i := 0; i < field.ConcurrentExecutions; i++ {
-		out = (answers[0][i*2] + answers[1][i*2]) % field.ModP
-		tmp := (uint64(out) * uint64(c.state.alphas[i])) % uint64(field.ModP)
+		tmp := (uint64(data) * uint64(c.state.alphas[i])) % uint64(field.ModP)
 		tag := uint32(tmp)
-		reconstructedTag := (answers[0][i*2+1] + answers[1][i*2+1]) % field.ModP
+		reconstructedTag := (answers[0][i+1] + answers[1][i+1]) % field.ModP
 		if tag != reconstructedTag {
 			return nil, errors.New("REJECT")
 		}
 	}
 
-	return []uint32{out}, nil
+	return []uint32{data}, nil
 }

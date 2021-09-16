@@ -26,7 +26,7 @@ type state struct {
 
 	// for multi-server
 	alphas []uint32 // four alphas to meet desired soundness
-	a      []uint32 // cointains the four [1, alpha_i] sub-vectors
+	a      []uint32 // cointains [1, alpha_i], i = 0, .., 3
 
 	// for single-server (DH)
 	r   group.Scalar

@@ -32,7 +32,7 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		fss:       fss.ServerInitialize(prfKeys, 64, 2*field.ConcurrentExecutions),
+		fss:       fss.ServerInitialize(prfKeys, 64, 1+field.ConcurrentExecutions),
 	}
 
 }
@@ -63,8 +63,8 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns
 
-	out := make([]uint32, s.db.BlockSize*field.ConcurrentExecutions)
-	tmp := make([]uint32, s.db.BlockSize*field.ConcurrentExecutions)
+	out := make([]uint32, 1+field.ConcurrentExecutions)
+	tmp := make([]uint32, 1+field.ConcurrentExecutions)
 
 	if !q.And {
 		switch q.Target {
