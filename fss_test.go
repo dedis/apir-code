@@ -17,6 +17,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/blake2b"
 )
 
 const (
@@ -38,7 +39,8 @@ func TestCountEntireEmail(t *testing.T) {
 		db.KeysInfo[i].UserId.Email = match
 	}
 
-	in := utils.ByteToBits([]byte(match))
+	h := blake2b.Sum256([]byte(match))
+	in := utils.ByteToBits(h[:16])
 	q := &query.ClientFSS{
 		Target: query.UserId,
 		Input:  in,
