@@ -19,6 +19,7 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/blake2b"
 )
 
 func TestRealCountEmailMatch(t *testing.T) {
@@ -29,7 +30,8 @@ func TestRealCountEmailMatch(t *testing.T) {
 	require.NoError(t, err)
 
 	match := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
-	in := utils.ByteToBits([]byte(match))
+	h := blake2b.Sum256([]byte(match))
+	in := utils.ByteToBits(h[:16])
 	q := &query.ClientFSS{
 		Target: query.UserId,
 		Input:  in,

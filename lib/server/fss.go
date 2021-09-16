@@ -10,6 +10,7 @@ import (
 	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/crypto/blake2b"
 )
 
 type FSS struct {
@@ -31,8 +32,7 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		//fss:       fss.ServerInitialize(prfKeys, 64, db.BlockSize*field.ConcurrentExecutions),
-		fss: fss.ServerInitialize(prfKeys, 64, 2*field.ConcurrentExecutions),
+		fss:       fss.ServerInitialize(prfKeys, 64, 2*field.ConcurrentExecutions),
 	}
 
 }
@@ -83,7 +83,8 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 					}
 					id = utils.ByteToBits([]byte(email[len(email)-q.FromEnd:]))
 				} else {
-					id = utils.ByteToBits([]byte(email))
+					h := blake2b.Sum256([]byte(email))
+					id = utils.ByteToBits(h[:16])
 				}
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 				for i := range out {
