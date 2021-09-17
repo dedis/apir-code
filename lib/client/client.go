@@ -72,45 +72,6 @@ func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*stat
 	return st, nil
 } */
 
-// reconstruct takes as input the answers from he servers, the info about the
-// database and the client state to return the reconstructed database entry.
-// The integrity check is performed in this function.
-/*
-func reconstruct(answers [][]uint32, dbInfo *database.Info, st *state) ([]uint32, error) {
-	sum := make([][]uint32, dbInfo.NumRows)
-
-	// mutli-bit scheme
-	// sum answers as vectors in F^(b+1)
-	for i := 0; i < dbInfo.NumRows; i++ {
-		sum[i] = make([]uint32, dbInfo.BlockSize+1)
-		for b := 0; b < dbInfo.BlockSize+1; b++ {
-			for k := range answers {
-				sum[i][b] = (sum[i][b] + answers[k][i*(dbInfo.BlockSize+1)+b]) % field.ModP
-			}
-		}
-	}
-
-	messages := make([]uint32, dbInfo.BlockSize)
-	for i := 0; i < dbInfo.NumRows; i++ {
-		copy(messages, sum[i][:len(sum[i])-1])
-		tag := sum[i][len(sum[i])-1]
-		// compute reconstructed tag
-		reconstructedTag := uint32(0)
-		for b := 0; b < len(messages); b++ {
-			p := (uint64(st.a[b+1]) * uint64(messages[b])) % uint64(field.ModP)
-			reconstructedTag = (reconstructedTag + uint32(p)) % field.ModP
-		}
-
-		if tag != reconstructedTag {
-			return nil, errors.New("REJECT")
-		}
-	}
-
-	//return sum[st.ix][:len(sum[st.ix])-1], nil
-	return sum[0][:len(sum[0])-1], nil
-}
-*/
-
 // reconstructPIR returns the database entry for the classical PIR schemes.
 // These schemes are used as a baseline for the evaluation of the VPIR schemes.
 func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]byte, error) {
