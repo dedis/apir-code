@@ -7,19 +7,20 @@ import (
 
 	"github.com/dimakogan/dpf-go/dpf"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/query"
 )
 
-// PIRdpf represent the client for the DPF-based multi-bit classical PIR scheme
-type PIRdpf struct {
+// PIRfss represent the client for the FSS-based complex-queries non-verifiable PIR
+type PIRfss struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
 }
 
-// NewPIRdpf returns a new client for the DPF-base multi-bit classical PIR
+// NewPIRfss returns a new client for the DPF-base multi-bit classical PIR
 // scheme
-func NewPIRdpf(rnd io.Reader, info *database.Info) *PIRdpf {
-	return &PIRdpf{
+func NewPIRfss(rnd io.Reader, info *database.Info) *PIRfss {
+	return &PIRfss{
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
@@ -28,21 +29,16 @@ func NewPIRdpf(rnd io.Reader, info *database.Info) *PIRdpf {
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-func (c *PIRdpf) QueryBytes(index, numServers int) ([][]byte, error) {
+func (c *PIRfss) QueryBytes(query []byte, numServers int) ([][]byte, error) {
 	queries := c.Query(index, numServers)
 	return [][]byte{[]byte(queries[0]), []byte(queries[1])}, nil
 }
 
 // Query outputs the queries, i.e. DPF keys, for index i. The DPF
 // implementation assumes two servers.
-func (c *PIRdpf) Query(index, numServers int) []dpf.DPFkey {
-	if invalidQueryInputsDPF(index, numServers) {
+func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []dpf.DPFkey {
+	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
-	}
-	// set the client state. The entries specific to VPIR are not used
-	c.state = &state{
-		ix: index / c.dbInfo.NumColumns,
-		iy: index % c.dbInfo.NumColumns,
 	}
 
 	// compute dpf keys
@@ -52,11 +48,11 @@ func (c *PIRdpf) Query(index, numServers int) []dpf.DPFkey {
 }
 
 // ReconstructBytes returns []byte
-func (c *PIRdpf) ReconstructBytes(a [][]byte) (interface{}, error) {
+func (c *PIRfss) ReconstructBytes(a [][]byte) (interface{}, error) {
 	return c.Reconstruct(a)
 }
 
 // Reconstruct reconstruct the entry of the database from answers
-func (c *PIRdpf) Reconstruct(answers [][]byte) ([]byte, error) {
+func (c *PIRfss) Reconstruct(answers [][]byte) ([]byte, error) {
 	return reconstructPIR(answers, c.dbInfo, c.state)
 }
