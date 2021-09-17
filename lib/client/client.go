@@ -46,32 +46,6 @@ func decodeAnswer(in [][]byte) ([][]uint32, error) {
 	return answer, nil
 }
 
-/* // generateClientState returns the client state with all the needed settings.
-func generateClientState(index int, rnd io.Reader, dbInfo *database.Info) (*state, error) {
-	// initialize state
-	st := &state{}
-
-	// sample random alpha
-	st.alpha = field.RandElementWithPRG(rnd)
-
-	// Compute the position in the db (vector or matrix)
-	// if db is a vector, ix always equals 0
-	st.ix = index / dbInfo.NumColumns
-	st.iy = index % dbInfo.NumColumns
-
-	// compute vector a = (1, alpha, alpha^2, ..., alpha^b) for the
-	// multi-bit scheme
-	// +1 to BlockSize for recovering true value
-	st.a = make([]uint32, dbInfo.BlockSize+1)
-	st.a[0] = 1
-	for i := 1; i < len(st.a); i++ {
-		a := (uint64(st.a[i-1]) * uint64(st.alpha)) % uint64(field.ModP)
-		st.a[i] = uint32(a)
-	}
-
-	return st, nil
-} */
-
 // reconstructPIR returns the database entry for the classical PIR schemes.
 // These schemes are used as a baseline for the evaluation of the VPIR schemes.
 func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]byte, error) {
