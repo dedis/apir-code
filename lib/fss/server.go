@@ -13,10 +13,9 @@ import (
 // Upon receiving query from client, initialize server with
 // this function. The server, unlike the client
 // receives prfKeys, so it doesn't need to pick random ones
-func ServerInitialize(prfKeys [][]byte, numBits uint, blockLength int) *Fss {
+func ServerInitialize(prfKeys [][]byte, blockLength int) *Fss {
 	f := new(Fss)
 	initPRFLen := len(prfKeys)
-	f.NumBits = numBits
 	f.PrfKeys = make([][]byte, initPRFLen)
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)
 	for i := range prfKeys {

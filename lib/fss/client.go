@@ -19,9 +19,8 @@ import (
 // have to send the prfKeys to the server and we avoid initialization of PRF
 // keys every time we invoke the client. We can use the expand key function to
 // and replicate the same behaviour as the init function in the other library
-func ClientInitialize(numBits uint, blockLength int) *Fss {
+func ClientInitialize(blockLength int) *Fss {
 	f := new(Fss)
-	f.NumBits = numBits
 	f.BlockLength = blockLength
 	initPRFLen := int(math.Ceil(float64(blockLength / field.Bytes)))
 	if initPRFLen < 4 {

@@ -32,7 +32,8 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		fss:       fss.ServerInitialize(prfKeys, 64, 1+field.ConcurrentExecutions),
+		// one value for the data, four values for the info-theoretic MAC
+		fss: fss.ServerInitialize(prfKeys, 1+field.ConcurrentExecutions),
 	}
 
 }

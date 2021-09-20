@@ -30,8 +30,8 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		// TODO: avoid hardcoded 64
-		Fss: fss.ClientInitialize(64, 1+field.ConcurrentExecutions),
+		// one value for the data, four values for the theoretic MAC
+		Fss: fss.ClientInitialize(1 + field.ConcurrentExecutions),
 	}
 }
 

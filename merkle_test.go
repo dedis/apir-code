@@ -19,23 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestVectorOneMbMerkle(t *testing.T) {
-	dbLen := oneMB // specified in bits
-	// blockLen is computed such that a block contains the same amount of
-	// bytes as in the integrated approach, which uses the finite filed in
-	// /lib/field.
-	blockLen := testBlockLength * field.Bytes
-	nRows := 1
-
-	// functions defined in vpir_test.go
-	xofDB := utils.RandomPRG()
-	xof := utils.RandomPRG()
-
-	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
-
-	retrieveBlocksITMerkle(t, xof, db, db.NumRows*db.NumColumns, "DPFVectorMerkle")
-}
-
 func TestMatrixOneMbMerkle(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
