@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 
-	"github.com/si-co/vpir-code/lib/fss"
+	"github.com/si-co/vpir-code/lib/authfss"
 )
 
 type Target uint8
@@ -29,7 +29,7 @@ type ClientFSS struct {
 type FSS struct {
 	Target             Target
 	FromStart, FromEnd int // start and end of the target
-	FssKey             fss.FssKeyEq2P
+	FssKey             authfss.FssKeyEq2P
 
 	And     bool
 	Targets []Target

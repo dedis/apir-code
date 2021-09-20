@@ -1,56 +1,57 @@
-package libfss
+package authfss
 
-// This file contains all the client code for the FSS scheme.
+// This file contains all the client code for the authenticated FSS scheme.
+// Source: https://github.com/frankw2/libfss/blob/master/go/libfss/client.go
 
 import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/binary"
-	//"fmt"
 	"math"
+
+	"github.com/si-co/vpir-code/lib/field"
 )
 
 // Initialize client with this function
 // numBits represents the input domain for the function, i.e. the number
 // of bits to check
-func ClientInitialize(numBits uint) *Fss {
+// TODO: initialize PRF keys as in Dima's init() function, so that we don't
+// have to send the prfKeys to the server and we avoid initialization of PRF
+// keys every time we invoke the client. We can use the expand key function to
+// and replicate the same behaviour as the init function in the other library
+func ClientInitialize(blockLength int) *Fss {
 	f := new(Fss)
-	f.NumBits = numBits
+	f.BlockLength = blockLength
+	initPRFLen := int(math.Ceil(float64(blockLength / field.Bytes)))
+	if initPRFLen < 4 {
+		initPRFLen = 4
+	}
 	f.PrfKeys = make([][]byte, initPRFLen)
 	// Create fixed AES blocks
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)
-	for i := uint(0); i < initPRFLen; i++ {
+	for i := uint(0); i < uint(initPRFLen); i++ {
 		f.PrfKeys[i] = make([]byte, aes.BlockSize)
 		rand.Read(f.PrfKeys[i])
-		//fmt.Println("client")
-		//fmt.Println(f.PrfKeys[i])
 		block, err := aes.NewCipher(f.PrfKeys[i])
 		if err != nil {
 			panic(err.Error())
 		}
 		f.FixedBlocks[i] = block
 	}
-	// Check if int is 32 or 64 bit
-	var x uint64 = 1 << 32
-	if uint(x) == 0 {
-		f.N = 32
-	} else {
-		f.N = 64
-	}
-	f.M = 4 // Default is 4. Only used in multiparty. To change this, you should change the size of the CW in multiparty keys. Read comments there.
+	f.N = 256 // maximum number of bits supported by FSS
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
+	f.OutConvertBlock = make([]byte, blockLength*field.Bytes)
+
 	return f
 }
 
-// This is based on the following paper:
-// Boyle, Elette, Niv Gilboa, and Yuval Ishai. "Function Secret Sharing: Improvements and Extensions." Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security. ACM, 2016.
+// Generate Keys for 2-party point functions It creates keys for a function
+// that evaluates to vector b when input x = a.
+func (f Fss) GenerateTreePF(a []bool, b []uint32) []FssKeyEq2P {
+	// reinitialize f.NumBits because we have different input lengths
+	f.NumBits = uint(len(a))
 
-// Generate Keys for 2-party point functions
-// It creates keys for a function that evaluates to b when input x = a.
-
-func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 	fssKeys := make([]FssKeyEq2P, 2)
 	// Set up initial values
 	tempRand1 := make([]byte, aes.BlockSize+1)
@@ -89,15 +90,17 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 		prfOut1 := make([]byte, aes.BlockSize*3)
 		copy(prfOut1, f.Out[:aes.BlockSize*3])
 
-		//fmt.Println(i, sCurr0)
-		//fmt.Println(i, sCurr1)
 		// Parse out "t" bits
 		t0Left := prfOut0[aes.BlockSize] % 2
 		t0Right := prfOut0[(aes.BlockSize*2)+1] % 2
 		t1Left := prfOut1[aes.BlockSize] % 2
 		t1Right := prfOut1[(aes.BlockSize*2)+1] % 2
 		// Find bit in a
-		aBit := getBit(a, (f.N - f.NumBits + i + 1), f.N)
+		// original: aBit := getBit(a, (f.N - f.NumBits + i + 1), f.N)
+		aBit := byte(0)
+		if a[i] {
+			aBit = byte(1)
+		}
 
 		// Figure out which half of expanded seeds to keep and lose
 		keep := rightStart
@@ -106,8 +109,7 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 			keep = leftStart
 			lose = rightStart
 		}
-		//fmt.Println("keep", keep)
-		//fmt.Println("aBit", aBit)
+
 		// Set correction words for both keys. Note: they are the same
 		for j := 0; j < aes.BlockSize; j++ {
 			fssKeys[0].CW[i][j] = prfOut0[lose+j] ^ prfOut1[lose+j]
@@ -122,8 +124,7 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 			sCurr0[j] = prfOut0[keep+j] ^ (tCurr0 * fssKeys[0].CW[i][j])
 			sCurr1[j] = prfOut1[keep+j] ^ (tCurr1 * fssKeys[0].CW[i][j])
 		}
-		//fmt.Println("sKeep0:", prfOut0[keep:keep+aes.BlockSize])
-		//fmt.Println("sKeep1:", prfOut1[keep:keep+aes.BlockSize])
+
 		tCWKeep := fssKeys[0].CW[i][aes.BlockSize]
 		if keep == rightStart {
 			tCWKeep = fssKeys[0].CW[i][aes.BlockSize+1]
@@ -131,22 +132,43 @@ func (f Fss) GenerateTreePF(a, b uint) []FssKeyEq2P {
 		tCurr0 = (prfOut0[keep+aes.BlockSize] % 2) ^ tCWKeep*tCurr0
 		tCurr1 = (prfOut1[keep+aes.BlockSize] % 2) ^ tCWKeep*tCurr1
 	}
-	// Convert final CW to integer
-	sFinal0, _ := binary.Varint(sCurr0[:8])
-	sFinal1, _ := binary.Varint(sCurr1[:8])
-	fssKeys[0].FinalCW = (int(b) - int(sFinal0) + int(sFinal1))
-	fssKeys[1].FinalCW = fssKeys[0].FinalCW
-	if tCurr1 == 1 {
-		fssKeys[0].FinalCW = fssKeys[0].FinalCW * -1
-		fssKeys[1].FinalCW = fssKeys[0].FinalCW
+
+	bLen := uint(len(b))
+
+	// convert blocks
+	tmp0 := make([]uint32, bLen)
+	tmp1 := make([]uint32, bLen)
+	convertBlock(f, sCurr0, tmp0)
+	convertBlock(f, sCurr1, tmp1)
+
+	fssKeys[0].FinalCW = make([]uint32, bLen)
+	fssKeys[1].FinalCW = make([]uint32, bLen)
+
+	for i := range fssKeys[0].FinalCW {
+		// Need to make sure that no intermediate
+		// results under or overflow the 32-bit modulus
+
+		//fssKeys[0].FinalCW[i] = (b[i] - tmp0[i] + tmp1[i]) % field.ModP
+		val := (b[i] + (field.ModP - tmp0[i])) % field.ModP
+		val = (val + tmp1[i]) % field.ModP
+		fssKeys[0].FinalCW[i] = val
+		fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
+		if tCurr1 == 1 {
+			fssKeys[0].FinalCW[i] = field.ModP - fssKeys[0].FinalCW[i] // negation
+			fssKeys[1].FinalCW[i] = fssKeys[0].FinalCW[i]
+		}
 	}
+
 	return fssKeys
 }
 
-// This function contains the 2-party FSS key generation for interval functions, i.e. <, > functions.
-// The usage is similar to 2-party FSS for equality functions.
+// This function contains the 2-party FSS key generation for interval
+// functions, i.e. <, > functions.  The usage is similar to 2-party FSS for
+// equality functions.
+// From: Boyle et al., Function Secret Sharing, EUROCRYPT'15, pag. 19
+func (f Fss) GenerateTreeLt(a uint64, b []uint32) []ServerKeyLt {
+	lenb := len(b)
 
-func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	k := make([]ServerKeyLt, 2)
 
 	k[0].cw = make([][]CWLt, 2)
@@ -165,8 +187,8 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 
 	k[0].t = make([]uint8, 2)
 	k[1].t = make([]uint8, 2)
-	k[0].v = make([]uint, 2)
-	k[1].v = make([]uint, 2)
+	k[0].v = make([][]uint32, 2)
+	k[1].v = make([][]uint32, 2)
 	// Figure out first bit
 	aBit := getBit(a, (f.N - f.NumBits + 1), f.N)
 	naBit := aBit ^ 1
@@ -184,8 +206,7 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	rand.Read(s0[naStart : naStart+aes.BlockSize])
 	// Ensure the "not a" bits are the same
 	copy(s1[naStart:naStart+aes.BlockSize], s0[naStart:naStart+aes.BlockSize])
-	//fmt.Println("s0:", s0)
-	//fmt.Println("s1:", s1)
+
 	// Set initial "t" bits
 	t0 := make([]uint8, 2)
 	t1 := make([]uint8, 2)
@@ -201,16 +222,25 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	t1[naBit] = t0[naBit]
 
 	// Generate random Vs
-	v0 := make([]uint, 2)
-	v1 := make([]uint, 2)
+	// NOTE: element of the output group, which for us is F^(1+b)
+	v0 := make([][]uint32, 2)
+	v1 := make([][]uint32, 2)
 
 	// make sure v0a + -v1a = 0
-	v0[aBit] = randomCryptoInt()
-	v1[aBit] = v0[aBit]
+	v0[aBit] = field.RandVector(lenb)
+	v1[aBit] = field.NegateVector(v0[aBit])
 
 	// make sure v0na + -v1na = a1 * b
-	v0[naBit] = randomCryptoInt()
-	v1[naBit] = v0[naBit] - b*uint(aBit)
+	// NOTE: b is the target input, denoted as g in the paper, in F^(1+b)
+	v0[naBit] = field.RandVector(lenb)
+	if aBit == 0 {
+		v1[naBit] = field.NegateVector((v0[naBit]))
+	} else {
+		for i := range v1[naBit] {
+			// v1[naBit][i] = v0[naBit][i] - b[i]
+			v1[naBit][i] = (v0[naBit][i] + (field.ModP - b[i])) % field.ModP
+		}
+	}
 
 	// Store generated values into the key
 	copy(k[0].s[0], s0[0:aes.BlockSize])
@@ -238,36 +268,35 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	ct0 := make([]uint8, 2)
 	ct1 := make([]uint8, 2)
 
-	var cv [][]uint
-	cv = make([][]uint, 2)
-	cv[0] = make([]uint, 2)
-	cv[1] = make([]uint, 2)
+	// TODO: elements of the group
+	var cv [][][]uint32
+	cv = make([][][]uint32, 2)
+	cv[0] = make([][]uint32, 2)
+	cv[1] = make([][]uint32, 2)
 
 	for i := uint(0); i < f.NumBits-1; i++ {
 		// Figure out next bit
 		aBit = getBit(a, (f.N - f.NumBits + i + 2), f.N)
 		naBit = aBit ^ 1
 
-		prf(key0, f.FixedBlocks, 4, f.Temp, f.Out)
-		copy(s0, f.Out[:aes.BlockSize*2])
-		t0[0] = f.Out[aes.BlockSize*2] % 2
-		t0[1] = f.Out[aes.BlockSize*2+1] % 2
-		conv, _ := binary.Uvarint(f.Out[aes.BlockSize*2+8 : aes.BlockSize*2+16])
-		v0[0] = uint(conv)
-		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+16 : aes.BlockSize*2+24])
-		v0[1] = uint(conv)
+		// TODO: check this until line 288
+		prf(key0, f.FixedBlocks, 3, f.Temp, f.Out)
+		copy(s0, f.Out[:aes.BlockSize*2])    // 2 blocks here
+		t0[0] = f.Out[aes.BlockSize*2] % 2   // one byte from third block
+		t0[1] = f.Out[aes.BlockSize*2+1] % 2 // one additional byte from third block
+		// TODO: here we are wasting 14 bytes from the third block
 
-		prf(key1, f.FixedBlocks, 4, f.Temp, f.Out)
+		convertBlock(f, s0, v0[0])
+		convertBlock(f, s0, v0[1])
+
+		prf(key1, f.FixedBlocks, 3, f.Temp, f.Out)
 		copy(s1, f.Out[:aes.BlockSize*2])
 		t1[0] = f.Out[aes.BlockSize*2] % 2
 		t1[1] = f.Out[aes.BlockSize*2+1] % 2
-		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+8 : aes.BlockSize*2+16])
-		v1[0] = uint(conv)
-		conv, _ = binary.Uvarint(f.Out[aes.BlockSize*2+16 : aes.BlockSize*2+24])
-		v1[1] = uint(conv)
 
-		//fmt.Println("s0:", s0)
-		//fmt.Println("s1:", s1)
+		convertBlock(f, s1, v1[0])
+		convertBlock(f, s1, v1[1])
+
 		// Redefine aStart and naStart based on new a's
 		aStart = int(aes.BlockSize * aBit)
 		naStart = int(aes.BlockSize * naBit)
@@ -295,11 +324,28 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 		ct0[naBit] = uint8(temp[1]) % 2
 		ct1[naBit] = ct0[naBit] ^ t0[naBit] ^ t1[naBit]
 
-		cv[tbit0][aBit] = randomCryptoInt()
-		cv[tbit1][aBit] = v0[aBit] + cv[tbit0][aBit] - v1[aBit]
+		// NOTE: cv are group element
+		cv[tbit0][aBit] = field.RandVector(lenb)
+		cv[tbit1][aBit] = make([]uint32, lenb)
+		for i := range cv[tbit0][aBit] {
+			//cv[tbit1][aBit][i] = (v0[aBit][i] + cv[tbit0][aBit][i] - v1[aBit][i]) % field.ModP
+			val := (v0[aBit][i] + cv[tbit0][aBit][i]) % field.ModP
+			val = (val + (field.ModP - v1[aBit][i])) % field.ModP
+			cv[tbit1][aBit][i] = val
+		}
 
-		cv[tbit0][naBit] = randomCryptoInt()
-		cv[tbit1][naBit] = cv[tbit0][naBit] + v0[naBit] - v1[naBit] - b*uint(aBit)
+		cv[tbit0][naBit] = field.RandVector(lenb)
+		cv[tbit1][naBit] = make([]uint32, lenb)
+		for i := range cv[tbit0][naBit] {
+			//cv[tbit1][naBit][i] = (cv[tbit0][naBit][i] +
+			//v0[naBit][i] -
+			//v1[naBit][i] -
+			//b[i]*uint32(aBit)) % field.ModP
+			val := (cv[tbit0][naBit][i] + v0[naBit][i]) % field.ModP
+			val = (val + (field.ModP - v1[naBit][i])) % field.ModP
+			val = (val + (field.ModP - b[i]*uint32(aBit))) % field.ModP
+			cv[tbit1][naBit][i] = val
+		}
 
 		k[0].cw[0][i].cs = make([][]byte, 2)
 		k[0].cw[0][i].cs[0] = make([]byte, aes.BlockSize)
@@ -309,9 +355,9 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 		k[0].cw[1][i].cs[1] = make([]byte, aes.BlockSize)
 
 		k[0].cw[0][i].ct = make([]uint8, 2)
-		k[0].cw[0][i].cv = make([]uint, 2)
+		k[0].cw[0][i].cv = make([][]uint32, 2) // NOTE: group element
 		k[0].cw[1][i].ct = make([]uint8, 2)
-		k[0].cw[1][i].cv = make([]uint, 2)
+		k[0].cw[1][i].cv = make([][]uint32, 2) // NOTE: group element
 
 		copy(k[0].cw[0][i].cs[0], cs0[0:aes.BlockSize])
 		copy(k[0].cw[0][i].cs[1], cs0[aes.BlockSize:aes.BlockSize*2])
@@ -335,9 +381,9 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 		k[1].cw[1][i].cs[1] = make([]byte, aes.BlockSize)
 
 		k[1].cw[0][i].ct = make([]uint8, 2)
-		k[1].cw[0][i].cv = make([]uint, 2)
+		k[1].cw[0][i].cv = make([][]uint32, 2)
 		k[1].cw[1][i].ct = make([]uint8, 2)
-		k[1].cw[1][i].cv = make([]uint, 2)
+		k[1].cw[1][i].cv = make([][]uint32, 2)
 
 		copy(k[1].cw[0][i].cs[0], cs0[0:aes.BlockSize])
 		copy(k[1].cw[0][i].cs[1], cs0[aes.BlockSize:aes.BlockSize*2])
@@ -384,121 +430,4 @@ func (f Fss) GenerateTreeLt(a, b uint) []ServerKeyLt {
 	}
 
 	return k
-}
-
-// This function is for multi-party (3 or more parties) FSS
-// for equality functions
-// The API interface is similar to the 2 party version.
-// One main difference is the output of the evaluation function
-// is XOR homomorphic, so for additive queries like SUM and COUNT,
-// the client has to add it locally.
-
-func (f Fss) GenerateTreeEqMP(a, b, num_p uint) []FssKeyEqMP {
-	keys := make([]FssKeyEqMP, num_p)
-	p2 := uint(math.Pow(2, float64(num_p-1)))
-	mu := uint(math.Ceil(math.Pow(2, float64(f.NumBits)/2) * math.Pow(2, float64(num_p-1)/2.0)))
-	v := uint(math.Ceil(math.Pow(2, float64(f.NumBits)) / float64(mu)))
-
-	delta := a & ((1 << (f.NumBits / 2)) - 1)
-	gamma := (a & (((1 << (f.NumBits + 1) / 2) - 1) << f.NumBits / 2)) >> f.NumBits / 2
-	aArr := make([][][]byte, v)
-	for i := uint(0); i < v; i++ {
-		aArr[i] = make([][]byte, num_p)
-		for j := uint(0); j < num_p; j++ {
-			aArr[i][j] = make([]byte, p2)
-		}
-	}
-	for i := uint(0); i < v; i++ {
-		for j := uint(0); j < num_p; j++ {
-			if j != (num_p - 1) {
-				rand.Read(aArr[i][j])
-				for k := uint(0); k < p2; k++ {
-					aArr[i][j][k] = aArr[i][j][k] % 2
-				}
-			} else {
-				for k := uint(0); k < p2; k++ {
-					curr_bits := uint(0)
-					for l := uint(0); l < num_p-1; l++ {
-						curr_bits += uint(aArr[i][l][k])
-					}
-					curr_bits = curr_bits % 2
-					if i != gamma {
-						if curr_bits == 0 {
-							aArr[i][j][k] = 0
-						} else {
-							aArr[i][j][k] = 1
-						}
-					} else {
-						if curr_bits == 0 {
-							aArr[i][j][k] = 1
-						} else {
-							aArr[i][j][k] = 0
-						}
-					}
-				}
-			}
-		}
-	}
-
-	s := make([][][]byte, v)
-	for i := uint(0); i < v; i++ {
-		s[i] = make([][]byte, p2)
-		for j := uint(0); j < p2; j++ {
-			s[i][j] = make([]byte, aes.BlockSize)
-			rand.Read(s[i][j])
-		}
-	}
-
-	cw := make([][]uint32, p2)
-	cw_temp := make([]uint32, mu)
-	cw_helper := make([]byte, f.M*mu)
-	numBlocks := uint(math.Ceil(float64(f.M*mu) / float64(aes.BlockSize)))
-	// Create correction words
-	for i := uint(0); i < p2; i++ {
-		prf(s[gamma][i], f.FixedBlocks, numBlocks, f.Temp, f.Out)
-		for k := uint(0); k < mu; k++ {
-			tempInt := binary.LittleEndian.Uint32(f.Out[f.M*k : f.M*k+f.M])
-			cw_temp[k] = cw_temp[k] ^ tempInt
-		}
-		cw[i] = make([]uint32, mu)
-		// The last CW has to fulfill a certain condition, so we deal with it separately
-		if i == (p2 - 1) {
-			break
-		}
-		rand.Read(cw_helper)
-		for j := uint(0); j < mu; j++ {
-			cw[i][j] = binary.LittleEndian.Uint32(cw_helper[f.M*j : f.M*j+f.M])
-			cw_temp[j] = cw_temp[j] ^ cw[i][j]
-		}
-	}
-
-	for i := uint(0); i < mu; i++ {
-		if i == delta {
-			cw[p2-1][i] = uint32(b) ^ cw_temp[i]
-		} else {
-			cw[p2-1][i] = cw_temp[i]
-		}
-	}
-
-	sigma := make([][][]byte, num_p)
-	for i := uint(0); i < num_p; i++ {
-		// set number of parties in keys
-		sigma[i] = make([][]byte, v)
-		for j := uint(0); j < v; j++ {
-			sigma[i][j] = make([]byte, aes.BlockSize*p2)
-			for k := uint(0); k < p2; k++ {
-				// if aArr[j][i][k] == 0, sigma[i][j] should be 0
-				if aArr[j][i][k] != 0 {
-					copy(sigma[i][j][k*aes.BlockSize:k*aes.BlockSize+aes.BlockSize], s[j][k])
-				}
-			}
-		}
-	}
-
-	for i := uint(0); i < num_p; i++ {
-		keys[i].Sigma = sigma[i]
-		keys[i].CW = cw
-		keys[i].NumParties = num_p
-	}
-	return keys
 }

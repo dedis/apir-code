@@ -5,9 +5,9 @@ import (
 	"encoding/gob"
 	"runtime"
 
+	"github.com/si-co/vpir-code/lib/authfss"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
@@ -18,7 +18,7 @@ type FSS struct {
 	cores int
 
 	serverNum byte
-	fss       *fss.Fss
+	fss       *authfss.Fss
 }
 
 // use variadic argument for cores to achieve backward compatibility
@@ -33,7 +33,7 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		cores:     numCores,
 		serverNum: serverNum,
 		// one value for the data, four values for the info-theoretic MAC
-		fss: fss.ServerInitialize(prfKeys, 1+field.ConcurrentExecutions),
+		fss: authfss.ServerInitialize(prfKeys, 1+field.ConcurrentExecutions),
 	}
 
 }
