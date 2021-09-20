@@ -1,6 +1,8 @@
 package client
 
 import (
+	"bytes"
+	"encoding/gob"
 	"io"
 	"log"
 	"math/bits"
@@ -29,9 +31,26 @@ func NewPIRfss(rnd io.Reader, info *database.Info) *PIRfss {
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-func (c *PIRfss) QueryBytes(query []byte, numServers int) ([][]byte, error) {
-	queries := c.Query(index, numServers)
-	return [][]byte{[]byte(queries[0]), []byte(queries[1])}, nil
+func (c *PIRfss) QueryBytes(in []byte, numServers int) ([][]byte, error) {
+	inQuery, err := query.DecodeClientFSS(in)
+	if err != nil {
+		return nil, err
+	}
+
+	queries := c.Query(inQuery, numServers)
+
+	// encode all the queries in bytes
+	data := make([][]byte, len(queries))
+	for i, q := range queries {
+		buf := new(bytes.Buffer)
+		enc := gob.NewEncoder(buf)
+		if err := enc.Encode(q); err != nil {
+			return nil, err
+		}
+		data[i] = buf.Bytes()
+	}
+
+	return data, nil
 }
 
 // Query outputs the queries, i.e. DPF keys, for index i. The DPF

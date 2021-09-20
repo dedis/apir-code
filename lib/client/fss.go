@@ -37,7 +37,12 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-func (c *FSS) QueryBytes(inQuery *query.ClientFSS, numServers int) ([][]byte, error) {
+func (c *FSS) QueryBytes(in []byte, numServers int) ([][]byte, error) {
+	inQuery, err := query.DecodeClientFSS(in)
+	if err != nil {
+		return nil, err
+	}
+
 	queries := c.Query(inQuery, numServers)
 
 	// encode all the queries in bytes
@@ -60,20 +65,16 @@ func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
 	}
-	// initialize empty client state
+
+	// set client state
 	c.state = &state{}
-	// crete state for retrieving a single key, i.e. exact match
-	if q.Target == query.Key {
-		panic("not yet implemented")
-	} else {
-		c.state.alphas = make([]uint32, field.ConcurrentExecutions)
-		c.state.a = make([]uint32, field.ConcurrentExecutions+1)
-		c.state.a[0] = 1
-		for i := 0; i < field.ConcurrentExecutions; i++ {
-			c.state.alphas[i] = field.RandElementWithPRG(c.rnd)
-			// c.state.a contains [1, alpha_i] for i = 0, .., 3
-			c.state.a[i+1] = c.state.alphas[i]
-		}
+	c.state.alphas = make([]uint32, field.ConcurrentExecutions)
+	c.state.a = make([]uint32, field.ConcurrentExecutions+1)
+	c.state.a[0] = 1
+	for i := 0; i < field.ConcurrentExecutions; i++ {
+		c.state.alphas[i] = field.RandElementWithPRG(c.rnd)
+		// c.state.a contains [1, alpha_i] for i = 0, .., 3
+		c.state.a[i+1] = c.state.alphas[i]
 	}
 
 	// client initialization is the same for both single- and multi-bit scheme

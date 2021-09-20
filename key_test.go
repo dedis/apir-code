@@ -104,7 +104,9 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	totalTimer := monitor.NewMonitor()
 
 	// compute the input of the query
-	fssKeys, err := c.QueryBytes(q, 2)
+	in, err := q.Encode()
+	require.NoError(t, err)
+	fssKeys, err := c.QueryBytes(in, 2)
 	require.NoError(t, err)
 
 	a0, err := s0.AnswerBytes(fssKeys[0])

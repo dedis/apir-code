@@ -13,7 +13,6 @@ const (
 	UserId Target = iota
 	CreationTime
 	PubKeyAlgo
-	Key
 )
 
 // TODO: refactor into a single type FSS and then differenciate in Input and FssKey?

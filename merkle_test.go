@@ -4,6 +4,7 @@ package main
 // implemented using this approach.
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 	"math"
@@ -53,22 +54,6 @@ func TestMatrixOneMbMerkle(t *testing.T) {
 	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MatrixOneMbMerkle")
 }
 
-func TestDPFVectorMerkle(t *testing.T) {
-	dbLen := oneMB
-	blockLen := testBlockLength * field.Bytes
-	elemBitSize := 8
-	numBlocks := dbLen / (elemBitSize * blockLen)
-	nRows := 1
-
-	// getXof is defined in vpir_test.go
-	xofDB := utils.RandomPRG()
-	xof := utils.RandomPRG()
-
-	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
-
-	retrieveBlocksDPFMerkle(t, xof, db, numBlocks, "DPFVectorMerkle")
-}
-
 func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
 	c := client.NewPIR(rnd, &db.Info)
 	s0 := server.NewPIR(db)
@@ -76,37 +61,14 @@ func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, num
 
 	totalTimer := monitor.NewMonitor()
 	for i := 0; i < numBlocks; i++ {
-		queries, err := c.QueryBytes(i, 2)
+		in := make([]byte, 4)
+		binary.BigEndian.PutUint32(in, uint32(i))
+		queries, err := c.QueryBytes(in, 2)
 		require.NoError(t, err)
 
 		a0, err := s0.AnswerBytes(queries[0])
 		require.NoError(t, err)
 		a1, err := s1.AnswerBytes(queries[1])
-		require.NoError(t, err)
-
-		answers := [][]byte{a0, a1}
-
-		res, err := c.ReconstructBytes(answers)
-		require.NoError(t, err)
-		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize-db.ProofLen-1], res)
-	}
-
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
-}
-
-func retrieveBlocksDPFMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
-	c := client.NewPIRdpf(rnd, &db.Info)
-	s0 := server.NewPIRdpf(db)
-	s1 := server.NewPIRdpf(db)
-
-	totalTimer := monitor.NewMonitor()
-	for i := 0; i < numBlocks; i++ {
-		fssKeys, err := c.QueryBytes(i, 2)
-		require.NoError(t, err)
-
-		a0, err := s0.AnswerBytes(fssKeys[0])
-		require.NoError(t, err)
-		a1, err := s1.AnswerBytes(fssKeys[1])
 		require.NoError(t, err)
 
 		answers := [][]byte{a0, a1}

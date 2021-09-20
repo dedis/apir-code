@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/binary"
 	"io"
 	"log"
 
@@ -31,7 +32,8 @@ func NewPIR(rnd io.Reader, info *database.Info) *PIR {
 }
 
 // QueryBytes is wrapper around Query to implement the Client interface
-func (c *PIR) QueryBytes(index, numServers int) ([][]byte, error) {
+func (c *PIR) QueryBytes(in []byte, numServers int) ([][]byte, error) {
+	index := int(binary.BigEndian.Uint32(in))
 	return c.Query(index, numServers), nil
 }
 
