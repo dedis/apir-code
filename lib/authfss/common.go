@@ -69,5 +69,5 @@ func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 func convertBlock(f Fss, x []byte, out []uint32) {
 	// we can generate four uint32 numbers with a 16-bytes AES block
 	prf(x, f.FixedBlocks, uint(len(out)/4), f.Temp, f.OutConvertBlock)
-	field.ByteSliceToFieldElementSlice(out, f.OutConvertBlock)
+	field.BytesToElements(out, f.OutConvertBlock)
 }
