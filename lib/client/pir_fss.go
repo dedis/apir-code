@@ -5,10 +5,9 @@ import (
 	"encoding/gob"
 	"io"
 	"log"
-	"math/bits"
 
-	"github.com/dimakogan/dpf-go/dpf"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 )
 
@@ -17,6 +16,8 @@ type PIRfss struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
+
+	Fss *fss.Fss
 }
 
 // NewPIRfss returns a new client for the DPF-base multi-bit classical PIR
@@ -26,6 +27,7 @@ func NewPIRfss(rnd io.Reader, info *database.Info) *PIRfss {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
+		Fss:    fss.ClientInitialize(),
 	}
 }
 
@@ -55,23 +57,25 @@ func (c *PIRfss) QueryBytes(in []byte, numServers int) ([][]byte, error) {
 
 // Query outputs the queries, i.e. DPF keys, for index i. The DPF
 // implementation assumes two servers.
-func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []dpf.DPFkey {
+func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
 	}
 
-	// compute dpf keys
-	key0, key1 := dpf.Gen(uint64(c.state.iy), uint64(bits.Len(uint(c.dbInfo.NumColumns)-1)))
+	fssKeys := c.Fss.GenerateTreePF(q.Input)
 
-	return []dpf.DPFkey{key0, key1}
+	return []*query.FSS{
+		{Target: q.Target, FromStart: q.FromStart, FromEnd: q.FromEnd, FssKey: fssKeys[0]},
+		{Target: q.Target, FromStart: q.FromStart, FromEnd: q.FromEnd, FssKey: fssKeys[1]},
+	}
 }
 
 // ReconstructBytes returns []byte
-func (c *PIRfss) ReconstructBytes(a [][]byte) (interface{}, error) {
-	return c.Reconstruct(a)
-}
+// func (c *PIRfss) ReconstructBytes(a [][]byte) (interface{}, error) {
+// 	return c.Reconstruct(a)
+// }
 
 // Reconstruct reconstruct the entry of the database from answers
-func (c *PIRfss) Reconstruct(answers [][]byte) ([]byte, error) {
-	return reconstructPIR(answers, c.dbInfo, c.state)
+func (c *PIRfss) Reconstruct(answers []int) (int, error) {
+	return answers[0] + answers[1], nil
 }
