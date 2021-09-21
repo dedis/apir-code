@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMatrixOneMbPIR(t *testing.T) {
+func TestPIRPointOneMb(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
@@ -32,10 +32,10 @@ func TestMatrixOneMbPIR(t *testing.T) {
 
 	db := database.CreateRandomBytes(xofDB, dbLen, nRows, blockLen)
 
-	retrieveBlocksBytes(t, xof, db, numBlocks, "MatrixOneMbPIR")
+	retrievePoint(t, xof, db, numBlocks, "PIRPointOneMb")
 }
 
-func retrieveBlocksBytes(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
+func retrievePoint(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
 	c := client.NewPIR(rnd, &db.Info)
 	s0 := server.NewPIR(db)
 	s1 := server.NewPIR(db)
