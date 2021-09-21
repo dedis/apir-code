@@ -10,7 +10,6 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
-	"golang.org/x/crypto/blake2b"
 )
 
 type FSS struct {
@@ -71,21 +70,10 @@ func (s *FSS) Answer(q *query.AuthFSS) []uint32 {
 		switch q.Target {
 		case query.UserId:
 			for i := 0; i < numIdentifiers; i++ {
-				var id []bool
 				email := s.db.KeysInfo[i].UserId.Email
-				if q.FromStart != 0 {
-					if q.FromStart > len(email) {
-						continue
-					}
-					id = utils.ByteToBits([]byte(email[:q.FromStart]))
-				} else if q.FromEnd != 0 {
-					if q.FromEnd > len(email) {
-						continue
-					}
-					id = utils.ByteToBits([]byte(email[len(email)-q.FromEnd:]))
-				} else {
-					h := blake2b.Sum256([]byte(email))
-					id = utils.ByteToBits(h[:16])
+				id, valid := q.IdForEmail(email)
+				if !valid {
+					continue
 				}
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 				for i := range out {
@@ -95,7 +83,7 @@ func (s *FSS) Answer(q *query.AuthFSS) []uint32 {
 			return out
 		case query.PubKeyAlgo:
 			for i := 0; i < numIdentifiers; i++ {
-				id := utils.ByteToBits([]byte{uint8(s.db.KeysInfo[i].PubKeyAlgo)})
+				id := q.IdForPubKeyAlgo(s.db.KeysInfo[i].PubKeyAlgo)
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 				for i := range out {
 					out[i] = (out[i] + tmp[i]) % field.ModP
@@ -104,11 +92,11 @@ func (s *FSS) Answer(q *query.AuthFSS) []uint32 {
 			return out
 		case query.CreationTime:
 			for i := 0; i < numIdentifiers; i++ {
-				binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
+				id, err := q.IdForCreationTime(s.db.KeysInfo[i].CreationTime)
 				if err != nil {
 					panic("impossible to marshal creation date")
+
 				}
-				id := utils.ByteToBits(binaryMatch)
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 				for i := range out {
 					out[i] = (out[i] + tmp[i]) % field.ModP
@@ -134,5 +122,4 @@ func (s *FSS) Answer(q *query.AuthFSS) []uint32 {
 		return out
 
 	}
-
 }

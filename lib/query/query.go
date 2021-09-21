@@ -3,9 +3,13 @@ package query
 import (
 	"bytes"
 	"encoding/gob"
+	"time"
 
+	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/authfss"
 	"github.com/si-co/vpir-code/lib/fss"
+	"github.com/si-co/vpir-code/lib/utils"
+	"golang.org/x/crypto/blake2b"
 )
 
 type Target uint8
@@ -28,18 +32,18 @@ type ClientFSS struct {
 }
 
 type AuthFSS struct {
-	Target             Target
-	FromStart, FromEnd int // start and end of the target
-	FssKey             authfss.FssKeyEq2P
-
-	And     bool
-	Targets []Target
+	AdditionalInformationFSS
+	FssKey authfss.FssKeyEq2P
 }
 
 type FSS struct {
+	AdditionalInformationFSS
+	FssKey fss.FssKeyEq2P
+}
+
+type AdditionalInformationFSS struct {
 	Target             Target
 	FromStart, FromEnd int // start and end of the target
-	FssKey             fss.FssKeyEq2P
 
 	And     bool
 	Targets []Target
@@ -63,4 +67,36 @@ func DecodeClientFSS(in []byte) (*ClientFSS, error) {
 	}
 
 	return v, nil
+}
+
+func (q AuthFSS) IdForEmail(email string) ([]bool, bool) {
+	var id []bool
+	if q.FromStart != 0 {
+		if q.FromStart > len(email) {
+			return nil, false
+		}
+		id = utils.ByteToBits([]byte(email[:q.FromStart]))
+	} else if q.FromEnd != 0 {
+		if q.FromEnd > len(email) {
+			return nil, false
+		}
+		id = utils.ByteToBits([]byte(email[len(email)-q.FromEnd:]))
+	} else {
+		h := blake2b.Sum256([]byte(email))
+		id = utils.ByteToBits(h[:16])
+	}
+
+	return id, true
+}
+
+func (q AuthFSS) IdForPubKeyAlgo(pka packet.PublicKeyAlgorithm) []bool {
+	return utils.ByteToBits([]byte{uint8(pka)})
+}
+
+func (q AuthFSS) IdForCreationTime(t time.Time) ([]bool, error) {
+	binaryMatch, err := t.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	return utils.ByteToBits(binaryMatch), nil
 }
