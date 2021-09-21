@@ -2,10 +2,8 @@ package field
 
 import (
 	"encoding/binary"
-	"io"
-	"unsafe"
-
 	"github.com/si-co/vpir-code/lib/utils"
+	"io"
 )
 
 const (
@@ -24,10 +22,30 @@ func NegateVector(in []uint32) []uint32 {
 	return in
 }
 
+// Element converts input bytes into a field toElement.
+// It sources a new random byte string in the rare case
+// when the input bytes convert to ModP
+func toElement(in []byte) uint32 {
+	// Clearing the top most bit of uint32
+	in[0] &= Mask
+	// Take the first Bytes bytes
+	out := binary.BigEndian.Uint32(in[:Bytes])
+	// Make sure that toElement is not equal 2^31 - 1
+	for out == ModP {
+		var buf [Bytes]byte
+		_, err := utils.RandomPRG().Read(buf[:])
+		if err != nil {
+			panic("error in randomness")
+		}
+		out = binary.BigEndian.Uint32(buf[:])
+	}
+	return out
+}
+
 func RandElementWithPRG(rnd io.Reader) uint32 {
 	var buf [Bytes]byte
 	var out = ModP
-	// Make sure that element is not equal 2^31 - 1
+	// Make sure that toElement is not equal 2^31 - 1
 	for out == ModP {
 		_, err := rnd.Read(buf[:])
 		if err != nil {
@@ -68,17 +86,20 @@ func RandVector(length int) []uint32 {
 	return RandVectorWithPRG(length, utils.RandomPRG())
 }
 
-// TODO: FIX THIS, NOT FIELD ELEMENT
-func ByteSliceToFieldElementSlice(out []uint32, in []byte) {
-	// for i := range out {
-	// 	out[i] = binary.BigEndian.Uint32(in[i*Bytes:(i+1)*Bytes]) % ModP
-	// }
-	out = *(*[]uint32)(unsafe.Pointer(&in))
+
+func BytesToElements(out []uint32, in []byte) {
+	//if len(in) % Bytes != 0 {
+	//	padding := make([]byte, Bytes-len(in) % Bytes)
+	//	in = append(in, padding...)
+	//}
+	for i := range out {
+		out[i] = toElement(in[i*Bytes:(i+1)*Bytes])
+	}
 }
 
 // VectorToBytes extracts bytes from a vector of field elements.  Assume that
-// only 3 bytes worth of data are embedded in each field element and therefore
-// strips the initial zero from each field element.
+// only 3 bytes worth of data are embedded in each field toElement and therefore
+// strips the initial zero from each field toElement.
 func VectorToBytes(in interface{}) []byte {
 	switch vec := in.(type) {
 	case []uint32:

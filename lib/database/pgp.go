@@ -32,15 +32,12 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 
 	// create empty database
 	info := NewInfo(numRows, numColumns, 0)
-	db, err := NewEmptyDB(info)
-	if err != nil {
-		return nil, err
-	}
+	db := NewKeysDB(info)
 
 	// iterate and embed keys
 	for i := 0; i < len(keys); i++ {
 		// useless to store keys for FSS queries
-		//key := utils.ByteSliceToUint32Slice(keys[i].Packet)
+		//key := field.BytesToElements(keys[i].Packet)
 		//db.Entries = append(db.Entries, key...)
 
 		keyInfo, err := GetKeyInfoFromPacket(keys[i].Packet)

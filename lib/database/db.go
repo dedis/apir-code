@@ -3,6 +3,7 @@ package database
 import (
 	"crypto"
 	"encoding/binary"
+	"golang.org/x/xerrors"
 	"io"
 	"math"
 	"math/rand"
@@ -66,12 +67,19 @@ type Merkle struct {
 	ProofLen int
 }
 
-func NewEmptyDB(info Info) (*DB, error) {
+func NewKeysDB(info Info) *DB {
 	return &DB{
 		Info:     info,
 		KeysInfo: make([]*KeyInfo, 0),
 		Entries:  make([]uint32, 0),
-	}, nil
+	}
+}
+
+func NewBitsDB(info Info) *DB {
+	return &DB{
+		Info:     info,
+		Entries:  make([]uint32, info.NumRows*info.NumColumns*info.BlockSize),
+	}
 }
 
 func NewInfo(nRows, nCols, bSize int) Info {
@@ -83,7 +91,40 @@ func NewInfo(nRows, nCols, bSize int) Info {
 	}
 }
 
-func CreateRandomDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
+func CreateRandomBitsDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, error) {
+	numColumns := dbLen / (8 * field.Bytes * numRows * blockLen)
+	// handle very small db
+	if numColumns == 0 {
+		numColumns = 1
+	}
+
+	info := Info{
+		NumColumns: numColumns,
+		NumRows:    numRows,
+		BlockSize:  blockLen,
+	}
+
+	n := numRows * numColumns * blockLen
+
+	numBytesToRead := n*field.Bytes + 1
+	randBytes := make([]byte, numBytesToRead)
+	if _, err := io.ReadFull(rnd, randBytes[:]); err != nil {
+		return nil, xerrors.Errorf("failed to read random randBytes: %v", err)
+	}
+
+	db := NewBitsDB(info)
+	field.BytesToElements(db.Entries, randBytes)
+
+	// add block lengths also in this case for compatibility
+	db.BlockLengths = make([]int, numRows*numColumns)
+	for i := 0; i < n; i++ {
+		db.BlockLengths[i/blockLen] = blockLen
+	}
+
+	return db, nil
+}
+
+func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	rand.Seed(time.Now().UnixNano())
 	entryLength := 2
 

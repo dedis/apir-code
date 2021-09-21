@@ -33,7 +33,7 @@ func TestCountEntireEmail(t *testing.T) {
 
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
-	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	db, err := database.CreateRandomKeysDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
 		db.KeysInfo[i].UserId.Email = match
@@ -53,7 +53,7 @@ func TestCountStartsWithEmail(t *testing.T) {
 	match := "START"
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
-	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	db, err := database.CreateRandomKeysDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
 		newEmail := match + db.KeysInfo[i].UserId.Email[5:]
@@ -74,7 +74,7 @@ func TestCountEndsWithEmail(t *testing.T) {
 	match := "END"
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
-	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	db, err := database.CreateRandomKeysDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
 		newEmail := db.KeysInfo[i].UserId.Email[:len(db.KeysInfo[i].UserId.Email)-len(match)] + match
@@ -95,7 +95,7 @@ func TestCountPublicKeyAlgorithm(t *testing.T) {
 	match := packet.PubKeyAlgoRSA
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
-	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	db, err := database.CreateRandomKeysDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
 		db.KeysInfo[i].PubKeyAlgo = match
@@ -114,7 +114,7 @@ func TestCountCreationTime(t *testing.T) {
 	match := time.Date(2009, time.November, 0, 0, 0, 0, 0, time.UTC)
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
-	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	db, err := database.CreateRandomKeysDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
 		db.KeysInfo[i].CreationTime = match
@@ -135,7 +135,7 @@ func TestCountAndQuery(t *testing.T) {
 	match := []interface{}{time.Date(2009, time.November, 0, 0, 0, 0, 0, time.UTC), packet.PubKeyAlgoRSA}
 	rndDB := utils.RandomPRG()
 	xof := utils.RandomPRG()
-	db, err := database.CreateRandomDB(rndDB, numIdentifiers)
+	db, err := database.CreateRandomKeysDB(rndDB, numIdentifiers)
 	require.NoError(t, err)
 	for i := 0; i < 50; i++ {
 		db.KeysInfo[i].CreationTime = match[0].(time.Time)
