@@ -205,9 +205,8 @@ func fss(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk 
 	DOMAIN_TO_SEARCH := "epfl.ch"
 	in := utils.ByteToBits([]byte(DOMAIN_TO_SEARCH))
 	q := &query.ClientFSS{
-		Target:  query.UserId,
-		FromEnd: len(DOMAIN_TO_SEARCH),
-		Input:   in,
+		Info:  &query.Info{Target: query.UserId, FromEnd: len(DOMAIN_TO_SEARCH)},
+		Input: in,
 	}
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
