@@ -1,5 +1,0 @@
-Name = "merkleDPF"
-Primitive = "pir-dpf-merkle"
-NumRows = 1
-BlockLength = 1024
-ElementBitSize = 8

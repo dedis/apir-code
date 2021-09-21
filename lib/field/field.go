@@ -2,9 +2,12 @@ package field
 
 import (
 	"encoding/binary"
-	"github.com/si-co/vpir-code/lib/utils"
 	"io"
+
+	"github.com/si-co/vpir-code/lib/utils"
 )
+
+type Element uint32
 
 const (
 	ModP                 = uint32(2147483647) // 2^31 - 1

@@ -1,0 +1,5 @@
+Name = "fssPir"
+Primitive = "fss-pir"
+NumRows = 1
+BlockLength = 2
+ElementBitSize = 31

@@ -1,0 +1,5 @@
+Name = "fssVpir"
+Primitive = "fss-vpir"
+NumRows = 1
+BlockLength = 2
+ElementBitSize = 31
