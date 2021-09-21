@@ -81,8 +81,8 @@ func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.AuthFSS {
 	fssKeys := c.Fss.GenerateTreePF(q.Input, c.state.a)
 
 	return []*query.AuthFSS{
-		{Target: q.Target, FromStart: q.FromStart, FromEnd: q.FromEnd, FssKey: fssKeys[0]},
-		{Target: q.Target, FromStart: q.FromStart, FromEnd: q.FromEnd, FssKey: fssKeys[1]},
+		{Info: q.Info, FssKey: fssKeys[0]},
+		{Info: q.Info, FssKey: fssKeys[1]},
 	}
 }
 

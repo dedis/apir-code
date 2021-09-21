@@ -20,28 +20,22 @@ const (
 	PubKeyAlgo
 )
 
-// TODO: refactor into a single type FSS and then differenciate in Input and FssKey?
-// TODO: this needs refactoring
 type ClientFSS struct {
-	Target             Target
-	FromStart, FromEnd int // start and end of the target
-	Input              []bool
-
-	And     bool
-	Targets []Target
+	*Info
+	Input []bool
 }
 
 type AuthFSS struct {
-	AdditionalInformationFSS
+	*Info
 	FssKey authfss.FssKeyEq2P
 }
 
 type FSS struct {
-	AdditionalInformationFSS
+	*Info
 	FssKey fss.FssKeyEq2P
 }
 
-type AdditionalInformationFSS struct {
+type Info struct {
 	Target             Target
 	FromStart, FromEnd int // start and end of the target
 

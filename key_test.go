@@ -33,8 +33,8 @@ func TestRealCountEmailMatch(t *testing.T) {
 	h := blake2b.Sum256([]byte(match))
 	in := utils.ByteToBits(h[:16])
 	q := &query.ClientFSS{
-		Target: query.UserId,
-		Input:  in,
+		Info:  &query.Info{Target: query.UserId},
+		Input: in,
 	}
 
 	retrieveKeysFSS(t, db, q, match, "TestRealCountEntireEmail")
@@ -50,9 +50,8 @@ func TestRealCountStartsWithEmail(t *testing.T) {
 	match := "bryan"
 	in := utils.ByteToBits([]byte(match))
 	q := &query.ClientFSS{
-		Target:    query.UserId,
-		FromStart: len(match),
-		Input:     in,
+		Info:  &query.Info{Target: query.UserId, FromStart: len(match)},
+		Input: in,
 	}
 
 	retrieveKeysFSS(t, db, q, match, "TestRealCountStartsWithEmail")
@@ -68,9 +67,8 @@ func TestRealCountEndsWithEmail(t *testing.T) {
 	match := "com"
 	in := utils.ByteToBits([]byte(match))
 	q := &query.ClientFSS{
-		Target:  query.UserId,
-		FromEnd: len(match),
-		Input:   in,
+		Info:  &query.Info{Target: query.UserId, FromEnd: len(match)},
+		Input: in,
 	}
 
 	retrieveKeysFSS(t, db, q, match, "TestRealCountEndsWithEmail")
@@ -86,8 +84,8 @@ func TestRealCountPublicKeyAlgorithm(t *testing.T) {
 	match := packet.PubKeyAlgoRSA
 	in := utils.ByteToBits([]byte{byte(match)})
 	q := &query.ClientFSS{
-		Target: query.PubKeyAlgo,
-		Input:  in,
+		Info:  &query.Info{Target: query.PubKeyAlgo},
+		Input: in,
 	}
 
 	retrieveKeysFSS(t, db, q, match, "TestRealCountPublicKeyAlgorithm")

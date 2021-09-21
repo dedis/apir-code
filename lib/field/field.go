@@ -2,8 +2,9 @@ package field
 
 import (
 	"encoding/binary"
-	"github.com/si-co/vpir-code/lib/utils"
 	"io"
+
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 const (
@@ -29,6 +30,7 @@ func toElement(in []byte) uint32 {
 	// Clearing the top most bit of uint32
 	in[0] &= Mask
 	// Take the first Bytes bytes
+	//out := *(*uint32)(unsafe.Pointer(&in))
 	out := binary.BigEndian.Uint32(in[:Bytes])
 	// Make sure that toElement is not equal 2^31 - 1
 	for out == ModP {
@@ -86,14 +88,13 @@ func RandVector(length int) []uint32 {
 	return RandVectorWithPRG(length, utils.RandomPRG())
 }
 
-
 func BytesToElements(out []uint32, in []byte) {
 	//if len(in) % Bytes != 0 {
 	//	padding := make([]byte, Bytes-len(in) % Bytes)
 	//	in = append(in, padding...)
 	//}
 	for i := range out {
-		out[i] = toElement(in[i*Bytes:(i+1)*Bytes])
+		out[i] = toElement(in[i*Bytes : (i+1)*Bytes])
 	}
 }
 

@@ -42,8 +42,8 @@ func TestCountEntireEmail(t *testing.T) {
 	h := blake2b.Sum256([]byte(match))
 	in := utils.ByteToBits(h[:16])
 	q := &query.ClientFSS{
-		Target: query.UserId,
-		Input:  in,
+		Info:  &query.Info{Target: query.UserId},
+		Input: in,
 	}
 
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCountEntireEmail")
@@ -62,9 +62,8 @@ func TestCountStartsWithEmail(t *testing.T) {
 
 	in := utils.ByteToBits([]byte(match))
 	q := &query.ClientFSS{
-		Target:    query.UserId,
-		FromStart: len(match),
-		Input:     in,
+		Info:  &query.Info{Target: query.UserId, FromStart: len(match)},
+		Input: in,
 	}
 
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCountStartsWithEmail")
@@ -83,9 +82,8 @@ func TestCountEndsWithEmail(t *testing.T) {
 
 	in := utils.ByteToBits([]byte(match))
 	q := &query.ClientFSS{
-		Target:  query.UserId,
-		FromEnd: len(match),
-		Input:   in,
+		Info:  &query.Info{Target: query.UserId, FromEnd: len(match)},
+		Input: in,
 	}
 
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCountEndsWithEmail")
@@ -103,8 +101,8 @@ func TestCountPublicKeyAlgorithm(t *testing.T) {
 
 	in := utils.ByteToBits([]byte{byte(match)})
 	q := &query.ClientFSS{
-		Target: query.PubKeyAlgo,
-		Input:  in,
+		Info:  &query.Info{Target: query.PubKeyAlgo},
+		Input: in,
 	}
 
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCountPublicKeyAlgorithm")
@@ -124,8 +122,8 @@ func TestCountCreationTime(t *testing.T) {
 	require.NoError(t, err)
 	in := utils.ByteToBits(binaryMatch)
 	q := &query.ClientFSS{
-		Target: query.CreationTime,
-		Input:  in,
+		Info:  &query.Info{Target: query.CreationTime},
+		Input: in,
 	}
 
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCreationDate")
@@ -148,9 +146,11 @@ func TestCountAndQuery(t *testing.T) {
 	matchBytes = append(matchBytes, byte(match[1].(packet.PublicKeyAlgorithm)))
 	in := utils.ByteToBits(matchBytes)
 	q := &query.ClientFSS{
-		And:     true,
-		Targets: []query.Target{query.PubKeyAlgo, query.CreationTime},
-		Input:   in,
+		Info: &query.Info{
+			And:     true,
+			Targets: []query.Target{query.PubKeyAlgo, query.CreationTime},
+		},
+		Input: in,
 	}
 
 	retrieveBlocksFSS(t, xof, db, q, match, "TestCountAndQuery")
