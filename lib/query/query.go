@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 
 	"github.com/si-co/vpir-code/lib/authfss"
+	"github.com/si-co/vpir-code/lib/fss"
 )
 
 type Target uint8
@@ -26,10 +27,19 @@ type ClientFSS struct {
 	Targets []Target
 }
 
-type FSS struct {
+type AuthFSS struct {
 	Target             Target
 	FromStart, FromEnd int // start and end of the target
 	FssKey             authfss.FssKeyEq2P
+
+	And     bool
+	Targets []Target
+}
+
+type FSS struct {
+	Target             Target
+	FromStart, FromEnd int // start and end of the target
+	FssKey             fss.FssKeyEq2P
 
 	And     bool
 	Targets []Target

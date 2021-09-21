@@ -207,5 +207,5 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q *query.Cl
 	}
 
 	// verify result
-	require.Equal(t, count, res[0])
+	require.Equal(t, count, res)
 }
