@@ -55,7 +55,6 @@ func retrievePIRPoint(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks
 		answers := [][]byte{a0, a1}
 
 		res, err := c.ReconstructBytes(answers)
-		//fmt.Println(res)
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize], res)
 	}
