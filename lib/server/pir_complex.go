@@ -10,7 +10,6 @@ import (
 	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
-	"golang.org/x/crypto/blake2b"
 )
 
 // PIRfss represent the server for the FSS-based complex-queries non-verifiable PIR
@@ -74,36 +73,25 @@ func (s *PIRfss) Answer(q *query.FSS) int {
 			for i := 0; i < numIdentifiers; i++ {
 				var id []bool
 				email := s.db.KeysInfo[i].UserId.Email
-				if q.FromStart != 0 {
-					if q.FromStart > len(email) {
-						continue
-					}
-					id = utils.ByteToBits([]byte(email[:q.FromStart]))
-				} else if q.FromEnd != 0 {
-					if q.FromEnd > len(email) {
-						continue
-					}
-					id = utils.ByteToBits([]byte(email[len(email)-q.FromEnd:]))
-				} else {
-					h := blake2b.Sum256([]byte(email))
-					id = utils.ByteToBits(h[:16])
+				id, valid := q.IdForEmail(email)
+				if !valid {
+					continue
 				}
 				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
 			}
 			return out
 		case query.PubKeyAlgo:
 			for i := 0; i < numIdentifiers; i++ {
-				id := utils.ByteToBits([]byte{uint8(s.db.KeysInfo[i].PubKeyAlgo)})
+				id := q.IdForPubKeyAlgo(s.db.KeysInfo[i].PubKeyAlgo)
 				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
 			}
 			return out
 		case query.CreationTime:
 			for i := 0; i < numIdentifiers; i++ {
-				binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
+				id, err := q.IdForCreationTime(s.db.KeysInfo[i].CreationTime)
 				if err != nil {
 					panic("impossible to marshal creation date")
 				}
-				id := utils.ByteToBits(binaryMatch)
 				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
 			}
 			return out

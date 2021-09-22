@@ -63,18 +63,42 @@ func DecodeClientFSS(in []byte) (*ClientFSS, error) {
 	return v, nil
 }
 
-func (q AuthFSS) IdForEmail(email string) ([]bool, bool) {
+func (q *AuthFSS) IdForEmail(email string) ([]bool, bool) {
+	return q.Info.IdForEmail(email)
+}
+
+func (q *AuthFSS) IdForPubKeyAlgo(pka packet.PublicKeyAlgorithm) []bool {
+	return q.Info.IdForPubKeyAlgo(pka)
+}
+
+func (q *AuthFSS) IdForCreationTime(t time.Time) ([]bool, error) {
+	return q.Info.IdForCreationTime(t)
+}
+
+func (q *FSS) IdForEmail(email string) ([]bool, bool) {
+	return q.Info.IdForEmail(email)
+}
+
+func (q *FSS) IdForPubKeyAlgo(pka packet.PublicKeyAlgorithm) []bool {
+	return q.Info.IdForPubKeyAlgo(pka)
+}
+
+func (q *FSS) IdForCreationTime(t time.Time) ([]bool, error) {
+	return q.Info.IdForCreationTime(t)
+}
+
+func (i *Info) IdForEmail(email string) ([]bool, bool) {
 	var id []bool
-	if q.FromStart != 0 {
-		if q.FromStart > len(email) {
+	if i.FromStart != 0 {
+		if i.FromStart > len(email) {
 			return nil, false
 		}
-		id = utils.ByteToBits([]byte(email[:q.FromStart]))
-	} else if q.FromEnd != 0 {
-		if q.FromEnd > len(email) {
+		id = utils.ByteToBits([]byte(email[:i.FromStart]))
+	} else if i.FromEnd != 0 {
+		if i.FromEnd > len(email) {
 			return nil, false
 		}
-		id = utils.ByteToBits([]byte(email[len(email)-q.FromEnd:]))
+		id = utils.ByteToBits([]byte(email[len(email)-i.FromEnd:]))
 	} else {
 		h := blake2b.Sum256([]byte(email))
 		id = utils.ByteToBits(h[:16])
@@ -83,11 +107,11 @@ func (q AuthFSS) IdForEmail(email string) ([]bool, bool) {
 	return id, true
 }
 
-func (q AuthFSS) IdForPubKeyAlgo(pka packet.PublicKeyAlgorithm) []bool {
+func (i *Info) IdForPubKeyAlgo(pka packet.PublicKeyAlgorithm) []bool {
 	return utils.ByteToBits([]byte{uint8(pka)})
 }
 
-func (q AuthFSS) IdForCreationTime(t time.Time) ([]bool, error) {
+func (i *Info) IdForCreationTime(t time.Time) ([]bool, error) {
 	binaryMatch, err := t.MarshalBinary()
 	if err != nil {
 		return nil, err
