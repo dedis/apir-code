@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"github.com/si-co/vpir-code/lib/query"
 	"io/ioutil"
 	"log"
 	"math"
@@ -13,6 +14,7 @@ import (
 	"runtime/pprof"
 	"runtime/trace"
 	"time"
+	"unsafe"
 
 	"github.com/BurntSushi/toml"
 	"github.com/cloudflare/circl/group"
@@ -110,12 +112,7 @@ func main() {
 		var numBlocks int
 		// Find the total number of blocks in the db
 		numBlocks = dbLen / (elemBitSize * blockLen)
-		// for really small db
-		if numBlocks == 0 {
-			numBlocks = 1
-		}
-
-		// rebalanced db
+		// matrix db
 		if nRows != 1 {
 			utils.IncreaseToNextSquare(&numBlocks)
 			nRows = int(math.Sqrt(float64(numBlocks)))
@@ -128,17 +125,17 @@ func main() {
 		dbRing := new(database.Ring)
 		dbElliptic := new(database.Elliptic)
 		switch s.Primitive[:3] {
-		case "vpi":
-			db, err = database.CreateRandomMultiBitDB(dbPRG, dbLen, nRows, blockLen)
-			if err != nil {
-				panic(err)
-			}
-
 		case "pir":
 			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
 				dbBytes = database.CreateRandomMerkle(dbPRG, dbLen, nRows, blockLen)
 			} else {
 				dbBytes = database.CreateRandomBytes(dbPRG, dbLen, nRows, blockLen)
+			}
+		case "fss":
+			// TODO: update config or db creation to match dbLen params, or vice versa
+			db, err = database.CreateRandomKeysDB(dbPRG, numBlocks)
+			if err != nil {
+				panic(err)
 			}
 		case "cmp":
 			if s.Primitive == "cmp-pir" {
@@ -158,20 +155,13 @@ func main() {
 		var results []*Chunk
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		switch s.Primitive {
-		case "vpir-it":
-			log.Printf("db info: %#v", db.Info)
-			results = vpirIT(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		case "vpir-dpf":
-			log.Printf("db info: %#v", db.Info)
-			results = vpirDPF(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		case "pir-it", "pir-it-merkle":
+		case "pir-classic", "pir-merkle":
 			log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		case "pir-dpf", "pir-dpf-merkle":
-			log.Printf("db info: %#v", dbBytes.Info)
-			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
-			results = pirDPF(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+		case "fss-pir", "fss-vpir":
+			log.Printf("db info: %#v", db.Info)
+			results = fss(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "cmp-pir":
 			log.Printf("db info: %#v", dbRing.Info)
 			results = pirLattice(dbRing, s.Repetitions)
@@ -200,113 +190,54 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
-func vpirIT(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
+func fss(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
-	c := client.NewIT(prg, &db.Info)
-	ss := makeITServers(db)
-	numTotalBlocks := db.NumRows * db.NumColumns
+	c := client.NewFSS(prg, &db.Info)
+	ss := makeFSSServers(db, c.Fss.PrfKeys)
+
 	numRetrieveBlocks := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
-
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
-	var startIndex int
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = initChunk(numRetrieveBlocks)
-
-		// pick a random block index to start the retrieval
-		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
-		for i := 0; i < numRetrieveBlocks; i++ {
-			results[j].CPU[i] = initBlock(len(ss))
-			results[j].Bandwidth[i] = initBlock(len(ss))
-
-			m.Reset()
-			queries := c.Query(startIndex+i, 2)
-			results[j].CPU[i].Query = m.RecordAndReset()
-			for r := range queries {
-				results[j].Bandwidth[i].Query += lenBytesFieldSlice(queries[r])
-			}
-
-			// get servers answers
-			answers := make([][]field.Element, len(ss))
-			for k := range ss {
-				m.Reset()
-				answers[k] = ss[k].Answer(queries[k])
-				results[j].CPU[i].Answers[k] = m.RecordAndReset()
-				results[j].Bandwidth[i].Answers[k] = lenBytesFieldSlice(answers[k])
-			}
-
-			m.Reset()
-			_, err := c.Reconstruct(answers)
-			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-			if err != nil {
-				log.Fatal(err)
-			}
-			results[j].Bandwidth[i].Reconstruct = 0
-		}
-
-		// GC after each repetition
-		runtime.GC()
-
-		// sleep after every iteration
-		time.Sleep(2 * time.Second)
+	DOMAIN_TO_SEARCH := "epfl.ch"
+	in := utils.ByteToBits([]byte(DOMAIN_TO_SEARCH))
+	q := &query.ClientFSS{
+		Info:  &query.Info{Target: query.UserId, FromEnd: len(DOMAIN_TO_SEARCH)},
+		Input: in,
 	}
-
-	return results
-}
-
-func vpirDPF(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
-	prg := utils.RandomPRG()
-	c := client.NewDPF(prg, &db.Info)
-	ss := makeDPFServers(db)
-	numTotalBlocks := db.NumRows * db.NumColumns
-	numRetrieveBlocks := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
-
-	// create main monitor for CPU time
-	m := monitor.NewMonitor()
-
-	// run the experiment nRepeat times
-	results := make([]*Chunk, nRepeat)
-
-	var startIndex int
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrieveBlocks)
-
-		// pick a random block index to start the retrieval
-		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
 		for i := 0; i < numRetrieveBlocks; i++ {
 			results[j].CPU[i] = initBlock(len(ss))
 			results[j].Bandwidth[i] = initBlock(len(ss))
 
 			m.Reset()
-			queries := c.Query(startIndex+i, 2)
+			queries := c.Query(q, 2)
 			results[j].CPU[i].Query = m.RecordAndReset()
-			// TODO: len DPF queries
 			for r := range queries {
-				results[j].Bandwidth[i].Query += lenBytesDPFFieldKey(queries[r])
+				results[j].Bandwidth[i].Query += fssQueryByteLength(queries[r])
 			}
 
 			// get servers answers
-			answers := make([][]field.Element, len(ss))
+			answers := make([][]uint32, len(ss))
 			for k := range ss {
 				m.Reset()
 				answers[k] = ss[k].Answer(queries[k])
 				results[j].CPU[i].Answers[k] = m.RecordAndReset()
-				results[j].Bandwidth[i].Answers[k] = lenBytesFieldSlice(answers[k])
+				results[j].Bandwidth[i].Answers[k] = fieldVectorByteLength(answers[k])
 			}
 
 			m.Reset()
 			_, err := c.Reconstruct(answers)
 			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-			results[j].Bandwidth[i].Reconstruct = 0
 			if err != nil {
 				log.Fatal(err)
 			}
+			results[j].Bandwidth[i].Reconstruct = 0
 		}
 
 		// GC after each repetition
@@ -322,7 +253,7 @@ func vpirDPF(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Ch
 func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	c := client.NewPIR(prg, &db.Info)
-	ss := makePIRITServers(db)
+	ss := makePIRServers(db)
 	numTotalBlocks := db.NumRows * db.NumColumns
 	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
 
@@ -361,66 +292,6 @@ func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepea
 
 			m.Reset()
 			_, err := c.Reconstruct(answers)
-			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-			results[j].Bandwidth[i].Reconstruct = 0
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		// GC after each repetition
-		runtime.GC()
-
-		// sleep after every iteration
-		time.Sleep(2 * time.Second)
-	}
-
-	return results
-}
-
-func pirDPF(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
-	prg := utils.RandomPRG()
-	c := client.NewPIRdpf(prg, &db.Info)
-	ss := makePIRDPFServers(db)
-	numTotalBlocks := db.NumRows * db.NumColumns
-	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
-
-	// create main monitor for CPU time
-	m := monitor.NewMonitor()
-
-	// run the experiment nRepeat times
-	results := make([]*Chunk, nRepeat)
-
-	var startIndex int
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = initChunk(numRetrieveBlocks)
-
-		// pick a random block index to start the retrieval
-		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
-		for i := 0; i < numRetrieveBlocks; i++ {
-			results[j].CPU[i] = initBlock(len(ss))
-			results[j].Bandwidth[i] = initBlock(len(ss))
-
-			m.Reset()
-			queries := c.Query(startIndex+i, 2)
-			results[j].CPU[i].Query = m.RecordAndReset()
-			for r := range queries {
-				// key of binary DPF is simply []byte
-				results[j].Bandwidth[i].Query += float64(len(queries[r]))
-			}
-
-			// get servers answers
-			answers := make([][]byte, len(ss))
-			for k := range ss {
-				m.Reset()
-				answers[k] = ss[k].Answer(queries[k])
-				results[j].CPU[i].Answers[k] = m.RecordAndReset()
-				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
-			}
-
-			m.Reset()
-			_, err := c.ReconstructBytes(answers)
 			results[j].CPU[i].Reconstruct = m.RecordAndReset()
 			results[j].Bandwidth[i].Reconstruct = 0
 			if err != nil {
@@ -546,28 +417,44 @@ func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	return numBits / (blockSize * elemSize)
 }
 
-func makeDPFServers(db *database.DB) []*server.DPF {
-	s0 := server.NewDPF(db)
-	s1 := server.NewDPF(db)
-	return []*server.DPF{s0, s1}
+func makeFSSServers(db *database.DB, keys [][]byte) []*server.FSS {
+	s0 := server.NewFSS(db, 0, keys)
+	s1 := server.NewFSS(db, 1, keys)
+	return []*server.FSS{s0, s1}
 }
 
-func makeITServers(db *database.DB) []*server.IT {
-	s0 := server.NewIT(db)
-	s1 := server.NewIT(db)
-	return []*server.IT{s0, s1}
-}
-
-func makePIRITServers(db *database.Bytes) []*server.PIR {
+func makePIRServers(db *database.Bytes) []*server.PIR {
 	s0 := server.NewPIR(db)
 	s1 := server.NewPIR(db)
 	return []*server.PIR{s0, s1}
 }
 
-func makePIRDPFServers(db *database.Bytes) []*server.PIRdpf {
-	s0 := server.NewPIRdpf(db)
-	s1 := server.NewPIRdpf(db)
-	return []*server.PIRdpf{s0, s1}
+func fssQueryByteLength(q *query.AuthFSS) float64 {
+	totalLen := 0
+
+	// Count the bytes of FssKey
+	totalLen += len(q.FssKey.SInit)
+	totalLen += 1 // q.FssKey.TInit
+	totalLen += len(q.FssKey.FinalCW) * field.Bytes
+	for i := range q.FssKey.CW {
+		totalLen += len(q.FssKey.CW[i])
+	}
+
+	// Count the bytes of AdditionalInformationFSS
+	// q.Target and q.Targets are uint8 and []uint8,
+	// respectively
+	totalLen += len(q.Targets) + 1 // q.Target
+	// The size of int is platform dependent
+	totalLen += int(unsafe.Sizeof(q.FromStart))
+	totalLen += int(unsafe.Sizeof(q.FromEnd))
+	// And is bool
+	totalLen += 1
+
+	return float64(totalLen)
+}
+
+func fieldVectorByteLength(vec []uint32) float64 {
+	return float64(len(vec) * field.Bytes)
 }
 
 func initChunk(numRetrieveBlocks int) *Chunk {
@@ -583,21 +470,6 @@ func initBlock(numAnswers int) *Block {
 		Answers:     make([]float64, numAnswers),
 		Reconstruct: 0,
 	}
-}
-
-func lenBytesFieldSlice(in []field.Element) float64 {
-	return float64(field.Bytes * len(in))
-}
-
-func lenBytesDPFFieldKey(in dpf.DPFkey) float64 {
-	// ServerIdx byte
-	out := float64(1)
-	// Bytes     []byte
-	out += float64(len(in.Bytes))
-	// FinalCW   []field.Element
-	out += lenBytesFieldSlice(in.FinalCW)
-
-	return out
 }
 
 func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
@@ -619,9 +491,7 @@ func (s *Simulation) validSimulation() bool {
 	return s.Primitive == "vpir-it" ||
 		s.Primitive == "vpir-dpf" ||
 		s.Primitive == "pir-it" ||
-		s.Primitive == "pir-dpf" ||
 		s.Primitive == "pir-it-merkle" ||
-		s.Primitive == "pir-dpf-merkle" ||
 		s.Primitive == "cmp-pir" ||
 		s.Primitive == "cmp-vpir"
 }
