@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/gob"
 	"io"
 	"log"
@@ -71,11 +72,16 @@ func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 }
 
 // ReconstructBytes returns []byte
-// func (c *PIRfss) ReconstructBytes(a [][]byte) (interface{}, error) {
-// 	return c.Reconstruct(a)
-// }
+func (c *PIRfss) ReconstructBytes(answers [][]byte) (interface{}, error) {
+	in := make([]int, 2)
+	for i, a := range answers {
+		in[i] = int(binary.BigEndian.Uint64(a))
+	}
+
+	return c.Reconstruct(in), nil
+}
 
 // Reconstruct reconstruct the entry of the database from answers
-func (c *PIRfss) Reconstruct(answers []int) (int, error) {
-	return answers[0] + answers[1], nil
+func (c *PIRfss) Reconstruct(answers []int) int {
+	return answers[0] + answers[1]
 }

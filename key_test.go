@@ -84,21 +84,26 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 	totalTimer := monitor.NewMonitor()
 
 	// compute the input query
-	fssKeys := c.Query(q, 2)
+	in, err := q.Encode()
+	require.NoError(t, err)
+	fssKeys, err := c.QueryBytes(in, 2)
+	require.NoError(t, err)
 
-	a0 := s0.Answer(fssKeys[0])
-	a1 := s1.Answer(fssKeys[1])
+	a0, err := s0.AnswerBytes(fssKeys[0])
+	require.NoError(t, err)
+	a1, err := s1.AnswerBytes(fssKeys[1])
+	require.NoError(t, err)
 
-	answers := []int{a0, a1}
+	answers := [][]byte{a0, a1}
 
-	res, err := c.Reconstruct(answers)
+	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
 	totalTime := totalTimer.Record()
 	fmt.Printf("TotalCPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
 
 	// verify result
 	count := localResult(db, q.Info, match)
-	require.Equal(t, count, res)
+	require.Equal(t, count, res.(int))
 }
 
 func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
@@ -128,7 +133,7 @@ func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 
 	// verify result
 	count := uint32(localResult(db, q.Info, match))
-	require.Equal(t, count, res)
+	require.Equal(t, count, res.(uint32))
 }
 
 func emailMatch(db *database.DB) (string, *query.ClientFSS) {

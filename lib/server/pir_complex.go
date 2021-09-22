@@ -55,8 +55,8 @@ func (s *PIRfss) AnswerBytes(q []byte) ([]byte, error) {
 	a := s.Answer(query)
 
 	// encode answer
-	out := make([]byte, 4)
-	binary.BigEndian.PutUint32(out, uint32(a))
+	out := make([]byte, 8)
+	binary.BigEndian.PutUint64(out, uint64(a))
 
 	return out, nil
 }
