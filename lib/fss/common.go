@@ -7,6 +7,8 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/binary"
+
+	"github.com/lukechampine/fastxor"
 )
 
 type Fss struct {
@@ -63,15 +65,13 @@ func randomCryptoInt() uint {
 // numBlocks represents the number
 func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
 	// If request blocks greater than actual needed blocks, grow output array
-	if numBlocks > initPRFLen {
-		out = make([]byte, numBlocks*aes.BlockSize)
-	}
+	// if numBlocks > initPRFLen {
+	// 	out = make([]byte, numBlocks*aes.BlockSize)
+	// }
 	for i := uint(0); i < numBlocks; i++ {
 		// get AES_k[i](x)
 		aesBlocks[i].Encrypt(temp, x)
 		// get AES_k[i](x) ^ x
-		for j := range temp {
-			out[i*aes.BlockSize+uint(j)] = temp[j] ^ x[j]
-		}
+		fastxor.Bytes(out[i*aes.BlockSize:], temp, x)
 	}
 }
