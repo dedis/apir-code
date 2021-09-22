@@ -95,7 +95,6 @@ func (s *FSS) Answer(q *query.AuthFSS) []uint32 {
 				id, err := q.IdForCreationTime(s.db.KeysInfo[i].CreationTime)
 				if err != nil {
 					panic("impossible to marshal creation date")
-
 				}
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 				for i := range out {

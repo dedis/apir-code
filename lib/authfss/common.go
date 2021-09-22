@@ -48,13 +48,6 @@ type ServerKeyLt struct {
 
 // Helper functions
 
-// 0th position is the most significant bit
-// True if bit is 1 and False if bit is 0
-// N is the number of bits in uint
-func getBit(n uint64, pos, N uint) byte {
-	return byte((n & (1 << (N - pos))) >> (N - pos))
-}
-
 // fixed key PRF (Matyas–Meyer–Oseas one way compression function)
 // numBlocks represents the number
 func prf(x []byte, aesBlocks []cipher.Block, numBlocks uint, temp, out []byte) {
