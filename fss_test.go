@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"math/rand"
 	"testing"
 	"time"
 
@@ -161,7 +160,6 @@ func retrieveBlocksFSS(t *testing.T, rnd io.Reader, db *database.DB, q *query.Cl
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
 
-	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
 
 	// compute the input of the query

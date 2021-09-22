@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
+	"fmt"
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -22,8 +23,8 @@ type PIRfss struct {
 	fss       *fss.Fss
 }
 
-// NewPIRdpf initializes and returns a new server for FSS-based classical PIR
-func NewPIRdpf(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *PIRfss {
+// NewPIRfss initializes and returns a new server for FSS-based classical PIR
+func NewPIRfss(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *PIRfss {
 	numCores := runtime.NumCPU()
 	if len(cores) > 0 {
 		numCores = cores[0]
@@ -88,6 +89,7 @@ func (s *PIRfss) Answer(q *query.FSS) int {
 					h := blake2b.Sum256([]byte(email))
 					id = utils.ByteToBits(h[:16])
 				}
+				fmt.Println(s.serverNum, out)
 				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
 			}
 			return out
