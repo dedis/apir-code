@@ -39,7 +39,7 @@ func TestPIRComplex(t *testing.T) {
 		Input: in,
 	}
 
-	retrievePIRComplex(t, xof, db, q, match, "TestCountEntireEmail")
+	retrievePIRComplex(t, xof, db, q, match, "TestPIRComplex")
 }
 
 func TestPIRPointOneMb(t *testing.T) {
