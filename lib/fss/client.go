@@ -29,7 +29,6 @@ func ClientInitialize() *Fss {
 		f.FixedBlocks[i] = block
 	}
 	f.N = 256 // number of bits supported
-	f.M = 4   // Default is 4. Only used in multiparty. To change this, you should change the size of the CW in multiparty keys. Read comments there.
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	return f
