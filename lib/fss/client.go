@@ -28,14 +28,8 @@ func ClientInitialize() *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	// Check if int is 32 or 64 bit
-	var x uint64 = 1 << 32
-	if uint(x) == 0 {
-		f.N = 32
-	} else {
-		f.N = 64
-	}
-	f.M = 4 // Default is 4. Only used in multiparty. To change this, you should change the size of the CW in multiparty keys. Read comments there.
+	f.N = 256 // number of bits supported
+	f.M = 4   // Default is 4. Only used in multiparty. To change this, you should change the size of the CW in multiparty keys. Read comments there.
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 	return f

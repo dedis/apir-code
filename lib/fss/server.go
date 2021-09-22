@@ -7,7 +7,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/binary"
-	//"fmt"
 )
 
 // Upon receiving query from client, initialize server with
@@ -26,14 +25,7 @@ func ServerInitialize(prfKeys [][]byte) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	// Check if int is 32 or 64 bit
-	var x uint64 = 1 << 32
-	if uint(x) == 0 {
-		f.N = 32
-	} else {
-		f.N = 64
-	}
-	f.M = 4 // Again default = 4. Look at comments in ClientInitialize to understand this.
+	f.N = 256 // number of bits supported
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*initPRFLen)
 
