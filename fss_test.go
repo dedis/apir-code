@@ -24,7 +24,7 @@ const (
 	oneKB           = 1024 * oneB
 	oneMB           = 1024 * oneKB
 	testBlockLength = 64
-	numIdentifiers  = 1000000
+	numIdentifiers  = 1000
 )
 
 func TestCountEntireEmail(t *testing.T) {

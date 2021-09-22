@@ -18,28 +18,15 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/blake2b"
 )
 
-func TestPIRComplex(t *testing.T) {
-	match := "epflepflepflepflepflepflepflepfl"
-
-	rndDB := utils.RandomPRG()
-	xof := utils.RandomPRG()
-	db, err := database.CreateRandomKeysDB(rndDB, numIdentifiers)
+func TestRealCountEmailMatchPIR(t *testing.T) {
+	db, err := getDB()
 	require.NoError(t, err)
-	for i := 0; i < 50; i++ {
-		db.KeysInfo[i].UserId.Email = match
-	}
 
-	h := blake2b.Sum256([]byte(match))
-	in := utils.ByteToBits(h[:16])
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId},
-		Input: in,
-	}
+	match, q := realCountEmailMatch(db)
 
-	retrievePIRComplex(t, xof, db, q, match, "TestPIRComplex")
+	retrievePIRComplex(t, db, q, match, "TestPIRRealCountEmailMatchPIR")
 }
 
 func TestPIRPointOneMb(t *testing.T) {
@@ -59,8 +46,8 @@ func TestPIRPointOneMb(t *testing.T) {
 	retrievePIRPoint(t, xof, db, numBlocks, "PIRPointOneMb")
 }
 
-func retrievePIRComplex(t *testing.T, rnd io.Reader, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
-	c := client.NewPIRfss(rnd, &db.Info)
+func retrievePIRComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
+	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
 	s0 := server.NewPIRfss(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewPIRfss(db, 1, c.Fss.PrfKeys)
 

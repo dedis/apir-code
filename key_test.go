@@ -23,11 +23,17 @@ import (
 )
 
 func TestRealCountEmailMatch(t *testing.T) {
-	// math randomness used only for testing purposes
-	rand.Seed(time.Now().UnixNano())
-
 	db, err := getDB()
 	require.NoError(t, err)
+
+	match, q := realCountEmailMatch(db)
+
+	retrieveKeysFSS(t, db, q, match, "TestRealCountEntireEmail")
+}
+
+func realCountEmailMatch(db *database.DB) (string, *query.ClientFSS) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
 
 	match := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
 	h := blake2b.Sum256([]byte(match))
@@ -37,7 +43,7 @@ func TestRealCountEmailMatch(t *testing.T) {
 		Input: in,
 	}
 
-	retrieveKeysFSS(t, db, q, match, "TestRealCountEntireEmail")
+	return match, q
 }
 
 func TestRealCountStartsWithEmail(t *testing.T) {
@@ -92,9 +98,7 @@ func TestRealCountPublicKeyAlgorithm(t *testing.T) {
 }
 
 func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
-	rnd := utils.RandomPRG()
-
-	c := client.NewFSS(rnd, &db.Info)
+	c := client.NewFSS(utils.RandomPRG(), &db.Info)
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
 
