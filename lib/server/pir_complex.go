@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"fmt"
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -89,7 +88,6 @@ func (s *PIRfss) Answer(q *query.FSS) int {
 					h := blake2b.Sum256([]byte(email))
 					id = utils.ByteToBits(h[:16])
 				}
-				fmt.Println(s.serverNum, out)
 				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
 			}
 			return out
