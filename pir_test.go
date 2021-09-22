@@ -71,7 +71,6 @@ func retrievePIRComplex(t *testing.T, rnd io.Reader, db *database.DB, q *query.C
 
 	a0 := s0.Answer(fssKeys[0])
 	a1 := s1.Answer(fssKeys[1])
-	fmt.Println(a0, a1)
 
 	answers := []int{a0, a1}
 
