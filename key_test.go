@@ -22,87 +22,90 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-func TestRealCountEmailMatch(t *testing.T) {
-	db, err := getDB()
-	require.NoError(t, err)
+var db *database.DB
 
-	match, q := realCountEmailMatch(db)
-
-	retrieveKeysFSS(t, db, q, match, "TestRealCountEntireEmail")
-}
-
-func realCountEmailMatch(db *database.DB) (string, *query.ClientFSS) {
+func init() {
 	// math randomness used only for testing purposes
 	rand.Seed(time.Now().UnixNano())
 
-	match := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
-	h := blake2b.Sum256([]byte(match))
-	in := utils.ByteToBits(h[:16])
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId},
-		Input: in,
+	// init global db
+	var err error
+	db, err = getDB()
+	if err != nil {
+		panic(err)
 	}
+}
 
-	return match, q
+func TestRealCountEmail(t *testing.T) {
+	match, q := emailMatch(db)
+	retrieveComplex(t, db, q, match, "TestRealCountEntireEmail")
+}
+
+func TestRealCountEmailPIR(t *testing.T) {
+	match, q := emailMatch(db)
+	retrieveComplexPIR(t, db, q, match, "TestRealCountEntireEmailPIR")
 }
 
 func TestRealCountStartsWithEmail(t *testing.T) {
-	// math randomness used only for testing purposes
-	rand.Seed(time.Now().UnixNano())
+	match, q := startsWithMatch(db)
+	retrieveComplex(t, db, q, match, "TestRealCountStartsWithEmail")
+}
 
-	db, err := getDB()
-	require.NoError(t, err)
-
-	match := "bryan"
-	in := utils.ByteToBits([]byte(match))
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromStart: len(match)},
-		Input: in,
-	}
-
-	retrieveKeysFSS(t, db, q, match, "TestRealCountStartsWithEmail")
+func TestRealCountStartsWithEmailPIR(t *testing.T) {
+	match, q := startsWithMatch(db)
+	retrieveComplexPIR(t, db, q, match, "TestCountStartsWithEmailPIR")
 }
 
 func TestRealCountEndsWithEmail(t *testing.T) {
-	// math randomness used only for testing purposes
-	rand.Seed(time.Now().UnixNano())
+	match, q := endsWithMatch(db)
+	retrieveComplex(t, db, q, match, "TestRealCountEndsWithEmail")
+}
 
-	db, err := getDB()
-	require.NoError(t, err)
-
-	match := "com"
-	in := utils.ByteToBits([]byte(match))
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromEnd: len(match)},
-		Input: in,
-	}
-
-	retrieveKeysFSS(t, db, q, match, "TestRealCountEndsWithEmail")
+func TestRealCountEndsWithEmailPIR(t *testing.T) {
+	match, q := endsWithMatch(db)
+	retrieveComplexPIR(t, db, q, match, "TestRealCountEndsWithEmailPIR")
 }
 
 func TestRealCountPublicKeyAlgorithm(t *testing.T) {
-	// math randomness used only for testing purposes
-	rand.Seed(time.Now().UnixNano())
-
-	db, err := getDB()
-	require.NoError(t, err)
-
-	match := packet.PubKeyAlgoRSA
-	in := utils.ByteToBits([]byte{byte(match)})
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.PubKeyAlgo},
-		Input: in,
-	}
-
-	retrieveKeysFSS(t, db, q, match, "TestRealCountPublicKeyAlgorithm")
+	match, q := pkaMatch(db)
+	retrieveComplex(t, db, q, match, "TestRealCountPublicKeyAlgorithm")
 }
 
-func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
+func TestRealCountPublicKeyAlgorithmPIR(t *testing.T) {
+	match, q := pkaMatch(db)
+	retrieveComplex(t, db, q, match, "TestRealCountPublicKeyAlgorithmPIR")
+}
+
+func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
+	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
+	s0 := server.NewPIRfss(db, 0, c.Fss.PrfKeys)
+	s1 := server.NewPIRfss(db, 1, c.Fss.PrfKeys)
+
+	totalTimer := monitor.NewMonitor()
+
+	// compute the input query
+	fssKeys := c.Query(q, 2)
+
+	a0 := s0.Answer(fssKeys[0])
+	a1 := s1.Answer(fssKeys[1])
+
+	answers := []int{a0, a1}
+
+	res, err := c.Reconstruct(answers)
+	require.NoError(t, err)
+	totalTime := totalTimer.Record()
+	fmt.Printf("TotalCPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
+
+	// verify result
+	count := localResult(db, q.Info, match)
+	require.Equal(t, count, res)
+}
+
+func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
 	c := client.NewFSS(utils.RandomPRG(), &db.Info)
 	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
 	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
 
-	rand.Seed(time.Now().UnixNano())
 	totalTimer := monitor.NewMonitor()
 
 	// compute the input of the query
@@ -122,25 +125,85 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	require.NoError(t, err)
 	totalTime := totalTimer.Record()
 	fmt.Printf("TotalCPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
-	// verify output
-	count := uint32(0)
+
+	// verify result
+	count := uint32(localResult(db, q.Info, match))
+	require.Equal(t, count, res)
+}
+
+func emailMatch(db *database.DB) (string, *query.ClientFSS) {
+	match := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
+	h := blake2b.Sum256([]byte(match))
+	in := utils.ByteToBits(h[:16])
+	q := &query.ClientFSS{
+		Info:  &query.Info{Target: query.UserId},
+		Input: in,
+	}
+
+	return match, q
+}
+
+func startsWithMatch(db *database.DB) (string, *query.ClientFSS) {
+	email := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
+	for len(email) < 5 {
+		email = db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
+	}
+	match := email[:5]
+	in := utils.ByteToBits([]byte(match))
+	q := &query.ClientFSS{
+		Info:  &query.Info{Target: query.UserId, FromStart: len(match)},
+		Input: in,
+	}
+
+	return match, q
+}
+
+func endsWithMatch(db *database.DB) (string, *query.ClientFSS) {
+	email := db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
+	for len(email) < 5 {
+		email = db.KeysInfo[rand.Intn(db.NumColumns)].UserId.Email
+	}
+	match := email[len(email)-5:]
+	in := utils.ByteToBits([]byte(match))
+	q := &query.ClientFSS{
+		Info:  &query.Info{Target: query.UserId, FromEnd: len(match)},
+		Input: in,
+	}
+
+	return match, q
+}
+
+func pkaMatch(db *database.DB) (packet.PublicKeyAlgorithm, *query.ClientFSS) {
+	match := packet.PubKeyAlgoRSA
+	in := utils.ByteToBits([]byte{byte(match)})
+	q := &query.ClientFSS{
+		Info:  &query.Info{Target: query.PubKeyAlgo},
+		Input: in,
+	}
+
+	return match, q
+}
+
+func localResult(db *database.DB, q *query.Info, match interface{}) int {
+	count := 0
 	for _, k := range db.KeysInfo {
 		switch q.Target {
 		case query.UserId:
 			toMatch := ""
-			email := k.UserId.Email
 			if q.FromStart != 0 {
-				if q.FromStart > len(email) {
+				email := k.UserId.Email
+				if len(email) < q.FromStart {
 					continue
 				}
-				toMatch = email[:q.FromStart]
+				toMatch = k.UserId.Email[:q.FromStart]
 			} else if q.FromEnd != 0 {
-				if q.FromEnd > len(email) {
+				email := k.UserId.Email
+				if len(email) < q.FromEnd {
 					continue
 				}
 				toMatch = email[len(email)-q.FromEnd:]
 			} else {
-				toMatch = email
+				toMatch = k.UserId.Email
 			}
 
 			if toMatch == match {
@@ -159,8 +222,7 @@ func retrieveKeysFSS(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 		}
 	}
 
-	// verify result
-	require.Equal(t, count, res.([]uint32)[0])
+	return count
 }
 
 func getDB() (*database.DB, error) {

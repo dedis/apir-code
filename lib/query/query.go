@@ -3,6 +3,7 @@ package query
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"time"
 
 	"github.com/nikirill/go-crypto/openpgp/packet"
@@ -54,9 +55,10 @@ func (q *ClientFSS) Encode() ([]byte, error) {
 
 func DecodeClientFSS(in []byte) (*ClientFSS, error) {
 	dec := gob.NewDecoder(bytes.NewBuffer(in))
-	var v *ClientFSS
+	v := &ClientFSS{}
 	err := dec.Decode(v)
 	if err != nil {
+		fmt.Println("here")
 		return nil, err
 	}
 
