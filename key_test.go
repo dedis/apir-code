@@ -24,7 +24,7 @@ import (
 
 var db *database.DB
 
-func init() {
+func initRealDB() {
 	// math randomness used only for testing purposes
 	rand.Seed(time.Now().UnixNano())
 
@@ -37,6 +37,9 @@ func init() {
 }
 
 func TestRealCountEmail(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := emailMatch(db)
 	retrieveComplex(t, db, q, match, "TestRealCountEntireEmail")
 }
