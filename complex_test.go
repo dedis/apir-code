@@ -3,6 +3,7 @@ package main
 // Test suite for integrated VPIR.
 
 import (
+	"runtime"
 	"testing"
 	"time"
 
@@ -30,6 +31,9 @@ func initRandomDB() {
 	if err != nil {
 		panic(err)
 	}
+
+	// GC after DB creation
+	runtime.GC()
 }
 
 func TestCountEntireEmail(t *testing.T) {

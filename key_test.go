@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/rand"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -34,6 +35,9 @@ func initRealDB() {
 	if err != nil {
 		panic(err)
 	}
+
+	// GC after DB creation
+	runtime.GC()
 }
 
 func TestRealCountEmail(t *testing.T) {
