@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/si-co/vpir-code/lib/query"
 	"io/ioutil"
 	"log"
 	"math"
@@ -15,6 +14,8 @@ import (
 	"runtime/trace"
 	"time"
 	"unsafe"
+
+	"github.com/si-co/vpir-code/lib/query"
 
 	"github.com/BurntSushi/toml"
 	"github.com/cloudflare/circl/group"
@@ -487,8 +488,11 @@ func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
 	return &Simulation{generalParam: *genConfig, individualParam: *indConfig}, nil
 }
 
+// TODO: update
 func (s *Simulation) validSimulation() bool {
-	return s.Primitive == "vpir-it" ||
+	return s.Primitive == "pir-classic" ||
+		s.Primitive == "pir-merkle" ||
+		s.Primitive == "vpir-it" ||
 		s.Primitive == "vpir-dpf" ||
 		s.Primitive == "pir-it" ||
 		s.Primitive == "pir-it-merkle" ||

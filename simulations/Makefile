@@ -3,6 +3,10 @@
 run_simul: 
 	env GOGC=8000 go run . -config=$(config) # -cpuprofile=$(config).prof
 
+point: 
+	$(MAKE) -s run_simul config=pirClassic.toml; \
+	$(MAKE) -s run_simul config=pirMerkle.toml \
+
 performance:
 	$(MAKE) -s run_simul config=vpirMultiMatrixBlock.toml; \
 	$(MAKE) -s run_simul config=vpirMultiVectorBlockDPF.toml; \
