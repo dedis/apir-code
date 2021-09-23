@@ -49,7 +49,7 @@ func TestCountEntireEmailPIR(t *testing.T) {
 
 	match, q := fixedEmailMatch(randomDB)
 
-	retrieveComplexPIR(t, randomDB, q, match, "TestCountEntireEmail")
+	retrieveComplexPIR(t, randomDB, q, match, "TestCountEntireEmailPIR")
 }
 
 func TestCountStartsWithEmail(t *testing.T) {
@@ -69,7 +69,7 @@ func TestCountStartsWithEmailPIR(t *testing.T) {
 
 	match, q := fixedStartsWithMatch(db)
 
-	retrieveComplexPIR(t, randomDB, q, match, "TestCountStartsWithEmail")
+	retrieveComplexPIR(t, randomDB, q, match, "TestCountStartsWithEmailPIR")
 }
 
 func TestCountEndsWithEmail(t *testing.T) {
@@ -89,7 +89,7 @@ func TestCountEndsWithEmailPIR(t *testing.T) {
 
 	match, q := fixedEndsWithMatch(db)
 
-	retrieveComplexPIR(t, randomDB, q, match, "TestCountEndsWithEmail")
+	retrieveComplexPIR(t, randomDB, q, match, "TestCountEndsWithEmailPIR")
 }
 
 func TestCountPublicKeyAlgorithm(t *testing.T) {
@@ -109,7 +109,7 @@ func TestCountPublicKeyAlgorithmPIR(t *testing.T) {
 
 	match, q := fixedPkaMatch(db)
 
-	retrieveComplexPIR(t, randomDB, q, match, "TestCountPublicKeyAlgorithm")
+	retrieveComplexPIR(t, randomDB, q, match, "TestCountPublicKeyAlgorithmPIR")
 }
 
 func TestCountCreationTime(t *testing.T) {
@@ -129,7 +129,7 @@ func TestCountCreationTimePIR(t *testing.T) {
 
 	match, q := fixedCreationTimeMatch(db)
 
-	retrieveComplexPIR(t, randomDB, q, match, "TestCreationDate")
+	retrieveComplexPIR(t, randomDB, q, match, "TestCreationDatePIR")
 }
 
 func TestCountAndQuery(t *testing.T) {
@@ -149,7 +149,7 @@ func TestCountAndQueryPIR(t *testing.T) {
 
 	match, q := fixedAndQueryMatch(db)
 
-	retrieveComplexPIR(t, randomDB, q, match, "TestCountAndQuery")
+	retrieveComplexPIR(t, randomDB, q, match, "TestCountAndQueryPIR")
 }
 
 func fixedAndQueryMatch(db *database.DB) (interface{}, *query.ClientFSS) {
