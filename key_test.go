@@ -45,36 +45,57 @@ func TestRealCountEmail(t *testing.T) {
 }
 
 func TestRealCountEmailPIR(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := emailMatch(db)
 	retrieveComplexPIR(t, db, q, match, "TestRealCountEntireEmailPIR")
 }
 
 func TestRealCountStartsWithEmail(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := startsWithMatch(db)
 	retrieveComplex(t, db, q, match, "TestRealCountStartsWithEmail")
 }
 
 func TestRealCountStartsWithEmailPIR(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := startsWithMatch(db)
 	retrieveComplexPIR(t, db, q, match, "TestCountStartsWithEmailPIR")
 }
 
 func TestRealCountEndsWithEmail(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := endsWithMatch(db)
 	retrieveComplex(t, db, q, match, "TestRealCountEndsWithEmail")
 }
 
 func TestRealCountEndsWithEmailPIR(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := endsWithMatch(db)
 	retrieveComplexPIR(t, db, q, match, "TestRealCountEndsWithEmailPIR")
 }
 
 func TestRealCountPublicKeyAlgorithm(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := pkaMatch(db)
 	retrieveComplex(t, db, q, match, "TestRealCountPublicKeyAlgorithm")
 }
 
 func TestRealCountPublicKeyAlgorithmPIR(t *testing.T) {
+	if db == nil {
+		initRealDB()
+	}
 	match, q := pkaMatch(db)
 	retrieveComplex(t, db, q, match, "TestRealCountPublicKeyAlgorithmPIR")
 }
@@ -195,38 +216,45 @@ func pkaMatch(db *database.DB) (packet.PublicKeyAlgorithm, *query.ClientFSS) {
 func localResult(db *database.DB, q *query.Info, match interface{}) int {
 	count := 0
 	for _, k := range db.KeysInfo {
-		switch q.Target {
-		case query.UserId:
-			toMatch := ""
-			if q.FromStart != 0 {
-				email := k.UserId.Email
-				if len(email) < q.FromStart {
-					continue
+		if !q.And {
+			switch q.Target {
+			case query.UserId:
+				toMatch := ""
+				if q.FromStart != 0 {
+					email := k.UserId.Email
+					if len(email) < q.FromStart {
+						continue
+					}
+					toMatch = k.UserId.Email[:q.FromStart]
+				} else if q.FromEnd != 0 {
+					email := k.UserId.Email
+					if len(email) < q.FromEnd {
+						continue
+					}
+					toMatch = email[len(email)-q.FromEnd:]
+				} else {
+					toMatch = k.UserId.Email
 				}
-				toMatch = k.UserId.Email[:q.FromStart]
-			} else if q.FromEnd != 0 {
-				email := k.UserId.Email
-				if len(email) < q.FromEnd {
-					continue
-				}
-				toMatch = email[len(email)-q.FromEnd:]
-			} else {
-				toMatch = k.UserId.Email
-			}
 
-			if toMatch == match {
+				if toMatch == match {
+					count++
+				}
+			case query.PubKeyAlgo:
+				if k.PubKeyAlgo == match {
+					count++
+				}
+			case query.CreationTime:
+				if k.CreationTime.Equal(match.(time.Time)) {
+					count++
+				}
+			default:
+				panic("unknown query type")
+			}
+		} else {
+			if k.CreationTime.Equal((match.([]interface{}))[0].(time.Time)) &&
+				k.PubKeyAlgo == (match.([]interface{}))[1].(packet.PublicKeyAlgorithm) {
 				count++
 			}
-		case query.PubKeyAlgo:
-			if k.PubKeyAlgo == match {
-				count++
-			}
-		case query.CreationTime:
-			if k.CreationTime.Equal(match.(time.Time)) {
-				count++
-			}
-		default:
-			panic("unknown query type")
 		}
 	}
 
