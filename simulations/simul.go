@@ -157,7 +157,7 @@ func main() {
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		switch s.Primitive {
 		case "pir-classic", "pir-merkle":
-			log.Printf("db info: %#v", dbBytes.Info)
+			//log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "fss-pir", "fss-vpir":
@@ -414,8 +414,9 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 }
 
 // Converts number of bits to retrieve into the number of db blocks
+// TODO: check if correct
 func bitsToBlocks(blockSize, elemSize, numBits int) int {
-	return numBits / (blockSize * elemSize)
+	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
 }
 
 func makeFSSServers(db *database.DB, keys [][]byte) []*server.FSS {

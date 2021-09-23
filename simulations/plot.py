@@ -16,6 +16,7 @@ linestyles = ['-', '--', ':', '-.']
 patterns = ['', '//', '.']
 
 GB = pow(1024, 3)
+bitsToGB = 0.000000000125
 MB = pow(1024, 2)
 KB = 1024
 LatticeRotKeysLen = 39322025
@@ -25,10 +26,29 @@ def plotPoint():
     schemes = ["pirClassic.json", "pirMerkle.json"]
     schemLabels = ["No-intergrity", "Authenticated"]
 
-    fig, ax = plt.subplots()
+    fig, axs = plt.subplots(2)
 
+    cpuArray = []
+    bwArray = []
+    x = []
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme) 
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpuArray.append(cpu)
+            bwArray.append(bw/1000)
+        
+        print("x:", sorted(stats.keys()))
+        print("bw:", bwArray)
+        print("cpu:", cpuArray)
+        axs[0].plot(sorted(stats.keys()), cpuArray, color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
+        axs[1].plot(sorted(stats.keys()), bwArray, color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
+
+    plt.tight_layout()
+    plt.savefig('point_bw.eps', format='eps', dpi=300, transparent=True)
+    # plt.show()
+
 
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
