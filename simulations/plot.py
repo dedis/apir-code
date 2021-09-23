@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results/"
+#resultFolder = "final_results/"
+resultFolder = "results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -20,48 +21,14 @@ KB = 1024
 LatticeRotKeysLen = 39322025
 LatticeCiphertextLen = 393221
 
-def plotVpirBenchmarks():
-    # schemes = ["vpirSingleVector.json", "vpirMultiVector.json", "vpirMultiVectorBlock.json"]
-    # labels = ["Single-bit (§4.2)", "Single-element (§4.4)", "Block (§4.4)"]
-    # colors = ['black', 'grey', 'lightgrey']
-
-    schemes = ["vpirSingleVector.json", "vpirMultiVectorBlock.json"]
-    labels = ["Single-bit (§4.2)", "Block (§4.4)"]
-    colors = ['black', 'darkgrey']
+def plotPoint():
+    schemes = ["pirClassic.json", "pirMerkle.json"]
+    schemLabels = ["No-intergrity", "Authenticated"]
 
     fig, ax = plt.subplots()
-    plt.style.use('grayscale')
 
-    width = 0.2
-    dbSizes = sorted([int(size / (8 * KB)) for size in allStats(resultFolder + schemes[0]).keys()])
-    Xs = np.arange(len(dbSizes))
-    bars = [[]] * len(schemes)
     for i, scheme in enumerate(schemes):
-        stats = allStats(resultFolder + scheme)
-        for j, dbSize in enumerate(sorted(stats.keys())):
-            Y = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            Yerr = stats[dbSize]['client']['cpu']['std'] + stats[dbSize]['server']['cpu']['std']
-            bars[i] = ax.bar(j + i * width, Y, width, color=colors[i], yerr=Yerr)
-            ax.annotate(f'{Y:.1f}',
-                        xy=(j + i * width, Y),
-                        xytext=(0, 5),  # 5 points vertical offset
-                        textcoords="offset points",
-                        ha='center', va='bottom')
-
-    ax.set_ylabel("CPU time [ms]")
-    ax.set_xlabel("DB size [KiB]")
-    ax.set_xticks(Xs + width * (len(schemes) - 1) / 2)
-    ax.set_xticklabels(dbSizes)
-    ax.legend(bars, labels)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
-    # plt.tick_params(left=False, labelleft=False)
-    plt.tight_layout()
-    plt.yscale('log')
-    plt.savefig('multi_benchmarks.eps', format='eps', dpi=300, transparent=True)
-    # plt.show()
-
+        stats = allStats(resultFolder + scheme) 
 
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
@@ -382,8 +349,8 @@ EXPR = args.expr
 
 if __name__ == "__main__":
     prepare_for_latex()
-    if EXPR == "benchmarks":
-        plotVpirBenchmarks()
+    if EXPR == "point":
+        plotPoint()
     elif EXPR == "performance":
         plotVpirPerformanceLines()
         # plotVpirPerformanceBars()
