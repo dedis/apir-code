@@ -130,7 +130,8 @@ func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 
 	// create random keys
 	// for random db use 2048 bits = 64 uint32 elements
-	entries := field.RandVectorWithPRG(numIdentifiers*entryLength, rnd)
+	// Comment out for now as the entries are not needed for experiments, only the info
+	//entries := field.RandVectorWithPRG(numIdentifiers*entryLength, rnd)
 
 	keysInfo := make([]*KeyInfo, numIdentifiers)
 	for i := 0; i < numIdentifiers; i++ {
@@ -146,7 +147,7 @@ func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		// By convention, this takes the form "Full Name (Comment) <email@example.com>"
 		// which is split out in the fields below.
 		// For testing purposes, only random email and other fields empty strings
-		id := packet.NewUserId("", "", utils.Ranstring(16))
+		id := packet.NewUserId("", "", utils.Ranstring(32))
 
 		keysInfo[i] = &KeyInfo{
 			UserId:       id,
@@ -164,7 +165,7 @@ func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 
 	return &DB{
 		KeysInfo: keysInfo,
-		Entries:  entries,
+		//Entries:  entries,
 		Info:     info,
 	}, nil
 }
