@@ -14,21 +14,14 @@ import (
 // Initialize client with this function
 // numBits represents the input domain for the function, i.e. the number
 // of bits to check
-// TODO: initialize PRF keys as in Dima's init() function, so that we don't
-// have to send the prfKeys to the server and we avoid initialization of PRF
-// keys every time we invoke the client. We can use the expand key function to
-// and replicate the same behaviour as the init function in the other library
 func ClientInitialize(blockLength int) *Fss {
 	f := new(Fss)
 	f.BlockLength = blockLength
 	initPRFLen := 4
-	f.PrfKeys = make([][]byte, initPRFLen)
 	// Create fixed AES blocks
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)
 	for i := uint(0); i < uint(initPRFLen); i++ {
-		f.PrfKeys[i] = make([]byte, aes.BlockSize)
-		rand.Read(f.PrfKeys[i])
-		block, err := aes.NewCipher(f.PrfKeys[i])
+		block, err := aes.NewCipher(PrfKeys[i])
 		if err != nil {
 			panic(err.Error())
 		}

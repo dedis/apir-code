@@ -21,7 +21,7 @@ type FSS struct {
 }
 
 // use variadic argument for cores to achieve backward compatibility
-func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FSS {
+func NewFSS(db *database.DB, serverNum byte, cores ...int) *FSS {
 	numCores := runtime.NumCPU()
 	if len(cores) > 0 {
 		numCores = cores[0]
@@ -32,7 +32,7 @@ func NewFSS(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *FS
 		cores:     numCores,
 		serverNum: serverNum,
 		// one value for the data, four values for the info-theoretic MAC
-		fss: authfss.ServerInitialize(prfKeys, 1+field.ConcurrentExecutions),
+		fss: authfss.ServerInitialize(1 + field.ConcurrentExecutions),
 	}
 
 }

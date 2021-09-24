@@ -11,9 +11,9 @@ import (
 	"github.com/lukechampine/fastxor"
 )
 
+var PrfKeys [][]byte
+
 type Fss struct {
-	// store keys used in fixedBlocks so that they can be sent to the server
-	PrfKeys     [][]byte
 	FixedBlocks []cipher.Block
 	N           uint
 	NumBits     uint   // number of bits in domain
@@ -49,6 +49,14 @@ type FssKeyEqMP struct {
 	NumParties uint
 	CW         [][]uint32 //Assume CW is 32-bit because f.M is 4. If you change f.M, you should change this
 	Sigma      [][]byte
+}
+
+func init() {
+	PrfKeys = [][]byte{
+		{2, 16, 223, 155, 240, 218, 18, 217, 66, 61, 95, 162, 213, 195, 169, 50},
+		{130, 178, 43, 30, 226, 225, 106, 13, 196, 22, 96, 191, 75, 100, 87, 221},
+		{227, 121, 10, 139, 215, 136, 201, 227, 253, 210, 170, 246, 215, 213, 65, 69},
+		{49, 194, 90, 224, 41, 253, 48, 252, 55, 167, 51, 93, 246, 176, 38, 220}}
 }
 
 // Helper functions

@@ -12,14 +12,11 @@ import (
 // Upon receiving query from client, initialize server with
 // this function. The server, unlike the client
 // receives prfKeys, so it doesn't need to pick random ones
-func ServerInitialize(prfKeys [][]byte) *Fss {
+func ServerInitialize() *Fss {
 	f := new(Fss)
-	f.PrfKeys = make([][]byte, initPRFLen)
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)
-	for i := range prfKeys {
-		f.PrfKeys[i] = make([]byte, aes.BlockSize)
-		copy(f.PrfKeys[i], prfKeys[i])
-		block, err := aes.NewCipher(f.PrfKeys[i])
+	for i := range PrfKeys {
+		block, err := aes.NewCipher(PrfKeys[i])
 		if err != nil {
 			panic(err.Error())
 		}

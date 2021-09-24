@@ -32,7 +32,7 @@ func TestPoint(t *testing.T) {
 	fssKeys := fClient.GenerateTreePF(index, b)
 
 	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, testBlockLength)
+	fServer := ServerInitialize(testBlockLength)
 
 	zeros := make([]uint32, bLen)
 	// test only part of the input space, impossible to do a complete test
@@ -81,7 +81,7 @@ func TestPointWithAlphaVector(t *testing.T) {
 	fssKeys := fClient.GenerateTreePF(index, b)
 
 	// Simulate server
-	fServer := ServerInitialize(fClient.PrfKeys, testBlockLength)
+	fServer := ServerInitialize(testBlockLength)
 
 	zeros := make([]uint32, bLen)
 	// test only random samples of the input space, impossible to do a complete test
