@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"log"
@@ -153,31 +154,31 @@ func (lc *localClient) exec() (string, error) {
 
 	// start correct client, which can be either IT or DPF.
 	switch lc.flags.scheme {
-	case "it":
-		lc.vpirClient = client.NewIT(lc.prg, lc.dbInfo)
-	case "dpf":
-		lc.vpirClient = client.NewFSS(lc.prg, lc.dbInfo)
-	case "pir-it", "merkle-it":
+	case "pointPIR", "pointVPIR":
 		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
-	case "pir-dpf", "merkle-dpf":
-		lc.vpirClient = client.NewPIRdpf(lc.prg, lc.dbInfo)
+
+		// get id
+		if lc.flags.id == "" {
+			var id string
+			fmt.Print("please enter the id: ")
+			fmt.Scanln(&id)
+			if id == "" {
+				log.Fatal("id not provided")
+			}
+			lc.flags.id = id
+		}
+
+		// retrieve the key corresponding to the id
+		return lc.retrieveKeyGivenId(lc.flags.id)
+	case "complexPIR":
+		lc.vpirClient = client.NewPIRfss(lc.prg, lc.dbInfo)
+		panic("not yet implemented")
+	case "complexVPIR":
+		lc.vpirClient = client.NewFSS(lc.prg, lc.dbInfo)
+		panic("not yet implemented")
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
-
-	// get id
-	if lc.flags.id == "" {
-		var id string
-		fmt.Print("please enter the id: ")
-		fmt.Scanln(&id)
-		if id == "" {
-			log.Fatal("id not provided")
-		}
-		lc.flags.id = id
-	}
-
-	// retrieve the key corresponding to the id
-	return lc.retrieveKeyGivenId(lc.flags.id)
 }
 
 func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
@@ -188,7 +189,9 @@ func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 	log.Printf("id: %s, hashKey: %d", id, hashKey)
 
 	// query given hash key
-	queries, err := lc.vpirClient.QueryBytes(hashKey, len(lc.connections))
+	in := make([]byte, 8)
+	binary.BigEndian.PutUint64(in, uint64(hashKey))
+	queries, err := lc.vpirClient.QueryBytes(in, len(lc.connections))
 	if err != nil {
 		return "", xerrors.Errorf("error when executing query: %v", err)
 	}
