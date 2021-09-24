@@ -41,7 +41,8 @@ func main() {
 	experiment := flag.Bool("experiment", false, "run setting for experiments")
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
 	cores := flag.Int("cores", -1, "number of cores to use")
-	vpirScheme := flag.String("scheme", "", "scheme to use: it, dpf, pir-it or pir-dpf")
+	scheme := flag.String("scheme", "", "scheme to use: it, dpf, pir-it or pir-dpf")
+	serverNum := flag.Int("server number", -1, "server number: 0, 1")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	mprof := flag.Bool("mprof", false, "Write memory prof file")
@@ -94,7 +95,7 @@ func main() {
 	// load the db
 	var db *database.DB
 	var dbBytes *database.Bytes
-	switch *vpirScheme {
+	switch *scheme {
 	case "pointPIR":
 		dbBytes, err = loadPgpBytes(*filesNumber, true)
 		if err != nil {
@@ -143,7 +144,7 @@ func main() {
 
 	// select correct server
 	var s server.Server
-	switch *vpirScheme {
+	switch *scheme {
 	case "pointPIR", "pointVPIR":
 		if *cores != -1 && *experiment {
 			s = server.NewPIR(dbBytes, *cores)
@@ -151,7 +152,17 @@ func main() {
 			s = server.NewPIR(dbBytes)
 		}
 	case "complexPIR":
+		if *cores != -1 && *experiment {
+			s = server.NewPIRfss(db, byte(*serverNum), *cores)
+		} else {
+			s = server.NewPIRfss(db, byte(*serverNum))
+		}
 	case "complexVPIR":
+		if *cores != -1 && *experiment {
+			s = server.NewFSS(db, byte(*serverNum), *cores)
+		} else {
+			s = server.NewFSS(db, byte(*serverNum))
+		}
 	default:
 		log.Fatal("unknow scheme")
 	}
