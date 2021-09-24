@@ -26,7 +26,7 @@ def plotPoint():
     schemes = ["pirClassic.json", "pirMerkle.json"]
     schemLabels = ["No-intergrity", "Authenticated"]
 
-    fig, axs = plt.subplots(2)
+    fig, axs = plt.subplots(2, sharex=True)
 
     cpuArray = []
     bwArray = []
@@ -36,18 +36,32 @@ def plotPoint():
         cpuArray.append([])
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
-            cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
-            cpuArray[i].append(cpu)
-            bwArray[i].append(bw/1000)
-        
-        axs[0].plot(sorted(stats.keys()), cpuArray[i], color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
-        axs[1].plot(sorted(stats.keys()), bwArray[i], color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
+            # means
+            cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpuArray[i].append(cpuMean)
+            bwArray[i].append(bwMean/1000)
+
+        axs[0].plot(
+                [x/pow(10, 6) for x in sorted(stats.keys())], 
+                cpuArray[i], 
+                color='black', 
+                linestyle=linestyles[int(i / (len(schemes) / 2))]
+        )
+        axs[1].plot(
+                [x/pow(10, 6) for x in sorted(stats.keys())], 
+                bwArray[i], 
+                color='black', 
+                linestyle=linestyles[int(i / (len(schemes) / 2))]
+        )
+
+    # cosmetics
+    axs[0].set_ylabel('CPU time [ms]')
+    axs[1].set_ylabel('Bandwidth [KiB]')
+    axs[1].set_xlabel('DB size [MiB]')
 
     plt.tight_layout()
     plt.savefig('point_bw.eps', format='eps', dpi=300, transparent=True)
-    # plt.show()
-
 
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
