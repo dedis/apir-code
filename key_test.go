@@ -106,8 +106,8 @@ func TestRealCountPublicKeyAlgorithmPIR(t *testing.T) {
 
 func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
 	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
-	s0 := server.NewPIRfss(db, 0, c.Fss.PrfKeys)
-	s1 := server.NewPIRfss(db, 1, c.Fss.PrfKeys)
+	s0 := server.NewPIRfss(db, 0)
+	s1 := server.NewPIRfss(db, 1)
 
 	totalTimer := monitor.NewMonitor()
 
@@ -136,8 +136,8 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 
 func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
 	c := client.NewFSS(utils.RandomPRG(), &db.Info)
-	s0 := server.NewFSS(db, 0, c.Fss.PrfKeys)
-	s1 := server.NewFSS(db, 1, c.Fss.PrfKeys)
+	s0 := server.NewFSS(db, 0)
+	s1 := server.NewFSS(db, 1)
 
 	totalTimer := monitor.NewMonitor()
 

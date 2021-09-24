@@ -16,13 +16,10 @@ import (
 // of bits to check
 func ClientInitialize() *Fss {
 	f := new(Fss)
-	f.PrfKeys = make([][]byte, initPRFLen)
 	// Create fixed AES blocks
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)
 	for i := uint(0); i < initPRFLen; i++ {
-		f.PrfKeys[i] = make([]byte, aes.BlockSize)
-		rand.Read(f.PrfKeys[i])
-		block, err := aes.NewCipher(f.PrfKeys[i])
+		block, err := aes.NewCipher(PrfKeys[i])
 		if err != nil {
 			panic(err.Error())
 		}

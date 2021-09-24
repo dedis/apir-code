@@ -13,15 +13,11 @@ import (
 // Upon receiving query from client, initialize server with
 // this function. The server, unlike the client
 // receives prfKeys, so it doesn't need to pick random ones
-func ServerInitialize(prfKeys [][]byte, blockLength int) *Fss {
+func ServerInitialize(blockLength int) *Fss {
 	f := new(Fss)
-	initPRFLen := len(prfKeys)
-	f.PrfKeys = make([][]byte, initPRFLen)
-	f.FixedBlocks = make([]cipher.Block, initPRFLen)
-	for i := range prfKeys {
-		f.PrfKeys[i] = make([]byte, aes.BlockSize)
-		copy(f.PrfKeys[i], prfKeys[i])
-		block, err := aes.NewCipher(f.PrfKeys[i])
+	f.FixedBlocks = make([]cipher.Block, len(PrfKeys))
+	for i := range PrfKeys {
+		block, err := aes.NewCipher(PrfKeys[i])
 		if err != nil {
 			panic(err.Error())
 		}
@@ -29,7 +25,7 @@ func ServerInitialize(prfKeys [][]byte, blockLength int) *Fss {
 	}
 	f.N = 256 // maximum number of bits supported by FSS
 	f.Temp = make([]byte, aes.BlockSize)
-	f.Out = make([]byte, aes.BlockSize*initPRFLen)
+	f.Out = make([]byte, aes.BlockSize*len(PrfKeys))
 	f.OutConvertBlock = make([]byte, blockLength*field.Bytes)
 
 	return f

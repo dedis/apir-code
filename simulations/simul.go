@@ -157,7 +157,7 @@ func main() {
 		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		switch s.Primitive {
 		case "pir-classic", "pir-merkle":
-			log.Printf("db info: %#v", dbBytes.Info)
+			//log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "fss-pir", "fss-vpir":
@@ -194,7 +194,7 @@ func main() {
 func fss(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	c := client.NewFSS(prg, &db.Info)
-	ss := makeFSSServers(db, c.Fss.PrfKeys)
+	ss := makeFSSServers(db)
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
@@ -411,13 +411,14 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 }
 
 // Converts number of bits to retrieve into the number of db blocks
+// TODO: check if correct
 func bitsToBlocks(blockSize, elemSize, numBits int) int {
-	return numBits / (blockSize * elemSize)
+	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
 }
 
-func makeFSSServers(db *database.DB, keys [][]byte) []*server.FSS {
-	s0 := server.NewFSS(db, 0, keys)
-	s1 := server.NewFSS(db, 1, keys)
+func makeFSSServers(db *database.DB) []*server.FSS {
+	s0 := server.NewFSS(db, 0)
+	s1 := server.NewFSS(db, 1)
 	return []*server.FSS{s0, s1}
 }
 

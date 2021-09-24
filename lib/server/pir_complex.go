@@ -22,7 +22,7 @@ type PIRfss struct {
 }
 
 // NewPIRfss initializes and returns a new server for FSS-based classical PIR
-func NewPIRfss(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) *PIRfss {
+func NewPIRfss(db *database.DB, serverNum byte, cores ...int) *PIRfss {
 	numCores := runtime.NumCPU()
 	if len(cores) > 0 {
 		numCores = cores[0]
@@ -33,7 +33,7 @@ func NewPIRfss(db *database.DB, serverNum byte, prfKeys [][]byte, cores ...int) 
 		cores:     numCores,
 		serverNum: serverNum,
 		// one value for the data, four values for the info-theoretic MAC
-		fss: fss.ServerInitialize(prfKeys),
+		fss: fss.ServerInitialize(),
 	}
 }
 

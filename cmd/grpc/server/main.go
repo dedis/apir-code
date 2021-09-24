@@ -15,7 +15,6 @@ import (
 	"runtime/pprof"
 	"syscall"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -41,15 +40,13 @@ func main() {
 	experiment := flag.Bool("experiment", false, "run setting for experiments")
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
 	cores := flag.Int("cores", -1, "number of cores to use")
-	vpirScheme := flag.String("scheme", "", "scheme to use: it, dpf, pir-it or pir-dpf")
+	scheme := flag.String("scheme", "", "scheme to use: it, dpf, pir-it or pir-dpf")
+	serverNum := flag.Int("server number", -1, "server number: 0, 1")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	mprof := flag.Bool("mprof", false, "Write memory prof file")
 
 	flag.Parse()
-
-	// TODO: remove
-	fmt.Println(*filesNumber)
 
 	// start profiling
 	if *prof {
@@ -97,43 +94,31 @@ func main() {
 	// load the db
 	var db *database.DB
 	var dbBytes *database.Bytes
-	switch *vpirScheme {
-	case "it":
-		db, err = loadPgpDB(*filesNumber, true)
-		if err != nil {
-			log.Fatalf("impossible to load real keys db: %v", err)
-		}
-		log.Printf("db size in GiB: %f", db.SizeGiB())
-	case "dpf":
-		db, err = loadPgpDB(*filesNumber, false)
-		if err != nil {
-			log.Fatalf("impossible to construct real keys db: %v", err)
-		}
-		log.Printf("db size in GiB: %f", db.SizeGiB())
-	case "pir-it":
+	switch *scheme {
+	case "pointPIR":
 		dbBytes, err = loadPgpBytes(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
 		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "pir-dpf":
-		dbBytes, err = loadPgpBytes(*filesNumber, false)
-		if err != nil {
-			log.Fatalf("impossible to construct real keys bytes db: %v", err)
-		}
-		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "merkle-it":
+	case "pointVPIR":
 		dbBytes, err = loadPgpMerkle(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
 		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "merkle-dpf":
-		dbBytes, err = loadPgpMerkle(*filesNumber, false)
+	case "complexPIR":
+		db, err = loadPgpDB(*filesNumber, true)
 		if err != nil {
-			log.Fatalf("impossible to construct real keys bytes db: %v", err)
+			log.Fatalf("impossible to load real keys db: %v", err)
 		}
-		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
+		log.Printf("db size in GiB: %f", db.SizeGiB())
+	case "complexVPIR":
+		db, err = loadPgpDB(*filesNumber, true)
+		if err != nil {
+			log.Fatalf("impossible to load real keys db: %v", err)
+		}
+		log.Printf("db size in GiB: %f", db.SizeGiB())
 	default:
 		log.Fatal("unknown scheme")
 	}
@@ -158,33 +143,27 @@ func main() {
 
 	// select correct server
 	var s server.Server
-	switch *vpirScheme {
-	case "it":
-		if *cores != -1 && *experiment {
-			s = server.NewIT(db, *cores)
-		} else {
-			s = server.NewIT(db)
-		}
-	case "dpf":
-		if *cores != -1 && *experiment {
-			s = server.NewDPF(db, *cores)
-		} else {
-			s = server.NewDPF(db)
-		}
-	case "pir-it", "merkle-it":
+	switch *scheme {
+	case "pointPIR", "pointVPIR":
 		if *cores != -1 && *experiment {
 			s = server.NewPIR(dbBytes, *cores)
 		} else {
 			s = server.NewPIR(dbBytes)
 		}
-	case "pir-dpf", "merkle-dpf":
+	case "complexPIR":
 		if *cores != -1 && *experiment {
-			s = server.NewPIRdpf(dbBytes, *cores)
+			s = server.NewPIRfss(db, byte(*serverNum), *cores)
 		} else {
-			s = server.NewPIRdpf(dbBytes)
+			s = server.NewPIRfss(db, byte(*serverNum))
+		}
+	case "complexVPIR":
+		if *cores != -1 && *experiment {
+			s = server.NewFSS(db, byte(*serverNum), *cores)
+		} else {
+			s = server.NewFSS(db, byte(*serverNum))
 		}
 	default:
-		log.Fatal("unknow VPIR type")
+		log.Fatal("unknow scheme")
 	}
 
 	// start server
@@ -284,7 +263,7 @@ func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 	// take only filesNumber files
 	files := getSksFiles(filesNumber)
 
-	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
+	db, err := database.GenerateRealKeyDB(files)
 	if err != nil {
 		return nil, err
 	}
