@@ -15,7 +15,6 @@ import (
 	"runtime/pprof"
 	"syscall"
 
-	"github.com/si-co/vpir-code/lib/constants"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -264,7 +263,7 @@ func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
 	// take only filesNumber files
 	files := getSksFiles(filesNumber)
 
-	db, err := database.GenerateRealKeyDB(files, constants.ChunkBytesLength, rebalanced)
+	db, err := database.GenerateRealKeyDB(files)
 	if err != nil {
 		return nil, err
 	}
