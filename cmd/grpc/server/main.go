@@ -48,9 +48,6 @@ func main() {
 
 	flag.Parse()
 
-	// TODO: remove
-	fmt.Println(*filesNumber)
-
 	// start profiling
 	if *prof {
 		utils.StartProfiling(fmt.Sprintf("server-%v.prof", *sid))
@@ -98,42 +95,30 @@ func main() {
 	var db *database.DB
 	var dbBytes *database.Bytes
 	switch *vpirScheme {
-	case "it":
-		db, err = loadPgpDB(*filesNumber, true)
-		if err != nil {
-			log.Fatalf("impossible to load real keys db: %v", err)
-		}
-		log.Printf("db size in GiB: %f", db.SizeGiB())
-	case "dpf":
-		db, err = loadPgpDB(*filesNumber, false)
-		if err != nil {
-			log.Fatalf("impossible to construct real keys db: %v", err)
-		}
-		log.Printf("db size in GiB: %f", db.SizeGiB())
-	case "pir-it":
+	case "pointPIR":
 		dbBytes, err = loadPgpBytes(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
 		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "pir-dpf":
-		dbBytes, err = loadPgpBytes(*filesNumber, false)
-		if err != nil {
-			log.Fatalf("impossible to construct real keys bytes db: %v", err)
-		}
-		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "merkle-it":
+	case "pointVPIR":
 		dbBytes, err = loadPgpMerkle(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
 		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "merkle-dpf":
-		dbBytes, err = loadPgpMerkle(*filesNumber, false)
+	case "complexPIR":
+		db, err = loadPgpDB(*filesNumber, true)
 		if err != nil {
-			log.Fatalf("impossible to construct real keys bytes db: %v", err)
+			log.Fatalf("impossible to load real keys db: %v", err)
 		}
-		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
+		log.Printf("db size in GiB: %f", db.SizeGiB())
+	case "complexVPIR":
+		db, err = loadPgpDB(*filesNumber, true)
+		if err != nil {
+			log.Fatalf("impossible to load real keys db: %v", err)
+		}
+		log.Printf("db size in GiB: %f", db.SizeGiB())
 	default:
 		log.Fatal("unknown scheme")
 	}
@@ -159,32 +144,16 @@ func main() {
 	// select correct server
 	var s server.Server
 	switch *vpirScheme {
-	case "it":
-		if *cores != -1 && *experiment {
-			s = server.NewIT(db, *cores)
-		} else {
-			s = server.NewIT(db)
-		}
-	case "dpf":
-		if *cores != -1 && *experiment {
-			s = server.NewDPF(db, *cores)
-		} else {
-			s = server.NewDPF(db)
-		}
-	case "pir-it", "merkle-it":
+	case "pointPIR", "pointVPIR":
 		if *cores != -1 && *experiment {
 			s = server.NewPIR(dbBytes, *cores)
 		} else {
 			s = server.NewPIR(dbBytes)
 		}
-	case "pir-dpf", "merkle-dpf":
-		if *cores != -1 && *experiment {
-			s = server.NewPIRdpf(dbBytes, *cores)
-		} else {
-			s = server.NewPIRdpf(dbBytes)
-		}
+	case "complexPIR":
+	case "complexVPIR":
 	default:
-		log.Fatal("unknow VPIR type")
+		log.Fatal("unknow scheme")
 	}
 
 	// start server
