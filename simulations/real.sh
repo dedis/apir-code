@@ -39,17 +39,16 @@ for scheme in pointPIR, pointVPIR; do
   # repeat experiment 10 times
   for i in {1..10}; do
     #echo "##### iteration $i running with $cores cores #####"
-    echo "##### iteration $i #####"
+    echo "  ##### iteration $i #####"
     #cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores -scheme=$scheme >> simulations/results/stats_client_$scheme.log
     cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -scheme=$scheme >> simulations/results/stats_client_$scheme.log
     sleep 5
   done
 
   # send sigterm to servers and trigger graceful stop
-  kill -TERM "$pid0"
-  kill -TERM "$pid1"
+  curl -s '127.0.0.1:8080' > /dev/null
   echo "sleeping to let server gracefully stops..."
   sleep 5
-  echo "##### done with $cores #####"
+  #echo "##### done with $cores #####"
   #done
 done
