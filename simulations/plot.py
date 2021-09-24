@@ -33,17 +33,16 @@ def plotPoint():
     x = []
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme) 
+        cpuArray.append([])
+        bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
             cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
             bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
-            cpuArray.append(cpu)
-            bwArray.append(bw/1000)
+            cpuArray[i].append(cpu)
+            bwArray[i].append(bw/1000)
         
-        print("x:", sorted(stats.keys()))
-        print("bw:", bwArray)
-        print("cpu:", cpuArray)
-        axs[0].plot(sorted(stats.keys()), cpuArray, color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
-        axs[1].plot(sorted(stats.keys()), bwArray, color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
+        axs[0].plot(sorted(stats.keys()), cpuArray[i], color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
+        axs[1].plot(sorted(stats.keys()), bwArray[i], color='black', linestyle=linestyles[int(i / (len(schemes) / 2))])
 
     plt.tight_layout()
     plt.savefig('point_bw.eps', format='eps', dpi=300, transparent=True)
