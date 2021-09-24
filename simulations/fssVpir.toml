@@ -3,3 +3,4 @@ Primitive = "fss-vpir"
 NumRows = 1
 BlockLength = 2
 ElementBitSize = 31
+InputSizes = [2, 4, 8, 16]

@@ -15,14 +15,13 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/si-co/vpir-code/lib/query"
-
 	"github.com/BurntSushi/toml"
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
+	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 )
@@ -41,6 +40,7 @@ type individualParam struct {
 	NumRows        int
 	BlockLength    int
 	ElementBitSize int
+	InputSizes      []int // FSS input sizes in bytes
 }
 
 type Simulation struct {
@@ -162,7 +162,7 @@ func main() {
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "fss-pir", "fss-vpir":
 			log.Printf("db info: %#v", db.Info)
-			results = fss(db, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			results = fss(db, s.InputSizes, s.Repetitions)
 		case "cmp-pir":
 			log.Printf("db info: %#v", dbRing.Info)
 			results = pirLattice(dbRing, s.Repetitions)
@@ -191,55 +191,52 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
-func fss(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
+func fss(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	c := client.NewFSS(prg, &db.Info)
 	ss := makeFSSServers(db)
-
-	numRetrieveBlocks := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
-	DOMAIN_TO_SEARCH := "epfl.ch"
-	in := utils.ByteToBits([]byte(DOMAIN_TO_SEARCH))
+	stringToSearch := utils.Ranstring(inputSizes[0])
+
+	in := utils.ByteToBits([]byte(stringToSearch))
 	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromEnd: len(DOMAIN_TO_SEARCH)},
+		Info:  &query.Info{Target: query.UserId, FromStart: inputSizes[0]},
 		Input: in,
 	}
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = initChunk(numRetrieveBlocks)
-		for i := 0; i < numRetrieveBlocks; i++ {
-			results[j].CPU[i] = initBlock(len(ss))
-			results[j].Bandwidth[i] = initBlock(len(ss))
+		results[j] = initChunk(1)
+		results[j].CPU[0] = initBlock(len(ss))
+		results[j].Bandwidth[0] = initBlock(len(ss))
 
-			m.Reset()
-			queries := c.Query(q, 2)
-			results[j].CPU[i].Query = m.RecordAndReset()
-			for r := range queries {
-				results[j].Bandwidth[i].Query += fssQueryByteLength(queries[r])
-			}
-
-			// get servers answers
-			answers := make([][]uint32, len(ss))
-			for k := range ss {
-				m.Reset()
-				answers[k] = ss[k].Answer(queries[k])
-				results[j].CPU[i].Answers[k] = m.RecordAndReset()
-				results[j].Bandwidth[i].Answers[k] = fieldVectorByteLength(answers[k])
-			}
-
-			m.Reset()
-			_, err := c.Reconstruct(answers)
-			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-			if err != nil {
-				log.Fatal(err)
-			}
-			results[j].Bandwidth[i].Reconstruct = 0
+		m.Reset()
+		queries := c.Query(q, 2)
+		results[j].CPU[0].Query = m.RecordAndReset()
+		for r := range queries {
+			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
 		}
+
+		// get servers answers
+		answers := make([][]uint32, len(ss))
+		for k := range ss {
+			m.Reset()
+			answers[k] = ss[k].Answer(queries[k])
+			results[j].CPU[0].Answers[k] = m.RecordAndReset()
+			results[j].Bandwidth[0].Answers[k] = fieldVectorByteLength(answers[k])
+		}
+
+		m.Reset()
+		_, err := c.Reconstruct(answers)
+		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].Bandwidth[0].Reconstruct = 0
 
 		// GC after each repetition
 		runtime.GC()
