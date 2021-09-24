@@ -23,8 +23,6 @@ type Fss struct {
 	OutConvertBlock []byte // to gather random bytes in convertBlock, allocate once for performance
 }
 
-//const initPRFLen uint = 4
-
 // Structs for keys
 type FssKeyEq2P struct {
 	SInit   []byte
