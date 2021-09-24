@@ -7,7 +7,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"math"
 
 	"github.com/si-co/vpir-code/lib/field"
 )
@@ -22,10 +21,7 @@ import (
 func ClientInitialize(blockLength int) *Fss {
 	f := new(Fss)
 	f.BlockLength = blockLength
-	initPRFLen := int(math.Ceil(float64(blockLength / field.Bytes)))
-	if initPRFLen < 4 {
-		initPRFLen = 4
-	}
+	initPRFLen := 4
 	f.PrfKeys = make([][]byte, initPRFLen)
 	// Create fixed AES blocks
 	f.FixedBlocks = make([]cipher.Block, initPRFLen)
