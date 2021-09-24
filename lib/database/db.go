@@ -3,11 +3,12 @@ package database
 import (
 	"crypto"
 	"encoding/binary"
-	"golang.org/x/xerrors"
 	"io"
 	"math"
 	"math/rand"
 	"time"
+
+	"golang.org/x/xerrors"
 
 	"github.com/cloudflare/circl/group"
 	"github.com/ldsec/lattigo/v2/bfv"
@@ -77,8 +78,8 @@ func NewKeysDB(info Info) *DB {
 
 func NewBitsDB(info Info) *DB {
 	return &DB{
-		Info:     info,
-		Entries:  make([]uint32, info.NumRows*info.NumColumns*info.BlockSize),
+		Info:    info,
+		Entries: make([]uint32, info.NumRows*info.NumColumns*info.BlockSize),
 	}
 }
 
@@ -186,4 +187,8 @@ func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns
 		numRows = 1
 	}
 	return
+}
+
+func (d *DB) SizeGiB() float64 {
+	return float64(len(d.Entries)*16) * 9.313e-10
 }
