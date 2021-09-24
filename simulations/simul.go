@@ -194,7 +194,7 @@ func main() {
 func fss(db *database.DB, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	c := client.NewFSS(prg, &db.Info)
-	ss := makeFSSServers(db, c.Fss.PrfKeys)
+	ss := makeFSSServers(db)
 
 	numRetrieveBlocks := bitsToBlocks(db.BlockSize, elemBitSize, numBitsToRetrieve)
 
@@ -419,9 +419,9 @@ func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
 }
 
-func makeFSSServers(db *database.DB, keys [][]byte) []*server.FSS {
-	s0 := server.NewFSS(db, 0, keys)
-	s1 := server.NewFSS(db, 1, keys)
+func makeFSSServers(db *database.DB) []*server.FSS {
+	s0 := server.NewFSS(db, 0)
+	s1 := server.NewFSS(db, 1)
 	return []*server.FSS{s0, s1}
 }
 
