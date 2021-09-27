@@ -7,6 +7,10 @@ point:
 	$(MAKE) -s run_simul config=pirClassic.toml; \
 	$(MAKE) -s run_simul config=pirMerkle.toml \
 
+complex:
+	$(MAKE) -s run_simul config=fssPir.toml; \
+	$(MAKE) -s run_simul config=fssVpir.toml \
+
 performance:
 	$(MAKE) -s run_simul config=vpirMultiMatrixBlock.toml; \
 	$(MAKE) -s run_simul config=vpirMultiVectorBlockDPF.toml; \

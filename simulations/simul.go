@@ -30,8 +30,8 @@ const generalConfigFile = "simul.toml"
 
 type generalParam struct {
 	DBBitLengths   []int
-	Repetitions    int
 	BitsToRetrieve int
+	Repetitions    int
 }
 
 type individualParam struct {
@@ -40,7 +40,7 @@ type individualParam struct {
 	NumRows        int
 	BlockLength    int
 	ElementBitSize int
-	InputSizes      []int // FSS input sizes in bytes
+	InputSizes     []int // FSS input sizes in bytes
 }
 
 type Simulation struct {
@@ -134,7 +134,12 @@ func main() {
 			}
 		case "fss":
 			// TODO: update config or db creation to match dbLen params, or vice versa
-			db, err = database.CreateRandomKeysDB(dbPRG, numBlocks)
+			// TODO (Simone): I would fix the number of identifiers
+			// here to e.g. 100k, instead of using the numBlocks
+			// variable
+			numIdenfitiers := 100000
+			//db, err = database.CreateRandomKeysDB(dbPRG, numBlocks)
+			db, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
 			if err != nil {
 				panic(err)
 			}
@@ -154,14 +159,16 @@ func main() {
 
 		// run experiment
 		var results []*Chunk
-		log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits", s.Primitive, dbLen)
 		switch s.Primitive {
 		case "pir-classic", "pir-merkle":
+			log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits",
+				s.Primitive, dbLen)
+			// TODO (Simone): avoid printing BlockLengths, too verbose
 			//log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "fss-pir", "fss-vpir":
-			log.Printf("db info: %#v", db.Info)
+			// TODO (Simone): avoid printing BlockLengths, too verbose
 			// In FSS, we iterate over input sizes instead of db sizes
 			for _, inputSize := range s.InputSizes {
 				results = fss(db, inputSize, s.Repetitions)
@@ -199,6 +206,7 @@ func main() {
 
 func fss(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
+	// TODO (Simone): should differentiate with respect to authenticated or not
 	c := client.NewFSS(prg, &db.Info)
 	ss := makeFSSServers(db)
 
@@ -492,14 +500,11 @@ func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
 	return &Simulation{generalParam: *genConfig, individualParam: *indConfig}, nil
 }
 
-// TODO: update
 func (s *Simulation) validSimulation() bool {
 	return s.Primitive == "pir-classic" ||
 		s.Primitive == "pir-merkle" ||
-		s.Primitive == "vpir-it" ||
-		s.Primitive == "vpir-dpf" ||
-		s.Primitive == "pir-it" ||
-		s.Primitive == "pir-it-merkle" ||
+		s.Primitive == "fss-pir" ||
+		s.Primitive == "fss-vpir" ||
 		s.Primitive == "cmp-pir" ||
 		s.Primitive == "cmp-vpir"
 }
