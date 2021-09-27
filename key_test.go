@@ -5,9 +5,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/pprof"
 	"testing"
 	"time"
 
@@ -111,6 +114,15 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 
 	totalTimer := monitor.NewMonitor()
 
+	f, err := os.Create("complexPIR.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+	defer pprof.StopCPUProfile()
+
 	// compute the input query
 	in, err := q.Encode()
 	require.NoError(t, err)
@@ -140,6 +152,15 @@ func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	s1 := server.NewFSS(db, 1)
 
 	totalTimer := monitor.NewMonitor()
+
+	f, err := os.Create("complexVPIR.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+	defer pprof.StopCPUProfile()
 
 	// compute the input of the query
 	in, err := q.Encode()
