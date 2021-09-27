@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"math/bits"
 	"math/rand"
 	"os"
 	"path"
@@ -13,7 +14,6 @@ import (
 	"runtime/pprof"
 	"runtime/trace"
 	"time"
-	"unsafe"
 
 	"github.com/BurntSushi/toml"
 	"github.com/cloudflare/circl/group"
@@ -245,7 +245,7 @@ func fssVPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 		queries := c.Query(q, 2)
 		results[j].CPU[0].Query = m.RecordAndReset()
 		for r := range queries {
-			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
+			results[j].Bandwidth[0].Query += authFssQueryByteLength(queries[r])
 		}
 
 		// get servers answers
@@ -301,24 +301,21 @@ func fssPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 		queries := c.Query(q, 2)
 		results[j].CPU[0].Query = m.RecordAndReset()
 		for r := range queries {
-			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
+			results[j].Bandwidth[0].Query += classicFssQueryByteLength(queries[r])
 		}
 
 		// get servers answers
-		answers := make([][]uint32, len(ss))
+		answers := make([]int, len(ss))
 		for k := range ss {
 			m.Reset()
 			answers[k] = ss[k].Answer(queries[k])
 			results[j].CPU[0].Answers[k] = m.RecordAndReset()
-			results[j].Bandwidth[0].Answers[k] = fieldVectorByteLength(answers[k])
+			results[j].Bandwidth[0].Answers[k] = float64(bits.UintSize / 8)
 		}
 
 		m.Reset()
-		_, err := c.Reconstruct(answers)
+		_ = c.Reconstruct(answers)
 		results[j].CPU[0].Reconstruct = m.RecordAndReset()
-		if err != nil {
-			log.Fatal(err)
-		}
 		results[j].Bandwidth[0].Reconstruct = 0
 
 		// GC after each repetition
@@ -504,7 +501,23 @@ func makePIRServers(db *database.Bytes) []*server.PIR {
 	return []*server.PIR{s0, s1}
 }
 
-func fssQueryByteLength(q *query.AuthFSS) float64 {
+func classicFssQueryByteLength(q *query.FSS) float64 {
+	totalLen := 0
+
+	// Count the bytes of FssKey
+	totalLen += len(q.FssKey.SInit)
+	totalLen += 1 // q.FssKey.TInit
+	for i := range q.FssKey.CW {
+		totalLen += len(q.FssKey.CW[i])
+	}
+	totalLen += bits.UintSize / 8 // q.FssKey.FinalCW
+
+	totalLen += infoSizeByte(q.Info)
+
+	return float64(totalLen)
+}
+
+func authFssQueryByteLength(q *query.AuthFSS) float64 {
 	totalLen := 0
 
 	// Count the bytes of FssKey
@@ -515,17 +528,25 @@ func fssQueryByteLength(q *query.AuthFSS) float64 {
 		totalLen += len(q.FssKey.CW[i])
 	}
 
-	// Count the bytes of AdditionalInformationFSS
+	// Count the bytes of Info
+	totalLen += infoSizeByte(q.Info)
+
+	return float64(totalLen)
+}
+
+func infoSizeByte(q *query.Info) int {
+	totalLen := 0
+	// Count the bytes of Info
 	// q.Target and q.Targets are uint8 and []uint8,
 	// respectively
 	totalLen += len(q.Targets) + 1 // q.Target
 	// The size of int is platform dependent
-	totalLen += int(unsafe.Sizeof(q.FromStart))
-	totalLen += int(unsafe.Sizeof(q.FromEnd))
+	totalLen += bits.UintSize / 8 //q.FromStart
+	totalLen += bits.UintSize / 8 // q.FromEnd
 	// And is bool
 	totalLen += 1
 
-	return float64(totalLen)
+	return totalLen
 }
 
 func fieldVectorByteLength(vec []uint32) float64 {
