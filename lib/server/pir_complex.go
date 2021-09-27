@@ -6,8 +6,9 @@ import (
 	"encoding/gob"
 	"runtime"
 
+	"github.com/si-co/vpir-code/lib/authfss"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/fss"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
 )
@@ -18,7 +19,7 @@ type PIRfss struct {
 	cores int
 
 	serverNum byte
-	fss       *fss.Fss
+	fss       *authfss.Fss
 }
 
 // NewPIRfss initializes and returns a new server for FSS-based classical PIR
@@ -32,8 +33,7 @@ func NewPIRfss(db *database.DB, serverNum byte, cores ...int) *PIRfss {
 		db:        db,
 		cores:     numCores,
 		serverNum: serverNum,
-		// one value for the data, four values for the info-theoretic MAC
-		fss: fss.ServerInitialize(),
+		fss:       authfss.ServerInitialize(1), // only one value for data
 	}
 }
 
@@ -55,17 +55,18 @@ func (s *PIRfss) AnswerBytes(q []byte) ([]byte, error) {
 	a := s.Answer(query)
 
 	// encode answer
-	out := make([]byte, 8)
-	binary.BigEndian.PutUint64(out, uint64(a))
+	out := make([]byte, 4)
+	binary.BigEndian.PutUint32(out, a)
 
 	return out, nil
 }
 
 // Answer computes the answer for the given query
-func (s *PIRfss) Answer(q *query.FSS) int {
+func (s *PIRfss) Answer(q *query.FSS) uint32 {
 	numIdentifiers := s.db.NumColumns
 
-	out := 0
+	out := uint32(0)
+	tmp := []uint32{0}
 
 	if !q.And {
 		switch q.Target {
@@ -77,13 +78,15 @@ func (s *PIRfss) Answer(q *query.FSS) int {
 				if !valid {
 					continue
 				}
-				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
+				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+				out = (out + tmp[0]) % field.ModP
 			}
 			return out
 		case query.PubKeyAlgo:
 			for i := 0; i < numIdentifiers; i++ {
 				id := q.IdForPubKeyAlgo(s.db.KeysInfo[i].PubKeyAlgo)
-				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
+				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+				out = (out + tmp[0]) % field.ModP
 			}
 			return out
 		case query.CreationTime:
@@ -92,7 +95,8 @@ func (s *PIRfss) Answer(q *query.FSS) int {
 				if err != nil {
 					panic("impossible to marshal creation date")
 				}
-				out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
+				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+				out = (out + tmp[0]) % field.ModP
 			}
 			return out
 		default:
@@ -106,8 +110,8 @@ func (s *PIRfss) Answer(q *query.FSS) int {
 			}
 			binaryMatch = append(binaryMatch, byte(s.db.KeysInfo[i].PubKeyAlgo))
 			id := utils.ByteToBits(binaryMatch)
-			out += s.fss.EvaluatePF(s.serverNum, q.FssKey, id)
-
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+			out = (out + tmp[0]) % field.ModP
 		}
 		return out
 	}

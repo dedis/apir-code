@@ -309,7 +309,7 @@ func fssPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 		}
 
 		// get servers answers
-		answers := make([]int, len(ss))
+		answers := make([]uint32, len(ss))
 		for k := range ss {
 			m.Reset()
 			answers[k] = ss[k].Answer(queries[k])
@@ -521,7 +521,7 @@ func classicFssQueryByteLength(q *query.FSS) float64 {
 	return float64(totalLen)
 }
 
-func authFssQueryByteLength(q *query.AuthFSS) float64 {
+func authFssQueryByteLength(q *query.FSS) float64 {
 	totalLen := 0
 
 	// Count the bytes of FssKey

@@ -7,7 +7,6 @@ import (
 
 	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/authfss"
-	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 )
@@ -25,15 +24,15 @@ type ClientFSS struct {
 	Input []bool
 }
 
-type AuthFSS struct {
+type FSS struct {
 	*Info
 	FssKey authfss.FssKeyEq2P
 }
 
-type FSS struct {
-	*Info
-	FssKey fss.FssKeyEq2P
-}
+// type FSS struct {
+// 	*Info
+// 	FssKey authfss.FssKeyEq2P
+// }
 
 type Info struct {
 	Target             Target
@@ -61,18 +60,6 @@ func DecodeClientFSS(in []byte) (*ClientFSS, error) {
 	}
 
 	return v, nil
-}
-
-func (q *AuthFSS) IdForEmail(email string) ([]bool, bool) {
-	return q.Info.IdForEmail(email)
-}
-
-func (q *AuthFSS) IdForPubKeyAlgo(pka packet.PublicKeyAlgorithm) []bool {
-	return q.Info.IdForPubKeyAlgo(pka)
-}
-
-func (q *AuthFSS) IdForCreationTime(t time.Time) ([]bool, error) {
-	return q.Info.IdForCreationTime(t)
 }
 
 func (q *FSS) IdForEmail(email string) ([]bool, bool) {

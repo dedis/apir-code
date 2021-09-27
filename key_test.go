@@ -143,7 +143,7 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 
 	// verify result
 	count := localResult(db, q.Info, match)
-	require.Equal(t, count, res.(int))
+	require.Equal(t, count, res.(uint32))
 }
 
 func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
@@ -181,7 +181,7 @@ func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	fmt.Printf("TotalCPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
 
 	// verify result
-	count := uint32(localResult(db, q.Info, match))
+	count := localResult(db, q.Info, match)
 	require.Equal(t, count, res.(uint32))
 }
 
@@ -238,8 +238,8 @@ func pkaMatch(db *database.DB) (packet.PublicKeyAlgorithm, *query.ClientFSS) {
 	return match, q
 }
 
-func localResult(db *database.DB, q *query.Info, match interface{}) int {
-	count := 0
+func localResult(db *database.DB, q *query.Info, match interface{}) uint32 {
+	count := uint32(0)
 	for _, k := range db.KeysInfo {
 		if !q.And {
 			switch q.Target {

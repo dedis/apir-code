@@ -61,7 +61,7 @@ func (c *FSS) QueryBytes(in []byte, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.AuthFSS {
+func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -80,7 +80,7 @@ func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.AuthFSS {
 	// generate FSS keys
 	fssKeys := c.Fss.GenerateTreePF(q.Input, c.state.a)
 
-	return []*query.AuthFSS{
+	return []*query.FSS{
 		{Info: q.Info, FssKey: fssKeys[0]},
 		{Info: q.Info, FssKey: fssKeys[1]},
 	}

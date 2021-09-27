@@ -45,7 +45,7 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query
 	buf := bytes.NewBuffer(q)
 	dec := gob.NewDecoder(buf)
-	var query *query.AuthFSS
+	var query *query.FSS
 	if err := dec.Decode(&query); err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
 }
 
 // TODO: refactor this function
-func (s *FSS) Answer(q *query.AuthFSS) []uint32 {
+func (s *FSS) Answer(q *query.FSS) []uint32 {
 	numIdentifiers := s.db.NumColumns
 
 	out := make([]uint32, 1+field.ConcurrentExecutions)

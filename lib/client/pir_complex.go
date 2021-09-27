@@ -7,8 +7,9 @@ import (
 	"io"
 	"log"
 
+	"github.com/si-co/vpir-code/lib/authfss"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/fss"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/query"
 )
 
@@ -18,7 +19,7 @@ type PIRfss struct {
 	dbInfo *database.Info
 	state  *state
 
-	Fss *fss.Fss
+	Fss *authfss.Fss
 }
 
 // NewPIRfss returns a new client for the DPF-base multi-bit classical PIR
@@ -28,7 +29,7 @@ func NewPIRfss(rnd io.Reader, info *database.Info) *PIRfss {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		Fss:    fss.ClientInitialize(),
+		Fss:    authfss.ClientInitialize(1), // only one value
 	}
 }
 
@@ -63,7 +64,7 @@ func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 		log.Fatal("invalid query inputs")
 	}
 
-	fssKeys := c.Fss.GenerateTreePF(q.Input)
+	fssKeys := c.Fss.GenerateTreePF(q.Input, []uint32{1})
 
 	return []*query.FSS{
 		{Info: q.Info, FssKey: fssKeys[0]},
@@ -73,15 +74,15 @@ func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 
 // ReconstructBytes returns []byte
 func (c *PIRfss) ReconstructBytes(answers [][]byte) (interface{}, error) {
-	in := make([]int, 2)
+	in := make([]uint32, 2)
 	for i, a := range answers {
-		in[i] = int(binary.BigEndian.Uint64(a))
+		in[i] = binary.BigEndian.Uint32(a)
 	}
 
 	return c.Reconstruct(in), nil
 }
 
 // Reconstruct reconstruct the entry of the database from answers
-func (c *PIRfss) Reconstruct(answers []int) int {
-	return answers[0] + answers[1]
+func (c *PIRfss) Reconstruct(answers []uint32) uint32 {
+	return (answers[0] + answers[1]) % field.ModP
 }
