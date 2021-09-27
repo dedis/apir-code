@@ -73,7 +73,7 @@ func saveKeyIfValid(e *openpgp.Entity, keyMap map[string]*openpgp.Entity) {
 	if email == "" {
 		return
 	}
-	// TODO: Should we skip expired keys?
+
 	//expired, email = isExpired(e)
 	//if expired {
 	//	return
