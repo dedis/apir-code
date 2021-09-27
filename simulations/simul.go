@@ -249,7 +249,7 @@ func fssVPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 		queries := c.Query(q, 2)
 		results[j].CPU[0].Query = m.RecordAndReset()
 		for r := range queries {
-			results[j].Bandwidth[0].Query += authFssQueryByteLength(queries[r])
+			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
 		}
 
 		// get servers answers
@@ -305,7 +305,7 @@ func fssPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 		queries := c.Query(q, 2)
 		results[j].CPU[0].Query = m.RecordAndReset()
 		for r := range queries {
-			results[j].Bandwidth[0].Query += classicFssQueryByteLength(queries[r])
+			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
 		}
 
 		// get servers answers
@@ -505,23 +505,7 @@ func makePIRServers(db *database.Bytes) []*server.PIR {
 	return []*server.PIR{s0, s1}
 }
 
-func classicFssQueryByteLength(q *query.FSS) float64 {
-	totalLen := 0
-
-	// Count the bytes of FssKey
-	totalLen += len(q.FssKey.SInit)
-	totalLen += 1 // q.FssKey.TInit
-	for i := range q.FssKey.CW {
-		totalLen += len(q.FssKey.CW[i])
-	}
-	totalLen += bits.UintSize / 8 // q.FssKey.FinalCW
-
-	totalLen += infoSizeByte(q.Info)
-
-	return float64(totalLen)
-}
-
-func authFssQueryByteLength(q *query.FSS) float64 {
+func fssQueryByteLength(q *query.FSS) float64 {
 	totalLen := 0
 
 	// Count the bytes of FssKey

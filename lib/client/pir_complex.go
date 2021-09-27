@@ -7,9 +7,9 @@ import (
 	"io"
 	"log"
 
-	"github.com/si-co/vpir-code/lib/authfss"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 )
 
@@ -19,7 +19,7 @@ type PIRfss struct {
 	dbInfo *database.Info
 	state  *state
 
-	Fss *authfss.Fss
+	Fss *fss.Fss
 }
 
 // NewPIRfss returns a new client for the DPF-base multi-bit classical PIR
@@ -29,7 +29,7 @@ func NewPIRfss(rnd io.Reader, info *database.Info) *PIRfss {
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
-		Fss:    authfss.ClientInitialize(1), // only one value
+		Fss:    fss.ClientInitialize(1), // only one value
 	}
 }
 

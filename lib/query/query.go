@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/nikirill/go-crypto/openpgp/packet"
-	"github.com/si-co/vpir-code/lib/authfss"
+	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 )
@@ -26,13 +26,8 @@ type ClientFSS struct {
 
 type FSS struct {
 	*Info
-	FssKey authfss.FssKeyEq2P
+	FssKey fss.FssKeyEq2P
 }
-
-// type FSS struct {
-// 	*Info
-// 	FssKey authfss.FssKeyEq2P
-// }
 
 type Info struct {
 	Target             Target

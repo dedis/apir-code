@@ -1,4 +1,4 @@
-package authfss
+package fss
 
 // Source: https://github.com/frankw2/libfss/blob/master/go/test_fss/test_fss.go
 

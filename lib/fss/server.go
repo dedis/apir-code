@@ -1,4 +1,4 @@
-package authfss
+package fss
 
 // This file contains the server side code for authenticated the FSS library.
 // Source: https://github.com/frankw2/libfss/blob/master/go/libfss/server.go

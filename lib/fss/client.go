@@ -1,4 +1,4 @@
-package authfss
+package fss
 
 // This file contains all the client code for the authenticated FSS scheme.
 // Source: https://github.com/frankw2/libfss/blob/master/go/libfss/client.go

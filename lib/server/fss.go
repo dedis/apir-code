@@ -5,9 +5,9 @@ import (
 	"encoding/gob"
 	"runtime"
 
-	"github.com/si-co/vpir-code/lib/authfss"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
 )
@@ -17,7 +17,7 @@ type FSS struct {
 	cores int
 
 	serverNum byte
-	fss       *authfss.Fss
+	fss       *fss.Fss
 }
 
 // use variadic argument for cores to achieve backward compatibility
@@ -32,7 +32,7 @@ func NewFSS(db *database.DB, serverNum byte, cores ...int) *FSS {
 		cores:     numCores,
 		serverNum: serverNum,
 		// one value for the data, four values for the info-theoretic MAC
-		fss: authfss.ServerInitialize(1 + field.ConcurrentExecutions),
+		fss: fss.ServerInitialize(1 + field.ConcurrentExecutions),
 	}
 
 }
