@@ -61,7 +61,7 @@ def plotPoint():
     axs[1].set_xlabel('DB size [MiB]')
 
     plt.tight_layout()
-    plt.savefig('point_bw.eps', format='eps', dpi=300, transparent=True)
+    plt.savefig('point.eps', format='eps', dpi=300, transparent=True)
 
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
