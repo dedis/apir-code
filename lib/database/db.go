@@ -82,15 +82,6 @@ func NewBitsDB(info Info) *DB {
 	}
 }
 
-func NewInfo(nRows, nCols, bSize int) Info {
-	return Info{
-		NumRows:      nRows,
-		NumColumns:   nCols,
-		BlockSize:    bSize,
-		BlockLengths: make([]int, nRows*nCols),
-	}
-}
-
 func CreateRandomBitsDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, error) {
 	numColumns := dbLen / (8 * field.Bytes * numRows * blockLen)
 	// handle very small db
@@ -126,12 +117,6 @@ func CreateRandomBitsDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, error
 
 func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	rand.Seed(time.Now().UnixNano())
-	entryLength := 2
-
-	// create random keys
-	// for random db use 2048 bits = 64 uint32 elements
-	// Comment out for now as the entries are not needed for experiments, only the info
-	//entries := field.RandVectorWithPRG(numIdentifiers*entryLength, rnd)
 
 	keysInfo := make([]*KeyInfo, numIdentifiers)
 	for i := 0; i < numIdentifiers; i++ {
@@ -156,17 +141,12 @@ func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 		}
 	}
 
-	// in this case lengths are all equal
-	// TODO: here for compatibility reasons, FIX
-	info := NewInfo(1, numIdentifiers, entryLength)
-	for i := range info.BlockLengths {
-		info.BlockLengths[i] = entryLength
-	}
+	// only information needed for FSS-based schemes
+	info := Info{NumColumns: numIdentifiers}
 
 	return &DB{
 		KeysInfo: keysInfo,
-		//Entries:  entries,
-		Info: info,
+		Info:     info,
 	}, nil
 }
 

@@ -26,12 +26,9 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	// all the servers end up with an identical hash table.
 	sortById(keys)
 
-	// decide on the length of the hash table
-	numRows := 1
-	numColumns := len(keys) // one column per identifier
-
+	// only information needed for FSS-based schemes
+	info := Info{NumColumns: len(keys)}
 	// create empty database
-	info := NewInfo(numRows, numColumns, 0)
 	db := NewKeysDB(info)
 
 	// iterate and embed keys
@@ -47,9 +44,6 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 
 		db.KeysInfo = append(db.KeysInfo, keyInfo)
 	}
-
-	// TODO: avoid constant here
-	db.Info.BlockSize = 2
 
 	return db, nil
 }
