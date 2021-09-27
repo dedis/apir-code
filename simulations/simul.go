@@ -103,7 +103,7 @@ func main() {
 	experiment := &Experiment{Results: make(map[int][]*Chunk, 0)}
 
 	// range over all the DB lengths specified in the general simulation config
-	for _, dl := range s.DBBitLengths {
+	dbSizesLoop: for _, dl := range s.DBBitLengths {
 		// compute database data
 		dbLen := dl
 		blockLen := s.BlockLength
@@ -169,10 +169,20 @@ func main() {
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "fss-pir":
 			// TODO (Simone): avoid printing BlockLengths, too verbose
+<<<<<<< HEAD
 			//log.Printf("db info: %#v", db.Info)
 			results = fssPIR(db, s.InputSizes, s.Repetitions)
 		case "fss-vpir":
 			results = fssVPIR(db, s.InputSizes, s.Repetitions)
+=======
+			// In FSS, we iterate over input sizes instead of db sizes
+			for _, inputSize := range s.InputSizes {
+				results = fss(db, inputSize, s.Repetitions)
+				experiment.Results[inputSize] = results
+			}
+			// Skip the rest of the loop
+			break dbSizesLoop
+>>>>>>> 9e0081ef2951132070f1308e73a288d1e29f0675
 		case "cmp-pir":
 			log.Printf("db info: %#v", dbRing.Info)
 			results = pirLattice(dbRing, s.Repetitions)
@@ -201,6 +211,7 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
+<<<<<<< HEAD
 func fssVPIR(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
 	c := client.NewFSS(utils.RandomPRG(), &db.Info)
 	ss := []*server.FSS{server.NewFSS(db, 0), server.NewFSS(db, 1)}
@@ -263,20 +274,31 @@ func fssVPIR(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
 func fssPIR(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
 	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
 	ss := []*server.PIRfss{server.NewPIRfss(db, 0), server.NewPIRfss(db, 1)}
+=======
+func fss(db *database.DB, inputSize int, nRepeat int) []*Chunk {
+	prg := utils.RandomPRG()
+	// TODO (Simone): should differentiate with respect to authenticated or not
+	c := client.NewFSS(prg, &db.Info)
+	ss := makeFSSServers(db)
+>>>>>>> 9e0081ef2951132070f1308e73a288d1e29f0675
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
+<<<<<<< HEAD
 	// TODO (Simone): is this the best way to evaluate the FSS-based
 	// approach? Or should have some form of determinism here?
 	// TODO (Simone): why only inputSizes[0]?
 	stringToSearch := utils.Ranstring(inputSizes[0])
+=======
+	stringToSearch := utils.Ranstring(inputSize)
+>>>>>>> 9e0081ef2951132070f1308e73a288d1e29f0675
 
 	in := utils.ByteToBits([]byte(stringToSearch))
 	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromStart: inputSizes[0]},
+		Info:  &query.Info{Target: query.UserId, FromStart: inputSize},
 		Input: in,
 	}
 	for j := 0; j < nRepeat; j++ {
