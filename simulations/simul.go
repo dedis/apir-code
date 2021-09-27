@@ -175,6 +175,8 @@ dbSizesLoop:
 			//log.Printf("db info: %#v", db.Info)
 			// In FSS, we iterate over input sizes instead of db sizes
 			for _, inputSize := range s.InputSizes {
+				log.Printf("retrieving with primitive %s with input size of %d bits",
+					s.Primitive, inputSize)
 				results = fssPIR(db, inputSize, s.Repetitions)
 				experiment.Results[inputSize] = results
 			}
@@ -184,6 +186,8 @@ dbSizesLoop:
 			// TODO (Simone): avoid printing BlockLengths, too verbose
 			//log.Printf("db info: %#v", db.Info)
 			for _, inputSize := range s.InputSizes {
+				log.Printf("retrieving with primitive %s with input size of %d bits",
+					s.Primitive, inputSize)
 				results = fssVPIR(db, inputSize, s.Repetitions)
 				experiment.Results[inputSize] = results
 			}

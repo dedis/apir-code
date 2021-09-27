@@ -7,9 +7,6 @@ point:
 	$(MAKE) -s run_simul config=pirClassic.toml; \
 	$(MAKE) -s run_simul config=pirMerkle.toml \
 
-fssvpir:
-	$(MAKE) -s run_simul config=fssVpir.toml \
-
 complex:
 	$(MAKE) -s run_simul config=fssPir.toml; \
 	$(MAKE) -s run_simul config=fssVpir.toml \
