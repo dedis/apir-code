@@ -63,6 +63,63 @@ def plotPoint():
     plt.tight_layout()
     plt.savefig('point.eps', format='eps', dpi=300, transparent=True)
 
+def plotComplex(): 
+    schemes = ["fssPir.json", "fssVpir.json"]
+    schemeLabels = ["No-intergrity", "Authenticated"]
+
+    fig, axs = plt.subplots(2, sharex=True)
+
+    cpuArray = []
+    bwArray = []
+    x = []
+    for i, scheme in enumerate(schemes):
+        stats = allStats(resultFolder + scheme) 
+        cpuArray.append([])
+        bwArray.append([])
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            # means
+            cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpuArray[i].append(cpuMean)
+            bwArray[i].append(bwMean/1000)
+
+        axs[0].plot(
+                [x for x in sorted(stats.keys())], 
+                cpuArray[i], 
+                color='black', 
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=schemeLabels[int(i / (len(schemes) / 2))]
+        )
+        axs[1].plot(
+                [x for x in sorted(stats.keys())], 
+                bwArray[i], 
+                color='black', 
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=schemeLabels[int(i / (len(schemes) / 2))]
+        )
+
+    # cosmetics
+    axs[0].set_ylabel('CPU time [ms]')
+    axs[1].set_ylabel('Bandwidth [KiB]')
+    axs[1].set_xlabel('FSS input size [bits]')
+
+    # legend
+    handles = []
+    for i, label in enumerate(schemeLabels):
+        handles.append(mpatches.Patch(color='black', label=label))
+
+    #ax.legend(handles=handles, loc='upper left', ncol=2)
+    #axs[0].legend(handles=handles, loc='upper left')
+    #axs[0].legend(loc='upper left')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, mode="expand", borderaxespad=0.)
+    # ax.legend(handles=handles, bbox_to_anchor=(0.01, 1.2, 0.39, 0.1), loc="upper left",
+    #axs[0].legend(handles=handles, bbox_to_anchor=(0.01, 1.08, 0.94, 0.1), loc="upper left",
+              #mode="expand", borderaxespad=0, ncol=5)
+
+    plt.tight_layout()
+    plt.savefig('complex.eps', format='eps', dpi=300, transparent=True)
+
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
     schemes = ["pirMatrix.json", "merkleMatrix.json", "vpirMultiMatrixBlock.json",
@@ -384,6 +441,8 @@ if __name__ == "__main__":
     prepare_for_latex()
     if EXPR == "point":
         plotPoint()
+    if EXPR == "complex":
+        plotComplex()
     elif EXPR == "performance":
         plotVpirPerformanceLines()
         # plotVpirPerformanceBars()
