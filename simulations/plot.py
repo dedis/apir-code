@@ -24,7 +24,7 @@ LatticeCiphertextLen = 393221
 
 def plotPoint():
     schemes = ["pirClassic.json", "pirMerkle.json"]
-    schemLabels = ["No-intergrity", "Authenticated"]
+    schemeLabels = ["No-intergrity", "Authenticated"]
 
     fig, axs = plt.subplots(2, sharex=True)
 
@@ -46,19 +46,23 @@ def plotPoint():
                 [x/pow(10, 6) for x in sorted(stats.keys())], 
                 cpuArray[i], 
                 color='black', 
-                linestyle=linestyles[int(i / (len(schemes) / 2))]
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=schemeLabels[int(i / (len(schemes) / 2))]
         )
         axs[1].plot(
                 [x/pow(10, 6) for x in sorted(stats.keys())], 
                 bwArray[i], 
                 color='black', 
-                linestyle=linestyles[int(i / (len(schemes) / 2))]
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=schemeLabels[int(i / (len(schemes) / 2))]
         )
 
     # cosmetics
     axs[0].set_ylabel('CPU time [ms]')
     axs[1].set_ylabel('Bandwidth [KiB]')
     axs[1].set_xlabel('DB size [MiB]')
+    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout()
     plt.savefig('point.eps', format='eps', dpi=300, transparent=True)
@@ -90,6 +94,7 @@ def plotComplex():
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
+
         axs[1].plot(
                 [x for x in sorted(stats.keys())], 
                 bwArray[i], 
@@ -102,20 +107,8 @@ def plotComplex():
     axs[0].set_ylabel('CPU time [ms]')
     axs[1].set_ylabel('Bandwidth [KiB]')
     axs[1].set_xlabel('FSS input size [bits]')
-
-    # legend
-    handles = []
-    for i, label in enumerate(schemeLabels):
-        handles.append(mpatches.Patch(color='black', label=label))
-
-    #ax.legend(handles=handles, loc='upper left', ncol=2)
-    #axs[0].legend(handles=handles, loc='upper left')
-    #axs[0].legend(loc='upper left')
-    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
-    # ax.legend(handles=handles, bbox_to_anchor=(0.01, 1.2, 0.39, 0.1), loc="upper left",
-    #axs[0].legend(handles=handles, bbox_to_anchor=(0.01, 1.08, 0.94, 0.1), loc="upper left",
-              #mode="expand", borderaxespad=0, ncol=5)
 
     plt.tight_layout()
     plt.savefig('complex.eps', format='eps', dpi=300, transparent=True)
