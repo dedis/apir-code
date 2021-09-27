@@ -167,10 +167,12 @@ func main() {
 			//log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		case "fss-pir", "fss-vpir":
+		case "fss-pir":
 			// TODO (Simone): avoid printing BlockLengths, too verbose
 			//log.Printf("db info: %#v", db.Info)
-			results = fss(db, s.InputSizes, s.Repetitions)
+			results = fssPIR(db, s.InputSizes, s.Repetitions)
+		case "fss-vpir":
+			results = fssVPIR(db, s.InputSizes, s.Repetitions)
 		case "cmp-pir":
 			log.Printf("db info: %#v", dbRing.Info)
 			results = pirLattice(dbRing, s.Repetitions)
@@ -199,17 +201,77 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
-func fss(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
-	prg := utils.RandomPRG()
-	// TODO (Simone): should differentiate with respect to authenticated or not
-	c := client.NewFSS(prg, &db.Info)
-	ss := makeFSSServers(db)
+func fssVPIR(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
+	c := client.NewFSS(utils.RandomPRG(), &db.Info)
+	ss := []*server.FSS{server.NewFSS(db, 0), server.NewFSS(db, 1)}
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
+	// TODO (Simone): is this the best way to evaluate the FSS-based
+	// approach? Or should have some form of determinism here?
+	// TODO (Simone): why only inputSizes[0]?
+	stringToSearch := utils.Ranstring(inputSizes[0])
+
+	in := utils.ByteToBits([]byte(stringToSearch))
+	q := &query.ClientFSS{
+		Info:  &query.Info{Target: query.UserId, FromStart: inputSizes[0]},
+		Input: in,
+	}
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = initChunk(1)
+		results[j].CPU[0] = initBlock(len(ss))
+		results[j].Bandwidth[0] = initBlock(len(ss))
+
+		m.Reset()
+		queries := c.Query(q, 2)
+		results[j].CPU[0].Query = m.RecordAndReset()
+		for r := range queries {
+			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
+		}
+
+		// get servers answers
+		answers := make([][]uint32, len(ss))
+		for k := range ss {
+			m.Reset()
+			answers[k] = ss[k].Answer(queries[k])
+			results[j].CPU[0].Answers[k] = m.RecordAndReset()
+			results[j].Bandwidth[0].Answers[k] = fieldVectorByteLength(answers[k])
+		}
+
+		m.Reset()
+		_, err := c.Reconstruct(answers)
+		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].Bandwidth[0].Reconstruct = 0
+
+		// GC after each repetition
+		runtime.GC()
+
+		// sleep after every iteration
+		time.Sleep(2 * time.Second)
+	}
+
+	return results
+}
+
+func fssPIR(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
+	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
+	ss := []*server.PIRfss{server.NewPIRfss(db, 0), server.NewPIRfss(db, 1)}
+
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	// TODO (Simone): is this the best way to evaluate the FSS-based
+	// approach? Or should have some form of determinism here?
+	// TODO (Simone): why only inputSizes[0]?
 	stringToSearch := utils.Ranstring(inputSizes[0])
 
 	in := utils.ByteToBits([]byte(stringToSearch))
@@ -420,15 +482,8 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 }
 
 // Converts number of bits to retrieve into the number of db blocks
-// TODO: check if correct
 func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
-}
-
-func makeFSSServers(db *database.DB) []*server.FSS {
-	s0 := server.NewFSS(db, 0)
-	s1 := server.NewFSS(db, 1)
-	return []*server.FSS{s0, s1}
 }
 
 func makePIRServers(db *database.Bytes) []*server.PIR {
