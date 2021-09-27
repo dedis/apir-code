@@ -68,7 +68,7 @@ def plotPoint():
     plt.savefig('point.eps', format='eps', dpi=300, transparent=True)
 
 def plotComplex(): 
-    schemes = ["fssPir.json", "fssVpir.json"]
+    schemes = ["fss.json", "authfss.json"]
     schemeLabels = ["No-intergrity", "Authenticated"]
 
     fig, axs = plt.subplots(2, sharex=True)
@@ -106,12 +106,13 @@ def plotComplex():
     # cosmetics
     axs[0].set_ylabel('CPU time [ms]')
     axs[1].set_ylabel('Bandwidth [KiB]')
-    axs[1].set_xlabel('FSS input size [bits]')
+    axs[1].set_xlabel('FSS input size [bytes]')
     axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout()
-    plt.savefig('complex.eps', format='eps', dpi=300, transparent=True)
+    plt.show()
+    # plt.savefig('complex.eps', format='eps', dpi=300, transparent=True)
 
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']

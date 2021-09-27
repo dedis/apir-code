@@ -1,5 +1,5 @@
-Name = "fssVpir"
-Primitive = "fss-vpir"
+Name = "fss"
+Primitive = "fss"
 NumRows = 1
 BlockLength = 2
 ElementBitSize = 31

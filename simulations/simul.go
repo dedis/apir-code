@@ -101,6 +101,10 @@ func main() {
 	log.Printf("running simulation %#v\n", s)
 	// initialize experiment
 	experiment := &Experiment{Results: make(map[int][]*Chunk, 0)}
+	var experimentv *Experiment
+	if s.Primitive[:3] == "fss" {
+		experimentv = &Experiment{Results: make(map[int][]*Chunk, 0)}
+	}
 
 	// TODO (Simone): what if we range on DB sizes for point and single and on input bit size
 	// for complex?
@@ -170,26 +174,19 @@ dbSizesLoop:
 			//log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-		case "fss-pir":
+		case "fss":
 			// TODO (Simone): avoid printing BlockLengths, too verbose
 			//log.Printf("db info: %#v", db.Info)
 			// In FSS, we iterate over input sizes instead of db sizes
 			for _, inputSize := range s.InputSizes {
-				log.Printf("retrieving with primitive %s with input size of %d bits",
+				log.Printf("retrieving with primitive %s with input size of %d bytes",
 					s.Primitive, inputSize)
+				// Non-verifiable FSS
 				results = fssPIR(db, inputSize, s.Repetitions)
 				experiment.Results[inputSize] = results
-			}
-			// Skip the rest of the loop
-			break dbSizesLoop
-		case "fss-vpir":
-			// TODO (Simone): avoid printing BlockLengths, too verbose
-			//log.Printf("db info: %#v", db.Info)
-			for _, inputSize := range s.InputSizes {
-				log.Printf("retrieving with primitive %s with input size of %d bits",
-					s.Primitive, inputSize)
+				// Authenticated FSS
 				results = fssVPIR(db, inputSize, s.Repetitions)
-				experiment.Results[inputSize] = results
+				experimentv.Results[inputSize] = results
 			}
 			// Skip the rest of the loop
 			break dbSizesLoop
@@ -216,6 +213,17 @@ dbSizesLoop:
 	fileName := s.Name + ".json"
 	if err = ioutil.WriteFile(path.Join("results", fileName), res, 0644); err != nil {
 		panic(err)
+	}
+
+	if s.Primitive[:3] == "fss" {
+		resv, err := json.Marshal(experimentv)
+		if err != nil {
+			panic(err)
+		}
+		fileName := "auth" + s.Name + ".json"
+		if err = ioutil.WriteFile(path.Join("results", fileName), resv, 0644); err != nil {
+			panic(err)
+		}
 	}
 
 	log.Println("simulation terminated successfully")
@@ -574,8 +582,7 @@ func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
 func (s *Simulation) validSimulation() bool {
 	return s.Primitive == "pir-classic" ||
 		s.Primitive == "pir-merkle" ||
-		s.Primitive == "fss-pir" ||
-		s.Primitive == "fss-vpir" ||
+		s.Primitive == "fss" ||
 		s.Primitive == "cmp-pir" ||
 		s.Primitive == "cmp-vpir"
 }
