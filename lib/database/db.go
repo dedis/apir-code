@@ -32,10 +32,9 @@ type KeyInfo struct {
 }
 
 type Info struct {
-	NumRows    int
-	NumColumns int
-	BlockSize  int
-	// TODO: remove this, should use the block length defined in the KeyInfo struct
+	NumRows      int
+	NumColumns   int
+	BlockSize    int
 	BlockLengths []int // length of data in blocks defined in number of elements
 
 	// PIR type: classical, merkle, signature
@@ -167,7 +166,7 @@ func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	return &DB{
 		KeysInfo: keysInfo,
 		//Entries:  entries,
-		Info:     info,
+		Info: info,
 	}, nil
 }
 
