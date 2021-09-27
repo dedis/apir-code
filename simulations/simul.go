@@ -103,7 +103,7 @@ func main() {
 	experiment := &Experiment{Results: make(map[int][]*Chunk, 0)}
 
 	// range over all the DB lengths specified in the general simulation config
-	for _, dl := range s.DBBitLengths {
+	dbSizesLoop: for _, dl := range s.DBBitLengths {
 		// compute database data
 		dbLen := dl
 		blockLen := s.BlockLength
@@ -162,7 +162,13 @@ func main() {
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "fss-pir", "fss-vpir":
 			log.Printf("db info: %#v", db.Info)
-			results = fss(db, s.InputSizes, s.Repetitions)
+			// In FSS, we iterate over input sizes instead of db sizes
+			for _, inputSize := range s.InputSizes {
+				results = fss(db, inputSize, s.Repetitions)
+				experiment.Results[inputSize] = results
+			}
+			// Skip the rest of the loop
+			break dbSizesLoop
 		case "cmp-pir":
 			log.Printf("db info: %#v", dbRing.Info)
 			results = pirLattice(dbRing, s.Repetitions)
@@ -191,7 +197,7 @@ func main() {
 	log.Println("simulation terminated successfully")
 }
 
-func fss(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
+func fss(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	c := client.NewFSS(prg, &db.Info)
 	ss := makeFSSServers(db)
@@ -201,11 +207,11 @@ func fss(db *database.DB, inputSizes []int, nRepeat int) []*Chunk {
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
-	stringToSearch := utils.Ranstring(inputSizes[0])
+	stringToSearch := utils.Ranstring(inputSize)
 
 	in := utils.ByteToBits([]byte(stringToSearch))
 	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromStart: inputSizes[0]},
+		Info:  &query.Info{Target: query.UserId, FromStart: inputSize},
 		Input: in,
 	}
 	for j := 0; j < nRepeat; j++ {
