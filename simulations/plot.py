@@ -64,7 +64,7 @@ def plotPoint():
     axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
 
-    plt.tight_layout()
+    plt.tight_layout(h_pad=1.5)
     plt.savefig('point.eps', format='eps', dpi=300, transparent=True)
 
 def plotComplex(): 
