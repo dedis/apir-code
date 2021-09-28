@@ -1,0 +1,103 @@
+VPIR
+ROUTINE ======================== github.com/si-co/vpir-code/lib/fss.Fss.EvaluatePF in /home/smscolom/code/go/src/github.com/si-co/vpir-code/lib/fss/server.go
+     1.67s      3.21s (flat, cum) 92.51% of Total
+         .          .     34:func (f Fss) EvaluatePF(serverNum byte, k FssKeyEq2P, x []bool, out []uint32) {
+         .          .     35:	// reinitialize f.NumBits because we have different input lengths
+         .          .     36:	f.NumBits = uint(len(x))
+         .          .     37:
+         .          .     38:	sCurr := make([]byte, aes.BlockSize)
+         .       10ms     39:	copy(sCurr, k.SInit)
+         .          .     40:	tCurr := k.TInit
+         .          .     41:	tmp := make([]uint32, len(out))
+     270ms      270ms     42:	for i := uint(0); i < f.NumBits; i++ {
+         .          .     43:		var xBit byte = 0
+         .          .     44:		if i != f.N {
+         .          .     45:			// original: xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
+      10ms       10ms     46:			if x[i] {
+         .          .     47:				xBit = 1
+         .          .     48:			}
+         .          .     49:		}
+         .          .     50:
+      50ms      1.49s     51:		prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+         .          .     52:
+         .          .     53:		// Keep counter to ensure we are accessing CW correctly
+         .          .     54:		count := 0
+     260ms      260ms     55:		for j := 0; j < aes.BlockSize*2+2; j++ {
+         .          .     56:			// Make sure we are doing G(s) ^ (t*sCW||tLCW||sCW||tRCW)
+     200ms      200ms     57:			if j == aes.BlockSize+1 {
+         .          .     58:				count = 0
+      40ms       40ms     59:			} else if j == aes.BlockSize*2+1 {
+         .          .     60:				count = aes.BlockSize + 1
+         .          .     61:			}
+     730ms      730ms     62:			f.Out[j] = f.Out[j] ^ (tCurr * k.CW[i][count])
+      10ms       10ms     63:			count++
+         .          .     64:		}
+         .          .     65:
+         .          .     66:		// Pick right seed expansion based on
+      20ms       20ms     67:		if xBit == 0 {
+      10ms       10ms     68:			copy(sCurr, f.Out[:aes.BlockSize])
+      10ms       10ms     69:			tCurr = f.Out[aes.BlockSize] % 2
+         .          .     70:		} else {
+      20ms       20ms     71:			copy(sCurr, f.Out[(aes.BlockSize+1):(aes.BlockSize*2+1)])
+         .          .     72:			tCurr = f.Out[aes.BlockSize*2+1] % 2
+         .          .     73:		}
+         .          .     74:	}
+         .          .     75:
+         .          .     76:	// convert block
+         .       90ms     77:	convertBlock(f, sCurr, tmp)
+         .          .     78:	for i := range out {
+         .          .     79:		if serverNum == 0 {
+         .          .     80:			// tCurr is either 0 or 1, no need to mod
+      10ms       10ms     81:			out[i] = (tmp[i] + uint32(tCurr)*k.FinalCW[i]) % field.ModP
+         .          .     82:		} else {
+      30ms       30ms     83:			out[i] = field.ModP - ((tmp[i] + uint32(tCurr)*k.FinalCW[i]) % field.ModP)
+         .          .     84:		}
+         .          .     85:	}
+         .          .     86:}
+
+
+PIR
+ROUTINE ======================== github.com/si-co/vpir-code/lib/fss.Fss.EvaluatePF in /home/smscolom/code/go/src/github.com/si-co/vpir-code/lib/fss/server.go
+     1.60s      3.09s (flat, cum) 94.50% of Total
+         .          .     37:
+         .          .     38:	sCurr := make([]byte, aes.BlockSize)
+         .          .     39:	copy(sCurr, k.SInit)
+         .          .     40:	tCurr := k.TInit
+         .          .     41:	tmp := make([]uint32, len(out))
+     220ms      220ms     42:	for i := uint(0); i < f.NumBits; i++ {
+         .          .     43:		var xBit byte = 0
+         .          .     44:		if i != f.N {
+         .          .     45:			// original: xBit = byte(getBit(x, (f.N - f.NumBits + i + 1), f.N))
+         .          .     46:			if x[i] {
+         .          .     47:				xBit = 1
+         .          .     48:			}
+         .          .     49:		}
+         .          .     50:
+      50ms      1.54s     51:		prf(sCurr, f.FixedBlocks, 3, f.Temp, f.Out)
+         .          .     52:
+         .          .     53:		// Keep counter to ensure we are accessing CW correctly
+         .          .     54:		count := 0
+     290ms      290ms     55:		for j := 0; j < aes.BlockSize*2+2; j++ {
+         .          .     56:			// Make sure we are doing G(s) ^ (t*sCW||tLCW||sCW||tRCW)
+     170ms      170ms     57:			if j == aes.BlockSize+1 {
+         .          .     58:				count = 0
+         .          .     59:			} else if j == aes.BlockSize*2+1 {
+         .          .     60:				count = aes.BlockSize + 1
+         .          .     61:			}
+     790ms      790ms     62:			f.Out[j] = f.Out[j] ^ (tCurr * k.CW[i][count])
+      20ms       20ms     63:			count++
+         .          .     64:		}
+         .          .     65:
+         .          .     66:		// Pick right seed expansion based on
+         .          .     67:		if xBit == 0 {
+      10ms       10ms     68:			copy(sCurr, f.Out[:aes.BlockSize])
+      10ms       10ms     69:			tCurr = f.Out[aes.BlockSize] % 2
+         .          .     70:		} else {
+      20ms       20ms     71:			copy(sCurr, f.Out[(aes.BlockSize+1):(aes.BlockSize*2+1)])
+      20ms       20ms     72:			tCurr = f.Out[aes.BlockSize*2+1] % 2
+         .          .     73:		}
+         .          .     74:	}
+         .          .     75:
+         .          .     76:	// convert block
+         .          .     77:	convertBlock(f, sCurr, tmp)
+
