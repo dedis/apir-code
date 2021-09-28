@@ -179,14 +179,15 @@ dbSizesLoop:
 			//log.Printf("db info: %#v", db.Info)
 			// In FSS, we iterate over input sizes instead of db sizes
 			for _, inputSize := range s.InputSizes {
+				stringToSearch := utils.Ranstring(inputSize)
 				// Non-verifiable FSS
-				results = fssPIR(db, inputSize, s.Repetitions)
+				results = fssPIR(db, inputSize, stringToSearch, s.Repetitions)
 				log.Printf("retrieving with non-verifiable FSS with h input size of %d bytes",
 					s.Primitive,
 					inputSize)
 				experiment.Results[inputSize] = results
 				// Authenticated FSS
-				results = fssVPIR(db, inputSize, s.Repetitions)
+				results = fssVPIR(db, inputSize, stringToSearch, s.Repetitions)
 				log.Printf("retrieving with verifiable FSS with h input size of %d bytes",
 					s.Primitive,
 					inputSize)
@@ -233,7 +234,7 @@ dbSizesLoop:
 	log.Println("simulation terminated successfully")
 }
 
-func fssVPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
+func fssVPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) []*Chunk {
 	c := client.NewFSS(utils.RandomPRG(), &db.Info)
 	ss := []*server.FSS{server.NewFSS(db, 0), server.NewFSS(db, 1)}
 
@@ -241,10 +242,6 @@ func fssVPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
-
-	// TODO (Simone): is this the best way to evaluate the FSS-based
-	// approach? Or should have some form of determinism here?
-	stringToSearch := utils.Ranstring(inputSize)
 
 	in := utils.ByteToBits([]byte(stringToSearch))
 	q := &query.ClientFSS{
@@ -299,8 +296,6 @@ func fssPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
 	m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
-
-	stringToSearch := utils.Ranstring(inputSize)
 
 	in := utils.ByteToBits([]byte(stringToSearch))
 	q := &query.ClientFSS{
