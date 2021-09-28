@@ -182,15 +182,11 @@ dbSizesLoop:
 				stringToSearch := utils.Ranstring(inputSize)
 				// Non-verifiable FSS
 				results = fssPIR(db, inputSize, stringToSearch, s.Repetitions)
-				log.Printf("retrieving with non-verifiable FSS with h input size of %d bytes",
-					s.Primitive,
-					inputSize)
+				log.Printf("retrieving with non-verifiable FSS with input size of %d bytes\n", inputSize)
 				experiment.Results[inputSize] = results
 				// Authenticated FSS
 				results = fssVPIR(db, inputSize, stringToSearch, s.Repetitions)
-				log.Printf("retrieving with verifiable FSS with h input size of %d bytes",
-					s.Primitive,
-					inputSize)
+				log.Printf("retrieving with verifiable FSS with the input size of %d bytes\n", inputSize)
 				experimentv.Results[inputSize] = results
 			}
 			// Skip the rest of the loop
@@ -288,7 +284,7 @@ func fssVPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int)
 	return results
 }
 
-func fssPIR(db *database.DB, inputSize int, nRepeat int) []*Chunk {
+func fssPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) []*Chunk {
 	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
 	ss := []*server.PIRfss{server.NewPIRfss(db, 0), server.NewPIRfss(db, 1)}
 
