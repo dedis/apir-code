@@ -179,13 +179,17 @@ dbSizesLoop:
 			//log.Printf("db info: %#v", db.Info)
 			// In FSS, we iterate over input sizes instead of db sizes
 			for _, inputSize := range s.InputSizes {
-				log.Printf("retrieving with primitive %s with input size of %d bytes",
-					s.Primitive, inputSize)
 				// Non-verifiable FSS
 				results = fssPIR(db, inputSize, s.Repetitions)
+				log.Printf("retrieving with non-verifiable FSS with h input size of %d bytes",
+					s.Primitive,
+					inputSize)
 				experiment.Results[inputSize] = results
 				// Authenticated FSS
 				results = fssVPIR(db, inputSize, s.Repetitions)
+				log.Printf("retrieving with verifiable FSS with h input size of %d bytes",
+					s.Primitive,
+					inputSize)
 				experimentv.Results[inputSize] = results
 			}
 			// Skip the rest of the loop
