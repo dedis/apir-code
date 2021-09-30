@@ -120,7 +120,7 @@ func main() {
 		}
 		log.Printf("db size in GiB: %f", db.SizeGiB())
 	default:
-		log.Fatal("unknown scheme")
+		log.Fatal("unknown scheme: " + string(*scheme))
 	}
 
 	// GC after db creation
