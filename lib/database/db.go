@@ -152,9 +152,9 @@ func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 
 // HashToIndex hashes the given id to an index for a database of the given
 // length
-func HashToIndex(id string, length int) int {
+func HashToIndex(id string, length int) uint32 {
 	hash := blake2b.Sum256([]byte(id))
-	return int(binary.BigEndian.Uint64(hash[:]) % uint64(length))
+	return binary.BigEndian.Uint32(hash[:4]) % uint32(length)
 }
 
 func CalculateNumRowsAndColumns(numBlocks int, matrix bool) (numRows, numColumns int) {

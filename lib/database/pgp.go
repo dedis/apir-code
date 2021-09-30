@@ -149,7 +149,7 @@ func makeHashTable(keys []*pgp.Key, tableLen int) map[int][]byte {
 
 	// range over all id,v pairs and assign every pair to a given bucket
 	for _, key := range keys {
-		hashKey := HashToIndex(key.ID, tableLen)
+		hashKey := int(HashToIndex(key.ID, tableLen))
 		db[hashKey] = append(db[hashKey], key.Packet...)
 	}
 

@@ -189,8 +189,9 @@ func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 	log.Printf("id: %s, hashKey: %d", id, hashKey)
 
 	// query given hash key
-	in := make([]byte, 8)
-	binary.BigEndian.PutUint64(in, uint64(hashKey))
+	in := make([]byte, 4)
+	fmt.Println("HASH KEY IN", hashKey)
+	binary.BigEndian.PutUint32(in, uint32(hashKey))
 	queries, err := lc.vpirClient.QueryBytes(in, len(lc.connections))
 	if err != nil {
 		return "", xerrors.Errorf("error when executing query: %v", err)

@@ -4,6 +4,7 @@ package main
 // locally, the networking logic is not tested here.
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"math/rand"
@@ -14,9 +15,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nikirill/go-crypto/openpgp"
 	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/query"
@@ -41,6 +44,54 @@ func initRealDB() {
 
 	// GC after DB creation
 	runtime.GC()
+}
+
+func TestRealRetrieveKey(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	// get file paths for key dump
+	filePaths := getDBFilePaths()
+
+	// generate db from sks key dump
+	db, err := database.GenerateRealKeyMerkle(filePaths, true)
+	require.NoError(t, err)
+	numBlocks := db.NumColumns * db.NumRows
+
+	// read in the real pgp key values
+	realKeys, err := pgp.LoadAndParseKeys(filePaths)
+	require.NoError(t, err)
+
+	// client and servers
+	prg := utils.RandomPRG()
+	c := client.NewPIR(prg, &db.Info)
+	servers := []server.Server{server.NewPIR(db), server.NewPIR(db)}
+
+	retrieveRealKey(t, c, servers, realKeys, numBlocks)
+}
+
+func TestRealRetrieveKeyPIR(t *testing.T) {
+	// math randomness used only for testing purposes
+	rand.Seed(time.Now().UnixNano())
+
+	// get file paths for key dump
+	filePaths := getDBFilePaths()
+
+	// generate db from sks key dump
+	db, err := database.GenerateRealKeyBytes(filePaths, true)
+	require.NoError(t, err)
+	numBlocks := db.NumColumns * db.NumRows
+
+	// read in the real pgp key values
+	realKeys, err := pgp.LoadAndParseKeys(filePaths)
+	require.NoError(t, err)
+
+	// client and servers
+	prg := utils.RandomPRG()
+	c := client.NewPIR(prg, &db.Info)
+	servers := []server.Server{server.NewPIR(db), server.NewPIR(db)}
+
+	retrieveRealKey(t, c, servers, realKeys, numBlocks)
 }
 
 func TestRealCountEmail(t *testing.T) {
@@ -105,6 +156,58 @@ func TestRealCountPublicKeyAlgorithmPIR(t *testing.T) {
 	}
 	match, q := pkaMatch(db)
 	retrieveComplex(t, db, q, match, "TestRealCountPublicKeyAlgorithmPIR")
+}
+
+func retrieveRealKey(t *testing.T, c client.Client, servers []server.Server, realKeys []*openpgp.Entity, numBlocks int) {
+	// number of keys to retrieve for the test
+	numKeys := 1
+
+	start := time.Now()
+	for i := 0; i < numKeys; i++ {
+		// get random key
+		j := rand.Intn(len(realKeys))
+		fmt.Println(pgp.PrimaryEmail(realKeys[i]))
+		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
+		result = database.UnPadBlock(result)
+
+		// Get a key from the block with the id of the search
+		retrievedKey, err := pgp.RecoverKeyFromBlock(result, pgp.PrimaryEmail(realKeys[j]))
+		require.NoError(t, err)
+		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
+		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
+	}
+	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
+}
+
+func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
+	// compute hash key for id
+	hashKey := database.HashToIndex(id, dbLenBlocks)
+	in := make([]byte, 4)
+	binary.BigEndian.PutUint32(in, uint32(hashKey))
+
+	// query given hash key
+	queries, err := c.QueryBytes(in, len(ss))
+	require.NoError(t, err)
+
+	// get servers answers
+	answers := make([][]byte, len(ss))
+	for i := range ss {
+		answers[i], err = ss[i].AnswerBytes(queries[i])
+		require.NoError(t, err)
+
+	}
+
+	// reconstruct block
+	result, err := c.ReconstructBytes(answers)
+	require.NoError(t, err)
+
+	// return result bytes
+	switch result.(type) {
+	case []uint32:
+		return field.VectorToBytes(result.([]uint32))
+	default:
+		return result.([]byte)
+	}
 }
 
 func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
