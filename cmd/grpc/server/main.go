@@ -41,7 +41,6 @@ func main() {
 	filesNumber := flag.Int("files", 1, "number of key files to use in db creation")
 	cores := flag.Int("cores", -1, "number of cores to use")
 	scheme := flag.String("scheme", "", "scheme to use: it, dpf, pir-it or pir-dpf")
-	serverNum := flag.Int("server number", -1, "server number: 0, 1")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	prof := flag.Bool("prof", false, "Write CPU prof file")
 	mprof := flag.Bool("mprof", false, "Write memory prof file")
@@ -152,15 +151,15 @@ func main() {
 		}
 	case "complexPIR":
 		if *cores != -1 && *experiment {
-			s = server.NewPIRfss(db, byte(*serverNum), *cores)
+			s = server.NewPIRfss(db, byte(*sid), *cores)
 		} else {
-			s = server.NewPIRfss(db, byte(*serverNum))
+			s = server.NewPIRfss(db, byte(*sid))
 		}
 	case "complexVPIR":
 		if *cores != -1 && *experiment {
-			s = server.NewFSS(db, byte(*serverNum), *cores)
+			s = server.NewFSS(db, byte(*sid), *cores)
 		} else {
-			s = server.NewFSS(db, byte(*serverNum))
+			s = server.NewFSS(db, byte(*sid))
 		}
 	default:
 		log.Fatal("unknow scheme")
