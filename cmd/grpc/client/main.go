@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -15,6 +16,7 @@ import (
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/proto"
+	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
@@ -41,16 +43,21 @@ type localClient struct {
 }
 
 type flags struct {
-	id        string
 	profiling bool
 
 	// only for experiments
 	experiment bool
 	cores      int
-	scheme     string
 
 	demo       bool
 	listenAddr string
+
+	scheme    string
+	id        string
+	target    string
+	fromStart int
+	fromEnd   int
+	and       bool
 }
 
 func newLocalClient() *localClient {
@@ -181,6 +188,69 @@ func (lc *localClient) exec() (string, error) {
 	}
 }
 
+func (lc *localClient) retrieveComplesQuery() (uint32, error) {
+	t := time.Now()
+
+	var clientQuery *query.ClientFSS
+	switch lc.flags.target {
+	case "email":
+		info := &query.Info{
+			Target:    query.UserId,
+			FromStart: lc.flags.fromStart,
+			FromEnd:   lc.flags.fromEnd,
+			And:       lc.flags.and,
+			//Targets []Target // TODO: implement
+		}
+		id, _ := info.IdForEmail(lc.flags.id)
+		clientQuery = &query.ClientFSS{
+			Info:  info,
+			Input: id,
+		}
+	case "creation":
+		panic("not yet implemented")
+	case "algo":
+		panic("not yet implemented")
+	default:
+		return 0, errors.New("unknow target" + lc.flags.target)
+	}
+
+	in, err := clientQuery.Encode()
+	if err != nil {
+		return 0, err
+	}
+	queries, err := lc.vpirClient.QueryBytes(in, len(lc.connections))
+	if err != nil {
+		return 0, xerrors.Errorf("error when executing query: %v", err)
+	}
+	log.Printf("done with queries computation")
+
+	// send queries to servers
+	answers := lc.runQueries(queries)
+
+	// reconstruct block
+	result, err := lc.vpirClient.ReconstructBytes(answers)
+	if err != nil {
+		return 0, xerrors.Errorf("error during reconstruction: %v", err)
+	}
+	log.Printf("done with block reconstruction")
+
+	fmt.Println(result)
+
+	elapsedTime := time.Since(t)
+	if lc.flags.experiment {
+		// query bw
+		bw := 0
+		for _, q := range queries {
+			bw += len(q)
+		}
+		log.Printf("stats,%d,%d,%f", lc.flags.cores, bw, elapsedTime.Seconds())
+	}
+	fmt.Printf("Wall-clock time to retrieve complex output: %v\n", elapsedTime)
+
+	return result.(uint32), nil
+
+}
+
 func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 	t := time.Now()
 
@@ -190,7 +260,6 @@ func (lc *localClient) retrieveKeyGivenId(id string) (string, error) {
 
 	// query given hash key
 	in := make([]byte, 4)
-	fmt.Println("HASH KEY IN", hashKey)
 	binary.BigEndian.PutUint32(in, uint32(hashKey))
 	queries, err := lc.vpirClient.QueryBytes(in, len(lc.connections))
 	if err != nil {
@@ -308,7 +377,7 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	for _, conn := range lc.connections {
 		wg.Add(1)
 		go func(j int, conn *grpc.ClientConn) {
-			resCh <- query(subCtx, conn, lc.callOptions, queries[j])
+			resCh <- queryServer(subCtx, conn, lc.callOptions, queries[j])
 			wg.Done()
 		}(j, conn)
 		j++
@@ -325,7 +394,7 @@ func (lc *localClient) runQueries(queries [][]byte) [][]byte {
 	return q
 }
 
-func query(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, query []byte) []byte {
+func queryServer(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, query []byte) []byte {
 	c := proto.NewVPIRClient(conn)
 	q := &proto.QueryRequest{Query: query}
 	answer, err := c.Query(ctx, q, opts...)
@@ -369,13 +438,25 @@ func equalDBInfo(info []*database.Info) bool {
 func parseFlags() *flags {
 	f := new(flags)
 
+	// debugging flags
 	flag.BoolVar(&f.profiling, "prof", false, "write pprof file")
-	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
+
+	// experiment flags
 	flag.BoolVar(&f.experiment, "experiment", false, "run for experiments")
 	flag.IntVar(&f.cores, "cores", -1, "num of cores used for experiment")
-	flag.StringVar(&f.scheme, "scheme", "", "scheme to use: it, dpf or pit-it, pir-dpf")
+
+	// demo flags
 	flag.BoolVar(&f.demo, "demo", false, "runs as a demo, which exposes a REST API")
 	flag.StringVar(&f.listenAddr, "listen-addr", "", "demo listen address")
+
+	// scheme flags
+	flag.StringVar(&f.scheme, "scheme", "", "scheme to use: it, dpf or pit-it, pir-dpf")
+	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
+	flag.StringVar(&f.target, "target", "", "target for complex query")
+	flag.IntVar(&f.fromStart, "from-start", 0, "from start parameter for complex query")
+	flag.IntVar(&f.fromEnd, "from-end", 0, "from end parameter for complex query")
+	flag.BoolVar(&f.and, "and", false, "and clause for complex query")
+
 	flag.Parse()
 
 	return f
