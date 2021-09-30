@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -179,10 +180,18 @@ func (lc *localClient) exec() (string, error) {
 		return lc.retrieveKeyGivenId(lc.flags.id)
 	case "complexPIR":
 		lc.vpirClient = client.NewPIRfss(lc.prg, lc.dbInfo)
-		panic("not yet implemented")
+		out, err := lc.retrieveComplesQuery()
+		if err != nil {
+			return "", err
+		}
+		return strconv.FormatUint(uint64(out), 10), nil
 	case "complexVPIR":
 		lc.vpirClient = client.NewFSS(lc.prg, lc.dbInfo)
-		panic("not yet implemented")
+		out, err := lc.retrieveComplesQuery()
+		if err != nil {
+			return "", err
+		}
+		return strconv.FormatUint(uint64(out), 10), nil
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}

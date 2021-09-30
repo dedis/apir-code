@@ -27,7 +27,9 @@ func GenerateRealKeyDB(dataPaths []string) (*DB, error) {
 	sortById(keys)
 
 	// only information needed for FSS-based schemes
-	info := Info{NumColumns: len(keys)}
+	info := Info{NumColumns: len(keys),
+		Merkle: &Merkle{ProofLen: 0, Root: []byte{0}}, // only for tests compatibility}
+	}
 	// create empty database
 	db := NewKeysDB(info)
 
