@@ -8,4 +8,4 @@ cd - > /dev/null
 # move to root
 cd ../
 
-cmd/grpc/client/client -id=alex.braulio@varidi.com -scheme=$1
+cmd/grpc/client/client -id=resch@ocg.at -scheme=$1

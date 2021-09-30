@@ -88,7 +88,7 @@ func GenerateRealKeyBytes(dataPaths []string, rebalanced bool) (*Bytes, error) {
 }
 
 func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) {
-	log.Printf("Bytes db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
+	log.Printf("Merkle db rebalanced: %v, loading keys: %v\n", rebalanced, dataPaths)
 
 	keys, err := pgp.LoadKeysFromDisk(dataPaths)
 	if err != nil {
@@ -134,6 +134,7 @@ func GenerateRealKeyMerkle(dataPaths []string, rebalanced bool) (*Bytes, error) 
 		Info: Info{
 			NumRows:      numRows,
 			NumColumns:   numColumns,
+			BlockSize:    maxBlockLen,
 			BlockLengths: blockLens,
 			PIRType:      "merkle",
 			Merkle:       &Merkle{Root: tree.Root(), ProofLen: proofLen},
