@@ -4,4 +4,4 @@ NumRows = 1
 BlockLength = 2
 ElementBitSize = 31
 #InputSizes = [2, 4, 8, 16, 32, 64]
-InputSizes = [1, 2, 4, 8, 16]
+InputSizes = [1, 2, 4, 8, 16, 32]
