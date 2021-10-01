@@ -216,8 +216,10 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			Input: id,
 		}
 	case "creation":
+		// month + year => timestamp
 		panic("not yet implemented")
 	case "algo":
+		// RSA | ED25519 | ...
 		panic("not yet implemented")
 	default:
 		return 0, errors.New("unknow target" + lc.flags.target)
