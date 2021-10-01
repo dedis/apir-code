@@ -11,26 +11,38 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
+// Target defines the target of the query
 type Target uint8
 
 const (
+	// UserId corresponds to the email
 	UserId Target = iota
+
 	CreationTime
+
+	// RSA, ED25519, ...
 	PubKeyAlgo
 )
 
+// ClientFSS is used by the client to prepare an FSS
 type ClientFSS struct {
 	*Info
 	Input []bool
 }
 
+// FSS is what is sent to the server, one by server
 type FSS struct {
 	*Info
 	FssKey fss.FssKeyEq2P
 }
 
+// Info defines the query function
 type Info struct {
-	Target             Target
+	// Target is on what the query is to be executed. An email (id), or the
+	// creation time.
+	Target Target
+
+	// select the substring on the id (email)
 	FromStart, FromEnd int // start and end of the target
 
 	And     bool
