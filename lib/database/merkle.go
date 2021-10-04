@@ -32,6 +32,9 @@ func CreateRandomMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 		log.Fatalf("impossible to create Merkle tree: %v", err)
 	}
 
+	// GC after tree generation
+	runtime.GC()
+
 	// generate db
 	numColumns := numBlocks / numRows
 	proofLen := tree.EncodedProofLength()
@@ -43,6 +46,9 @@ func CreateRandomMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	}
 
 	entries := makeMerkleEntries(blocks, tree, numRows, numColumns, blockLen)
+
+	// GC after db creation
+	runtime.GC()
 
 	m := &Bytes{
 		Entries: entries,
