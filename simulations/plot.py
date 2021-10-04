@@ -65,7 +65,7 @@ def plotPoint():
            ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout(h_pad=1.5)
-    plt.savefig('point.eps', format='eps', dpi=300, transparent=True)
+    plt.savefig('figures/point.eps', format='eps', dpi=300, transparent=True)
 
 def plotComplex(): 
     schemes = ["fss.json", "authfss.json"]
@@ -111,8 +111,8 @@ def plotComplex():
            ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout()
-    plt.show()
-    # plt.savefig('complex.eps', format='eps', dpi=300, transparent=True)
+    #plt.show()
+    plt.savefig('figures/complex.eps', format='eps', dpi=300, transparent=True)
 
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
