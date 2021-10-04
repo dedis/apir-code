@@ -216,13 +216,13 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			Input: id,
 		}
 	case "creation":
-		// month + year => timestamp
-		panic("not yet implemented")
+		// timestamp
+		return 0, xerrors.New("timestamp not implemented yet")
 	case "algo":
-		// RSA | ED25519 | ...
-		panic("not yet implemented")
+		// RSA | DSA | ...
+		return 0, xerrors.New("algo not implemented yet")
 	default:
-		return 0, errors.New("unknow target" + lc.flags.target)
+		return 0, errors.New("unknown target" + lc.flags.target)
 	}
 
 	in, err := clientQuery.Encode()

@@ -12,9 +12,14 @@ run_server: $(PROTO_PB)
 	cd cmd/grpc/server && go build
 	go run cmd/grpc/server/main.go -id=$(id) -files=$(files) -scheme=$(scheme)
 
-run_client: $(PROTO_PB)
-	cd cmd/grpc/client && go build main.go demo.go
-	cmd/grpc/client/main -id=$(id) -scheme=$(scheme)
+build_client: $(PROTO_PB)
+	cd cmd/grpc/client && go build -o client .
+
+run_client: build_client
+	cmd/grpc/client/client -id=$(id) -scheme=$(scheme)
+
+run_demo: build_client
+	cmd/grpc/client/client -demo -scheme=$(scheme)
 
 test: $(PROTO_PB)
 	go test
