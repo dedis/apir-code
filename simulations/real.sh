@@ -22,8 +22,8 @@ cd - > /dev/null
 cd ../
 
 # run servers
-for scheme in pointPIR, pointVPIR; do
-  echo "##### running with $scheme scheme #####"
+for scheme in "pointPIR" "pointVPIR"; do
+  echo "##### running with $scheme #####"
   #for cores in {1..12}; do
   #echo "##### running with $cores cores #####"
 
