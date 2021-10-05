@@ -23,7 +23,7 @@ func ServerInitialize(blockLength int) *Fss {
 		}
 		f.FixedBlocks[i] = block
 	}
-	f.N = 256 // maximum number of bits supported by FSS
+	f.N = 512 // maximum number of bits supported by FSS
 	f.Temp = make([]byte, aes.BlockSize)
 	f.Out = make([]byte, aes.BlockSize*len(PrfKeys))
 	f.OutConvertBlock = make([]byte, blockLength*field.Bytes)
