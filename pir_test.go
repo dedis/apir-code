@@ -32,6 +32,8 @@ func TestPIRPointOneMb(t *testing.T) {
 
 	db := database.CreateRandomBytes(xofDB, dbLen, nRows, blockLen)
 
+	fmt.Println(len(db.Entries))
+
 	retrievePIRPoint(t, xof, db, numBlocks, "PIRPointOneMb")
 }
 

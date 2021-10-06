@@ -133,8 +133,7 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 		for j := 0; j < db.NumColumns; j++ {
 			nextPos += db.BlockLengths[i*db.NumColumns+j]
 		}
-		res := xorValues(db.Entries[prevPos:nextPos], db.BlockLengths[i*db.NumColumns:(i+1)*db.NumColumns], q, db.BlockSize)
-		copy(out[i*db.BlockSize:(i+1)*db.BlockSize], res)
+		xorValues(db.Entries[prevPos:nextPos], db.BlockLengths[i*db.NumColumns:(i+1)*db.NumColumns], q, db.BlockSize, out[i*db.BlockSize:(i+1)*db.BlockSize])
 		prevPos = nextPos
 	}
 	return out
@@ -194,19 +193,17 @@ func answerPIR(q []byte, db *database.Bytes, NGoRoutines int) []byte {
 }
 
 // XORs entries and q block by block of size bl
-func xorValues(entries []byte, blockLens []int, q []byte, bl int) []byte {
-	sum := make([]byte, bl)
+func xorValues(entries []byte, blockLens []int, q []byte, bl int, out []byte) {
 	pos := 0
 	for j := range blockLens {
 		if (q[j/8]>>(j%8))&1 == byte(1) {
-			fastxor.Bytes(sum, sum, entries[pos:pos+blockLens[j]])
+			fastxor.Bytes(out, out, entries[pos:pos+blockLens[j]])
 		}
 		pos += blockLens[j]
 	}
-	return sum
 }
 
-// XORs all the columns in a row, row by row, and writes the result into output
+/* // XORs all the columns in a row, row by row, and writes the result into output
 func xorRows(rows []byte, blockLens []int, query []byte, numRowsToProcess, numColumns, blockLen int) []byte {
 	var prevPos, nextPos int
 	//out := make([]byte, numRowsToProcess*blockLen)
@@ -224,7 +221,7 @@ func xorRows(rows []byte, blockLens []int, query []byte, numRowsToProcess, numCo
 	}
 	//reply <- sums
 	return out
-}
+} */
 
 /*
 %%	Shared helpers
