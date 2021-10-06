@@ -1,11 +1,10 @@
 package database
 
 import (
+	"github.com/si-co/vpir-code/lib/merkle"
 	"io"
 	"log"
 	"runtime"
-
-	"github.com/si-co/vpir-code/lib/merkle"
 )
 
 // CreateRandomMerkle
@@ -65,7 +64,7 @@ func CreateRandomMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 	return m
 }
 
-func makeMerkleEntries(blocks [][]byte, tree *merkle.MerkleTree, nRows, nColumns, maxBlockLen int) []byte {
+func makeMerkleEntries(blocks [][]byte, tree *merkle.MerkleTree, nRows, nColumns, blockLen int) []byte {
 	output := make([]byte, 0)
 	var begin, end int
 	NGoRoutines := runtime.NumCPU()
@@ -76,9 +75,9 @@ func makeMerkleEntries(blocks [][]byte, tree *merkle.MerkleTree, nRows, nColumns
 		if end > nRows*nColumns || i == NGoRoutines-1 {
 			end = nRows * nColumns
 		}
-		replyTo := make(chan []byte, maxBlockLen*(end-begin))
+		replyTo := make(chan []byte, 1)
 		replies[i] = replyTo
-		generateMerkleProofs(blocks[begin:end], tree, replyTo)
+		generateMerkleProofs(blocks[begin:end], tree, blockLen, replyTo)
 	}
 
 	for j, reply := range replies {
@@ -90,8 +89,9 @@ func makeMerkleEntries(blocks [][]byte, tree *merkle.MerkleTree, nRows, nColumns
 	return output
 }
 
-func generateMerkleProofs(data [][]byte, t *merkle.MerkleTree, reply chan<- []byte) {
-	result := make([]byte, 0)
+func generateMerkleProofs(data [][]byte, t *merkle.MerkleTree, blockLen int, reply chan<- []byte) {
+	result := make([]byte, 0, blockLen*len(data))
+	//fmt.Println(len(data), blockLen, len(result))
 	for b := 0; b < len(data); b++ {
 		p, err := t.GenerateProof(data[b])
 		if err != nil {
@@ -100,7 +100,10 @@ func generateMerkleProofs(data [][]byte, t *merkle.MerkleTree, reply chan<- []by
 		encodedProof := merkle.EncodeProof(p)
 		// appending 0x80
 		encodedProof = PadWithSignalByte(encodedProof)
+		//encodedProof = PadWithSignalByte(encodedProof)
+		// copying the data block and encoded proof into output
 		result = append(result, append(data[b], encodedProof...)...)
+		//copy(result[b*blockLen:(b+1)*blockLen], append(data[b], encodedProof...))
 	}
 	reply <- result
 }

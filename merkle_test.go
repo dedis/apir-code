@@ -33,6 +33,7 @@ func TestMatrixOneMbMerkle(t *testing.T) {
 	xof := utils.RandomPRG()
 
 	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
+	fmt.Println("DB created")
 
 	retrieveBlocksITMerkle(t, xof, db, numBlocks, "MatrixOneMbMerkle")
 }
