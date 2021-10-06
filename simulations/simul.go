@@ -69,6 +69,7 @@ func main() {
 	defer trace.Stop()
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
+	memprofile := flag.String("memprofile", "", "write mem profile to file")
 	indivConfigFile := flag.String("config", "", "config file for simulation")
 	flag.Parse()
 
@@ -78,7 +79,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		pprof.StartCPUProfile(f)
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal(err)
+		}
 		defer pprof.StopCPUProfile()
 	}
 
@@ -227,6 +231,18 @@ dbSizesLoop:
 		}
 	}
 
+	// mem profiling
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile: ", err)
+		}
+		defer f.Close() // error handling omitted for example
+		runtime.GC()    // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+	}
 	log.Println("simulation terminated successfully")
 }
 
