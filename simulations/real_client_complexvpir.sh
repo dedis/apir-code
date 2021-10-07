@@ -41,12 +41,10 @@ for i in {1..30}; do
   sleep 5
 done
 
-# TODO: continue from here
-# THIS IS FOR THE AND QUERY
-target="creation"
+# THIS IS FOR THE AND QUERY, HARDCODED IN GO
 for i in {1..30}; do
   echo "    ##### iteration $i"
-  cmd/grpc/client/client -id="2020" -target=$target -experiment -scheme=$scheme | tee -a simulations/results/stats_client_$scheme_$target.log
+  cmd/grpc/client/client -and -experiment -scheme=$scheme | tee -a simulations/results/stats_client_$scheme_and.log
   sleep 5
 done
 
