@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "results/"
+resultFolder = "final_results/"
+#resultFolder = "results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -42,12 +42,13 @@ def plotPoint():
             cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
             bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
             cpuArray[i].append(cpuMean/1000)
-            bwArray[i].append(bwMean/1048576)
+            bwArray[i].append(bwMean/MB)
 
         axs[0].plot(
                 [x/GiB for x in sorted(stats.keys())], 
                 cpuArray[i], 
                 color='black', 
+                marker=markers[int(i / (len(schemes) / 2))],
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
@@ -55,12 +56,14 @@ def plotPoint():
                 [x/GiB for x in sorted(stats.keys())], 
                 bwArray[i], 
                 color='black', 
+                marker=markers[int(i / (len(schemes) / 2))],
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
 
     # cosmetics
     axs[0].set_ylabel('CPU time [s]')
+    axs[0].set_xticks([int(x/GiB) for x in sorted(stats.keys())]), 
     axs[1].set_ylabel('Bandwidth [MiB]')
     axs[1].set_xlabel('DB size [GiB]')
     axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
@@ -71,7 +74,7 @@ def plotPoint():
 
 def plotComplex(): 
     schemes = ["fss.json", "authfss.json"]
-    schemeLabels = ["No-intergrity", "Authenticated"]
+    schemeLabels = ["Unauthenticated", "Authenticated"]
 
     fig, axs = plt.subplots(2, sharex=True)
 
@@ -83,11 +86,12 @@ def plotComplex():
         cpuArray.append([])
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
+            print(dbSize)
             # means
             cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
             bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
-            cpuArray[i].append(cpuMean)
-            bwArray[i].append(bwMean/1000)
+            cpuArray[i].append(cpuMean/1000)
+            bwArray[i].append(bwMean/1024)
 
         axs[0].plot(
                 [x for x in sorted(stats.keys())], 
@@ -106,9 +110,10 @@ def plotComplex():
         )
 
     # cosmetics
-    axs[0].set_ylabel('CPU time [ms]')
+    axs[0].set_ylabel('CPU time [s]')
+    axs[0].set_xticks([x for x in sorted(stats.keys())])
     axs[1].set_ylabel('Bandwidth [KiB]')
-    axs[1].set_xlabel('FSS input size [bytes]')
+    axs[1].set_xlabel('Function-secret-sharing input size [bytes]')
     axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
 
