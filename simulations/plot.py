@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "results/"
+resultFolder = "final_results/"
+#resultFolder = "results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -19,12 +19,14 @@ GB = pow(1024, 3)
 bitsToGB = 0.000000000125
 MB = pow(1024, 2)
 KB = 1024
+GiB = 8589935000
+MiB = 1048576
 LatticeRotKeysLen = 39322025
 LatticeCiphertextLen = 393221
 
 def plotPoint():
     schemes = ["pirClassic.json", "pirMerkle.json"]
-    schemeLabels = ["No-intergrity", "Authenticated"]
+    schemeLabels = ["Unauthenticated", "Authenticated"]
 
     fig, axs = plt.subplots(2, sharex=True)
 
@@ -39,18 +41,18 @@ def plotPoint():
             # means
             cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
             bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
-            cpuArray[i].append(cpuMean)
-            bwArray[i].append(bwMean/1000)
+            cpuArray[i].append(cpuMean/1000)
+            bwArray[i].append(bwMean/1048576)
 
         axs[0].plot(
-                [x/pow(10, 6) for x in sorted(stats.keys())], 
+                [x/GiB for x in sorted(stats.keys())], 
                 cpuArray[i], 
                 color='black', 
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
         axs[1].plot(
-                [x/pow(10, 6) for x in sorted(stats.keys())], 
+                [x/GiB for x in sorted(stats.keys())], 
                 bwArray[i], 
                 color='black', 
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
@@ -58,9 +60,9 @@ def plotPoint():
         )
 
     # cosmetics
-    axs[0].set_ylabel('CPU time [ms]')
-    axs[1].set_ylabel('Bandwidth [KiB]')
-    axs[1].set_xlabel('DB size [MiB]')
+    axs[0].set_ylabel('CPU time [s]')
+    axs[1].set_ylabel('Bandwidth [MiB]')
+    axs[1].set_xlabel('DB size [GiB]')
     axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
 
@@ -435,7 +437,7 @@ if __name__ == "__main__":
     prepare_for_latex()
     if EXPR == "point":
         plotPoint()
-    if EXPR == "complex":
+    elif EXPR == "complex":
         plotComplex()
     elif EXPR == "performance":
         plotVpirPerformanceLines()
