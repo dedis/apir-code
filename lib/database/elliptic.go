@@ -40,7 +40,7 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, dbLen int, g group.Group, reb
 		if end > numRows {
 			end = numRows
 		}
-		replyChan := make(chan []byte)
+		replyChan := make(chan []byte, 1)
 		replies[i] = replyChan
 		go computeDigests(begin, end, data, numColumns, g, h, replyChan)
 	}

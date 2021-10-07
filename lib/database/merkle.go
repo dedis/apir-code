@@ -91,7 +91,6 @@ func makeMerkleEntries(blocks [][]byte, tree *merkle.MerkleTree, nRows, nColumns
 
 func generateMerkleProofs(data [][]byte, t *merkle.MerkleTree, blockLen int, reply chan<- []byte) {
 	result := make([]byte, 0, blockLen*len(data))
-	//fmt.Println(len(data), blockLen, len(result))
 	for b := 0; b < len(data); b++ {
 		p, err := t.GenerateProof(data[b])
 		if err != nil {
@@ -100,10 +99,8 @@ func generateMerkleProofs(data [][]byte, t *merkle.MerkleTree, blockLen int, rep
 		encodedProof := merkle.EncodeProof(p)
 		// appending 0x80
 		encodedProof = PadWithSignalByte(encodedProof)
-		//encodedProof = PadWithSignalByte(encodedProof)
 		// copying the data block and encoded proof into output
 		result = append(result, append(data[b], encodedProof...)...)
-		//copy(result[b*blockLen:(b+1)*blockLen], append(data[b], encodedProof...))
 	}
 	reply <- result
 }
