@@ -10,6 +10,8 @@ from utils import *
 resultFolder = "final_results/"
 #resultFolder = "results/"
 
+print("plotting from", resultFolder)
+
 # styles
 markers = ['.', '*', 'd', 's']
 linestyles = ['-', '--', ':', '-.']
