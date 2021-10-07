@@ -202,60 +202,78 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 	t := time.Now()
 
 	var clientQuery *query.ClientFSS
-	switch lc.flags.target {
-	case "email":
-		info := &query.Info{
-			Target:    query.UserId,
-			FromStart: lc.flags.fromStart,
-			FromEnd:   lc.flags.fromEnd,
-			And:       lc.flags.and,
+	if !lc.flags.and {
+		switch lc.flags.target {
+		case "email":
+			info := &query.Info{
+				Target:    query.UserId,
+				FromStart: lc.flags.fromStart,
+				FromEnd:   lc.flags.fromEnd,
+				And:       lc.flags.and,
+			}
+			id, _ := info.IdForEmail(lc.flags.id)
+			clientQuery = &query.ClientFSS{
+				Info:  info,
+				Input: id,
+			}
+		case "algo":
+			info := &query.Info{
+				Target: query.PubKeyAlgo,
+			}
+			var pka packet.PublicKeyAlgorithm
+			switch lc.flags.id {
+			case "RSA":
+				pka = packet.PubKeyAlgoRSA
+			case "ElGamal":
+				pka = packet.PubKeyAlgoElGamal
+			case "DSA":
+				pka = packet.PubKeyAlgoDSA
+			case "ECDH":
+				pka = packet.PubKeyAlgoECDH
+			case "ECDSA":
+				pka = packet.PubKeyAlgoECDSA
+			}
+			id := info.IdForPubKeyAlgo(pka)
+			clientQuery = &query.ClientFSS{
+				Info:  info,
+				Input: id,
+			}
+		case "creation":
+			info := &query.Info{
+				Target: query.CreationTime,
+			}
+			year, err := strconv.Atoi(lc.flags.id)
+			if err != nil {
+				log.Fatal(err)
+			}
+			match := time.Date(year, time.November, 0, 0, 0, 0, 0, time.UTC)
+			id, err := info.IdForCreationTime(match)
+			if err != nil {
+				log.Fatal(err)
+			}
+			clientQuery = &query.ClientFSS{
+				Info:  info,
+				Input: id,
+			}
+		default:
+			return 0, errors.New("unknown target" + lc.flags.target)
 		}
-		id, _ := info.IdForEmail(lc.flags.id)
-		clientQuery = &query.ClientFSS{
-			Info:  info,
-			Input: id,
-		}
-	case "algo":
-		info := &query.Info{
-			Target: query.PubKeyAlgo,
-		}
-		var pka packet.PublicKeyAlgorithm
-		switch lc.flags.id {
-		case "RSA":
-			pka = packet.PubKeyAlgoRSA
-		case "ElGamal":
-			pka = packet.PubKeyAlgoElGamal
-		case "DSA":
-			pka = packet.PubKeyAlgoDSA
-		case "ECDH":
-			pka = packet.PubKeyAlgoECDH
-		case "ECDSA":
-			pka = packet.PubKeyAlgoECDSA
-		}
-		id := info.IdForPubKeyAlgo(pka)
-		clientQuery = &query.ClientFSS{
-			Info:  info,
-			Input: id,
-		}
-	case "creation":
-		info := &query.Info{
-			Target: query.CreationTime,
-		}
-		year, err := strconv.Atoi(lc.flags.id)
+	} else {
+		// TODO: for the moment AND is hardcoded for experiments
+		match := []interface{}{time.Date(2020, time.December, 0, 0, 0, 0, 0, time.UTC), packet.PubKeyAlgoRSA}
+		matchBytes, err := match[0].(time.Time).MarshalBinary()
 		if err != nil {
 			log.Fatal(err)
 		}
-		match := time.Date(year, time.November, 0, 0, 0, 0, 0, time.UTC)
-		id, err := info.IdForCreationTime(match)
-		if err != nil {
-			log.Fatal(err)
-		}
+		matchBytes = append(matchBytes, byte(match[1].(packet.PublicKeyAlgorithm)))
+		in := utils.ByteToBits(matchBytes)
 		clientQuery = &query.ClientFSS{
-			Info:  info,
-			Input: id,
+			Info: &query.Info{
+				And:     true,
+				Targets: []query.Target{query.PubKeyAlgo, query.CreationTime},
+			},
+			Input: in,
 		}
-	default:
-		return 0, errors.New("unknown target" + lc.flags.target)
 	}
 
 	in, err := clientQuery.Encode()
