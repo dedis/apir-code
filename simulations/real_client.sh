@@ -15,15 +15,16 @@ cd - > /dev/null
 cd ../
 
 # run servers
-for scheme in it dpf; do
+for scheme in "pointPIR", "pointVPIR"; do
   echo "##### running with $scheme scheme #####"
-  for cores in {1..24}; do
-    echo "##### running with $cores cores #####"
+  #for cores in {1..24}; do
+    #echo "##### running with $cores cores #####"
 
     # repeat experiment 20 times
-    for i in {1..20}; do
-      echo "##### iteration $i running with $cores cores #####"
-      cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -cores=$cores -scheme=$scheme | tee -a simulations/results/stats_client_$scheme.log
+    for i in {1..30}; do
+      #echo "##### iteration $i running with $cores cores #####"
+      echo "    ##### iteration $i"
+      cmd/grpc/client/client -id=alex.braulio@varidi.com -experiment -scheme=$scheme | tee -a simulations/results/stats_client_$scheme.log
       sleep 5
     done
 
@@ -32,6 +33,6 @@ for scheme in it dpf; do
     curl 10.90.36.33:8080 > /dev/null
     sleep 10
 
-    echo "##### done with $cores #####"
-  done
+    #echo "##### done with $cores #####"
+  #done
 done
