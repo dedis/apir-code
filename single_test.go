@@ -23,7 +23,7 @@ func TestDHMatrixOneMb(t *testing.T) {
 	dbPRG := utils.RandomPRG()
 	ecg := group.P256
 	db := database.CreateRandomEllipticWithDigest(dbPRG, dbLen, ecg, true)
-
+	fmt.Println("DB created")
 	prg := utils.RandomPRG()
 	retrieveBlocksDH(t, prg, db, "SingleMatrixOneMB")
 }
@@ -56,6 +56,7 @@ func TestLatticeMatrixOneMb(t *testing.T) {
 
 	for _, dbLen := range lens {
 		db := database.CreateRandomRingDB(dbPRG, dbLen, true)
+		fmt.Printf("DB of size %d created\n", dbLen)
 		retrieveBlocksLattice(t, db, "LatticeMatrixOneMB")
 	}
 }

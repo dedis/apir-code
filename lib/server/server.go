@@ -37,7 +37,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 			for colN := begin; colN < end; colN++ {
 				nextElemPos += db.BlockLengths[colN]
 			}
-			replyChan := make(chan []uint32, db.BlockSize+1)
+			replyChan := make(chan []uint32)
 			replies[i] = replyChan
 			go processColumns(db.Entries[prevElemPos:nextElemPos], db.BlockLengths[begin:end], q[begin*(db.BlockSize+1):end*(db.BlockSize+1)], db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
@@ -61,7 +61,7 @@ func answer(q []uint32, db *database.DB, NGoRoutines int) []uint32 {
 					nextElemPos += db.BlockLengths[rowN*db.NumColumns+colN]
 				}
 			}
-			replyChan := make(chan []uint32, (end-begin)*(db.BlockSize+1))
+			replyChan := make(chan []uint32)
 			replies[i] = replyChan
 			go processRows(db.Entries[prevElemPos:nextElemPos], db.BlockLengths[begin*db.NumColumns:end*db.NumColumns], q, end-begin, db.NumColumns, db.BlockSize, replyChan)
 			prevElemPos = nextElemPos
