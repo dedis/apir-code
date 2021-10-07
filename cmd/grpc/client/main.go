@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -208,9 +209,30 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			FromStart: lc.flags.fromStart,
 			FromEnd:   lc.flags.fromEnd,
 			And:       lc.flags.and,
-			//Targets []Target // TODO: implement
 		}
 		id, _ := info.IdForEmail(lc.flags.id)
+		clientQuery = &query.ClientFSS{
+			Info:  info,
+			Input: id,
+		}
+	case "algo":
+		info := &query.Info{
+			Target: query.PubKeyAlgo,
+		}
+		var pka packet.PublicKeyAlgorithm
+		switch lc.flags.id {
+		case "RSA":
+			pka = packet.PubKeyAlgoRSA
+		case "ElGamal":
+			pka = packet.PubKeyAlgoElGamal
+		case "DSA":
+			pka = packet.PubKeyAlgoDSA
+		case "ECDH":
+			pka = packet.PubKeyAlgoECDH
+		case "ECDSA":
+			pka = packet.PubKeyAlgoECDSA
+		}
+		id := info.IdForPubKeyAlgo(pka)
 		clientQuery = &query.ClientFSS{
 			Info:  info,
 			Input: id,
@@ -218,9 +240,6 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 	case "creation":
 		// timestamp
 		return 0, xerrors.New("timestamp not implemented yet")
-	case "algo":
-		// RSA | DSA | ...
-		return 0, xerrors.New("algo not implemented yet")
 	default:
 		return 0, errors.New("unknown target" + lc.flags.target)
 	}
