@@ -15,7 +15,7 @@ cd - > /dev/null
 cd ../
 
 # run servers
-echo "##### running with FSS-based scheme #####"
-# run server, db is same for complexPIR and complexVPIR
-cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme="complexPIR" | tee -a simulations/results/stats_server-0_$scheme.log
+echo "##### running with $2 scheme #####"
+# run server given the correct scheme 
+cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$2 | tee -a simulations/results/stats_server-0_$scheme.log
 wait $!
