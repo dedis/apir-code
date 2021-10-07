@@ -60,7 +60,7 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 		if i == NGoRoutines-1 {
 			end = c.dbInfo.NumColumns
 		}
-		replyChan := make(chan []group.Element, end-begin)
+		replyChan := make(chan []group.Element)
 		replies[i] = replyChan
 		go generateBlindedElements(begin, end, r, c.dbInfo, replyChan)
 	}
