@@ -238,8 +238,22 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			Input: id,
 		}
 	case "creation":
-		// timestamp
-		return 0, xerrors.New("timestamp not implemented yet")
+		info := &query.Info{
+			Target: query.CreationTime,
+		}
+		year, err := strconv.Atoi(lc.flags.id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		match := time.Date(year, time.November, 0, 0, 0, 0, 0, time.UTC)
+		id, err := info.IdForCreationTime(match)
+		if err != nil {
+			log.Fatal(err)
+		}
+		clientQuery = &query.ClientFSS{
+			Info:  info,
+			Input: id,
+		}
 	default:
 		return 0, errors.New("unknown target" + lc.flags.target)
 	}
