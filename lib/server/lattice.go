@@ -65,7 +65,7 @@ func (s *Lattice) AnswerBytes(q []byte) ([]byte, error) {
 		if i == NGoRoutines-1 {
 			end = s.db.NumRows
 		}
-		replyChan := make(chan []*bfv.Ciphertext, rowsPerRoutine)
+		replyChan := make(chan []*bfv.Ciphertext, 1)
 		replies[i] = replyChan
 		go s.processRows(begin, end, ctx, plainMask, rtk, replyChan)
 	}

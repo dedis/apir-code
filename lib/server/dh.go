@@ -37,7 +37,7 @@ func (s *DH) AnswerBytes(q []byte) ([]byte, error) {
 		if end > s.db.NumRows {
 			end = s.db.NumRows
 		}
-		replyChan := make(chan []group.Element)
+		replyChan := make(chan []group.Element, 1)
 		replies[i] = replyChan
 		go s.processRows(begin, end, query, replyChan)
 	}
