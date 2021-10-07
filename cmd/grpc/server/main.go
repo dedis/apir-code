@@ -106,13 +106,7 @@ func main() {
 			log.Fatalf("impossible to construct real keys bytes db: %v", err)
 		}
 		log.Printf("db size in GiB: %f", dbBytes.SizeGiB())
-	case "complexPIR":
-		db, err = loadPgpDB(*filesNumber, true)
-		if err != nil {
-			log.Fatalf("impossible to load real keys db: %v", err)
-		}
-		log.Printf("db size in GiB: %f", db.SizeGiB())
-	case "complexVPIR":
+	case "complexPIR", "complexVPIR":
 		db, err = loadPgpDB(*filesNumber, true)
 		if err != nil {
 			log.Fatalf("impossible to load real keys db: %v", err)
