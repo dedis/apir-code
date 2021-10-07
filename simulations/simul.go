@@ -174,13 +174,9 @@ dbSizesLoop:
 		case "pir-classic", "pir-merkle":
 			log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits",
 				s.Primitive, dbLen)
-			// TODO (Simone): avoid printing BlockLengths, too verbose
-			//log.Printf("db info: %#v", dbBytes.Info)
 			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 		case "fss":
-			// TODO (Simone): avoid printing BlockLengths, too verbose
-			//log.Printf("db info: %#v", db.Info)
 			// In FSS, we iterate over input sizes instead of db sizes
 			for _, inputSize := range s.InputSizes {
 				stringToSearch := utils.Ranstring(inputSize)
@@ -192,6 +188,10 @@ dbSizesLoop:
 				results = fssVPIR(db, inputSize, stringToSearch, s.Repetitions)
 				log.Printf("retrieving with verifiable FSS with the input size of %d bytes\n", inputSize)
 				experimentv.Results[inputSize] = results
+
+				time.Sleep(3)
+				runtime.GC()
+				time.Sleep(3)
 			}
 			// Skip the rest of the loop
 			break dbSizesLoop

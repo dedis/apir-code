@@ -78,6 +78,7 @@ def parseResults(file):
 
 def stats(data):
     s = {'cpu': {}, 'bw': {}}
+    #sorted = np.sort(data['CPU'])
     s['cpu']['mean'] = np.median(data['CPU'])
     s['cpu']['std'] = np.std(data['CPU'])
     # print(s['cpu']['std']/s['cpu']['mean']) 
