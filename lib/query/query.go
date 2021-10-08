@@ -47,6 +47,12 @@ type Info struct {
 
 	And     bool
 	Targets []Target
+
+	// to perform AVG query
+	Avg bool
+
+	// to perform SUM query
+	Sum bool
 }
 
 func (q *ClientFSS) Encode() ([]byte, error) {
