@@ -63,6 +63,7 @@ def plotPoint():
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
 
+
     # cosmetics
     axs[0].set_ylabel('CPU time [s]')
     axs[0].set_xticks([int(x/GiB) for x in sorted(stats.keys())]), 
@@ -88,7 +89,6 @@ def plotComplex():
         cpuArray.append([])
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
-            print(dbSize)
             # means
             cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
             bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
@@ -110,6 +110,9 @@ def plotComplex():
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
+
+    print("mean ratio CPU:", np.mean([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
+    print("mean ratio BW:", np.mean([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
 
     # cosmetics
     axs[0].set_ylabel('CPU time [s]')
