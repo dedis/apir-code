@@ -210,9 +210,16 @@ func GetKeyInfoFromPacket(pkt []byte) (*KeyInfo, error) {
 		return nil, errors.New("more than one openpgp entity in a key block")
 	}
 
+	// retrieve bit length
+	bl, err := el[0].PrimaryKey.BitLength()
+	if err != nil {
+		return nil, err
+	}
+
 	return &KeyInfo{
 		UserId:       el[0].PrimaryIdentity().UserId,
 		CreationTime: el[0].PrimaryKey.CreationTime,
 		PubKeyAlgo:   el[0].PrimaryKey.PubKeyAlgo,
+		BitLength:    bl,
 	}, nil
 }

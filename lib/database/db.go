@@ -29,6 +29,7 @@ type KeyInfo struct {
 	UserId       *packet.UserId
 	CreationTime time.Time
 	PubKeyAlgo   packet.PublicKeyAlgorithm
+	BitLength    uint16
 }
 
 type Info struct {
