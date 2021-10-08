@@ -27,6 +27,7 @@ for i in {1..30}; do
   sleep 5
 done
 
+: <<'END'
 target="algo"
 for i in {1..30}; do
   echo "    ##### iteration $i"
@@ -44,9 +45,10 @@ done
 # THIS IS FOR THE AND QUERY, HARDCODED IN GO
 for i in {1..30}; do
   echo "    ##### iteration $i"
-  cmd/grpc/client/client -and -experiment -scheme=$scheme | tee -a simulations/results/stats_client_$scheme_and.log
+  cmd/grpc/client/client -and -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_and.log
   sleep 5
 done
+END
 
 # terminates servers
 curl 10.90.36.31:8080 > /dev/null

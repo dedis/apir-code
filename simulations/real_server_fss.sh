@@ -17,5 +17,5 @@ cd ../
 # run servers
 echo "##### running with $2 scheme #####"
 # run server given the correct scheme 
-cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$2 | tee -a simulations/results/stats_server-0_$scheme.log
+cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$2 | tee -a simulations/results/stats_server-0_${2}.log
 wait $!
