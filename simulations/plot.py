@@ -284,8 +284,56 @@ def plotSingle():
     print_latex_table_separate(bwTable, len(schemes), get_size_in_bits)
 
 
+def plotRealComplex():
+    schemes = ["email_complexVPIR"]
+    #labels = ["Atomic", "Merkle", "PIR"]
+    #dbSizes = [12.485642 ,11.650396 ,11.907099,11.122669,11.702634 ,10.918602]
+
+    core = -1 # only a single core
+    c = core
+
+    fig, ax = plt.subplots()
+
+    for i, scheme in enumerate(schemes):
+        logServers = [
+                "stats_server-0_" + scheme + ".log", 
+                "stats_server-1_" + scheme + ".log"]
+
+        statsServers = []
+        for l in logServers:
+            statsServers.append(parseLog(resultFolder + l))
+
+        # combine answers bandwidth
+        answers = dict()
+        answers[core] = [sum(x) for x in zip(statsServers[0][core]["answer"], statsServers[1][core]["answer"])]
+        serversBW = answers[core]
+
+        # get client stats
+        statsClient = parseLog(resultFolder + "stats_client_" + scheme + ".log")
+
+        queries = dict()
+        latencies = dict()
+        queries[c] = statsClient[c]["queries"]
+        latencies[c] = statsClient[c]["latency"]
+
+        clientBW = queries[c]
+        userTime = latencies[c]
+        
+        totalBW = [sum(x) for x in zip(serversBW, clientBW)]
+
+        print("User time:", np.median(userTime), "BW:", np.median(totalBW)) 
+        
+        #if i % 2 == 0:
+        #    #print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
+        #    print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", round(dbSizes[i], 2), "&", end=" ")
+        #else:
+            #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
+        #    print(round(worstLatency, 2), "&", round(dbSizes[i], 2), "\\\\") 
+
+
+
 def plotReal():
-    schemes = ["it", "dpf", "merkle-it", "merkle-dpf", "pir-it", "pir-dpf"]
+    schemes = ["email_complexVPIR"]
     labels = ["Atomic", "Merkle", "PIR"]
     dbSizes = [12.485642 ,11.650396 ,11.907099,11.122669,11.702634 ,10.918602]
 
@@ -449,12 +497,11 @@ if __name__ == "__main__":
         plotPoint()
     elif EXPR == "complex":
         plotComplex()
-    elif EXPR == "performance":
-        plotVpirPerformanceLines()
-        # plotVpirPerformanceBars()
     elif EXPR == "single":
         plotSingle()
     elif EXPR == "real":
         plotReal()
+    elif EXPR == "realcomplex":
+        plotRealComplex()
     else:
         print("Unknown experiment: choose between benchmarks and performance")
