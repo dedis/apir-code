@@ -213,7 +213,7 @@ func GetKeyInfoFromPacket(pkt []byte) (*KeyInfo, error) {
 	// retrieve bit length
 	bl, err := el[0].PrimaryKey.BitLength()
 	if err != nil {
-		return nil, err
+		bl = 0
 	}
 
 	return &KeyInfo{
