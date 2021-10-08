@@ -68,7 +68,7 @@ func (s *PIRfss) Answer(q *query.FSS) uint32 {
 	out := uint32(0)
 	tmp := []uint32{0}
 
-	if !q.And {
+	if !q.And && !q.Avg && !q.Sum {
 		switch q.Target {
 		case query.UserId:
 			for i := 0; i < numIdentifiers; i++ {
@@ -102,7 +102,7 @@ func (s *PIRfss) Answer(q *query.FSS) uint32 {
 		default:
 			panic("not yet implemented")
 		}
-	} else { // conjunction
+	} else if q.And && !q.Avg && !q.Sum { // conjunction
 		for i := 0; i < numIdentifiers; i++ {
 			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
 			if err != nil {
@@ -114,5 +114,25 @@ func (s *PIRfss) Answer(q *query.FSS) uint32 {
 			out = (out + tmp[0]) % field.ModP
 		}
 		return out
+	} else if q.And && q.Sum && !q.Avg { // sum
+		for i := 0; i < numIdentifiers; i++ {
+			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
+			if err != nil {
+				panic("impossible to marshal creation date")
+			}
+			binaryMatch = append(binaryMatch, byte(s.db.KeysInfo[i].PubKeyAlgo))
+			id := utils.ByteToBits(binaryMatch)
+
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+			out = (out + tmp[0]*uint32(s.db.KeysInfo[i].BitLength)) % field.ModP
+		}
+
+		return out
+
+	} else if q.And && q.Avg && !q.Sum { // avg
+		panic("not yet implemented")
+	} else {
+		panic("query not recognized")
 	}
+
 }
