@@ -285,9 +285,8 @@ def plotSingle():
 
 
 def plotRealComplex():
-    schemes = ["email_complexVPIR"]
-    #labels = ["Atomic", "Merkle", "PIR"]
-    #dbSizes = [12.485642 ,11.650396 ,11.907099,11.122669,11.702634 ,10.918602]
+    #schemes = ["email_complexVPIR", "email_complexPIR", "algo_complexVPIR", "algo_complexPIR"]
+    schemes = ["email_complexVPIR", "algo_complexVPIR"]
 
     core = -1 # only a single core
     c = core
