@@ -285,14 +285,21 @@ def plotSingle():
 
 
 def plotRealComplex():
-    #schemes = ["email_complexVPIR", "email_complexPIR", "algo_complexVPIR", "algo_complexPIR"]
-    schemes = ["email_complexVPIR", "algo_complexVPIR"]
+    schemes = [
+        "email_complexPIR", 
+        "email_complexVPIR", 
+        "algo_complexPIR", 
+        "algo_complexVPIR",
+        "and_complexPIR",
+        "and_complexVPIR",
+    ]
 
     core = -1 # only a single core
     c = core
 
     fig, ax = plt.subplots()
 
+    bwUnauth = 0
     for i, scheme in enumerate(schemes):
         logServers = [
                 "stats_server-0_" + scheme + ".log", 
@@ -319,18 +326,23 @@ def plotRealComplex():
         userTime = latencies[c]
         
         totalBW = [sum(x) for x in zip(serversBW, clientBW)]
-
-        print("User time:", np.median(userTime), "BW:", np.median(totalBW)) 
         
-        #if i % 2 == 0:
-        #    #print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
-        #    print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", round(dbSizes[i], 2), "&", end=" ")
-        #else:
-            #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
-        #    print(round(worstLatency, 2), "&", round(dbSizes[i], 2), "\\\\") 
+        t = round(np.median(userTime), 2)
+        bw = np.median(totalBW)
+        if i % 2 == 0:
+            if scheme ==  "email_complexPIR":
+                print('COUNT of emails ending with ".org" & &', t, "&", end=" ") 
+            elif scheme == "algo_complexPIR":
+                print("COUNT of ElGamal keys & &", t, "&", end=" ") 
+            elif scheme == "and_complexPIR":
+                print('COUNT of keys created in Nov. 2020 AND ending with ".org" & &', t, "&", end=" ") 
+            else: 
+                print("unknow scheme")
 
-
-
+            bwUnauth = bw
+        else:
+            print(t, "&", bwUnauth, "&", bw, "\\\\")
+        
 def plotReal():
     schemes = ["email_complexVPIR"]
     labels = ["Atomic", "Merkle", "PIR"]
