@@ -126,6 +126,60 @@ def plotComplex():
     #plt.show()
     plt.savefig('figures/complex.eps', format='eps', dpi=300, transparent=True)
 
+def plotComplexBars(): 
+    schemes = ["fss.json", "authfss.json"]
+    schemeLabels = ["Unauthenticated", "Authenticated"]
+
+    width = 0.35  # the width of the bars
+    fig, ax = plt.subplots()
+
+    cpuArray = []
+    bwArray = []
+    for i, scheme in enumerate(schemes):
+        stats = allStats(resultFolder + scheme) 
+        cpuArray.append([])
+        bwArray.append([])
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            # means
+            cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpuArray[i].append(cpuMean/1000)
+            bwArray[i].append(bwMean/1024)
+
+    print("mean ratio CPU:", np.mean([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
+    print("mean ratio BW:", np.mean([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
+    
+    ratioCPU = [cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]
+    ratioBW = [bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]
+
+    x = np.arange(len(ratioCPU))
+    
+    rects1 = ax.bar(
+            x - width/2, 
+            ratioCPU, width, 
+            label='CPU', 
+            color='white', 
+            edgecolor='black', 
+            hatch='/')
+    rects2 = ax.bar(
+            x + width/2, 
+            ratioBW, width, 
+            label='Bandwidth',
+            color='white', 
+            edgecolor = 'black', 
+            hatch='-')
+
+    # cosmetics
+    ax.set_ylabel('Ratio')
+    ax.set_xticks(x, [x for x in sorted(stats.keys())])
+    ax.set_xlabel('Function-secret-sharing input size [bytes]')
+    ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, mode="expand", borderaxespad=0.)
+
+    plt.tight_layout()
+    #plt.show()
+    plt.savefig('figures/complex.eps', format='eps', dpi=300, transparent=True)
+
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
     schemes = ["pirMatrix.json", "merkleMatrix.json", "vpirMultiMatrixBlock.json",
@@ -508,6 +562,8 @@ if __name__ == "__main__":
         plotPoint()
     elif EXPR == "complex":
         plotComplex()
+    elif EXPR == "complexBars":
+        plotComplexBars()
     elif EXPR == "single":
         plotSingle()
     elif EXPR == "real":
