@@ -3,7 +3,6 @@ package main
 // Test suite for integrated VPIR.
 
 import (
-	"fmt"
 	"runtime"
 	"testing"
 	"time"
@@ -181,8 +180,6 @@ func fixedAndQueryMatch(db *database.DB) (interface{}, *query.ClientFSS) {
 	}
 	idOrganization, _ := info.IdForEmail(matchOrganization)
 	in := append(idYear, idOrganization...)
-	fmt.Println(len(in))
-
 	q := &query.ClientFSS{
 		Info:  info,
 		Input: in,

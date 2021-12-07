@@ -60,6 +60,7 @@ type flags struct {
 	fromStart int
 	fromEnd   int
 	and       bool
+	avg       bool
 }
 
 func newLocalClient() *localClient {
@@ -202,7 +203,7 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 	t := time.Now()
 
 	var clientQuery *query.ClientFSS
-	if !lc.flags.and {
+	if !lc.flags.and && !lc.flags.avg {
 		switch lc.flags.target {
 		case "email":
 			info := &query.Info{
@@ -258,7 +259,7 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 		default:
 			return 0, errors.New("unknown target" + lc.flags.target)
 		}
-	} else {
+	} else if lc.flags.and && !lc.flags.avg {
 		// TODO: for the moment AND is hardcoded for experiments, FIX this
 		// match organization
 		organization := ".edu"
@@ -279,6 +280,23 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			Info:  info,
 			Input: in,
 		}
+	} else if lc.flags.and && lc.flags.avg {
+		// TODO: for the moment AVG is hardcoded on lifetime and created in 2019, FIX this
+		info := &query.Info{
+			And: true,
+			Avg: true,
+		}
+		idYear, err := info.IdForYearCreationTime(time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC))
+		if err != nil {
+			panic(err)
+		}
+		in := idYear
+		clientQuery = &query.ClientFSS{
+			Info:  info,
+			Input: in,
+		}
+	} else {
+		panic("only avg is not implemented yet")
 	}
 
 	in, err := clientQuery.Encode()

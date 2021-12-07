@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"runtime"
+	"time"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -137,13 +138,32 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
 			for i := range out {
-				out[i] = (out[i] + tmp[0]*uint32(s.db.KeysInfo[i].BitLength)) % field.ModP
+				out[i] = (out[i] + tmp[i]*uint32(s.db.KeysInfo[i].BitLength)) % field.ModP
 			}
 		}
 
 		return out
 	} else if q.And && q.Avg && !q.Sum { // avg
-		panic("not yet implemented")
+		now := time.Now()
+		for i := 0; i < numIdentifiers; i++ {
+			// year
+			yearMatch, err := q.IdForYearCreationTime(s.db.KeysInfo[i].CreationTime)
+			if err != nil {
+				panic(err)
+			}
+			in := yearMatch
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, in, tmp)
+			for i := range out {
+				// COUNT
+				out[i] = (out[i] + tmp[i]) % field.ModP
+
+				// SUM
+				diffYears := uint32(now.Sub(s.db.KeysInfo[i].CreationTime).Seconds() / 31207680) // TODO: round
+				out[i] = (out[i] + (tmp[i]*diffYears)%field.ModP) % field.ModP
+			}
+		}
+		// TODO: need to implement modular inverse to divide sum by count
+		return out
 	} else {
 		panic("query not recognized")
 	}

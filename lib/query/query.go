@@ -53,6 +53,7 @@ type Info struct {
 	Avg bool
 
 	// to perform SUM query
+	// TODO: not implemented yet, but implicitely used in AVG
 	Sum bool
 }
 
