@@ -1,8 +1,11 @@
 # Verifiable PIR
-This repository contains the code for the verifiable PIR schemes and the code
+This repository contains the code for the authenticated PIR schemes and the code
 for the proof of concept application, Keyd. 
-Keyd is a privacy-preserving PGP public keys directory based on verifiable PIR.
+Keyd is a privacy-preserving PGP public keys directory based on authenticated PIR.
+Keyd enable a client to privately retrieve a PGP key given an email address and 
+to private compute several statistics over the set of PGP keys.
 
+<!---
 ### Verifiable PIR taxonomy
 The repository contains different verifiable PIR schemes. Keyd will be based
 either on the multi-bit DPF-based scheme or on the multi-bit matrix-based
@@ -74,3 +77,4 @@ The test relative to Keyd and its underlying cryptographic primitives are in
 
 [scripts](scripts) and [simulations](simulations) contain useful scripts and
 code for the evaluation of the cryptographic schemes. 
+ --->
