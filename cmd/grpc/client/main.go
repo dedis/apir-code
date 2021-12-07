@@ -259,19 +259,24 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			return 0, errors.New("unknown target" + lc.flags.target)
 		}
 	} else {
-		// TODO: for the moment AND is hardcoded for experiments
-		match := []interface{}{time.Date(2020, time.December, 0, 0, 0, 0, 0, time.UTC), packet.PubKeyAlgoRSA}
-		matchBytes, err := match[0].(time.Time).MarshalBinary()
-		if err != nil {
-			log.Fatal(err)
+		// TODO: for the moment AND is hardcoded for experiments, FIX this
+		// match organization
+		organization := ".edu"
+		info := &query.Info{
+			And:       true,
+			FromStart: 0,
+			FromEnd:   len(organization),
 		}
-		matchBytes = append(matchBytes, byte(match[1].(packet.PublicKeyAlgorithm)))
-		in := utils.ByteToBits(matchBytes)
+		idYear, err := info.IdForYearCreationTime(time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC))
+		if err != nil {
+			panic(err)
+		}
+		idOrganization, _ := info.IdForEmail(organization)
+
+		// combine
+		in := append(idYear, idOrganization...)
 		clientQuery = &query.ClientFSS{
-			Info: &query.Info{
-				And:     true,
-				Targets: []query.Target{query.PubKeyAlgo, query.CreationTime},
-			},
+			Info:  info,
 			Input: in,
 		}
 	}

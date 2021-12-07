@@ -3,6 +3,7 @@ package main
 // Test suite for integrated VPIR.
 
 import (
+	"fmt"
 	"runtime"
 	"testing"
 	"time"
@@ -157,29 +158,37 @@ func TestCountAndQueryPIR(t *testing.T) {
 }
 
 func fixedAndQueryMatch(db *database.DB) (interface{}, *query.ClientFSS) {
-	match := []interface{}{time.Date(2009, time.November, 0, 0, 0, 0, 0, time.UTC), packet.PubKeyAlgoRSA}
+	matchYear := time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC)
+	matchOrganization := ".edu"
 
 	for i := 0; i < 50; i++ {
-		randomDB.KeysInfo[i].CreationTime = match[0].(time.Time)
-		randomDB.KeysInfo[i].PubKeyAlgo = match[1].(packet.PublicKeyAlgorithm)
+		randomDB.KeysInfo[i].CreationTime = matchYear
+		originalEmail := randomDB.KeysInfo[i].UserId.Email
+		lenOriginalEmail := len(originalEmail)
+		newEmail := originalEmail[:lenOriginalEmail-len(matchOrganization)] + matchOrganization
+		randomDB.KeysInfo[i].UserId.Email = newEmail
 	}
 
-	//matchByte:= append([]byte(match[0].(string)), byte(match[1].(packet.PublicKeyAlgorithm)))
-	matchBytes, err := match[0].(time.Time).MarshalBinary()
+	info := &query.Info{
+		And:       true,
+		FromStart: 0,
+		FromEnd:   len(matchOrganization),
+	}
+
+	idYear, err := info.IdForYearCreationTime(matchYear)
 	if err != nil {
 		panic(err)
 	}
-	matchBytes = append(matchBytes, byte(match[1].(packet.PublicKeyAlgorithm)))
-	in := utils.ByteToBits(matchBytes)
+	idOrganization, _ := info.IdForEmail(matchOrganization)
+	in := append(idYear, idOrganization...)
+	fmt.Println(len(in))
+
 	q := &query.ClientFSS{
-		Info: &query.Info{
-			And:     true,
-			Targets: []query.Target{query.PubKeyAlgo, query.CreationTime},
-		},
+		Info:  info,
 		Input: in,
 	}
 
-	return match, q
+	return []interface{}{matchYear, matchOrganization}, q
 }
 
 func fixedEmailMatch(db *database.DB) (string, *query.ClientFSS) {

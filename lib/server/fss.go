@@ -107,13 +107,19 @@ func (s *FSS) Answer(q *query.FSS) []uint32 {
 		}
 	} else if q.And && !q.Avg && !q.Sum { // conjunction
 		for i := 0; i < numIdentifiers; i++ {
-			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
+			// year
+			yearMatch, err := q.IdForYearCreationTime(s.db.KeysInfo[i].CreationTime)
 			if err != nil {
-				panic("impossible to mashal creation date")
+				panic(err)
 			}
-			binaryMatch = append(binaryMatch, byte(s.db.KeysInfo[i].PubKeyAlgo))
-			id := utils.ByteToBits(binaryMatch)
-			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
+			// edu
+			email := s.db.KeysInfo[i].UserId.Email
+			id, valid := q.IdForEmail(email)
+			if !valid {
+				continue
+			}
+			in := append(yearMatch, id...)
+			s.fss.EvaluatePF(s.serverNum, q.FssKey, in, tmp)
 			for i := range out {
 				out[i] = (out[i] + tmp[i]) % field.ModP
 			}

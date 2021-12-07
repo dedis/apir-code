@@ -379,8 +379,13 @@ func localResult(db *database.DB, q *query.Info, match interface{}) uint32 {
 				panic("unknown query type")
 			}
 		} else {
-			if k.CreationTime.Equal((match.([]interface{}))[0].(time.Time)) &&
-				k.PubKeyAlgo == (match.([]interface{}))[1].(packet.PublicKeyAlgorithm) {
+			email := k.UserId.Email
+			if len(email) < q.FromEnd {
+				continue
+			}
+			toMatchEmail := email[len(email)-q.FromEnd:]
+			if k.CreationTime.Year() == (match.([]interface{}))[0].(time.Time).Year() &&
+				toMatchEmail == (match.([]interface{}))[1].(string) {
 				count++
 			}
 		}

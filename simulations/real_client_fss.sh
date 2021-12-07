@@ -16,39 +16,39 @@ cd - > /dev/null
 # move to root
 cd ../
 
-scheme="complexVPIR"
+scheme="$1"
 echo "##### running with $scheme scheme #####"
 
 # repeat experiment 30 times
-target="email"
-for i in {1..20}; do
+repeat=30
+
+target="email_edu"
+for i in {1..$repeat}; do
   echo "    ##### iteration $i"
-  cmd/grpc/client/client -id=".org" -target=$target -from-end=4 -experiment -scheme=$scheme | tee -a simulations/results/stats_client_$scheme_$target.log
+  cmd/grpc/client/client -id=".edu" -target=$target -from-end=4 -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_${target}.log
   sleep 5
 done
 
-: <<'END'
-target="algo"
-for i in {1..20}; do
+target="algo_elgamal"
+for i in {1..$repeat}; do
   echo "    ##### iteration $i"
-  cmd/grpc/client/client -id="ElGamal" -target=$target -experiment -scheme=$scheme | tee -a simulations/results/stats_client_$scheme_$target.log
+  cmd/grpc/client/client -id="ElGamal" -target=$target -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_${target}.log
   sleep 5
 done
 
-target="creation"
-for i in {1..20}; do
-  echo "    ##### iteration $i"
-  cmd/grpc/client/client -id="2020" -target=$target -experiment -scheme=$scheme | tee -a simulations/results/stats_client_$scheme_$target.log
-  sleep 5
-done
+#target="creation"
+#for i in {1..$repeat}; do
+  #echo "    ##### iteration $i"
+  #cmd/grpc/client/client -id="2020" -target=$target -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_${target}.log
+  #sleep 5
+#done
 
 # THIS IS FOR THE AND QUERY, HARDCODED IN GO
-for i in {1..20}; do
+for i in {1..$repeat}; do
   echo "    ##### iteration $i"
   cmd/grpc/client/client -and -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_and.log
   sleep 5
 done
-END
 
 # terminates servers
 curl 10.90.36.31:8080 > /dev/null

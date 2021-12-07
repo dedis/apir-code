@@ -1,4 +1,13 @@
 #!/bin/bash
+if [ $# -ne 0 ]; then
+    echo "not enough arguments provided"
+    exit 1
+fi
+
+id=$1
+scheme=$2
+expriment=$3
+
 export GOGC=8000
 
 # remove stats log and create new files
@@ -15,7 +24,7 @@ cd - > /dev/null
 cd ../
 
 # run servers
-echo "##### running with $2 scheme #####"
+echo "##### running server $id with $scheme scheme #####"
 # run server given the correct scheme 
-cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$2 | tee -a simulations/results/stats_server-0_${2}.log
+cmd/grpc/server/server -id=$id -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-${id}_${scheme}_${experiment}.log
 wait $!

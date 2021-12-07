@@ -70,7 +70,7 @@ func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 	c.state = &state{}
 	c.state.alphas = make([]uint32, field.ConcurrentExecutions)
 	c.state.a = make([]uint32, field.ConcurrentExecutions+1)
-	c.state.a[0] = 1
+	c.state.a[0] = 1 // to retrieve data
 	for i := 0; i < field.ConcurrentExecutions; i++ {
 		c.state.alphas[i] = field.RandElementWithPRG(c.rnd)
 		// c.state.a contains [1, alpha_i] for i = 0, .., 3

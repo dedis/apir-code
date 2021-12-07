@@ -2,6 +2,7 @@ package query
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/gob"
 	"time"
 
@@ -87,6 +88,10 @@ func (q *FSS) IdForCreationTime(t time.Time) ([]bool, error) {
 	return q.Info.IdForCreationTime(t)
 }
 
+func (q *FSS) IdForYearCreationTime(t time.Time) ([]bool, error) {
+	return q.Info.IdForYearCreationTime(t)
+}
+
 func (i *Info) IdForEmail(email string) ([]bool, bool) {
 	var id []bool
 	if i.FromStart != 0 {
@@ -117,4 +122,11 @@ func (i *Info) IdForCreationTime(t time.Time) ([]bool, error) {
 		return nil, err
 	}
 	return utils.ByteToBits(binaryMatch), nil
+}
+
+func (i *Info) IdForYearCreationTime(t time.Time) ([]bool, error) {
+	y := uint32(t.Year())
+	b := make([]byte, 4)
+	binary.BigEndian.PutUint32(b, y)
+	return utils.ByteToBits(b), nil
 }
