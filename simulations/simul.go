@@ -110,8 +110,6 @@ func main() {
 		experimentv = &Experiment{Results: make(map[int][]*Chunk, 0)}
 	}
 
-	// TODO (Simone): what if we range on DB sizes for point and single and on input bit size
-	// for complex?
 	// range over all the DB lengths specified in the general simulation config
 dbSizesLoop:
 	for _, dl := range s.DBBitLengths {

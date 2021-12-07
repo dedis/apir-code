@@ -46,6 +46,7 @@ def plotPoint():
             cpuArray[i].append(cpuMean/1000)
             bwArray[i].append(bwMean/MB)
 
+
         axs[0].plot(
                 [x/GiB for x in sorted(stats.keys())], 
                 cpuArray[i], 
@@ -63,6 +64,11 @@ def plotPoint():
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
 
+    ratioCPU = [cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]
+    ratioBW = [bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]
+
+    print("ratios CPU:", max(ratioCPU))
+    print("ratios BW:", max(ratioBW))
 
     # cosmetics
     axs[0].set_ylabel('CPU time [s]')
@@ -158,27 +164,29 @@ def plotComplexBars():
             x - width/2, 
             ratioCPU, width, 
             label='CPU', 
-            color='white', 
+            color='0.3', 
             edgecolor='black', 
-            hatch='/')
+            )
     rects2 = ax.bar(
             x + width/2, 
             ratioBW, width, 
             label='Bandwidth',
-            color='white', 
-            edgecolor = 'black', 
-            hatch='-')
+            color='0.7', 
+            edgecolor = 'black',
+            )
+    ax.axhline(y = 1, color ='black', linestyle = '--')
 
     # cosmetics
-    ax.set_ylabel('Ratio')
+    ax.set_ylabel('Relative overhead between \n authenticated and unauthenticated PIR')
     ax.set_xticks(x, [x for x in sorted(stats.keys())])
     ax.set_xlabel('Function-secret-sharing input size [bytes]')
+    ax.set_ylim(bottom=0.9)
     ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout()
     #plt.show()
-    plt.savefig('figures/complex.eps', format='eps', dpi=300, transparent=True)
+    plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
 
 def plotVpirPerformanceBars():
     colors = ['dimgray', 'darkgray', 'lightgrey']
