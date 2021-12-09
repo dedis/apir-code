@@ -72,7 +72,6 @@ func (s *PIRfss) Answer(q *query.FSS) uint32 {
 		switch q.Target {
 		case query.UserId:
 			for i := 0; i < numIdentifiers; i++ {
-				var id []bool
 				email := s.db.KeysInfo[i].UserId.Email
 				id, valid := q.IdForEmail(email)
 				if !valid {
