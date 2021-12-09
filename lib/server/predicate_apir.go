@@ -1,20 +1,17 @@
 package server
 
 import (
-	"bytes"
-	"encoding/gob"
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
-	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // PredicateAPIR represent the server for the FSS-based complex-queries authenticated PIR
 type PredicateAPIR struct {
-	ServerFSS
+	serverFSS
 }
 
 func NewPredicateAPIR(db *database.DB, serverNum byte, cores ...int) *PredicateAPIR {
@@ -25,7 +22,7 @@ func NewPredicateAPIR(db *database.DB, serverNum byte, cores ...int) *PredicateA
 	}
 
 	return &PredicateAPIR{
-		ServerFSS{
+		serverFSS{
 			db:        db,
 			cores:     numCores,
 			serverNum: serverNum,
@@ -36,30 +33,19 @@ func NewPredicateAPIR(db *database.DB, serverNum byte, cores ...int) *PredicateA
 }
 
 func (s *PredicateAPIR) DBInfo() *database.Info {
-	return s.ServerFSS.DBInfo()
+	return s.serverFSS.dbInfo()
 }
 
 func (s *PredicateAPIR) AnswerBytes(q []byte) ([]byte, error) {
-	// decode query
-	buf := bytes.NewBuffer(q)
-	dec := gob.NewDecoder(buf)
-	var query *query.FSS
-	if err := dec.Decode(&query); err != nil {
-		return nil, err
-	}
+	out := make([]uint32, 1+field.ConcurrentExecutions)
+	tmp := make([]uint32, 1+field.ConcurrentExecutions)
 
-	// get answer
-	a := s.Answer(query)
-
-	// encode answer
-	out := utils.Uint32SliceToByteSlice(a)
-
-	return out, nil
+	return s.serverFSS.answerBytes(q, out, tmp)
 }
 
 func (s *PredicateAPIR) Answer(q *query.FSS) []uint32 {
 	out := make([]uint32, 1+field.ConcurrentExecutions)
 	tmp := make([]uint32, 1+field.ConcurrentExecutions)
 
-	return s.ServerFSS.answer(q, out, tmp)
+	return s.serverFSS.answer(q, out, tmp)
 }

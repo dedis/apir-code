@@ -1,9 +1,6 @@
 package server
 
 import (
-	"bytes"
-	"encoding/binary"
-	"encoding/gob"
 	"runtime"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -13,7 +10,7 @@ import (
 
 // PredicatePIR represent the server for the FSS-based complex-queries unauthenticated PIR
 type PredicatePIR struct {
-	ServerFSS
+	serverFSS
 }
 
 // NewPredicatePIR initializes and returns a new server for FSS-based classical PIR
@@ -24,7 +21,7 @@ func NewPredicatePIR(db *database.DB, serverNum byte, cores ...int) *PredicatePI
 	}
 
 	return &PredicatePIR{
-		ServerFSS{
+		serverFSS{
 			db:        db,
 			cores:     numCores,
 			serverNum: serverNum,
@@ -35,26 +32,15 @@ func NewPredicatePIR(db *database.DB, serverNum byte, cores ...int) *PredicatePI
 
 // DBInfo returns database info
 func (s *PredicatePIR) DBInfo() *database.Info {
-	return s.ServerFSS.DBInfo()
+	return s.serverFSS.dbInfo()
 }
 
 // AnswerBytes computes the answer for the given query encoded in bytes
 func (s *PredicatePIR) AnswerBytes(q []byte) ([]byte, error) {
-	// decode query
-	buf := bytes.NewBuffer(q)
-	dec := gob.NewDecoder(buf)
-	var query *query.FSS
-	if err := dec.Decode(&query); err != nil {
-		return nil, err
-	}
+	out := make([]uint32, 1)
+	tmp := make([]uint32, 1)
 
-	a := s.Answer(query)
-
-	// encode answer
-	out := make([]byte, 4)
-	binary.BigEndian.PutUint32(out, a)
-
-	return out, nil
+	return s.serverFSS.answerBytes(q, out, tmp)
 }
 
 // Answer computes the answer for the given query
@@ -62,5 +48,5 @@ func (s *PredicatePIR) Answer(q *query.FSS) uint32 {
 	out := []uint32{0}
 	tmp := []uint32{0}
 
-	return s.ServerFSS.answer(q, out, tmp)[0]
+	return s.serverFSS.answer(q, out, tmp)[0]
 }

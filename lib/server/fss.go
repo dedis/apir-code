@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"encoding/gob"
 	"time"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -10,7 +12,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-type ServerFSS struct {
+type serverFSS struct {
 	db    *database.DB
 	cores int
 
@@ -18,11 +20,26 @@ type ServerFSS struct {
 	fss       *fss.Fss
 }
 
-func (s *ServerFSS) DBInfo() *database.Info {
+func (s *serverFSS) dbInfo() *database.Info {
 	return &s.db.Info
 }
 
-func (s *ServerFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
+func (s *serverFSS) answerBytes(q []byte, out, tmp []uint32) ([]byte, error) {
+	// decode query
+	buf := bytes.NewBuffer(q)
+	dec := gob.NewDecoder(buf)
+	var query *query.FSS
+	if err := dec.Decode(&query); err != nil {
+		return nil, err
+	}
+
+	// get answer
+	a := s.answer(query, out, tmp)
+
+	return utils.Uint32SliceToByteSlice(a), nil
+}
+
+func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 	numIdentifiers := s.db.NumColumns
 
 	if !q.And && !q.Avg && !q.Sum {
