@@ -13,8 +13,8 @@ import (
 	"github.com/si-co/vpir-code/lib/query"
 )
 
-// PIRfss represent the client for the FSS-based complex-queries non-verifiable PIR
-type PIRfss struct {
+// PredicatePIR represent the client for the FSS-based complex-queries non-verifiable PIR
+type PredicatePIR struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
@@ -22,10 +22,10 @@ type PIRfss struct {
 	Fss *fss.Fss
 }
 
-// NewPIRfss returns a new client for the DPF-base multi-bit classical PIR
+// NewPredicatePIR returns a new client for the DPF-base multi-bit classical PIR
 // scheme
-func NewPIRfss(rnd io.Reader, info *database.Info) *PIRfss {
-	return &PIRfss{
+func NewPredicatePIR(rnd io.Reader, info *database.Info) *PredicatePIR {
+	return &PredicatePIR{
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
@@ -35,7 +35,7 @@ func NewPIRfss(rnd io.Reader, info *database.Info) *PIRfss {
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-func (c *PIRfss) QueryBytes(in []byte, numServers int) ([][]byte, error) {
+func (c *PredicatePIR) QueryBytes(in []byte, numServers int) ([][]byte, error) {
 	inQuery, err := query.DecodeClientFSS(in)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (c *PIRfss) QueryBytes(in []byte, numServers int) ([][]byte, error) {
 
 // Query outputs the queries, i.e. DPF keys, for index i. The DPF
 // implementation assumes two servers.
-func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []*query.FSS {
+func (c *PredicatePIR) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -73,7 +73,7 @@ func (c *PIRfss) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 }
 
 // ReconstructBytes returns []byte
-func (c *PIRfss) ReconstructBytes(answers [][]byte) (interface{}, error) {
+func (c *PredicatePIR) ReconstructBytes(answers [][]byte) (interface{}, error) {
 	in := make([]uint32, 2)
 	for i, a := range answers {
 		in[i] = binary.BigEndian.Uint32(a)
@@ -83,6 +83,6 @@ func (c *PIRfss) ReconstructBytes(answers [][]byte) (interface{}, error) {
 }
 
 // Reconstruct reconstruct the entry of the database from answers
-func (c *PIRfss) Reconstruct(answers []uint32) uint32 {
+func (c *PredicatePIR) Reconstruct(answers []uint32) uint32 {
 	return (answers[0] + answers[1]) % field.ModP
 }

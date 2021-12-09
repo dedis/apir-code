@@ -15,8 +15,8 @@ import (
 
 const BlockLength = 2
 
-// FSS represent the client for the FSS-based single- and multi-bit schemes
-type FSS struct {
+// PredicateAPIR represent the client for the FSS-based complex-queries non-verifiable PIR
+type PredicateAPIR struct {
 	rnd    io.Reader
 	dbInfo *database.Info
 	state  *state
@@ -25,8 +25,8 @@ type FSS struct {
 }
 
 // NewFSS returns a new client for the FSS-based single- and multi-bit schemes
-func NewFSS(rnd io.Reader, info *database.Info) *FSS {
-	return &FSS{
+func NewPredicateAPIR(rnd io.Reader, info *database.Info) *PredicateAPIR {
+	return &PredicateAPIR{
 		rnd:    rnd,
 		dbInfo: info,
 		state:  nil,
@@ -37,7 +37,7 @@ func NewFSS(rnd io.Reader, info *database.Info) *FSS {
 
 // QueryBytes executes Query and encodes the result a byte array for each
 // server
-func (c *FSS) QueryBytes(in []byte, numServers int) ([][]byte, error) {
+func (c *PredicateAPIR) QueryBytes(in []byte, numServers int) ([][]byte, error) {
 	inQuery, err := query.DecodeClientFSS(in)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (c *FSS) QueryBytes(in []byte, numServers int) ([][]byte, error) {
 
 // Query takes as input the index of the entry to be retrieved and the number
 // of servers (= 2 in the DPF case). It returns the two FSS keys.
-func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.FSS {
+func (c *PredicateAPIR) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 	if invalidQueryInputsFSS(numServers) {
 		log.Fatal("invalid query inputs")
 	}
@@ -88,7 +88,7 @@ func (c *FSS) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 
 // ReconstructBytes decodes the answers from the servers and reconstruct the
 // entry, returned as []uint32
-func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
+func (c *PredicateAPIR) ReconstructBytes(a [][]byte) (interface{}, error) {
 	answer, err := decodeAnswer(a)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func (c *FSS) ReconstructBytes(a [][]byte) (interface{}, error) {
 
 // Reconstruct takes as input the answers from the client and returns the
 // reconstructed entry after the appropriate integrity check.
-func (c *FSS) Reconstruct(answers [][]uint32) (uint32, error) {
+func (c *PredicateAPIR) Reconstruct(answers [][]uint32) (uint32, error) {
 	// compute data
 	data := (answers[0][0] + answers[1][0]) % field.ModP
 	dataCasted := uint64(data)

@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-// WARNING: DO NOT USE THESE KEYS IN A REAL DEPLOYMENT!
+// WARNING: DO NOT USE THESE KEYS IN PRODUCTION!
 
 var ServerPublicKeys = [...]string{
 	`-----BEGIN CERTIFICATE-----

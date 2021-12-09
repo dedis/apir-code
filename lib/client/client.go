@@ -97,11 +97,6 @@ func invalidQueryInputsIT(index, numServers int) bool {
 	return index < 0 && numServers < 2
 }
 
-// return true if the query inputs are invalid for DPF-based schemes
-func invalidQueryInputsDPF(index, numServers int) bool {
-	return index < 0 && numServers != 2
-}
-
 func invalidQueryInputsFSS(numServers int) bool {
 	return numServers != 2
 }

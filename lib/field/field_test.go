@@ -2,10 +2,10 @@ package field
 
 import (
 	"crypto/rand"
-	"github.com/stretchr/testify/require"
 	"testing"
-)
 
+	"github.com/stretchr/testify/require"
+)
 
 func TestRandVectorWithPRG(t *testing.T) {
 	vec := RandVectorWithPRG(100000, rand.Reader)
