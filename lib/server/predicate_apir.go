@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/gob"
 	"runtime"
 
@@ -13,37 +12,34 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-// PIRfss represent the server for the FSS-based complex-queries non-verifiable PIR
-type PIRfss struct {
-	db    *database.DB
-	cores int
-
-	serverNum byte
-	fss       *fss.Fss
+// PredicateAPIR represent the server for the FSS-based complex-queries authenticated PIR
+type PredicateAPIR struct {
+	ServerFSS
 }
 
-// NewPIRfss initializes and returns a new server for FSS-based classical PIR
-func NewPIRfss(db *database.DB, serverNum byte, cores ...int) *PIRfss {
+func NewPredicateAPIR(db *database.DB, serverNum byte, cores ...int) *PredicateAPIR {
+	// use variadic argument for cores to achieve backward compatibility
 	numCores := runtime.NumCPU()
 	if len(cores) > 0 {
 		numCores = cores[0]
 	}
 
-	return &PIRfss{
-		db:        db,
-		cores:     numCores,
-		serverNum: serverNum,
-		fss:       fss.ServerInitialize(1), // only one value for data
+	return &PredicateAPIR{
+		ServerFSS{
+			db:        db,
+			cores:     numCores,
+			serverNum: serverNum,
+			// one value for the data, four values for the info-theoretic MAC
+			fss: fss.ServerInitialize(1 + field.ConcurrentExecutions),
+		},
 	}
 }
 
-// DBInfo returns database info
-func (s *PIRfss) DBInfo() *database.Info {
-	return &s.db.Info
+func (s *PredicateAPIR) DBInfo() *database.Info {
+	return s.ServerFSS.DBInfo()
 }
 
-// AnswerBytes computes the answer for the given query encoded in bytes
-func (s *PIRfss) AnswerBytes(q []byte) ([]byte, error) {
+func (s *PredicateAPIR) AnswerBytes(q []byte) ([]byte, error) {
 	// decode query
 	buf := bytes.NewBuffer(q)
 	dec := gob.NewDecoder(buf)
@@ -52,92 +48,18 @@ func (s *PIRfss) AnswerBytes(q []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	// get answer
 	a := s.Answer(query)
 
 	// encode answer
-	out := make([]byte, 4)
-	binary.BigEndian.PutUint32(out, a)
+	out := utils.Uint32SliceToByteSlice(a)
 
 	return out, nil
 }
 
-// Answer computes the answer for the given query
-func (s *PIRfss) Answer(q *query.FSS) uint32 {
-	numIdentifiers := s.db.NumColumns
+func (s *PredicateAPIR) Answer(q *query.FSS) []uint32 {
+	out := make([]uint32, 1+field.ConcurrentExecutions)
+	tmp := make([]uint32, 1+field.ConcurrentExecutions)
 
-	out := uint32(0)
-	tmp := []uint32{0}
-
-	if !q.And && !q.Avg && !q.Sum {
-		switch q.Target {
-		case query.UserId:
-			for i := 0; i < numIdentifiers; i++ {
-				email := s.db.KeysInfo[i].UserId.Email
-				id, valid := q.IdForEmail(email)
-				if !valid {
-					continue
-				}
-				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-				out = (out + tmp[0]) % field.ModP
-			}
-			return out
-		case query.PubKeyAlgo:
-			for i := 0; i < numIdentifiers; i++ {
-				id := q.IdForPubKeyAlgo(s.db.KeysInfo[i].PubKeyAlgo)
-				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-				out = (out + tmp[0]) % field.ModP
-			}
-			return out
-		case query.CreationTime:
-			for i := 0; i < numIdentifiers; i++ {
-				id, err := q.IdForCreationTime(s.db.KeysInfo[i].CreationTime)
-				if err != nil {
-					panic("impossible to marshal creation date")
-				}
-				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-				out = (out + tmp[0]) % field.ModP
-			}
-			return out
-		default:
-			panic("not yet implemented")
-		}
-	} else if q.And && !q.Avg && !q.Sum { // conjunction
-		for i := 0; i < numIdentifiers; i++ {
-			// year
-			yearMatch, err := q.IdForYearCreationTime(s.db.KeysInfo[i].CreationTime)
-			if err != nil {
-				panic(err)
-			}
-			// edu
-			email := s.db.KeysInfo[i].UserId.Email
-			id, valid := q.IdForEmail(email)
-			if !valid {
-				continue
-			}
-			in := append(yearMatch, id...)
-			s.fss.EvaluatePF(s.serverNum, q.FssKey, in, tmp)
-			out = (out + tmp[0]) % field.ModP
-		}
-		return out
-	} else if q.And && q.Sum && !q.Avg { // sum
-		for i := 0; i < numIdentifiers; i++ {
-			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
-			if err != nil {
-				panic("impossible to marshal creation date")
-			}
-			binaryMatch = append(binaryMatch, byte(s.db.KeysInfo[i].PubKeyAlgo))
-			id := utils.ByteToBits(binaryMatch)
-
-			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-			out = (out + tmp[0]*uint32(s.db.KeysInfo[i].BitLength)) % field.ModP
-		}
-
-		return out
-
-	} else if q.And && q.Avg && !q.Sum { // avg
-		panic("not yet implemented")
-	} else {
-		panic("query not recognized")
-	}
-
+	return s.ServerFSS.answer(q, out, tmp)
 }

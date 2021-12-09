@@ -1,9 +1,6 @@
 package server
 
 import (
-	"bytes"
-	"encoding/gob"
-	"runtime"
 	"time"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -13,7 +10,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-type FSS struct {
+type ServerFSS struct {
 	db    *database.DB
 	cores int
 
@@ -21,51 +18,12 @@ type FSS struct {
 	fss       *fss.Fss
 }
 
-// use variadic argument for cores to achieve backward compatibility
-func NewFSS(db *database.DB, serverNum byte, cores ...int) *FSS {
-	numCores := runtime.NumCPU()
-	if len(cores) > 0 {
-		numCores = cores[0]
-	}
-
-	return &FSS{
-		db:        db,
-		cores:     numCores,
-		serverNum: serverNum,
-		// one value for the data, four values for the info-theoretic MAC
-		fss: fss.ServerInitialize(1 + field.ConcurrentExecutions),
-	}
-
-}
-
-func (s *FSS) DBInfo() *database.Info {
+func (s *ServerFSS) DBInfo() *database.Info {
 	return &s.db.Info
 }
 
-func (s *FSS) AnswerBytes(q []byte) ([]byte, error) {
-	// decode query
-	buf := bytes.NewBuffer(q)
-	dec := gob.NewDecoder(buf)
-	var query *query.FSS
-	if err := dec.Decode(&query); err != nil {
-		return nil, err
-	}
-
-	// get answer
-	a := s.Answer(query)
-
-	// encode answer
-	out := utils.Uint32SliceToByteSlice(a)
-
-	return out, nil
-}
-
-// TODO: refactor this function
-func (s *FSS) Answer(q *query.FSS) []uint32 {
+func (s *ServerFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 	numIdentifiers := s.db.NumColumns
-
-	out := make([]uint32, 1+field.ConcurrentExecutions)
-	tmp := make([]uint32, 1+field.ConcurrentExecutions)
 
 	if !q.And && !q.Avg && !q.Sum {
 		switch q.Target {
