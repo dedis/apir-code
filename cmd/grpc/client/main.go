@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
@@ -212,50 +211,17 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 				FromEnd:   lc.flags.fromEnd,
 				And:       lc.flags.and,
 			}
-			id, _ := info.IdForEmail(lc.flags.id)
-			clientQuery = &query.ClientFSS{
-				Info:  info,
-				Input: id,
-			}
+			clientQuery = info.ToEmailClientFSS(lc.flags.id)
 		case "algo":
 			info := &query.Info{
 				Target: query.PubKeyAlgo,
 			}
-			var pka packet.PublicKeyAlgorithm
-			switch lc.flags.id {
-			case "RSA":
-				pka = packet.PubKeyAlgoRSA
-			case "ElGamal":
-				pka = packet.PubKeyAlgoElGamal
-			case "DSA":
-				pka = packet.PubKeyAlgoDSA
-			case "ECDH":
-				pka = packet.PubKeyAlgoECDH
-			case "ECDSA":
-				pka = packet.PubKeyAlgoECDSA
-			}
-			id := info.IdForPubKeyAlgo(pka)
-			clientQuery = &query.ClientFSS{
-				Info:  info,
-				Input: id,
-			}
+			clientQuery = info.ToPKAClientFSS(lc.flags.id)
 		case "creation":
 			info := &query.Info{
 				Target: query.CreationTime,
 			}
-			year, err := strconv.Atoi(lc.flags.id)
-			if err != nil {
-				log.Fatal(err)
-			}
-			match := time.Date(year, time.November, 0, 0, 0, 0, 0, time.UTC)
-			id, err := info.IdForCreationTime(match)
-			if err != nil {
-				log.Fatal(err)
-			}
-			clientQuery = &query.ClientFSS{
-				Info:  info,
-				Input: id,
-			}
+			clientQuery = info.ToCreationTimeClientFSS(lc.flags.id)
 		default:
 			return 0, errors.New("unknown target" + lc.flags.target)
 		}
@@ -268,18 +234,8 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			FromStart: 0,
 			FromEnd:   len(organization),
 		}
-		idYear, err := info.IdForYearCreationTime(time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC))
-		if err != nil {
-			panic(err)
-		}
-		idOrganization, _ := info.IdForEmail(organization)
 
-		// combine
-		in := append(idYear, idOrganization...)
-		clientQuery = &query.ClientFSS{
-			Info:  info,
-			Input: in,
-		}
+		clientQuery = info.ToAndClientFSS(organization)
 	} else if lc.flags.and && lc.flags.avg {
 		// TODO: for the moment AVG is hardcoded on lifetime and created in 2019, FIX this
 		info := &query.Info{

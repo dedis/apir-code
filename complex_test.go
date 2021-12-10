@@ -11,7 +11,6 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
-	"golang.org/x/crypto/blake2b"
 )
 
 const (
@@ -173,17 +172,7 @@ func fixedAndQueryMatch(db *database.DB) (interface{}, *query.ClientFSS) {
 		FromStart: 0,
 		FromEnd:   len(matchOrganization),
 	}
-
-	idYear, err := info.IdForYearCreationTime(matchYear)
-	if err != nil {
-		panic(err)
-	}
-	idOrganization, _ := info.IdForEmail(matchOrganization)
-	in := append(idYear, idOrganization...)
-	q := &query.ClientFSS{
-		Info:  info,
-		Input: in,
-	}
+	q := info.ToAndClientFSS(matchOrganization)
 
 	return []interface{}{matchYear, matchOrganization}, q
 }
@@ -195,12 +184,8 @@ func fixedEmailMatch(db *database.DB) (string, *query.ClientFSS) {
 		randomDB.KeysInfo[i].UserId.Email = match
 	}
 
-	h := blake2b.Sum256([]byte(match))
-	in := utils.ByteToBits(h[:16])
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId},
-		Input: in,
-	}
+	info := &query.Info{Target: query.UserId}
+	q := info.ToEmailClientFSS(match)
 
 	return match, q
 }
@@ -213,11 +198,8 @@ func fixedStartsWithMatch(db *database.DB) (string, *query.ClientFSS) {
 		randomDB.KeysInfo[i].UserId.Email = newEmail
 	}
 
-	in := utils.ByteToBits([]byte(match))
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromStart: len(match)},
-		Input: in,
-	}
+	info := &query.Info{Target: query.UserId, FromStart: len(match)}
+	q := info.ToEmailClientFSS(match)
 
 	return match, q
 }
@@ -230,47 +212,36 @@ func fixedEndsWithMatch(db *database.DB) (string, *query.ClientFSS) {
 		randomDB.KeysInfo[i].UserId.Email = newEmail
 	}
 
-	in := utils.ByteToBits([]byte(match))
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromEnd: len(match)},
-		Input: in,
-	}
+	info := &query.Info{Target: query.UserId, FromEnd: len(match)}
+	q := info.ToEmailClientFSS(match)
 
 	return match, q
 }
 
 func fixedPkaMatch(db *database.DB) (packet.PublicKeyAlgorithm, *query.ClientFSS) {
 	match := packet.PubKeyAlgoRSA
+	matchString := "RSA"
 
 	for i := 0; i < 50; i++ {
 		randomDB.KeysInfo[i].PubKeyAlgo = match
 	}
 
-	in := utils.ByteToBits([]byte{byte(match)})
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.PubKeyAlgo},
-		Input: in,
-	}
+	info := &query.Info{Target: query.PubKeyAlgo}
+	q := info.ToPKAClientFSS(matchString)
 
 	return match, q
 }
 
 func fixedCreationTimeMatch(db *database.DB) (time.Time, *query.ClientFSS) {
-	match := time.Date(2009, time.November, 0, 0, 0, 0, 0, time.UTC)
+	match := time.Date(2009, 0, 0, 0, 0, 0, 0, time.UTC)
+	matchString := "2009"
 
 	for i := 0; i < 50; i++ {
 		randomDB.KeysInfo[i].CreationTime = match
 	}
 
-	binaryMatch, err := match.MarshalBinary()
-	if err != nil {
-		panic(err)
-	}
-	in := utils.ByteToBits(binaryMatch)
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.CreationTime},
-		Input: in,
-	}
+	info := &query.Info{Target: query.CreationTime}
+	q := info.ToCreationTimeClientFSS(matchString)
 
 	return match, q
 }

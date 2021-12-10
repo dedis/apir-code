@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
+	"log"
+	"strconv"
 	"time"
 
 	"github.com/nikirill/go-crypto/openpgp/packet"
@@ -75,6 +77,67 @@ func DecodeClientFSS(in []byte) (*ClientFSS, error) {
 	}
 
 	return v, nil
+}
+
+func (i *Info) ToEmailClientFSS(in string) *ClientFSS {
+	id, _ := i.IdForEmail(in)
+	return &ClientFSS{
+		Info:  i,
+		Input: id,
+	}
+}
+
+func (i *Info) ToPKAClientFSS(in string) *ClientFSS {
+	var pka packet.PublicKeyAlgorithm
+	switch in {
+	case "RSA":
+		pka = packet.PubKeyAlgoRSA
+	case "ElGamal":
+		pka = packet.PubKeyAlgoElGamal
+	case "DSA":
+		pka = packet.PubKeyAlgoDSA
+	case "ECDH":
+		pka = packet.PubKeyAlgoECDH
+	case "ECDSA":
+		pka = packet.PubKeyAlgoECDSA
+	}
+	id := i.IdForPubKeyAlgo(pka)
+	return &ClientFSS{
+		Info:  i,
+		Input: id,
+	}
+}
+
+func (i *Info) ToCreationTimeClientFSS(in string) *ClientFSS {
+	year, err := strconv.Atoi(in)
+	if err != nil {
+		log.Fatal(err)
+	}
+	match := time.Date(year, 0, 0, 0, 0, 0, 0, time.UTC)
+	id, err := i.IdForCreationTime(match)
+	if err != nil {
+		panic(err)
+	}
+	return &ClientFSS{
+		Info:  i,
+		Input: id,
+	}
+}
+
+// TODO: hardcoded for the moment, FIX
+func (i *Info) ToAndClientFSS(in string) *ClientFSS {
+	idYear, err := i.IdForYearCreationTime(time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		panic(err)
+	}
+	idOrganization, _ := i.IdForEmail(in)
+
+	// combine
+	combined := append(idYear, idOrganization...)
+	return &ClientFSS{
+		Info:  i,
+		Input: combined,
+	}
 }
 
 func (q *FSS) IdForEmail(email string) ([]bool, bool) {
