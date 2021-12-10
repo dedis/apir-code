@@ -145,15 +145,15 @@ func main() {
 		}
 	case "complexPIR":
 		if *cores != -1 && *experiment {
-			s = server.NewPIRfss(db, byte(*sid), *cores)
+			s = server.NewPredicatePIR(db, byte(*sid), *cores)
 		} else {
-			s = server.NewPIRfss(db, byte(*sid))
+			s = server.NewPredicatePIR(db, byte(*sid))
 		}
 	case "complexVPIR":
 		if *cores != -1 && *experiment {
-			s = server.NewFSS(db, byte(*sid), *cores)
+			s = server.NewPredicateAPIR(db, byte(*sid), *cores)
 		} else {
-			s = server.NewFSS(db, byte(*sid))
+			s = server.NewPredicateAPIR(db, byte(*sid))
 		}
 	default:
 		log.Fatal("unknow scheme")

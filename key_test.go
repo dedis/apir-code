@@ -211,9 +211,9 @@ func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id 
 }
 
 func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
-	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
-	s0 := server.NewPIRfss(db, 0)
-	s1 := server.NewPIRfss(db, 1)
+	c := client.NewPredicatePIR(utils.RandomPRG(), &db.Info)
+	s0 := server.NewPredicatePIR(db, 0)
+	s1 := server.NewPredicatePIR(db, 1)
 
 	totalTimer := monitor.NewMonitor()
 
@@ -250,9 +250,9 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 }
 
 func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match interface{}, testName string) {
-	c := client.NewFSS(utils.RandomPRG(), &db.Info)
-	s0 := server.NewFSS(db, 0)
-	s1 := server.NewFSS(db, 1)
+	c := client.NewPredicateAPIR(utils.RandomPRG(), &db.Info)
+	s0 := server.NewPredicateAPIR(db, 0)
+	s1 := server.NewPredicateAPIR(db, 1)
 
 	totalTimer := monitor.NewMonitor()
 

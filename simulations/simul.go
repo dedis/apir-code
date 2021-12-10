@@ -245,8 +245,8 @@ dbSizesLoop:
 }
 
 func fssVPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) []*Chunk {
-	c := client.NewFSS(utils.RandomPRG(), &db.Info)
-	ss := []*server.FSS{server.NewFSS(db, 0), server.NewFSS(db, 1)}
+	c := client.NewPredicateAPIR(utils.RandomPRG(), &db.Info)
+	ss := []*server.PredicateAPIR{server.NewPredicateAPIR(db, 0), server.NewPredicateAPIR(db, 1)}
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()
@@ -299,8 +299,8 @@ func fssVPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int)
 }
 
 func fssPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) []*Chunk {
-	c := client.NewPIRfss(utils.RandomPRG(), &db.Info)
-	ss := []*server.PIRfss{server.NewPIRfss(db, 0), server.NewPIRfss(db, 1)}
+	c := client.NewPredicatePIR(utils.RandomPRG(), &db.Info)
+	ss := []*server.PredicatePIR{server.NewPredicatePIR(db, 0), server.NewPredicatePIR(db, 1)}
 
 	// create main monitor for CPU time
 	m := monitor.NewMonitor()

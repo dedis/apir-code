@@ -181,14 +181,14 @@ func (lc *localClient) exec() (string, error) {
 		// retrieve the key corresponding to the id
 		return lc.retrieveKeyGivenId(lc.flags.id)
 	case "complexPIR":
-		lc.vpirClient = client.NewPIRfss(lc.prg, lc.dbInfo)
+		lc.vpirClient = client.NewPredicatePIR(lc.prg, lc.dbInfo)
 		out, err := lc.retrieveComplesQuery()
 		if err != nil {
 			return "", err
 		}
 		return strconv.FormatUint(uint64(out), 10), nil
 	case "complexVPIR":
-		lc.vpirClient = client.NewFSS(lc.prg, lc.dbInfo)
+		lc.vpirClient = client.NewPredicateAPIR(lc.prg, lc.dbInfo)
 		out, err := lc.retrieveComplesQuery()
 		if err != nil {
 			return "", err
