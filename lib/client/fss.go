@@ -69,12 +69,3 @@ func (c *clientFSS) query(q *query.ClientFSS, numServers int) []*query.FSS {
 		{Info: q.Info, FssKey: fssKeys[1]},
 	}
 }
-
-func (c *clientFSS) generateFSSKeys(q *query.ClientFSS, a []uint32) []*query.FSS {
-	fssKeys := c.Fss.GenerateTreePF(q.Input, a)
-
-	return []*query.FSS{
-		{Info: q.Info, FssKey: fssKeys[0]},
-		{Info: q.Info, FssKey: fssKeys[1]},
-	}
-}
