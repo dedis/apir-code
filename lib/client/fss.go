@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"io"
 	"log"
 
@@ -68,4 +69,58 @@ func (c *clientFSS) query(q *query.ClientFSS, numServers int) []*query.FSS {
 		{Info: q.Info, FssKey: fssKeys[0]},
 		{Info: q.Info, FssKey: fssKeys[1]},
 	}
+}
+
+func (c *clientFSS) reconstruct(answers [][]uint32) (uint32, error) {
+	// AVG case
+	if len(answers[0]) == 2*c.executions {
+		countFirst := answers[0][:c.executions]
+		countSecond := answers[1][:c.executions]
+		sumFirst := answers[0][c.executions:]
+		sumSecond := answers[1][c.executions:]
+
+		dataCount := (countFirst[0] + countSecond[0]) % field.ModP
+		dataCountCasted := uint64(dataCount)
+		sumCount := (sumFirst[0] + sumSecond[0]) % field.ModP
+		sumCountCasted := uint64(sumCount)
+
+		// check tags, executed only for authenticated. The -1 is to ignore
+		// the value for the data already initialized
+		for i := 0; i < c.executions-1; i++ {
+			tmpCount := (dataCountCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
+			tagCount := uint32(tmpCount)
+			reconstructedTagCount := (countFirst[i+1] + countSecond[i+1]) % field.ModP
+			if tagCount != reconstructedTagCount {
+				return 0, errors.New("REJECT count")
+			}
+
+			tmpSum := (sumCountCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
+			tagSum := uint32(tmpSum)
+			reconstructedTagSum := (sumFirst[i+1] + sumSecond[i+1]) % field.ModP
+			if tagSum != reconstructedTagSum {
+				return 0, errors.New("REJECT sum")
+			}
+		}
+
+		return sumCount / dataCount, nil
+
+	} else {
+		// compute data
+		data := (answers[0][0] + answers[1][0]) % field.ModP
+		dataCasted := uint64(data)
+
+		// check tags, executed only for authenticated. The -1 is to ignore
+		// the value for the data already initialized
+		for i := 0; i < c.executions-1; i++ {
+			tmp := (dataCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
+			tag := uint32(tmp)
+			reconstructedTag := (answers[0][i+1] + answers[1][i+1]) % field.ModP
+			if tag != reconstructedTag {
+				return 0, errors.New("REJECT")
+			}
+		}
+
+		return data, nil
+	}
+
 }
