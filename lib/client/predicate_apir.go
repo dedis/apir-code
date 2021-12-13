@@ -46,12 +46,7 @@ func (c *PredicateAPIR) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 // ReconstructBytes decodes the answers from the servers and reconstruct the
 // entry, returned as []uint32
 func (c *PredicateAPIR) ReconstructBytes(a [][]byte) (interface{}, error) {
-	answer, err := decodeAnswer(a)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.Reconstruct(answer)
+	return c.reconstructBytes(a)
 }
 
 // Reconstruct takes as input the answers from the client and returns the

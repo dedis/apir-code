@@ -1,11 +1,9 @@
 package client
 
 import (
-	"encoding/binary"
 	"io"
 
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/fss"
 	"github.com/si-co/vpir-code/lib/query"
 )
@@ -44,15 +42,10 @@ func (c *PredicatePIR) Query(q *query.ClientFSS, numServers int) []*query.FSS {
 
 // ReconstructBytes returns []byte
 func (c *PredicatePIR) ReconstructBytes(answers [][]byte) (interface{}, error) {
-	in := make([]uint32, 2)
-	for i, a := range answers {
-		in[i] = binary.BigEndian.Uint32(a)
-	}
-
-	return c.Reconstruct(in), nil
+	return c.reconstructBytes(answers)
 }
 
 // Reconstruct reconstruct the entry of the database from answers
-func (c *PredicatePIR) Reconstruct(answers []uint32) uint32 {
-	return (answers[0] + answers[1]) % field.ModP
+func (c *PredicatePIR) Reconstruct(answers [][]uint32) (uint32, error) {
+	return c.reconstruct(answers)
 }

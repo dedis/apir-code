@@ -71,6 +71,15 @@ func (c *clientFSS) query(q *query.ClientFSS, numServers int) []*query.FSS {
 	}
 }
 
+func (c *clientFSS) reconstructBytes(answers [][]byte) (interface{}, error) {
+	answer, err := decodeAnswer(answers)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.reconstruct(answer)
+}
+
 func (c *clientFSS) reconstruct(answers [][]uint32) (uint32, error) {
 	// AVG case
 	if len(answers[0]) == 2*c.executions {
