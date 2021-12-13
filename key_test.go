@@ -342,6 +342,7 @@ func pkaMatch(db *database.DB) (packet.PublicKeyAlgorithm, *query.ClientFSS) {
 }
 
 func localResult(db *database.DB, q *query.Info, match interface{}) uint32 {
+	diffYears := uint32(0)
 	count := uint32(0)
 	for _, k := range db.KeysInfo {
 		if !q.And {
@@ -378,7 +379,7 @@ func localResult(db *database.DB, q *query.Info, match interface{}) uint32 {
 			default:
 				panic("unknown query type")
 			}
-		} else {
+		} else if q.And && !q.Avg {
 			email := k.UserId.Email
 			if len(email) < q.FromEnd {
 				continue
@@ -388,8 +389,22 @@ func localResult(db *database.DB, q *query.Info, match interface{}) uint32 {
 				toMatchEmail == (match.([]interface{}))[1].(string) {
 				count++
 			}
+		} else if q.And && q.Avg {
+			nowYear := time.Now().Year()
+			if k.CreationTime.Year() == match.(time.Time).Year() {
+				diffYears += uint32(nowYear - k.CreationTime.Year())
+				count++
+			}
+		} else {
+			panic("query not implemented")
 		}
 	}
+
+	if q.And && q.Avg {
+		count = diffYears / count
+	}
+
+	fmt.Println(count)
 
 	return count
 }

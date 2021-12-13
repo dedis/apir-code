@@ -155,6 +155,38 @@ func TestCountAndQueryPIR(t *testing.T) {
 	retrieveComplexPIR(t, randomDB, q, match, "TestCountAndQueryPIR")
 }
 
+func TestAvgQuery(t *testing.T) {
+	if randomDB == nil {
+		initRandomDB()
+	}
+
+	match, q := fixedAvgQueryMatch(db)
+
+	retrieveComplex(t, randomDB, q, match, "TestAvgQuery")
+}
+
+func TestAvgQueryPIR(t *testing.T) {
+	if randomDB == nil {
+		initRandomDB()
+	}
+
+	match, q := fixedAvgQueryMatch(db)
+
+	retrieveComplexPIR(t, randomDB, q, match, "TestAvgQueryPIR")
+}
+
+func fixedAvgQueryMatch(db *database.DB) (time.Time, *query.ClientFSS) {
+	matchYear := time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC)
+
+	info := &query.Info{
+		And: true,
+		Avg: true,
+	}
+	q := info.ToAvgClientFSS("")
+
+	return matchYear, q
+}
+
 func fixedAndQueryMatch(db *database.DB) (interface{}, *query.ClientFSS) {
 	matchYear := time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC)
 	matchOrganization := ".edu"

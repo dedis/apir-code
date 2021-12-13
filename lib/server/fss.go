@@ -52,8 +52,8 @@ func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 					continue
 				}
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-				for i := range out {
-					out[i] = (out[i] + tmp[i]) % field.ModP
+				for j := range out {
+					out[j] = (out[j] + tmp[j]) % field.ModP
 				}
 			}
 			return out
@@ -61,8 +61,8 @@ func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 			for i := 0; i < numIdentifiers; i++ {
 				id := q.IdForPubKeyAlgo(s.db.KeysInfo[i].PubKeyAlgo)
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-				for i := range out {
-					out[i] = (out[i] + tmp[i]) % field.ModP
+				for j := range out {
+					out[j] = (out[j] + tmp[j]) % field.ModP
 				}
 			}
 			return out
@@ -73,8 +73,8 @@ func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 					panic("impossible to marshal creation date")
 				}
 				s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-				for i := range out {
-					out[i] = (out[i] + tmp[i]) % field.ModP
+				for j := range out {
+					out[j] = (out[j] + tmp[j]) % field.ModP
 				}
 			}
 			return out
@@ -96,49 +96,40 @@ func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 			}
 			in := append(yearMatch, id...)
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, in, tmp)
-			for i := range out {
-				out[i] = (out[i] + tmp[i]) % field.ModP
+			for j := range out {
+				out[j] = (out[j] + tmp[j]) % field.ModP
 			}
 		}
 		return out
 
 	} else if q.And && q.Sum && !q.Avg { // sum
-		for i := 0; i < numIdentifiers; i++ {
-			binaryMatch, err := s.db.KeysInfo[i].CreationTime.MarshalBinary()
-			if err != nil {
-				panic("impossible to marshal creation date")
-			}
-			binaryMatch = append(binaryMatch, byte(s.db.KeysInfo[i].PubKeyAlgo))
-			id := utils.ByteToBits(binaryMatch)
-
-			s.fss.EvaluatePF(s.serverNum, q.FssKey, id, tmp)
-			for i := range out {
-				out[i] = (out[i] + tmp[i]*uint32(s.db.KeysInfo[i].BitLength)) % field.ModP
-			}
-		}
-
-		return out
+		panic("sum not implemented")
 	} else if q.And && q.Avg && !q.Sum { // avg
-		now := time.Now()
+		sum := make([]uint32, len(out))
+
+		//now := time.Now()
+		//now := time.Date(2021, time.October, 10, 23, 0, 0, 0, time.UTC) // TODO: change
 		for i := 0; i < numIdentifiers; i++ {
 			// year
-			yearMatch, err := q.IdForYearCreationTime(s.db.KeysInfo[i].CreationTime)
+			in, err := q.IdForYearCreationTime(s.db.KeysInfo[i].CreationTime)
 			if err != nil {
 				panic(err)
 			}
-			in := yearMatch
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, in, tmp)
-			for i := range out {
+
+			// compute difference in years between now and creation time
+			diffYears := time.Now().Year() - s.db.KeysInfo[i].CreationTime.Year()
+
+			for j := range out {
 				// COUNT
-				out[i] = (out[i] + tmp[i]) % field.ModP
+				out[j] = (out[j] + tmp[j]) % field.ModP
 
 				// SUM
-				diffYears := uint32(now.Sub(s.db.KeysInfo[i].CreationTime).Seconds() / 31207680) // TODO: round
-				out[i] = (out[i] + (tmp[i]*diffYears)%field.ModP) % field.ModP
+				tmpYears := (uint64(tmp[j]) * uint64(diffYears)) % uint64(field.ModP)
+				sum[j] = (sum[j] + uint32(tmpYears)) % field.ModP
 			}
 		}
-		// TODO: need to implement modular inverse to divide sum by count
-		return out
+		return append(out, sum...)
 	} else {
 		panic("query not recognized")
 	}

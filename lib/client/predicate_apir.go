@@ -100,19 +100,52 @@ func (c *PredicateAPIR) ReconstructBytes(a [][]byte) (interface{}, error) {
 // Reconstruct takes as input the answers from the client and returns the
 // reconstructed entry after the appropriate integrity check.
 func (c *PredicateAPIR) Reconstruct(answers [][]uint32) (uint32, error) {
-	// compute data
-	data := (answers[0][0] + answers[1][0]) % field.ModP
-	dataCasted := uint64(data)
+	// AVG case
+	if len(answers[0]) == 2*(1+field.ConcurrentExecutions) {
+		countFirst := answers[0][:1+field.ConcurrentExecutions]
+		countSecond := answers[1][:1+field.ConcurrentExecutions]
+		sumFirst := answers[0][1+field.ConcurrentExecutions:]
+		sumSecond := answers[1][1+field.ConcurrentExecutions:]
 
-	// check tags
-	for i := 0; i < field.ConcurrentExecutions; i++ {
-		tmp := (dataCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
-		tag := uint32(tmp)
-		reconstructedTag := (answers[0][i+1] + answers[1][i+1]) % field.ModP
-		if tag != reconstructedTag {
-			return 0, errors.New("REJECT")
+		dataCount := (countFirst[0] + countSecond[0]) % field.ModP
+		dataCountCasted := uint64(dataCount)
+		sumCount := (sumFirst[0] + sumSecond[0]) % field.ModP
+		sumCountCasted := uint64(sumCount)
+
+		// check tags
+		for i := 0; i < field.ConcurrentExecutions; i++ {
+			tmpCount := (dataCountCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
+			tagCount := uint32(tmpCount)
+			reconstructedTagCount := (countFirst[i+1] + countSecond[i+1]) % field.ModP
+			if tagCount != reconstructedTagCount {
+				return 0, errors.New("REJECT count")
+			}
+
+			tmpSum := (sumCountCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
+			tagSum := uint32(tmpSum)
+			reconstructedTagSum := (sumFirst[i+1] + sumSecond[i+1]) % field.ModP
+			if tagSum != reconstructedTagSum {
+				return 0, errors.New("REJECT sum")
+			}
 		}
-	}
 
-	return data, nil
+		return sumCount / dataCount, nil
+
+	} else {
+		// compute data
+		data := (answers[0][0] + answers[1][0]) % field.ModP
+		dataCasted := uint64(data)
+
+		// check tags
+		for i := 0; i < field.ConcurrentExecutions; i++ {
+			tmp := (dataCasted * uint64(c.state.alphas[i])) % uint64(field.ModP)
+			tag := uint32(tmp)
+			reconstructedTag := (answers[0][i+1] + answers[1][i+1]) % field.ModP
+			if tag != reconstructedTag {
+				return 0, errors.New("REJECT")
+			}
+		}
+
+		return data, nil
+	}
 }
