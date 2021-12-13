@@ -10,7 +10,7 @@ import (
 
 // PredicatePIR represent the server for the FSS-based complex-queries unauthenticated PIR
 type PredicatePIR struct {
-	serverFSS
+	*serverFSS
 }
 
 // NewPredicatePIR initializes and returns a new server for FSS-based classical PIR
@@ -21,7 +21,7 @@ func NewPredicatePIR(db *database.DB, serverNum byte, cores ...int) *PredicatePI
 	}
 
 	return &PredicatePIR{
-		serverFSS{
+		&serverFSS{
 			db:        db,
 			cores:     numCores,
 			serverNum: serverNum,

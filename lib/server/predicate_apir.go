@@ -11,7 +11,7 @@ import (
 
 // PredicateAPIR represent the server for the FSS-based complex-queries authenticated PIR
 type PredicateAPIR struct {
-	serverFSS
+	*serverFSS
 }
 
 func NewPredicateAPIR(db *database.DB, serverNum byte, cores ...int) *PredicateAPIR {
@@ -22,7 +22,7 @@ func NewPredicateAPIR(db *database.DB, serverNum byte, cores ...int) *PredicateA
 	}
 
 	return &PredicateAPIR{
-		serverFSS{
+		&serverFSS{
 			db:        db,
 			cores:     numCores,
 			serverNum: serverNum,

@@ -404,8 +404,6 @@ func localResult(db *database.DB, q *query.Info, match interface{}) uint32 {
 		count = diffYears / count
 	}
 
-	fmt.Println(count)
-
 	return count
 }
 
