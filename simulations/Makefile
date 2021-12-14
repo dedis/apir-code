@@ -10,14 +10,6 @@ point:
 complex:
 	$(MAKE) -s run_simul config=fss.toml \
 
-performance:
-	$(MAKE) -s run_simul config=vpirMultiMatrixBlock.toml; \
-	$(MAKE) -s run_simul config=vpirMultiVectorBlockDPF.toml; \
-	$(MAKE) -s run_simul config=pirMatrix.toml; \
-	$(MAKE) -s run_simul config=pirDPF.toml; \
-	$(MAKE) -s run_simul config=merkleMatrix.toml; \
-	$(MAKE) -s run_simul config=merkleDPF.toml; \
-
 single:
 	$(MAKE) -s run_simul config=computationalPir.toml; \
 	$(MAKE) -s run_simul config=computationalVpir.toml; \
