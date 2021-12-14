@@ -44,9 +44,9 @@ func (s *PredicatePIR) AnswerBytes(q []byte) ([]byte, error) {
 }
 
 // Answer computes the answer for the given query
-func (s *PredicatePIR) Answer(q *query.FSS) uint32 {
+func (s *PredicatePIR) Answer(q *query.FSS) []uint32 {
 	out := []uint32{0}
 	tmp := []uint32{0}
 
-	return s.serverFSS.answer(q, out, tmp)[0]
+	return s.serverFSS.answer(q, out, tmp)
 }
