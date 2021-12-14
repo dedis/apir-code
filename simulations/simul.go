@@ -326,7 +326,7 @@ func fssPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) 
 		}
 
 		// get servers answers
-		answers := make([]uint32, len(ss))
+		answers := make([][]uint32, len(ss))
 		for k := range ss {
 			m.Reset()
 			answers[k] = ss[k].Answer(queries[k])
@@ -335,8 +335,11 @@ func fssPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) 
 		}
 
 		m.Reset()
-		_ = c.Reconstruct(answers)
+		_, err := c.Reconstruct(answers)
 		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		if err != nil {
+			log.Fatal(err)
+		}
 		results[j].Bandwidth[0].Reconstruct = 0
 
 		// GC after each repetition
