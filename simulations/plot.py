@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results/"
-#resultFolder = "results/"
+#resultFolder = "final_results/"
+resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
