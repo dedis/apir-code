@@ -78,15 +78,10 @@ def parseResults(file):
 
 def stats(data):
     s = {'cpu': {}, 'bw': {}}
-    cpuSorted = np.sort(data['CPU'])
-    #cpuSortedRemoved = cpuSorted[5:-5]
-    #s['cpu']['mean'] = np.median(cpuSortedRemoved)
     s['cpu']['mean'] = np.median(data['CPU'])
     s['cpu']['std'] = np.std(data['CPU'])
-    # print(s['cpu']['std']/s['cpu']['mean']) 
     s['bw']['mean'] = np.median(data['Bandwidth'])
     s['bw']['std'] = np.std(data['Bandwidth'])
-    # print(s['bw']['std']/s['bw']['mean']) 
     return s
 
 def meanFromDict(data):
