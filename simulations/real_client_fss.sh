@@ -20,7 +20,7 @@ scheme="$1"
 echo "##### running with $scheme scheme #####"
 
 # repeat experiment 30 times
-repeat=30
+repeat=20
 
 target="email_edu"
 for i in {1..$repeat}; do
@@ -47,6 +47,20 @@ done
 for i in {1..$repeat}; do
   echo "    ##### iteration $i"
   cmd/grpc/client/client -and -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_and.log
+  sleep 5
+done
+
+# THIS IS FOR THE AND QUERY, HARDCODED IN GO
+for i in {1..$repeat}; do
+  echo "    ##### iteration $i"
+  cmd/grpc/client/client -and -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_and.log
+  sleep 5
+done
+
+# THIS IS FOR THE AVG QUERY, HARDCODED IN GO
+for i in {1..$repeat}; do
+  echo "    ##### iteration $i"
+  cmd/grpc/client/client -and -avg -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_and.log
   sleep 5
 done
 
