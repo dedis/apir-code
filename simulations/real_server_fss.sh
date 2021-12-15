@@ -1,8 +1,4 @@
 #!/bin/bash
-if [ $# -ne 0 ]; then
-    echo "not enough arguments provided"
-    exit 1
-fi
 
 id=$1
 scheme=$2
