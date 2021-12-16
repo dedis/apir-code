@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results/"
-#resultFolder = "results/"
+#resultFolder = "final_results/"
+resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -348,12 +348,7 @@ def plotSingle():
 
 def plotRealComplex():
     schemes = [
-        "email_complexPIR", 
-        "email_complexVPIR", 
-        "algo_complexPIR", 
-        "algo_complexVPIR",
-        "and_complexPIR",
-        "and_complexVPIR",
+        "complexVPIR_email", 
     ]
 
     core = -1 # only a single core
@@ -392,8 +387,8 @@ def plotRealComplex():
         t = round(np.median(userTime), 2)
         bw = np.median(totalBW)
         if i % 2 == 0:
-            if scheme ==  "email_complexPIR":
-                print('COUNT of emails ending with ".org" & &', t, "&", end=" ") 
+            if scheme ==  "complexPIR_email":
+                print('COUNT of emails ending with ".edu" & &', t, "&", end=" ") 
             elif scheme == "algo_complexPIR":
                 print("COUNT of ElGamal keys & &", t, "&", end=" ") 
             elif scheme == "and_complexPIR":
@@ -497,60 +492,6 @@ def rounder2(x):
         return f'{round(x):,.0f}'
     else:
         return f'{round(x, 1):,.1f}'
-
-
-# def plotVpirPerformanceRatio():
-#     colors = ['darkred', 'darkblue', 'darkorange', 'darkgreen']
-#     devcolors = ['mistyrose', 'ghostwhite', 'papayawhip', 'honeydew']
-#     schemes = ["vpirMultiMatrixBlock.json", "vpirMultiVectorBlockDPF.json", "pirMatrix.json", "pirDPF.json"]
-#     labels = ["CPU rebalanced", "BW rebalanced", "CPU DPF", "BW DPF"]
-#
-#     fig, ax1 = plt.subplots()
-#     ax1.set_ylabel('VPIR/PIR CPU ratio')
-#     ax1.set_xlabel('Database size [MB]')
-#     ax1.spines['top'].set_visible(False)
-#     ax1.spines['right'].set_visible(False)
-#
-#     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-#     ax2.set_ylabel("VPIR/PIR bandwidth ratio")
-#     ax2.spines['top'].set_visible(False)
-#     ax2.spines['right'].set_linestyle((0, (5, 10)))
-#     # ax2.set_yscale('log')
-#
-#     # Save PIR values first so we can divide by them later
-#     Xpir, Ypir, Ypirbw = [], [], []
-#     for scheme in schemes[int(len(schemes)/2):]:
-#         stats = allStats(resultFolder + scheme)
-#         for dbSize in sorted(stats.keys()):
-#             Xpir.append(dbSize/8000000)
-#             Ypir.append(stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean'])
-#             Ypirbw.append(stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean'])
-#
-#     j = 0
-#     for i, scheme in enumerate(schemes[:int(len(schemes)/2)]):
-#         stats = allStats(resultFolder + scheme)
-#         Xs, Ys, Ybw = [], [], []
-#         for dbSize in sorted(stats.keys()):
-#             if Xpir[j] == dbSize/8000000:
-#                 Xs.append(dbSize/8000000)
-#                 Ys.append((stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']) / Ypir[j])
-#                 Ybw.append((stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']) / Ypirbw[j])
-#             else:
-#                 print("Xs do not align")
-#                 break
-#             j += 1
-#
-#         ax1.plot(Xs, Ys, color=colors[i], marker=markers[i], linestyle=linestyles[0], label=labels[2*i])
-#         ax2.plot(Xs, Ybw, color=colors[i], marker=markers[i], linestyle=linestyles[1], label=labels[2*i+1])
-#
-#     handles, labels = [(a + b) for a, b in zip(ax1.get_legend_handles_labels(), ax2.get_legend_handles_labels())]
-#     plt.legend(handles, labels, bbox_to_anchor=(0.95, 0.7), loc='center right',
-#                ncol=1, borderaxespad=0.)
-#     plt.tight_layout()
-#     # plt.title("CPU and bandwidth VPIR-to-PIR ratio")
-#     plt.savefig('multi_performance.eps', format='eps', dpi=300, transparent=True)
-#     # plt.show()
-
 
 # -----------Argument Parser-------------
 parser = argparse.ArgumentParser()

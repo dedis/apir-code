@@ -2,7 +2,7 @@
 
 id=$1
 scheme=$2
-expriment=$3
+experiment=$3
 
 export GOGC=8000
 
