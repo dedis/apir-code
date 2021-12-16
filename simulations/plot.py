@@ -117,8 +117,8 @@ def plotComplex():
                 label=schemeLabels[int(i / (len(schemes) / 2))]
         )
 
-    print("mean ratio CPU:", np.mean([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
-    print("mean ratio BW:", np.mean([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
+    print("mean ratio CPU:", np.median([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
+    print("mean ratio BW:", np.median([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
 
     # cosmetics
     axs[0].set_ylabel('CPU time [s]')
@@ -152,8 +152,8 @@ def plotComplexBars():
             cpuArray[i].append(cpuMean/1000)
             bwArray[i].append(bwMean/1024)
 
-    print("mean ratio CPU:", np.mean([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
-    print("mean ratio BW:", np.mean([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
+    print("mean ratio CPU:", np.median([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
+    print("mean ratio BW:", np.median([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
     
     ratioCPU = [cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]
     ratioBW = [bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]
