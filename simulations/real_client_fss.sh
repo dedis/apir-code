@@ -19,7 +19,7 @@ cd ../
 # repeat experiment 30 times
 repeat=20
 
-for scheme in "complexPIR", "complexVPIR"; do
+for scheme in "complexPIR" "complexVPIR"; do
   echo "##### running with $scheme scheme #####"
 
   target="email"
