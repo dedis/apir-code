@@ -20,7 +20,7 @@ cd - > /dev/null
 cd ../
 
 # run servers
-echo "##### running server $id with $scheme scheme #####"
+echo "##### running server $id with ${SCHEME} scheme #####"
 # run server given the correct scheme 
-cmd/grpc/server/server -id=$id -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-${id}_${scheme}_${experiment}.log
+cmd/grpc/server/server -id=$id -files=31 -experiment -scheme=${SCHEME} | tee -a simulations/results/stats_server-${id}_${SCHEME}_${TARGET}.log
 wait $!
