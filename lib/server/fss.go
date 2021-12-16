@@ -106,9 +106,6 @@ func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 		panic("sum not implemented")
 	} else if q.And && q.Avg && !q.Sum { // avg
 		sum := make([]uint32, len(out))
-
-		//now := time.Now()
-		//now := time.Date(2021, time.October, 10, 23, 0, 0, 0, time.UTC) // TODO: change
 		for i := 0; i < numIdentifiers; i++ {
 			// year
 			in, err := q.IdForYearCreationTime(s.db.KeysInfo[i].CreationTime)
