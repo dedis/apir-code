@@ -2,11 +2,11 @@
 
 [servers]
   [servers.0]
-  ip = "10.90.36.38"
+  ip = "localhost"
   port = 50050
 
   [servers.1]
-  ip = "10.90.36.39"
+  ip = "localhost"
   port = 50051
 
   #[servers.2]
