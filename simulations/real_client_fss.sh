@@ -57,7 +57,7 @@ done
 # THIS IS FOR THE AVG QUERY, HARDCODED IN GO
 for i in {1..20}; do
   echo "    ##### iteration $i"
-  cmd/grpc/client/client id=".edu" -from-end=4 -and -avg -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_and.log
+  cmd/grpc/client/client id=".edu" -from-end=4 -and -avg -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_avg.log
   sleep 5
 done
 
