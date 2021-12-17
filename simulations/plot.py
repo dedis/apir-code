@@ -352,6 +352,8 @@ def plotRealComplex():
         "complexVPIR_email", 
         "complexPIR_algo", 
         "complexVPIR_algo", 
+        "complexPIR_and", 
+        "complexVPIR_and", 
     ]
 
     core = -1 # only a single core
@@ -394,7 +396,7 @@ def plotRealComplex():
                 print('COUNT of emails ending with ".edu" & &', t, "&", end=" ") 
             elif scheme == "complexPIR_algo":
                 print("COUNT of ElGamal keys & &", t, "&", end=" ") 
-            elif scheme == "and_complexPIR":
+            elif scheme == "complexPIR_and":
                 print('COUNT of keys created in 2019 AND ending with ".edu" & &', t, "&", end=" ") 
             else: 
                 print("unknow scheme")

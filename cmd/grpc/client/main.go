@@ -239,7 +239,7 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			And: true,
 			Avg: true,
 		}
-		clientQuery = info.ToAvgClientFSS("")
+		clientQuery = info.ToAvgClientFSS(lc.flags.target)
 	} else {
 		panic("query not implemented")
 	}

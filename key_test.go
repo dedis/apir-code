@@ -390,8 +390,13 @@ func localResult(db *database.DB, q *query.Info, match interface{}) uint32 {
 				count++
 			}
 		} else if q.And && q.Avg {
+			email := k.UserId.Email
+			if len(email) < q.FromEnd {
+				continue
+			}
+			toMatchEmail := email[len(email)-q.FromEnd:]
 			nowYear := time.Now().Year()
-			if k.CreationTime.Year() == match.(time.Time).Year() {
+			if toMatchEmail == match.(string) {
 				diffYears += uint32(nowYear - k.CreationTime.Year())
 				count++
 			}
