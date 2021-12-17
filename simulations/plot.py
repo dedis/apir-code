@@ -348,7 +348,10 @@ def plotSingle():
 
 def plotRealComplex():
     schemes = [
+        "complexPIR_email", 
         "complexVPIR_email", 
+        "complexPIR_algo", 
+        "complexVPIR_algo", 
     ]
 
     core = -1 # only a single core
@@ -385,14 +388,14 @@ def plotRealComplex():
         totalBW = [sum(x) for x in zip(serversBW, clientBW)]
         
         t = round(np.median(userTime), 2)
-        bw = np.median(totalBW)
+        bw = rounder2(np.median(totalBW)/1000)
         if i % 2 == 0:
             if scheme ==  "complexPIR_email":
                 print('COUNT of emails ending with ".edu" & &', t, "&", end=" ") 
-            elif scheme == "algo_complexPIR":
+            elif scheme == "complexPIR_algo":
                 print("COUNT of ElGamal keys & &", t, "&", end=" ") 
             elif scheme == "and_complexPIR":
-                print('COUNT of keys created in Nov. 2020 AND ending with ".org" & &', t, "&", end=" ") 
+                print('COUNT of keys created in 2019 AND ending with ".edu" & &', t, "&", end=" ") 
             else: 
                 print("unknow scheme")
 
