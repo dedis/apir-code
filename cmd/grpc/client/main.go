@@ -229,15 +229,18 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 		// match organization
 		organization := ".edu"
 		info := &query.Info{
-			And:       true,
+			And:       lc.flags.and,
 			FromStart: 0,
 			FromEnd:   len(organization),
 		}
 		clientQuery = info.ToAndClientFSS(organization)
 	} else if lc.flags.and && lc.flags.avg {
 		info := &query.Info{
-			And: true,
-			Avg: true,
+			Target:    query.UserId,
+			FromStart: lc.flags.fromStart,
+			FromEnd:   lc.flags.fromEnd,
+			And:       lc.flags.and,
+			Avg:       lc.flags.avg,
 		}
 		clientQuery = info.ToAvgClientFSS(lc.flags.target)
 	} else {
@@ -486,6 +489,7 @@ func parseFlags() *flags {
 	flag.IntVar(&f.fromStart, "from-start", 0, "from start parameter for complex query")
 	flag.IntVar(&f.fromEnd, "from-end", 0, "from end parameter for complex query")
 	flag.BoolVar(&f.and, "and", false, "and clause for complex query")
+	flag.BoolVar(&f.avg, "avg", false, "avg clause for complex query")
 
 	flag.Parse()
 
