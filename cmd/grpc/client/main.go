@@ -236,7 +236,6 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 		clientQuery = info.ToAndClientFSS(organization)
 	} else if lc.flags.and && lc.flags.avg {
 		info := &query.Info{
-			Target:    query.UserId,
 			FromStart: lc.flags.fromStart,
 			FromEnd:   lc.flags.fromEnd,
 			And:       lc.flags.and,

@@ -19,12 +19,12 @@ cd ../
 scheme="$1"
 echo "##### running with $scheme scheme #####"
 
-target="email"
-for i in {1..20}; do
-  echo "    ##### iteration $i"
-  cmd/grpc/client/client -id=".edu" -target=$target -from-end=4 -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_${target}.log
-  sleep 5
-done
+#target="email"
+#for i in {1..20}; do
+  #echo "    ##### iteration $i"
+  #cmd/grpc/client/client -id=".edu" -target=$target -from-end=4 -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_${target}.log
+  #sleep 5
+#done
 
 #target="algo_elgamal"
 #for i in {1..20}; do
