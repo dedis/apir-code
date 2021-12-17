@@ -142,14 +142,11 @@ func (i *Info) ToAndClientFSS(in string) *ClientFSS {
 
 // TODO: hardcoded for the moment, FIX
 func (i *Info) ToAvgClientFSS(in string) *ClientFSS {
-	idYear, err := i.IdForYearCreationTime(time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC))
-	if err != nil {
-		panic(err)
-	}
+	id, _ := i.IdForEmail(in)
 
 	return &ClientFSS{
 		Info:  i,
-		Input: idYear,
+		Input: id,
 	}
 }
 

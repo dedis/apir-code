@@ -108,10 +108,11 @@ func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 		sum := make([]uint32, len(out))
 		for i := 0; i < numIdentifiers; i++ {
 			// year
-			in, err := q.IdForYearCreationTime(s.db.KeysInfo[i].CreationTime)
-			if err != nil {
-				panic(err)
+			in, valid := q.IdForEmail(s.db.KeysInfo[i].UserId.Email)
+			if !valid {
+				continue
 			}
+
 			s.fss.EvaluatePF(s.serverNum, q.FssKey, in, tmp)
 
 			// compute difference in years between now and creation time

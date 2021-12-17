@@ -175,16 +175,26 @@ func TestAvgQueryPIR(t *testing.T) {
 	retrieveComplexPIR(t, randomDB, q, match, "TestAvgQueryPIR")
 }
 
-func fixedAvgQueryMatch(db *database.DB) (time.Time, *query.ClientFSS) {
-	matchYear := time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC)
+func fixedAvgQueryMatch(db *database.DB) (string, *query.ClientFSS) {
+	matchOrganization := ".edu"
+
+	for i := 0; i < 50; i++ {
+		originalEmail := randomDB.KeysInfo[i].UserId.Email
+		lenOriginalEmail := len(originalEmail)
+		newEmail := originalEmail[:lenOriginalEmail-len(matchOrganization)] + matchOrganization
+		randomDB.KeysInfo[i].UserId.Email = newEmail
+	}
 
 	info := &query.Info{
-		And: true,
-		Avg: true,
+		And:       true,
+		Avg:       true,
+		FromStart: 0,
+		FromEnd:   len(matchOrganization),
 	}
-	q := info.ToAvgClientFSS("")
 
-	return matchYear, q
+	q := info.ToAvgClientFSS(matchOrganization)
+
+	return matchOrganization, q
 }
 
 func fixedAndQueryMatch(db *database.DB) (interface{}, *query.ClientFSS) {
