@@ -215,3 +215,32 @@ func queryServer(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOpt
 
 	return answer.GetAnswer()
 }
+
+// RunQueries dispatch queries in parallel to all gRPC servers. It then combines
+// the answers.
+func (m *Manager) RunQueries(queries [][]byte) [][]byte {
+	subCtx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	wg := sync.WaitGroup{}
+	resCh := make(chan []byte, len(m.connections))
+	j := 0
+	for _, conn := range m.connections {
+		wg.Add(1)
+		go func(j int, conn *grpc.ClientConn) {
+			resCh <- queryServer(subCtx, conn, m.opts, queries[j])
+			wg.Done()
+		}(j, conn)
+		j++
+	}
+	wg.Wait()
+	close(resCh)
+
+	// combinate answers of all the servers
+	q := make([][]byte, 0)
+	for v := range resCh {
+		q = append(q, v)
+	}
+
+	return q
+}
