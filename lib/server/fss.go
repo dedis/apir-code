@@ -117,6 +117,10 @@ func (s *serverFSS) answer(q *query.FSS, out, tmp []uint32) []uint32 {
 
 			// compute difference in years between now and creation time
 			diffYears := time.Now().Year() - s.db.KeysInfo[i].CreationTime.Year()
+			if diffYears < 0 {
+				// some keys are malformed (creation time 2040, 2106, 2031), remove them
+				continue
+			}
 
 			for j := range out {
 				// COUNT
