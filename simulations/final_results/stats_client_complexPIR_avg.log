@@ -1,0 +1,240 @@
+[Client] 2021/12/20 13:50:40 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:50:40 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:50:40 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000310160), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:50:40 done with queries computation
+[Client] 2021/12/20 13:51:06 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:51:06 query size in bytes 894
+[Client] 2021/12/20 13:51:08 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:51:08 query size in bytes 892
+[Client] 2021/12/20 13:51:08 done with block reconstruction
+12
+[Client] 2021/12/20 13:51:08 stats,-1,1786,27.681819
+Wall-clock time to retrieve complex output: 27.681819361s
+[Client] 2021/12/20 13:51:13 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:51:13 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:51:13 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00011e120), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:51:13 done with queries computation
+[Client] 2021/12/20 13:51:38 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:51:38 query size in bytes 898
+[Client] 2021/12/20 13:51:41 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:51:41 query size in bytes 896
+[Client] 2021/12/20 13:51:41 done with block reconstruction
+12
+[Client] 2021/12/20 13:51:41 stats,-1,1794,28.305470
+Wall-clock time to retrieve complex output: 28.305469799s
+[Client] 2021/12/20 13:51:46 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:51:46 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:51:46 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00030a2e0), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:51:46 done with queries computation
+[Client] 2021/12/20 13:52:12 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:52:12 query size in bytes 894
+[Client] 2021/12/20 13:52:13 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:52:13 query size in bytes 892
+[Client] 2021/12/20 13:52:13 done with block reconstruction
+12
+[Client] 2021/12/20 13:52:13 stats,-1,1786,27.216559
+Wall-clock time to retrieve complex output: 27.216559027s
+[Client] 2021/12/20 13:52:18 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:52:18 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:52:18 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00012e280), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:52:18 done with queries computation
+[Client] 2021/12/20 13:52:42 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:52:42 query size in bytes 898
+[Client] 2021/12/20 13:52:44 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:52:44 query size in bytes 896
+[Client] 2021/12/20 13:52:44 done with block reconstruction
+12
+[Client] 2021/12/20 13:52:44 stats,-1,1794,25.157987
+Wall-clock time to retrieve complex output: 25.157987308s
+[Client] 2021/12/20 13:52:49 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:52:49 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:52:49 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000159220), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:52:49 done with queries computation
+[Client] 2021/12/20 13:53:12 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:53:12 query size in bytes 894
+[Client] 2021/12/20 13:53:13 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:53:13 query size in bytes 892
+[Client] 2021/12/20 13:53:13 done with block reconstruction
+12
+[Client] 2021/12/20 13:53:13 stats,-1,1786,24.387199
+Wall-clock time to retrieve complex output: 24.387199484s
+[Client] 2021/12/20 13:53:18 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:53:18 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:53:18 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000396100), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:53:18 done with queries computation
+[Client] 2021/12/20 13:53:42 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:53:42 query size in bytes 892
+[Client] 2021/12/20 13:53:42 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:53:42 query size in bytes 894
+[Client] 2021/12/20 13:53:42 done with block reconstruction
+0
+[Client] 2021/12/20 13:53:42 stats,-1,1786,24.242734
+Wall-clock time to retrieve complex output: 24.242733851s
+[Client] 2021/12/20 13:53:47 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:53:47 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:53:47 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d32e0), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:53:47 done with queries computation
+[Client] 2021/12/20 13:54:12 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:54:12 query size in bytes 898
+[Client] 2021/12/20 13:54:12 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:54:12 query size in bytes 896
+[Client] 2021/12/20 13:54:12 done with block reconstruction
+12
+[Client] 2021/12/20 13:54:12 stats,-1,1794,25.090789
+Wall-clock time to retrieve complex output: 25.090788508s
+[Client] 2021/12/20 13:54:17 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:54:17 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:54:17 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00030a340), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:54:17 done with queries computation
+[Client] 2021/12/20 13:54:40 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:54:40 query size in bytes 894
+[Client] 2021/12/20 13:54:45 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:54:45 query size in bytes 892
+[Client] 2021/12/20 13:54:45 done with block reconstruction
+12
+[Client] 2021/12/20 13:54:45 stats,-1,1786,27.762863
+Wall-clock time to retrieve complex output: 27.762863318s
+[Client] 2021/12/20 13:54:50 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:54:50 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:54:50 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0002a0300), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:54:50 done with queries computation
+[Client] 2021/12/20 13:55:14 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:55:14 query size in bytes 898
+[Client] 2021/12/20 13:55:16 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:55:16 query size in bytes 896
+[Client] 2021/12/20 13:55:16 done with block reconstruction
+12
+[Client] 2021/12/20 13:55:16 stats,-1,1794,26.264207
+Wall-clock time to retrieve complex output: 26.264206571s
+[Client] 2021/12/20 13:55:21 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:55:21 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:55:21 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d3220), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:55:21 done with queries computation
+[Client] 2021/12/20 13:55:46 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:55:46 query size in bytes 896
+[Client] 2021/12/20 13:55:47 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:55:47 query size in bytes 898
+[Client] 2021/12/20 13:55:47 done with block reconstruction
+12
+[Client] 2021/12/20 13:55:47 stats,-1,1794,25.989181
+Wall-clock time to retrieve complex output: 25.989180881s
+[Client] 2021/12/20 13:55:52 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:55:52 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:55:52 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d3320), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:55:52 done with queries computation
+[Client] 2021/12/20 13:56:17 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:56:17 query size in bytes 896
+[Client] 2021/12/20 13:56:18 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:56:18 query size in bytes 898
+[Client] 2021/12/20 13:56:18 done with block reconstruction
+0
+[Client] 2021/12/20 13:56:18 stats,-1,1794,25.323768
+Wall-clock time to retrieve complex output: 25.323767602s
+[Client] 2021/12/20 13:56:23 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:56:23 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:56:23 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000398120), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:56:23 done with queries computation
+[Client] 2021/12/20 13:56:47 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:56:47 query size in bytes 896
+[Client] 2021/12/20 13:56:50 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:56:50 query size in bytes 898
+[Client] 2021/12/20 13:56:50 done with block reconstruction
+12
+[Client] 2021/12/20 13:56:50 stats,-1,1794,27.260887
+Wall-clock time to retrieve complex output: 27.260887475s
+[Client] 2021/12/20 13:56:55 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:56:55 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:56:55 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00011e2c0), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:56:55 done with queries computation
+[Client] 2021/12/20 13:57:20 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:57:20 query size in bytes 894
+[Client] 2021/12/20 13:57:21 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:57:21 query size in bytes 892
+[Client] 2021/12/20 13:57:21 done with block reconstruction
+12
+[Client] 2021/12/20 13:57:21 stats,-1,1786,25.491090
+Wall-clock time to retrieve complex output: 25.491090434s
+[Client] 2021/12/20 13:57:26 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:57:26 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:57:26 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d22a0), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:57:26 done with queries computation
+[Client] 2021/12/20 13:57:51 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:57:51 query size in bytes 896
+[Client] 2021/12/20 13:57:54 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:57:54 query size in bytes 898
+[Client] 2021/12/20 13:57:54 done with block reconstruction
+12
+[Client] 2021/12/20 13:57:54 stats,-1,1794,28.535639
+Wall-clock time to retrieve complex output: 28.535639397s
+[Client] 2021/12/20 13:57:59 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:57:59 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:57:59 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0002a0440), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:57:59 done with queries computation
+[Client] 2021/12/20 13:58:24 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:58:24 query size in bytes 896
+[Client] 2021/12/20 13:58:26 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:58:26 query size in bytes 898
+[Client] 2021/12/20 13:58:26 done with block reconstruction
+0
+[Client] 2021/12/20 13:58:26 stats,-1,1794,26.839904
+Wall-clock time to retrieve complex output: 26.839903818s
+[Client] 2021/12/20 13:58:31 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:58:31 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:58:31 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d2220), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:58:31 done with queries computation
+[Client] 2021/12/20 13:58:55 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:58:55 query size in bytes 898
+[Client] 2021/12/20 13:58:56 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:58:56 query size in bytes 896
+[Client] 2021/12/20 13:58:56 done with block reconstruction
+12
+[Client] 2021/12/20 13:58:56 stats,-1,1794,25.426258
+Wall-clock time to retrieve complex output: 25.426257912s
+[Client] 2021/12/20 13:59:01 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:59:01 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:59:01 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000518080), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:59:01 done with queries computation
+[Client] 2021/12/20 13:59:25 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:59:25 query size in bytes 896
+[Client] 2021/12/20 13:59:26 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:59:26 query size in bytes 898
+[Client] 2021/12/20 13:59:26 done with block reconstruction
+12
+[Client] 2021/12/20 13:59:26 stats,-1,1794,24.461837
+Wall-clock time to retrieve complex output: 24.461837353s
+[Client] 2021/12/20 13:59:31 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 13:59:31 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 13:59:31 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000506080), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 13:59:31 done with queries computation
+[Client] 2021/12/20 13:59:57 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 13:59:57 query size in bytes 896
+[Client] 2021/12/20 13:59:59 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 13:59:59 query size in bytes 898
+[Client] 2021/12/20 13:59:59 done with block reconstruction
+12
+[Client] 2021/12/20 13:59:59 stats,-1,1794,27.798129
+Wall-clock time to retrieve complex output: 27.798129298s
+[Client] 2021/12/20 14:00:04 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 14:00:04 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 14:00:04 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00011e120), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 14:00:04 done with queries computation
+[Client] 2021/12/20 14:00:28 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 14:00:28 query size in bytes 898
+[Client] 2021/12/20 14:00:29 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 14:00:29 query size in bytes 896
+[Client] 2021/12/20 14:00:29 done with block reconstruction
+12
+[Client] 2021/12/20 14:00:29 stats,-1,1794,24.816873
+Wall-clock time to retrieve complex output: 24.816873155s
+[Client] 2021/12/20 14:00:34 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/12/20 14:00:34 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/12/20 14:00:34 databaseInfo: &database.Info{NumRows:0, NumColumns:3557164, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0002aa120), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/12/20 14:00:34 done with queries computation
+[Client] 2021/12/20 14:00:59 sent query to 10.90.36.39:50051
+[Client] 2021/12/20 14:00:59 query size in bytes 894
+[Client] 2021/12/20 14:00:59 sent query to 10.90.36.38:50050
+[Client] 2021/12/20 14:00:59 query size in bytes 892
+[Client] 2021/12/20 14:00:59 done with block reconstruction
+0
+[Client] 2021/12/20 14:00:59 stats,-1,1786,25.461441
+Wall-clock time to retrieve complex output: 25.461440517s

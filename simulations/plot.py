@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "results/"
+resultFolder = "final_results/"
+#resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -354,6 +354,8 @@ def plotRealComplex():
         "complexVPIR_algo", 
         "complexPIR_and", 
         "complexVPIR_and", 
+        "complexPIR_avg", 
+        "complexVPIR_avg", 
     ]
 
     core = -1 # only a single core
@@ -393,11 +395,13 @@ def plotRealComplex():
         bw = rounder2(np.median(totalBW)/1000)
         if i % 2 == 0:
             if scheme ==  "complexPIR_email":
-                print('COUNT of emails ending with ".edu" & &', t, "&", end=" ") 
+                print('\\texttt{COUNT} of emails ending with ".edu" & &', t, "&", end=" ") 
             elif scheme == "complexPIR_algo":
-                print("COUNT of ElGamal keys & &", t, "&", end=" ") 
+                print('\\texttt{COUNT} of ElGamal keys & &', t, "&", end=" ") 
             elif scheme == "complexPIR_and":
-                print('COUNT of keys created in 2019 AND ending with ".edu" & &', t, "&", end=" ") 
+                print('\\texttt{COUNT} of keys created in 2019 AND ending with ".edu" & &', t, "&", end=" ") 
+            elif scheme == "complexPIR_avg":
+                print('\\texttt{AVG} lifetime of keys for emails ending with ".edu" & &', t, "&", end=" ") 
             else: 
                 print("unknow scheme")
 

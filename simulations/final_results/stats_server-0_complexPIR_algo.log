@@ -1,0 +1,87 @@
+[Server 0] 2021/12/17 11:00:59 Starting to read in the DB data
+[Server 0] 2021/12/17 11:00:59 Loading keys: [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 0] 2021/12/17 11:20:14 DB loaded with files [data/sks/sks-000.pgp data/sks/sks-001.pgp data/sks/sks-002.pgp data/sks/sks-003.pgp data/sks/sks-004.pgp data/sks/sks-005.pgp data/sks/sks-006.pgp data/sks/sks-007.pgp data/sks/sks-008.pgp data/sks/sks-009.pgp data/sks/sks-010.pgp data/sks/sks-011.pgp data/sks/sks-012.pgp data/sks/sks-013.pgp data/sks/sks-014.pgp data/sks/sks-015.pgp data/sks/sks-016.pgp data/sks/sks-017.pgp data/sks/sks-018.pgp data/sks/sks-019.pgp data/sks/sks-020.pgp data/sks/sks-021.pgp data/sks/sks-022.pgp data/sks/sks-023.pgp data/sks/sks-024.pgp data/sks/sks-025.pgp data/sks/sks-026.pgp data/sks/sks-027.pgp data/sks/sks-028.pgp data/sks/sks-029.pgp data/sks/sks-030.pgp]
+[Server 0] 2021/12/17 11:20:14 db size in GiB: 0.000000
+[Server 0] 2021/12/17 11:20:15 is listening at 10.90.36.38:50050
+[Server 0] 2021/12/17 11:20:15 starting grpc server
+[Server 0] 2021/12/17 11:22:50 got databaseInfo request
+[Server 0] 2021/12/17 11:22:50 got query request
+[Server 0] 2021/12/17 11:22:58 answer size in bytes: 4
+[Server 0] 2021/12/17 11:22:58 stats,-1,4
+[Server 0] 2021/12/17 11:23:03 got databaseInfo request
+[Server 0] 2021/12/17 11:23:03 got query request
+[Server 0] 2021/12/17 11:23:10 answer size in bytes: 4
+[Server 0] 2021/12/17 11:23:10 stats,-1,4
+[Server 0] 2021/12/17 11:23:16 got databaseInfo request
+[Server 0] 2021/12/17 11:23:16 got query request
+[Server 0] 2021/12/17 11:23:23 answer size in bytes: 4
+[Server 0] 2021/12/17 11:23:23 stats,-1,4
+[Server 0] 2021/12/17 11:23:28 got databaseInfo request
+[Server 0] 2021/12/17 11:23:28 got query request
+[Server 0] 2021/12/17 11:23:36 answer size in bytes: 4
+[Server 0] 2021/12/17 11:23:36 stats,-1,4
+[Server 0] 2021/12/17 11:23:41 got databaseInfo request
+[Server 0] 2021/12/17 11:23:41 got query request
+[Server 0] 2021/12/17 11:23:48 answer size in bytes: 4
+[Server 0] 2021/12/17 11:23:48 stats,-1,4
+[Server 0] 2021/12/17 11:23:54 got databaseInfo request
+[Server 0] 2021/12/17 11:23:54 got query request
+[Server 0] 2021/12/17 11:24:00 answer size in bytes: 4
+[Server 0] 2021/12/17 11:24:00 stats,-1,4
+[Server 0] 2021/12/17 11:24:06 got databaseInfo request
+[Server 0] 2021/12/17 11:24:06 got query request
+[Server 0] 2021/12/17 11:24:12 answer size in bytes: 4
+[Server 0] 2021/12/17 11:24:12 stats,-1,4
+[Server 0] 2021/12/17 11:24:17 got databaseInfo request
+[Server 0] 2021/12/17 11:24:17 got query request
+[Server 0] 2021/12/17 11:24:24 answer size in bytes: 4
+[Server 0] 2021/12/17 11:24:24 stats,-1,4
+[Server 0] 2021/12/17 11:24:29 got databaseInfo request
+[Server 0] 2021/12/17 11:24:29 got query request
+[Server 0] 2021/12/17 11:24:35 answer size in bytes: 4
+[Server 0] 2021/12/17 11:24:35 stats,-1,4
+[Server 0] 2021/12/17 11:24:41 got databaseInfo request
+[Server 0] 2021/12/17 11:24:41 got query request
+[Server 0] 2021/12/17 11:24:49 answer size in bytes: 4
+[Server 0] 2021/12/17 11:24:49 stats,-1,4
+[Server 0] 2021/12/17 11:24:54 got databaseInfo request
+[Server 0] 2021/12/17 11:24:54 got query request
+[Server 0] 2021/12/17 11:25:00 answer size in bytes: 4
+[Server 0] 2021/12/17 11:25:00 stats,-1,4
+[Server 0] 2021/12/17 11:25:05 got databaseInfo request
+[Server 0] 2021/12/17 11:25:05 got query request
+[Server 0] 2021/12/17 11:25:12 answer size in bytes: 4
+[Server 0] 2021/12/17 11:25:12 stats,-1,4
+[Server 0] 2021/12/17 11:25:18 got databaseInfo request
+[Server 0] 2021/12/17 11:25:18 got query request
+[Server 0] 2021/12/17 11:25:25 answer size in bytes: 4
+[Server 0] 2021/12/17 11:25:25 stats,-1,4
+[Server 0] 2021/12/17 11:25:30 got databaseInfo request
+[Server 0] 2021/12/17 11:25:30 got query request
+[Server 0] 2021/12/17 11:25:37 answer size in bytes: 4
+[Server 0] 2021/12/17 11:25:37 stats,-1,4
+[Server 0] 2021/12/17 11:25:43 got databaseInfo request
+[Server 0] 2021/12/17 11:25:43 got query request
+[Server 0] 2021/12/17 11:25:51 answer size in bytes: 4
+[Server 0] 2021/12/17 11:25:51 stats,-1,4
+[Server 0] 2021/12/17 11:25:56 got databaseInfo request
+[Server 0] 2021/12/17 11:25:56 got query request
+[Server 0] 2021/12/17 11:26:03 answer size in bytes: 4
+[Server 0] 2021/12/17 11:26:03 stats,-1,4
+[Server 0] 2021/12/17 11:26:09 got databaseInfo request
+[Server 0] 2021/12/17 11:26:09 got query request
+[Server 0] 2021/12/17 11:26:18 answer size in bytes: 4
+[Server 0] 2021/12/17 11:26:18 stats,-1,4
+[Server 0] 2021/12/17 11:26:23 got databaseInfo request
+[Server 0] 2021/12/17 11:26:23 got query request
+[Server 0] 2021/12/17 11:26:28 answer size in bytes: 4
+[Server 0] 2021/12/17 11:26:28 stats,-1,4
+[Server 0] 2021/12/17 11:26:34 got databaseInfo request
+[Server 0] 2021/12/17 11:26:34 got query request
+[Server 0] 2021/12/17 11:26:41 answer size in bytes: 4
+[Server 0] 2021/12/17 11:26:41 stats,-1,4
+[Server 0] 2021/12/17 11:26:46 got databaseInfo request
+[Server 0] 2021/12/17 11:26:46 got query request
+[Server 0] 2021/12/17 11:26:53 answer size in bytes: 4
+[Server 0] 2021/12/17 11:26:53 stats,-1,4
+[Server 0] 2021/12/17 11:27:00 clean shutdown of server done
