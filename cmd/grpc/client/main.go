@@ -181,14 +181,14 @@ func (lc *localClient) exec() (string, error) {
 		return lc.retrieveKeyGivenId(lc.flags.id)
 	case "complexPIR":
 		lc.vpirClient = client.NewPredicatePIR(lc.prg, lc.dbInfo)
-		out, err := lc.retrieveComplesQuery()
+		out, err := lc.retrieveComplexQuery()
 		if err != nil {
 			return "", err
 		}
 		return strconv.FormatUint(uint64(out), 10), nil
 	case "complexVPIR":
 		lc.vpirClient = client.NewPredicateAPIR(lc.prg, lc.dbInfo)
-		out, err := lc.retrieveComplesQuery()
+		out, err := lc.retrieveComplexQuery()
 		if err != nil {
 			return "", err
 		}
@@ -198,7 +198,7 @@ func (lc *localClient) exec() (string, error) {
 	}
 }
 
-func (lc *localClient) retrieveComplesQuery() (uint32, error) {
+func (lc *localClient) retrieveComplexQuery() (uint32, error) {
 	t := time.Now()
 
 	var clientQuery *query.ClientFSS
@@ -227,13 +227,12 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 		}
 	} else if lc.flags.and && !lc.flags.avg {
 		// match organization
-		organization := ".edu"
 		info := &query.Info{
 			And:       lc.flags.and,
 			FromStart: 0,
-			FromEnd:   len(organization),
+			FromEnd:   len(lc.flags.id),
 		}
-		clientQuery = info.ToAndClientFSS(organization)
+		clientQuery = info.ToAndClientFSS(lc.flags.id)
 	} else if lc.flags.and && lc.flags.avg {
 		info := &query.Info{
 			FromStart: lc.flags.fromStart,
@@ -241,7 +240,7 @@ func (lc *localClient) retrieveComplesQuery() (uint32, error) {
 			And:       lc.flags.and,
 			Avg:       lc.flags.avg,
 		}
-		clientQuery = info.ToAvgClientFSS(lc.flags.target)
+		clientQuery = info.ToAvgClientFSS(lc.flags.id)
 	} else {
 		panic("query not implemented")
 	}
