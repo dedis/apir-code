@@ -25,7 +25,7 @@ func NewManager(config utils.Config, opts []grpc.CallOption) Manager {
 	}
 }
 
-// Manager is used to create connections to the servers.
+// Manager is used to initialize an actor that can manager servers
 type Manager struct {
 	config utils.Config
 	opts   []grpc.CallOption
@@ -34,7 +34,7 @@ type Manager struct {
 // Connect connects to the server and returns an Actor that can query the
 // servers.
 func (m *Manager) Connect() (Actor, error) {
-	conns := make(map[string]*grpc.ClientConn)
+	servers := make(map[string]server)
 
 	// load servers certificates
 	creds, err := utils.LoadServersCertificates()
@@ -52,22 +52,22 @@ func (m *Manager) Connect() (Actor, error) {
 			return Actor{}, xerrors.Errorf("did not connect to %s: %v", addr, err)
 		}
 
-		conns[addr] = conn
+		servers[addr] = server{conn: conn, opts: m.opts}
 	}
 
 	return Actor{
-		connections: conns,
-		opts:        m.opts,
+		servers: servers,
+		opts:    m.opts,
 	}, nil
 }
 
-// Actor allows to query the servers.
+// Actor allows to perform operations on the servers.
 type Actor struct {
-	connections map[string]*grpc.ClientConn
-	opts        []grpc.CallOption
+	servers map[string]server
+	opts    []grpc.CallOption
 }
 
-// GetKey perform a simple query by returning an email
+// GetKey perform a simple query that return a key from an email
 func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (string, error) {
 	t := time.Now()
 
@@ -78,26 +78,26 @@ func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (str
 	// query given hash key
 	in := make([]byte, 4)
 	binary.BigEndian.PutUint32(in, uint32(hashKey))
-	queries, err := client.QueryBytes(in, len(a.connections))
+	queries, err := client.QueryBytes(in, len(a.servers))
 	if err != nil {
 		return "", xerrors.Errorf("error when executing query: %v", err)
 	}
 	log.Printf("done with queries computation")
 
 	// send queries to servers
-	subCtx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(a.connections))
+	resCh := make(chan []byte, len(a.servers))
 	j := 0
 
-	for _, conn := range a.connections {
+	for _, srv := range a.servers {
 		wg.Add(1)
-		go func(j int, conn *grpc.ClientConn) {
-			resCh <- queryServer(subCtx, conn, a.opts, queries[j])
+		go func(j int, srv server) {
+			resCh <- srv.query(ctx, queries[j])
 			wg.Done()
-		}(j, conn)
+		}(j, srv)
 		j++
 	}
 	wg.Wait()
@@ -140,22 +140,22 @@ func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (str
 	return armored, nil
 }
 
-// GetDBInfos returns infos about the dbs.
+// GetDBInfos returns infos about the servers dbs.
 func (a *Actor) GetDBInfos() ([]database.Info, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan database.Info, len(a.connections))
+	resCh := make(chan database.Info, len(a.servers))
 
-	for _, conn := range a.connections {
+	for _, srv := range a.servers {
 		wg.Add(1)
-		go func(conn *grpc.ClientConn) {
+		go func(srv server) {
 			defer wg.Done()
 
-			info := queryDBInfo(ctx, conn, a.opts)
+			info := srv.getDBInfo(ctx)
 			resCh <- info
-		}(conn)
+		}(srv)
 	}
 
 	wg.Wait()
@@ -182,56 +182,21 @@ func (a *Actor) GetDBInfos() ([]database.Info, error) {
 	return dbInfo, nil
 }
 
-func queryDBInfo(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption) database.Info {
-	c := proto.NewVPIRClient(conn)
-	q := &proto.DatabaseInfoRequest{}
-	answer, err := c.DatabaseInfo(ctx, q, opts...)
-	if err != nil {
-		log.Fatalf("could not send database info request to %s: %v",
-			conn.Target(), err)
-	}
-	log.Printf("sent databaseInfo request to %s", conn.Target())
-
-	dbInfo := database.Info{
-		NumRows:    int(answer.GetNumRows()),
-		NumColumns: int(answer.GetNumColumns()),
-		BlockSize:  int(answer.GetBlockLength()),
-		PIRType:    answer.GetPirType(),
-		Merkle:     &database.Merkle{Root: answer.GetRoot(), ProofLen: int(answer.GetProofLen())},
-	}
-
-	return dbInfo
-}
-
-func queryServer(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, query []byte) []byte {
-	c := proto.NewVPIRClient(conn)
-	q := &proto.QueryRequest{Query: query}
-	answer, err := c.Query(ctx, q, opts...)
-	if err != nil {
-		log.Fatalf("could not query %s: %v",
-			conn.Target(), err)
-	}
-	log.Printf("sent query to %s", conn.Target())
-	log.Printf("query size in bytes %d", len(query))
-
-	return answer.GetAnswer()
-}
-
-// RunQueries dispatch queries in parallel to all gRPC servers. It then combines
-// the answers.
+// RunQueries dispatch queries in parallel to all servers. It then combines the
+// answers.
 func (a *Actor) RunQueries(queries [][]byte) [][]byte {
-	subCtx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(a.connections))
+	resCh := make(chan []byte, len(a.servers))
 	j := 0
-	for _, conn := range a.connections {
+	for _, srv := range a.servers {
 		wg.Add(1)
-		go func(j int, conn *grpc.ClientConn) {
-			resCh <- queryServer(subCtx, conn, a.opts, queries[j])
+		go func(j int, srv server) {
+			resCh <- srv.query(ctx, queries[j])
 			wg.Done()
-		}(j, conn)
+		}(j, srv)
 		j++
 	}
 	wg.Wait()
@@ -244,4 +209,51 @@ func (a *Actor) RunQueries(queries [][]byte) [][]byte {
 	}
 
 	return q
+}
+
+// server represents a remote server
+type server struct {
+	conn *grpc.ClientConn
+	opts []grpc.CallOption
+}
+
+// query performs a query on the server
+func (s server) query(ctx context.Context, query []byte) []byte {
+	c := proto.NewVPIRClient(s.conn)
+	q := &proto.QueryRequest{Query: query}
+
+	answer, err := c.Query(ctx, q, s.opts...)
+	if err != nil {
+		log.Fatalf("could not query %s: %v",
+			s.conn.Target(), err)
+	}
+
+	log.Printf("sent query to %s", s.conn.Target())
+	log.Printf("query size in bytes %d", len(query))
+
+	return answer.GetAnswer()
+}
+
+// getDBInfo returns DB info about the server
+func (s server) getDBInfo(ctx context.Context) database.Info {
+	c := proto.NewVPIRClient(s.conn)
+	q := &proto.DatabaseInfoRequest{}
+
+	answer, err := c.DatabaseInfo(ctx, q, s.opts...)
+	if err != nil {
+		log.Fatalf("could not send database info request to %s: %v",
+			s.conn.Target(), err)
+	}
+
+	log.Printf("sent databaseInfo request to %s", s.conn.Target())
+
+	dbInfo := database.Info{
+		NumRows:    int(answer.GetNumRows()),
+		NumColumns: int(answer.GetNumColumns()),
+		BlockSize:  int(answer.GetBlockLength()),
+		PIRType:    answer.GetPirType(),
+		Merkle:     &database.Merkle{Root: answer.GetRoot(), ProofLen: int(answer.GetProofLen())},
+	}
+
+	return dbInfo
 }

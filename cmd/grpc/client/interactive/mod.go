@@ -22,7 +22,7 @@ var grpcOpts = []grpc.CallOption{
 	grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
 }
 
-// main start an interactive CLI to perform queries.
+// main starts an interactive CLI to perform queries.
 func main() {
 	configPath := os.Getenv("VPIR_CONFIG")
 	if configPath == "" {
@@ -41,11 +41,10 @@ func main() {
 		log.Fatalf("failed to connect: %v", err)
 	}
 
-	// the initial questions: complex or simple query ?
+	// the initial questions: get a key or some stats ?
 	prompt := &survey.Select{
 		Message: "What do you want to do ?",
-		Options: []string{"Download a key", "Get stats", "exit"},
-		Default: "Download a key",
+		Options: []string{"📦 Download a key", "🔎 Get stats", "👉 exit"},
 	}
 
 	var action string
@@ -59,19 +58,19 @@ func main() {
 		}
 
 		switch action {
-		case "Download a key":
+		case "📦 Download a key":
 			err = downloadKey(actor)
 			if err != nil {
 				log.Fatalf("failed to download key: %v", err)
 			}
 
-		case "Get stats":
+		case "🔎 Get stats":
 			err = getStats(actor)
 			if err != nil {
 				log.Fatalf("failed to get stats: %v", err)
 			}
 
-		case "exit":
+		case "👉 exit":
 			fmt.Println("bye 👋")
 			os.Exit(0)
 		}
@@ -108,11 +107,11 @@ func downloadKey(actor manager.Actor) error {
 	return nil
 }
 
+// getStats either counts emails or computes an average lifetime
 func getStats(actor manager.Actor) error {
 	prompt := &survey.Select{
 		Message: "What kind of stat do you want ?",
-		Options: []string{"Count emails", "Get everage lifetime"},
-		Default: "Count emails",
+		Options: []string{"✌️ Count emails", "📆 Get average lifetime based on email"},
 	}
 
 	var answer string
@@ -123,22 +122,26 @@ func getStats(actor manager.Actor) error {
 	}
 
 	switch answer {
-	case "Count emails":
+	case "✌️ Count emails":
 		err = countStats(actor)
 		if err != nil {
-			xerrors.Errorf("failed to get stats email: %v", err)
+			return xerrors.Errorf("failed to get stats email: %v", err)
 		}
-	case "Get everage lifetime":
+	case "📆 Get average lifetime based on email":
+		err = getAvg(actor)
+		if err != nil {
+			return xerrors.Errorf("failed to get avg: %v", err)
+		}
 	}
 
 	return nil
 }
 
+// countStats counts emails based on different attributes
 func countStats(actor manager.Actor) error {
 	prompt := &survey.Select{
 		Message: "What attribute do you want to count on ?",
 		Options: []string{"email", "algo", "creation"},
-		Default: "email",
 	}
 
 	var answer string
@@ -164,9 +167,9 @@ func countStats(actor manager.Actor) error {
 		return xerrors.Errorf("failed to get stats: %v", err)
 	}
 
-	count, err := executeCountQuery(clientQuery, actor)
+	count, err := executeStatsQuery(clientQuery, actor)
 	if err != nil {
-		return xerrors.Errorf("failed to execute count query: %v, err")
+		return xerrors.Errorf("failed to execute count query: %v", err)
 	}
 
 	var res bool
@@ -179,46 +182,12 @@ func countStats(actor manager.Actor) error {
 	return nil
 }
 
-func executeCountQuery(clientQuery *query.ClientFSS, actor manager.Actor) (uint32, error) {
-	in, err := clientQuery.Encode()
-	if err != nil {
-		return 0, xerrors.Errorf("failed to encode query: %v", err)
-	}
-
-	dbInfo, err := actor.GetDBInfos()
-	if err != nil {
-		return 0, xerrors.Errorf("failed to get db info: %v", err)
-	}
-
-	client := client.NewPredicateAPIR(utils.RandomPRG(), &dbInfo[0])
-
-	queries, err := client.QueryBytes(in, len(dbInfo))
-	if err != nil {
-		return 0, xerrors.Errorf("failed to query bytes: %v", err)
-	}
-
-	answers := actor.RunQueries(queries)
-
-	result, err := client.ReconstructBytes(answers)
-	if err != nil {
-		return 0, xerrors.Errorf("failed to reconstruct bytes: %v", err)
-	}
-
-	count, ok := result.(uint32)
-	if !ok {
-		return 0, xerrors.Errorf("failed to cast result, wrong type %T", count)
-	}
-
-	return count, nil
-}
-
 func getCountByEmailQuery() (*query.ClientFSS, string, error) {
 	var prompt survey.Prompt
 
 	prompt = &survey.Select{
 		Message: "Select the kind of query",
 		Options: []string{"begin with", "end with"},
-		Default: "begins with",
 	}
 
 	var position string
@@ -262,7 +231,6 @@ func getCountByAlgoQuery() (*query.ClientFSS, string, error) {
 	prompt = &survey.Select{
 		Message: "Select the kind of algo",
 		Options: []string{"RSA", "ElGamal", "DSA", "ECDH", "ECDSA"},
-		Default: "RSA",
 	}
 
 	var algo string
@@ -313,4 +281,93 @@ func getCountByCreationQuery() (*query.ClientFSS, string, error) {
 	queryString := fmt.Sprintf("all emails created before year '%s'", yearStr)
 
 	return clientQuery, queryString, nil
+}
+
+func getAvg(actor manager.Actor) error {
+	var prompt survey.Prompt
+
+	prompt = &survey.Select{
+		Message: "Select the kind of query",
+		Options: []string{"begin with", "end with"},
+	}
+
+	var position string
+
+	err := survey.AskOne(prompt, &position)
+	if err != nil {
+		return xerrors.Errorf("failed to ask: %v", err)
+	}
+
+	prompt = &survey.Input{Message: "Enter your query text"}
+
+	var q string
+
+	err = survey.AskOne(prompt, &q)
+	if err != nil {
+		return xerrors.Errorf("failed to ask: %v", err)
+	}
+
+	fromStart, fromEnd := len(q), 0
+
+	if position == "end with" {
+		fromStart, fromEnd = 0, len(q)
+	}
+
+	info := &query.Info{
+		FromStart: fromStart,
+		FromEnd:   fromEnd,
+		And:       true,
+		Avg:       true,
+	}
+
+	clientQuery := info.ToAvgClientFSS(q)
+	queryString := fmt.Sprintf("average lifetime of all emails that %s '%s'", position, q)
+
+	count, err := executeStatsQuery(clientQuery, actor)
+	if err != nil {
+		return xerrors.Errorf("failed to execute count query: %v", err)
+	}
+
+	var res bool
+	prompt2 := &survey.Input{
+		Message: fmt.Sprintf("Result of %s: %d\n. Type enter to continue.", queryString, count),
+	}
+
+	survey.AskOne(prompt2, &res)
+
+	return nil
+}
+
+// executeStatsQuery takes a client query and executes it
+func executeStatsQuery(clientQuery *query.ClientFSS, actor manager.Actor) (uint32, error) {
+	in, err := clientQuery.Encode()
+	if err != nil {
+		return 0, xerrors.Errorf("failed to encode query: %v", err)
+	}
+
+	dbInfo, err := actor.GetDBInfos()
+	if err != nil {
+		return 0, xerrors.Errorf("failed to get db info: %v", err)
+	}
+
+	client := client.NewPredicateAPIR(utils.RandomPRG(), &dbInfo[0])
+
+	queries, err := client.QueryBytes(in, len(dbInfo))
+	if err != nil {
+		return 0, xerrors.Errorf("failed to query bytes: %v", err)
+	}
+
+	answers := actor.RunQueries(queries)
+
+	result, err := client.ReconstructBytes(answers)
+	if err != nil {
+		return 0, xerrors.Errorf("failed to reconstruct bytes: %v", err)
+	}
+
+	count, ok := result.(uint32)
+	if !ok {
+		return 0, xerrors.Errorf("failed to cast result, wrong type %T", count)
+	}
+
+	return count, nil
 }
