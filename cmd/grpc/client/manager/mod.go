@@ -19,33 +19,27 @@ import (
 
 // NewManager returns a new initialized manager
 func NewManager(config utils.Config, opts []grpc.CallOption) Manager {
-
 	return Manager{
-		opts:   opts,
 		config: config,
+		opts:   opts,
 	}
 }
 
-// Manager ...
+// Manager is used to create connections to the servers.
 type Manager struct {
-	opts        []grpc.CallOption
-	config      utils.Config
-	connections map[string]*grpc.ClientConn
+	config utils.Config
+	opts   []grpc.CallOption
 }
 
-// Connect connects to the server from the configuration. It fills the
-// 'connections' map.
-func (m *Manager) Connect() error {
-	if m.connections != nil {
-		return xerrors.Errorf("'Connect' already called")
-	}
-
+// Connect connects to the server and returns an Actor that can query the
+// servers.
+func (m *Manager) Connect() (Actor, error) {
 	conns := make(map[string]*grpc.ClientConn)
 
 	// load servers certificates
 	creds, err := utils.LoadServersCertificates()
 	if err != nil {
-		return xerrors.Errorf("could not load servers certificates: %v", err)
+		return Actor{}, xerrors.Errorf("could not load servers certificates: %v", err)
 	}
 
 	for _, addr := range m.config.Addresses {
@@ -55,19 +49,26 @@ func (m *Manager) Connect() error {
 		conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds),
 			grpc.WithBlock())
 		if err != nil {
-			return xerrors.Errorf("did not connect to %s: %v", addr, err)
+			return Actor{}, xerrors.Errorf("did not connect to %s: %v", addr, err)
 		}
 
 		conns[addr] = conn
 	}
 
-	m.connections = conns
+	return Actor{
+		connections: conns,
+		opts:        m.opts,
+	}, nil
+}
 
-	return nil
+// Actor allows to query the servers.
+type Actor struct {
+	connections map[string]*grpc.ClientConn
+	opts        []grpc.CallOption
 }
 
 // GetKey perform a simple query by returning an email
-func (m *Manager) GetKey(id string, dbInfo database.Info, client *client.PIR) (string, error) {
+func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (string, error) {
 	t := time.Now()
 
 	// compute hash key for id
@@ -77,7 +78,7 @@ func (m *Manager) GetKey(id string, dbInfo database.Info, client *client.PIR) (s
 	// query given hash key
 	in := make([]byte, 4)
 	binary.BigEndian.PutUint32(in, uint32(hashKey))
-	queries, err := client.QueryBytes(in, len(m.connections))
+	queries, err := client.QueryBytes(in, len(a.connections))
 	if err != nil {
 		return "", xerrors.Errorf("error when executing query: %v", err)
 	}
@@ -88,13 +89,13 @@ func (m *Manager) GetKey(id string, dbInfo database.Info, client *client.PIR) (s
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(m.connections))
+	resCh := make(chan []byte, len(a.connections))
 	j := 0
 
-	for _, conn := range m.connections {
+	for _, conn := range a.connections {
 		wg.Add(1)
 		go func(j int, conn *grpc.ClientConn) {
-			resCh <- queryServer(subCtx, conn, m.opts, queries[j])
+			resCh <- queryServer(subCtx, conn, a.opts, queries[j])
 			wg.Done()
 		}(j, conn)
 		j++
@@ -140,19 +141,19 @@ func (m *Manager) GetKey(id string, dbInfo database.Info, client *client.PIR) (s
 }
 
 // GetDBInfos returns infos about the dbs.
-func (m *Manager) GetDBInfos() ([]database.Info, error) {
+func (a *Actor) GetDBInfos() ([]database.Info, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan database.Info, len(m.connections))
+	resCh := make(chan database.Info, len(a.connections))
 
-	for _, conn := range m.connections {
+	for _, conn := range a.connections {
 		wg.Add(1)
 		go func(conn *grpc.ClientConn) {
 			defer wg.Done()
 
-			info := queryDBInfo(ctx, conn, m.opts)
+			info := queryDBInfo(ctx, conn, a.opts)
 			resCh <- info
 		}(conn)
 	}
@@ -218,17 +219,17 @@ func queryServer(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOpt
 
 // RunQueries dispatch queries in parallel to all gRPC servers. It then combines
 // the answers.
-func (m *Manager) RunQueries(queries [][]byte) [][]byte {
+func (a *Actor) RunQueries(queries [][]byte) [][]byte {
 	subCtx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
 
 	wg := sync.WaitGroup{}
-	resCh := make(chan []byte, len(m.connections))
+	resCh := make(chan []byte, len(a.connections))
 	j := 0
-	for _, conn := range m.connections {
+	for _, conn := range a.connections {
 		wg.Add(1)
 		go func(j int, conn *grpc.ClientConn) {
-			resCh <- queryServer(subCtx, conn, m.opts, queries[j])
+			resCh <- queryServer(subCtx, conn, a.opts, queries[j])
 			wg.Done()
 		}(j, conn)
 		j++

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/si-co/vpir-code/cmd/grpc/client/manager"
@@ -15,6 +16,12 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 )
 
+var grpcOpts = []grpc.CallOption{
+	grpc.UseCompressor(gzip.Name),
+	grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
+	grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
+}
+
 // main start an interactive CLI to perform queries.
 func main() {
 	configPath := os.Getenv("VPIR_CONFIG")
@@ -25,6 +32,13 @@ func main() {
 	config, err := utils.LoadConfig(configPath)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
+	}
+
+	manager := manager.NewManager(*config, grpcOpts)
+
+	actor, err := manager.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect: %v", err)
 	}
 
 	// the initial questions: complex or simple query ?
@@ -46,13 +60,13 @@ func main() {
 
 		switch action {
 		case "Download a key":
-			err = downloadKey(*config)
+			err = downloadKey(actor)
 			if err != nil {
 				log.Fatalf("failed to download key: %v", err)
 			}
 
 		case "Get stats":
-			err = getStats(*config)
+			err = getStats(actor)
 			if err != nil {
 				log.Fatalf("failed to get stats: %v", err)
 			}
@@ -65,7 +79,7 @@ func main() {
 }
 
 // downloadKey performs a simple query on an email
-func downloadKey(config utils.Config) error {
+func downloadKey(actor manager.Actor) error {
 	prompt := &survey.Input{Message: "Enter the email"}
 
 	var email string
@@ -77,27 +91,14 @@ func downloadKey(config utils.Config) error {
 
 	fmt.Println("email is", email)
 
-	opts := []grpc.CallOption{
-		grpc.UseCompressor(gzip.Name),
-		grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
-		grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
-	}
-
-	manager := manager.NewManager(config, opts)
-
-	err = manager.Connect()
-	if err != nil {
-		return xerrors.Errorf("failed to connect: %v", err)
-	}
-
-	dbInfo, err := manager.GetDBInfos()
+	dbInfo, err := actor.GetDBInfos()
 	if err != nil {
 		return xerrors.Errorf("failed to get db info: %v", err)
 	}
 
 	client := client.NewPIR(utils.RandomPRG(), &dbInfo[0])
 
-	result, err := manager.GetKey(email, dbInfo[0], client)
+	result, err := actor.GetKey(email, dbInfo[0], client)
 	if err != nil {
 		return xerrors.Errorf("failed to get result: %v", err)
 	}
@@ -107,9 +108,9 @@ func downloadKey(config utils.Config) error {
 	return nil
 }
 
-func getStats(config utils.Config) error {
+func getStats(actor manager.Actor) error {
 	prompt := &survey.Select{
-		Message: "Kind of stat do you want ?",
+		Message: "What kind of stat do you want ?",
 		Options: []string{"Count emails", "Get everage lifetime"},
 		Default: "Count emails",
 	}
@@ -123,9 +124,9 @@ func getStats(config utils.Config) error {
 
 	switch answer {
 	case "Count emails":
-		err = countStats(config)
+		err = countStats(actor)
 		if err != nil {
-			log.Fatalf("failed to get stats email: %v", err)
+			xerrors.Errorf("failed to get stats email: %v", err)
 		}
 	case "Get everage lifetime":
 	}
@@ -133,7 +134,7 @@ func getStats(config utils.Config) error {
 	return nil
 }
 
-func countStats(config utils.Config) error {
+func countStats(actor manager.Actor) error {
 	prompt := &survey.Select{
 		Message: "What attribute do you want to count on ?",
 		Options: []string{"email", "algo", "creation"},
@@ -147,20 +148,71 @@ func countStats(config utils.Config) error {
 		return xerrors.Errorf("failed to ask: %v", err)
 	}
 
+	var clientQuery *query.ClientFSS
+	var queryString string
+
 	switch answer {
 	case "email":
-		err = getStatsEmail(config)
-		if err != nil {
-			log.Fatalf("failed to get stats email: %v", err)
-		}
+		clientQuery, queryString, err = getCountByEmailQuery()
 	case "algo":
+		clientQuery, queryString, err = getCountByAlgoQuery()
 	case "creation":
+		clientQuery, queryString, err = getCountByCreationQuery()
 	}
+
+	if err != nil {
+		return xerrors.Errorf("failed to get stats: %v", err)
+	}
+
+	count, err := executeCountQuery(clientQuery, actor)
+	if err != nil {
+		return xerrors.Errorf("failed to execute count query: %v, err")
+	}
+
+	var res bool
+	prompt2 := &survey.Input{
+		Message: fmt.Sprintf("Result of %s: %d\n. Type enter to continue.", queryString, count),
+	}
+
+	survey.AskOne(prompt2, &res)
 
 	return nil
 }
 
-func getStatsEmail(config utils.Config) error {
+func executeCountQuery(clientQuery *query.ClientFSS, actor manager.Actor) (uint32, error) {
+	in, err := clientQuery.Encode()
+	if err != nil {
+		return 0, xerrors.Errorf("failed to encode query: %v", err)
+	}
+
+	dbInfo, err := actor.GetDBInfos()
+	if err != nil {
+		return 0, xerrors.Errorf("failed to get db info: %v", err)
+	}
+
+	client := client.NewPredicateAPIR(utils.RandomPRG(), &dbInfo[0])
+
+	queries, err := client.QueryBytes(in, len(dbInfo))
+	if err != nil {
+		return 0, xerrors.Errorf("failed to query bytes: %v", err)
+	}
+
+	answers := actor.RunQueries(queries)
+
+	result, err := client.ReconstructBytes(answers)
+	if err != nil {
+		return 0, xerrors.Errorf("failed to reconstruct bytes: %v", err)
+	}
+
+	count, ok := result.(uint32)
+	if !ok {
+		return 0, xerrors.Errorf("failed to cast result, wrong type %T", count)
+	}
+
+	return count, nil
+}
+
+func getCountByEmailQuery() (*query.ClientFSS, string, error) {
 	var prompt survey.Prompt
 
 	prompt = &survey.Select{
@@ -173,7 +225,7 @@ func getStatsEmail(config utils.Config) error {
 
 	err := survey.AskOne(prompt, &position)
 	if err != nil {
-		return xerrors.Errorf("failed to ask: %v", err)
+		return nil, "", xerrors.Errorf("failed to ask: %v", err)
 	}
 
 	prompt = &survey.Input{Message: "Enter your query text"}
@@ -182,7 +234,7 @@ func getStatsEmail(config utils.Config) error {
 
 	err = survey.AskOne(prompt, &q)
 	if err != nil {
-		return xerrors.Errorf("failed to ask: %v", err)
+		return nil, "", xerrors.Errorf("failed to ask: %v", err)
 	}
 
 	fromStart, fromEnd := len(q), 0
@@ -199,55 +251,66 @@ func getStatsEmail(config utils.Config) error {
 	}
 
 	clientQuery := info.ToEmailClientFSS(q)
+	queryString := fmt.Sprintf("all emails that %s '%s'", position, q)
 
-	in, err := clientQuery.Encode()
+	return clientQuery, queryString, nil
+}
+
+func getCountByAlgoQuery() (*query.ClientFSS, string, error) {
+	var prompt survey.Prompt
+
+	prompt = &survey.Select{
+		Message: "Select the kind of algo",
+		Options: []string{"RSA", "ElGamal", "DSA", "ECDH", "ECDSA"},
+		Default: "RSA",
+	}
+
+	var algo string
+
+	err := survey.AskOne(prompt, &algo)
 	if err != nil {
-		return xerrors.Errorf("failed to encode query: %v", err)
+		return nil, "", xerrors.Errorf("failed to ask: %v", err)
 	}
 
-	opts := []grpc.CallOption{
-		grpc.UseCompressor(gzip.Name),
-		grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
-		grpc.MaxCallSendMsgSize(1024 * 1024 * 1024),
+	info := &query.Info{
+		Target: query.PubKeyAlgo,
 	}
 
-	manager := manager.NewManager(config, opts)
+	clientQuery := info.ToPKAClientFSS(algo)
+	queryString := fmt.Sprintf("all emails that uses the '%s' algorithm", algo)
 
-	err = manager.Connect()
+	return clientQuery, queryString, nil
+}
+
+func getCountByCreationQuery() (*query.ClientFSS, string, error) {
+	var prompt survey.Prompt
+
+	prompt = &survey.Input{Message: "Enter a year"}
+
+	var yearStr string
+
+	intValidator := func(ans interface{}) error {
+		str := ans.(string)
+
+		year, err := strconv.Atoi(str)
+		if err != nil || year < 0 {
+			return xerrors.Errorf("please enter a positive integer")
+		}
+
+		return nil
+	}
+
+	err := survey.AskOne(prompt, &yearStr, survey.WithValidator(intValidator))
 	if err != nil {
-		return xerrors.Errorf("failed to connect: %v", err)
+		return nil, "", xerrors.Errorf("failed to ask: %v", err)
 	}
 
-	dbInfo, err := manager.GetDBInfos()
-	if err != nil {
-		return xerrors.Errorf("failed to get db info: %v", err)
+	info := &query.Info{
+		Target: query.CreationTime,
 	}
 
-	client := client.NewPredicateAPIR(utils.RandomPRG(), &dbInfo[0])
+	clientQuery := info.ToCreationTimeClientFSS(yearStr)
+	queryString := fmt.Sprintf("all emails created before year '%s'", yearStr)
 
-	queries, err := client.QueryBytes(in, len(dbInfo))
-	if err != nil {
-		return xerrors.Errorf("failed to query bytes: %v", err)
-	}
-
-	answers := manager.RunQueries(queries)
-
-	result, err := client.ReconstructBytes(answers)
-	if err != nil {
-		return xerrors.Errorf("failed to reconstruct bytes: %v", err)
-	}
-
-	count, ok := result.(uint32)
-	if !ok {
-		return xerrors.Errorf("failed to cast result, wrong type %T", count)
-	}
-
-	var res bool
-	prompt = &survey.Input{
-		Message: fmt.Sprintf("Result of all emails that %s '%s': %d\n. Type enter to continue.", position, q, count),
-	}
-
-	survey.AskOne(prompt, &res)
-
-	return nil
+	return clientQuery, queryString, nil
 }
