@@ -34,25 +34,25 @@ type Manager struct {
 // Connect connects to the server and returns an Actor that can query the
 // servers.
 func (m *Manager) Connect() (Actor, error) {
-	servers := make(map[string]server)
+	servers := make([]server, len(m.config.Addresses))
 
 	// load servers certificates
 	creds, err := utils.LoadServersCertificates()
 	if err != nil {
-		return Actor{}, xerrors.Errorf("could not load servers certificates: %v", err)
+		return Actor{}, xerrors.Errorf("failed to load servers certificates: %v", err)
 	}
 
-	for _, addr := range m.config.Addresses {
+	for i, addr := range m.config.Addresses {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
 
 		conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds),
 			grpc.WithBlock())
 		if err != nil {
-			return Actor{}, xerrors.Errorf("did not connect to %s: %v", addr, err)
+			return Actor{}, xerrors.Errorf("failed to connect to %s: %v", addr, err)
 		}
 
-		servers[addr] = server{conn: conn, opts: m.opts}
+		servers[i] = server{conn: conn, opts: m.opts, addr: addr}
 	}
 
 	return Actor{
@@ -63,11 +63,11 @@ func (m *Manager) Connect() (Actor, error) {
 
 // Actor allows to perform operations on the servers.
 type Actor struct {
-	servers map[string]server
+	servers []server
 	opts    []grpc.CallOption
 }
 
-// GetKey perform a simple query that return a key from an email
+// GetKey performs a simple query that return a key from an email
 func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (string, error) {
 	t := time.Now()
 
@@ -78,10 +78,12 @@ func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (str
 	// query given hash key
 	in := make([]byte, 4)
 	binary.BigEndian.PutUint32(in, uint32(hashKey))
+
 	queries, err := client.QueryBytes(in, len(a.servers))
 	if err != nil {
 		return "", xerrors.Errorf("error when executing query: %v", err)
 	}
+
 	log.Printf("done with queries computation")
 
 	// send queries to servers
@@ -90,16 +92,15 @@ func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (str
 
 	wg := sync.WaitGroup{}
 	resCh := make(chan []byte, len(a.servers))
-	j := 0
 
-	for _, srv := range a.servers {
+	for i, srv := range a.servers {
 		wg.Add(1)
-		go func(j int, srv server) {
-			resCh <- srv.query(ctx, queries[j])
+		go func(srv server, query []byte) {
+			resCh <- srv.query(ctx, query)
 			wg.Done()
-		}(j, srv)
-		j++
+		}(srv, queries[i])
 	}
+
 	wg.Wait()
 	close(resCh)
 
@@ -190,15 +191,15 @@ func (a *Actor) RunQueries(queries [][]byte) [][]byte {
 
 	wg := sync.WaitGroup{}
 	resCh := make(chan []byte, len(a.servers))
-	j := 0
-	for _, srv := range a.servers {
+
+	for i, srv := range a.servers {
 		wg.Add(1)
-		go func(j int, srv server) {
-			resCh <- srv.query(ctx, queries[j])
+		go func(srv server, query []byte) {
+			resCh <- srv.query(ctx, query)
 			wg.Done()
-		}(j, srv)
-		j++
+		}(srv, queries[i])
 	}
+
 	wg.Wait()
 	close(resCh)
 
@@ -213,6 +214,7 @@ func (a *Actor) RunQueries(queries [][]byte) [][]byte {
 
 // server represents a remote server
 type server struct {
+	addr string
 	conn *grpc.ClientConn
 	opts []grpc.CallOption
 }

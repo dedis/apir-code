@@ -125,7 +125,7 @@ func getStats(actor manager.Actor) error {
 	case "✌️ Count emails":
 		err = countStats(actor)
 		if err != nil {
-			return xerrors.Errorf("failed to get stats email: %v", err)
+			return xerrors.Errorf("failed to perform count stats: %v", err)
 		}
 	case "📆 Get average lifetime based on email":
 		err = getAvg(actor)
@@ -366,7 +366,7 @@ func executeStatsQuery(clientQuery *query.ClientFSS, actor manager.Actor) (uint3
 
 	count, ok := result.(uint32)
 	if !ok {
-		return 0, xerrors.Errorf("failed to cast result, wrong type %T", count)
+		return 0, xerrors.Errorf("failed to cast result, wrong type %T", result)
 	}
 
 	return count, nil
