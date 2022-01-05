@@ -3,6 +3,7 @@ module github.com/si-co/vpir-code
 go 1.16
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/BurntSushi/toml v0.3.1
 	github.com/bwesterb/go-ristretto v1.2.0 // indirect
 	github.com/cloudflare/circl v1.0.1-0.20210315192536-3977848c88c6
