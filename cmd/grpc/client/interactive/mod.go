@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/si-co/vpir-code/cmd/grpc/client/manager"
@@ -16,6 +18,42 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 )
 
+const keyNotFoundErr string = "no key with the given email id is found"
+
+var staticConfig = true
+
+var staticPointConfig = &utils.Config{
+	Servers: map[string]utils.Server{
+		"0": {
+			IP:   "128.179.33.63",
+			Port: 50050,
+		},
+		"1": {
+			IP:   "128.179.33.75",
+			Port: 50051,
+		},
+	},
+	Addresses: []string{
+		"128.179.33.63:50050", "128.179.33.75:50051",
+	},
+}
+
+var staticComplexConfig = &utils.Config{
+	Servers: map[string]utils.Server{
+		"0": {
+			IP:   "128.179.33.63",
+			Port: 50040,
+		},
+		"1": {
+			IP:   "128.179.33.75",
+			Port: 50041,
+		},
+	},
+	Addresses: []string{
+		"128.179.33.63:50040", "128.179.33.75:50041",
+	},
+}
+
 var grpcOpts = []grpc.CallOption{
 	grpc.UseCompressor(gzip.Name),
 	grpc.MaxCallRecvMsgSize(1024 * 1024 * 1024),
@@ -24,21 +62,26 @@ var grpcOpts = []grpc.CallOption{
 
 // main starts an interactive CLI to perform queries.
 func main() {
-	configPath := os.Getenv("VPIR_CONFIG")
-	if configPath == "" {
-		log.Fatalf("Please provide VPIR_CONFIG as env variable")
+	log.SetOutput(io.Discard)
+
+	pointManager, err := loadPointManager()
+	if err != nil {
+		log.Fatalf("failed to load point manager: %v", err)
 	}
 
-	config, err := utils.LoadConfig(configPath)
+	complexManager, err := loadComplexManager()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		log.Fatalf("failed to load complex manager: %v", err)
 	}
 
-	manager := manager.NewManager(*config, grpcOpts)
-
-	actor, err := manager.Connect()
+	pointActor, err := pointManager.Connect()
 	if err != nil {
-		log.Fatalf("failed to connect: %v", err)
+		log.Fatalf("failed to connect point manager: %v", err)
+	}
+
+	complexActor, err := complexManager.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect complex manager: %v", err)
 	}
 
 	// the initial questions: get a key or some stats ?
@@ -59,13 +102,13 @@ func main() {
 
 		switch action {
 		case "📦 Download a key":
-			err = downloadKey(actor)
+			err = downloadKey(pointActor)
 			if err != nil {
 				log.Fatalf("failed to download key: %v", err)
 			}
 
 		case "🔎 Get stats":
-			err = getStats(actor)
+			err = getStats(complexActor)
 			if err != nil {
 				log.Fatalf("failed to get stats: %v", err)
 			}
@@ -75,6 +118,54 @@ func main() {
 			os.Exit(0)
 		}
 	}
+}
+
+func loadPointManager() (manager.Manager, error) {
+	configPath := os.Getenv("VPIR_CONFIG_POINT")
+	if configPath == "" && !staticConfig {
+		return manager.Manager{}, xerrors.New("Please provide " +
+			"VPIR_CONFIG_POINT as env variable")
+	}
+
+	var config *utils.Config
+	var err error
+
+	if staticConfig {
+		config = staticPointConfig
+	} else {
+		config, err = utils.LoadConfig(configPath)
+		if err != nil {
+			return manager.Manager{}, xerrors.Errorf("failed to load config: %v", err)
+		}
+	}
+
+	manager := manager.NewManager(*config, grpcOpts)
+
+	return manager, nil
+}
+
+func loadComplexManager() (manager.Manager, error) {
+	configPath := os.Getenv("VPIR_CONFIG_COMPLEX")
+	if configPath == "" && !staticConfig {
+		return manager.Manager{}, xerrors.New("Please provide " +
+			"VPIR_CONFIG_COMPLEX as env variable")
+	}
+
+	var config *utils.Config
+	var err error
+
+	if staticConfig {
+		config = staticComplexConfig
+	} else {
+		config, err = utils.LoadConfig(configPath)
+		if err != nil {
+			return manager.Manager{}, xerrors.Errorf("failed to load config: %v", err)
+		}
+	}
+
+	manager := manager.NewManager(*config, grpcOpts)
+
+	return manager, nil
 }
 
 // downloadKey performs a simple query on an email
@@ -99,10 +190,16 @@ func downloadKey(actor manager.Actor) error {
 
 	result, err := actor.GetKey(email, dbInfo[0], client)
 	if err != nil {
-		return xerrors.Errorf("failed to get result: %v", err)
+		if strings.Contains(err.Error(), keyNotFoundErr) {
+			fmt.Println("key not found in block")
+		} else {
+			return xerrors.Errorf("failed to get result: %v", err)
+		}
+	} else {
+		fmt.Println("Result:", result)
 	}
 
-	fmt.Println("Result:", result)
+	fmt.Println("done.") // for some reason, need an additional print
 
 	return nil
 }
