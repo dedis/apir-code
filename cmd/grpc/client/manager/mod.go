@@ -132,7 +132,7 @@ func (a *Actor) GetKey(id string, dbInfo database.Info, client *client.PIR) (str
 		return "", xerrors.Errorf("error armor-encoding the key: %v", err)
 	}
 
-	fmt.Println(armored)
+	// fmt.Println(armored)
 
 	elapsedTime := time.Since(t)
 
