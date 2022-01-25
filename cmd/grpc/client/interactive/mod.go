@@ -271,7 +271,7 @@ func countStats(actor manager.Actor) error {
 
 	var res bool
 	prompt2 := &survey.Input{
-		Message: fmt.Sprintf("Result of %s: %d\n. Type enter to continue.", queryString, count),
+		Message: fmt.Sprintf("Result of %s: %d.\n Type enter to continue.", queryString, count),
 	}
 
 	survey.AskOne(prompt2, &res)
@@ -427,7 +427,7 @@ func getAvg(actor manager.Actor) error {
 
 	var res bool
 	prompt2 := &survey.Input{
-		Message: fmt.Sprintf("Result of %s: %d\n. Type enter to continue.", queryString, count),
+		Message: fmt.Sprintf("Result of %s: %d.\n Type enter to continue.", queryString, count),
 	}
 
 	survey.AskOne(prompt2, &res)
