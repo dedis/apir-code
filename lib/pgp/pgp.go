@@ -266,7 +266,7 @@ func RecoverKeyFromBlock(block []byte, email string) (*openpgp.Entity, error) {
 func ArmorKey(entity *openpgp.Entity) (string, error) {
 	var err error
 	buf := new(bytes.Buffer)
-	headers := map[string]string{"Comment": "Retrieved with VPIR"}
+	headers := map[string]string{"Comment": "Retrieved with Authenticated PIR"}
 	arm, err := armor.Encode(buf, openpgp.PublicKeyType, headers)
 	if err != nil {
 		return "", err
