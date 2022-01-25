@@ -50,7 +50,6 @@ type flags struct {
 	experiment bool
 	cores      int
 
-	demo       bool
 	listenAddr string
 
 	scheme    string
@@ -103,21 +102,16 @@ func newLocalClient() *localClient {
 func main() {
 	lc := newLocalClient()
 
-	if lc.flags.demo {
-		lc.runDemo()
-		return
-	} else {
-		err := lc.connectToServers()
-		defer lc.closeConnections()
+	err := lc.connectToServers()
+	defer lc.closeConnections()
 
-		if err != nil {
-			log.Fatal(err)
-		}
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		_, err = lc.exec()
-		if err != nil {
-			log.Fatal(err)
-		}
+	_, err = lc.exec()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	os.Exit(0)
@@ -475,10 +469,6 @@ func parseFlags() *flags {
 	// experiment flags
 	flag.BoolVar(&f.experiment, "experiment", false, "run for experiments")
 	flag.IntVar(&f.cores, "cores", -1, "num of cores used for experiment")
-
-	// demo flags
-	flag.BoolVar(&f.demo, "demo", false, "runs as a demo, which exposes a REST API")
-	flag.StringVar(&f.listenAddr, "listen-addr", "", "demo listen address")
 
 	// scheme flags
 	flag.StringVar(&f.scheme, "scheme", "", "scheme to use: it, dpf or pit-it, pir-dpf")

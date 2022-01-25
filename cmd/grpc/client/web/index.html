@@ -87,7 +87,7 @@
 
                     <form class="sub-form" action="javascript:void(0);" onSubmit="countByAlgo(this)">
                         <div class="row">
-                            <input type="radio" id="count-algo-rsa" name="algo-type" value="rsa">
+                            <input type="radio" id="count-algo-rsa" name="algo-type" value="RSA">
                             <label for="count-algo-rsa">RSA</label>
                         </div>
 
@@ -125,10 +125,10 @@
                     <label for="count-timestamp">By timestamp</label>
 
                     <form class="sub-form" action="javascript:void(0);" onSubmit="countByTimestamp(this)">
-                        <div class="row-form">
+                        <!--<div class="row-form">
                             <label for="count-timestamp-month">Month (1-12)</label>
                             <input type="number" id="count-timestamp-month" value="1" min="1" max="12" name="month">
-                        </div>
+                        </div>-->
 
                         <div class="row-form">
                             <label for="count-timestamp-year">Year</label>
@@ -237,8 +237,8 @@
         }
 
         function countByTimestamp(f) {
-            const day = 1
-            const month = f.elements.namedItem("month").value
+            //const day = 1
+            //const month = f.elements.namedItem("month").value
             const year = f.elements.namedItem("year").value
 
             const result = document.getElementById("count-timestamp-result")
@@ -250,7 +250,7 @@
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: `day=${day}&month=${month}&year=${year}`,
+                body: `year=${year}`,
             }).then(data => {
                 if (!data.ok) {
                     return Promise.all([Promise.resolve(`error: ${data.status} ${data.statusText}`), data.text()]);
