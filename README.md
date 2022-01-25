@@ -1,9 +1,14 @@
-# Verifiable PIR
+# Authenticated PIR
 This repository contains the code for the authenticated PIR schemes and the code
 for the proof of concept application, Keyd. 
-Keyd is a privacy-preserving PGP public keys directory based on authenticated PIR.
+Keyd is a privacy-preserving PGP public keys directory based on multi-server
+authenticated PIR.
 Keyd enable a client to privately retrieve a PGP key given an email address and 
 to private compute several statistics over the set of PGP keys.
+
+To try Keyd download the Go client with
+
+or try the website
 
 <!---
 ### Verifiable PIR taxonomy
