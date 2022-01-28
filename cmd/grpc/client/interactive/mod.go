@@ -191,7 +191,7 @@ func downloadKey(actor manager.Actor) error {
 	result, err := actor.GetKey(email, dbInfo[0], client)
 	if err != nil {
 		if strings.Contains(err.Error(), keyNotFoundErr) {
-			fmt.Println("key not found in block")
+			fmt.Println("No key is found for the given email")
 		} else {
 			return xerrors.Errorf("failed to get result: %v", err)
 		}
