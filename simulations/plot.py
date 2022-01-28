@@ -410,8 +410,8 @@ def plotRealComplex():
             print(t, "&", bwUnauth, "&", bw, "\\\\")
         
 def plotReal():
-    schemes = ["email_complexVPIR"]
-    labels = ["Atomic", "Merkle", "PIR"]
+    schemes = ["merkle-dpf", "pir-dpf"]
+    labels = ["Authenticated", "Unauthenticated"]
     dbSizes = [12.485642 ,11.650396 ,11.907099,11.122669,11.702634 ,10.918602]
 
     fig, ax = plt.subplots()
@@ -450,10 +450,10 @@ def plotReal():
         
         if i % 2 == 0:
             #print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
-            print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", round(dbSizes[i], 2), "&", end=" ")
+            print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", end=" ")
         else:
             #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
-            print(round(worstLatency, 2), "&", round(dbSizes[i], 2), "\\\\") 
+            print(round(worstLatency, 2), "\\\\") 
 
 
 def print_latex_table_separate(results, numApproaches, get_printable_size):
