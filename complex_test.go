@@ -220,7 +220,7 @@ func fixedAndQueryMatch(db *database.DB) (interface{}, *query.ClientFSS) {
 }
 
 func fixedEmailMatch(db *database.DB) (string, *query.ClientFSS) {
-	match := "epflepflepflepflepflepflepflepfl"
+	match := "testtesttesttesttest"
 
 	for i := 0; i < 50; i++ {
 		randomDB.KeysInfo[i].UserId.Email = match
