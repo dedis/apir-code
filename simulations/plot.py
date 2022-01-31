@@ -53,7 +53,8 @@ def plotPoint():
                 color='black', 
                 marker=markers[int(i / (len(schemes) / 2))],
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))]
+                label=schemeLabels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
         )
         axs[1].plot(
                 [x/GiB for x in sorted(stats.keys())], 
@@ -61,7 +62,8 @@ def plotPoint():
                 color='black', 
                 marker=markers[int(i / (len(schemes) / 2))],
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))]
+                label=schemeLabels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
         )
 
     ratioCPU = [cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]
@@ -177,7 +179,7 @@ def plotComplexBars():
     ax.axhline(y = 1, color ='black', linestyle = '--')
 
     # cosmetics
-    ax.set_ylabel('Relative overhead between \n authenticated and \n unauthenticated PIR')
+    ax.set_ylabel('Relative overhead between \n authenticated and unauthenticated PIR')
     ax.set_xticks(x, [x for x in sorted(stats.keys())])
     ax.set_xlabel('Function-secret-sharing input size [bytes]')
     ax.set_ylim(bottom=0.9)
