@@ -177,7 +177,7 @@ def plotComplexBars():
     ax.axhline(y = 1, color ='black', linestyle = '--')
 
     # cosmetics
-    ax.set_ylabel('Relative overhead between \n authenticated and unauthenticated PIR')
+    ax.set_ylabel('Relative overhead between \n authenticated and \n unauthenticated PIR')
     ax.set_xticks(x, [x for x in sorted(stats.keys())])
     ax.set_xlabel('Function-secret-sharing input size [bytes]')
     ax.set_ylim(bottom=0.9)
