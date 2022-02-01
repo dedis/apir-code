@@ -142,12 +142,7 @@ dbSizesLoop:
 				dbBytes = database.CreateRandomBytes(dbPRG, dbLen, nRows, blockLen)
 			}
 		case "fss":
-			// TODO: update config or db creation to match dbLen params, or vice versa
-			// TODO (Simone): I would fix the number of identifiers
-			// here to e.g. 100k, instead of using the numBlocks
-			// variable
 			numIdenfitiers := 100000
-			//db, err = database.CreateRandomKeysDB(dbPRG, numBlocks)
 			db, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
 			if err != nil {
 				panic(err)

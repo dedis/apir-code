@@ -93,22 +93,23 @@ def meanFromDict(data):
 
 def prepare_for_latex():
     # parameters for Latex
-    fig_width = 400
+    fig_width = 241.02039
     fig_width, fig_height = set_size(fig_width)
 
     params = {'backend': 'ps', 
               #'text.latex.preamble': [r'\usepackage{gensymb}', r'\usepackage{sansmath}', r'\sansmath'],
               #'text.latex.preamble': [r'\usepackage{mathptmx}'],
-              'axes.labelsize': 12,
-              'axes.titlesize': 12,
-              'font.size': 12,
-              'legend.fontsize': 10,
-              'lines.markersize': 8,
-              'xtick.labelsize': 12,
-              'ytick.labelsize': 12,
+              'axes.labelsize': 8,
+              'axes.titlesize': 8,
+              'font.size': 8,
+              'legend.fontsize': 8,
+              'lines.markersize': 5,
+              'xtick.labelsize': 8,
+              'ytick.labelsize': 8,
               'text.usetex': True,
               'figure.figsize': [fig_width, fig_height],
               'font.family': 'serif',
+              'font.serif': 'Times',
               'pgf.texsystem': 'pdflatex',
               'pgf.rcfonts': False
               }

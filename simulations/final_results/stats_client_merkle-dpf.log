@@ -1,0 +1,640 @@
+[Client] 2021/04/15 17:19:56 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:19:56 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:19:56 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d1580), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:19:56 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:19:56 done with queries computation
+[Client] 2021/04/15 17:19:59 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:19:59 query size in bytes 249
+[Client] 2021/04/15 17:19:59 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:19:59 query size in bytes 249
+[Client] 2021/04/15 17:19:59 done with block reconstruction
+[Client] 2021/04/15 17:19:59 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:19:59 stats,1,498,2.894144
+Wall-clock time to retrieve the key: 2.894144241s
+[Client] 2021/04/15 17:20:04 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:04 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:04 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00029e220), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:04 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:04 done with queries computation
+[Client] 2021/04/15 17:20:05 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:05 query size in bytes 249
+[Client] 2021/04/15 17:20:05 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:05 query size in bytes 249
+[Client] 2021/04/15 17:20:05 done with block reconstruction
+[Client] 2021/04/15 17:20:05 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:05 stats,1,498,1.112404
+Wall-clock time to retrieve the key: 1.112404303s
+[Client] 2021/04/15 17:20:10 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:10 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:10 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d1340), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:10 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:10 done with queries computation
+[Client] 2021/04/15 17:20:11 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:11 query size in bytes 249
+[Client] 2021/04/15 17:20:12 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:12 query size in bytes 249
+[Client] 2021/04/15 17:20:12 done with block reconstruction
+[Client] 2021/04/15 17:20:12 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:12 stats,1,498,1.123163
+Wall-clock time to retrieve the key: 1.123163276s
+[Client] 2021/04/15 17:20:17 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:17 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:17 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000163360), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:17 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:17 done with queries computation
+[Client] 2021/04/15 17:20:17 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:17 query size in bytes 249
+[Client] 2021/04/15 17:20:18 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:18 query size in bytes 249
+[Client] 2021/04/15 17:20:18 done with block reconstruction
+[Client] 2021/04/15 17:20:18 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:18 stats,1,498,1.206991
+Wall-clock time to retrieve the key: 1.206991274s
+[Client] 2021/04/15 17:20:23 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:23 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:23 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00030a320), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:23 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:23 done with queries computation
+[Client] 2021/04/15 17:20:24 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:24 query size in bytes 249
+[Client] 2021/04/15 17:20:24 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:24 query size in bytes 249
+[Client] 2021/04/15 17:20:24 done with block reconstruction
+[Client] 2021/04/15 17:20:24 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:24 stats,1,498,1.109086
+Wall-clock time to retrieve the key: 1.109085737s
+[Client] 2021/04/15 17:20:29 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:29 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:29 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00030a380), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:29 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:29 done with queries computation
+[Client] 2021/04/15 17:20:30 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:30 query size in bytes 249
+[Client] 2021/04/15 17:20:30 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:30 query size in bytes 249
+[Client] 2021/04/15 17:20:30 done with block reconstruction
+[Client] 2021/04/15 17:20:30 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:30 stats,1,498,1.120446
+Wall-clock time to retrieve the key: 1.120446377s
+[Client] 2021/04/15 17:20:35 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:35 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:35 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000163360), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:35 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:35 done with queries computation
+[Client] 2021/04/15 17:20:36 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:36 query size in bytes 249
+[Client] 2021/04/15 17:20:36 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:36 query size in bytes 249
+[Client] 2021/04/15 17:20:36 done with block reconstruction
+[Client] 2021/04/15 17:20:36 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:36 stats,1,498,1.093408
+Wall-clock time to retrieve the key: 1.093407777s
+[Client] 2021/04/15 17:20:41 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:41 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:41 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d13c0), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:41 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:41 done with queries computation
+[Client] 2021/04/15 17:20:42 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:42 query size in bytes 249
+[Client] 2021/04/15 17:20:42 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:42 query size in bytes 249
+[Client] 2021/04/15 17:20:42 done with block reconstruction
+[Client] 2021/04/15 17:20:42 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:42 stats,1,498,1.086957
+Wall-clock time to retrieve the key: 1.086957203s
+[Client] 2021/04/15 17:20:47 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:47 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:47 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d0480), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:47 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:47 done with queries computation
+[Client] 2021/04/15 17:20:48 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:48 query size in bytes 249
+[Client] 2021/04/15 17:20:48 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:48 query size in bytes 249
+[Client] 2021/04/15 17:20:48 done with block reconstruction
+[Client] 2021/04/15 17:20:48 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:48 stats,1,498,1.100133
+Wall-clock time to retrieve the key: 1.100133171s
+[Client] 2021/04/15 17:20:53 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:53 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:53 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00031a240), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:53 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:53 done with queries computation
+[Client] 2021/04/15 17:20:54 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:54 query size in bytes 249
+[Client] 2021/04/15 17:20:54 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:54 query size in bytes 249
+[Client] 2021/04/15 17:20:54 done with block reconstruction
+[Client] 2021/04/15 17:20:54 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:20:54 stats,1,498,1.011210
+Wall-clock time to retrieve the key: 1.011210488s
+[Client] 2021/04/15 17:20:59 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:20:59 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:20:59 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00059e080), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:20:59 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:20:59 done with queries computation
+[Client] 2021/04/15 17:21:00 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:00 query size in bytes 249
+[Client] 2021/04/15 17:21:01 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:01 query size in bytes 249
+[Client] 2021/04/15 17:21:01 done with block reconstruction
+[Client] 2021/04/15 17:21:01 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:01 stats,1,498,1.079540
+Wall-clock time to retrieve the key: 1.079540066s
+[Client] 2021/04/15 17:21:06 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:06 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:06 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000390100), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:06 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:06 done with queries computation
+[Client] 2021/04/15 17:21:06 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:06 query size in bytes 249
+[Client] 2021/04/15 17:21:07 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:07 query size in bytes 249
+[Client] 2021/04/15 17:21:07 done with block reconstruction
+[Client] 2021/04/15 17:21:07 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:07 stats,1,498,1.209285
+Wall-clock time to retrieve the key: 1.209285225s
+[Client] 2021/04/15 17:21:12 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:12 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:12 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00011e180), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:12 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:12 done with queries computation
+[Client] 2021/04/15 17:21:13 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:13 query size in bytes 249
+[Client] 2021/04/15 17:21:13 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:13 query size in bytes 249
+[Client] 2021/04/15 17:21:13 done with block reconstruction
+[Client] 2021/04/15 17:21:13 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:13 stats,1,498,1.099535
+Wall-clock time to retrieve the key: 1.099534597s
+[Client] 2021/04/15 17:21:18 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:18 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:18 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0002ac260), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:18 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:18 done with queries computation
+[Client] 2021/04/15 17:21:19 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:19 query size in bytes 249
+[Client] 2021/04/15 17:21:19 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:19 query size in bytes 249
+[Client] 2021/04/15 17:21:19 done with block reconstruction
+[Client] 2021/04/15 17:21:19 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:19 stats,1,498,1.055288
+Wall-clock time to retrieve the key: 1.055287986s
+[Client] 2021/04/15 17:21:24 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:24 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:24 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00011e240), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:24 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:24 done with queries computation
+[Client] 2021/04/15 17:21:25 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:25 query size in bytes 249
+[Client] 2021/04/15 17:21:25 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:25 query size in bytes 249
+[Client] 2021/04/15 17:21:25 done with block reconstruction
+[Client] 2021/04/15 17:21:25 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:25 stats,1,498,1.114226
+Wall-clock time to retrieve the key: 1.114225935s
+[Client] 2021/04/15 17:21:30 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:30 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:30 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000163460), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:30 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:30 done with queries computation
+[Client] 2021/04/15 17:21:31 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:31 query size in bytes 249
+[Client] 2021/04/15 17:21:31 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:31 query size in bytes 249
+[Client] 2021/04/15 17:21:31 done with block reconstruction
+[Client] 2021/04/15 17:21:31 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:31 stats,1,498,1.054920
+Wall-clock time to retrieve the key: 1.05492028s
+[Client] 2021/04/15 17:21:36 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:36 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:36 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000163480), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:36 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:36 done with queries computation
+[Client] 2021/04/15 17:21:37 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:37 query size in bytes 249
+[Client] 2021/04/15 17:21:37 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:37 query size in bytes 249
+[Client] 2021/04/15 17:21:37 done with block reconstruction
+[Client] 2021/04/15 17:21:37 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:37 stats,1,498,1.188346
+Wall-clock time to retrieve the key: 1.188345679s
+[Client] 2021/04/15 17:21:42 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:42 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:42 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000d14a0), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:42 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:42 done with queries computation
+[Client] 2021/04/15 17:21:43 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:43 query size in bytes 249
+[Client] 2021/04/15 17:21:43 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:43 query size in bytes 249
+[Client] 2021/04/15 17:21:43 done with block reconstruction
+[Client] 2021/04/15 17:21:43 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:43 stats,1,498,1.071548
+Wall-clock time to retrieve the key: 1.071548055s
+[Client] 2021/04/15 17:21:48 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:48 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:48 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00030a360), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:48 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:48 done with queries computation
+[Client] 2021/04/15 17:21:49 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:49 query size in bytes 249
+[Client] 2021/04/15 17:21:50 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:50 query size in bytes 249
+[Client] 2021/04/15 17:21:50 done with block reconstruction
+[Client] 2021/04/15 17:21:50 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:50 stats,1,498,1.113263
+Wall-clock time to retrieve the key: 1.113263462s
+[Client] 2021/04/15 17:21:55 sent databaseInfo request to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:55 sent databaseInfo request to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:55 databaseInfo: &database.Info{NumRows:1, NumColumns:355716, BlockSize:33575, PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc00029e3a0), DataEmbedding:(*database.DataEmbedding)(nil), LatParams:(*bfv.Parameters)(nil)}
+[Client] 2021/04/15 17:21:55 id: alex.braulio@varidi.com, hashKey: 248559
+[Client] 2021/04/15 17:21:55 done with queries computation
+[Client] 2021/04/15 17:21:56 sent query to 10.90.36.39:50051
+[Client] 2021/04/15 17:21:56 query size in bytes 249
+[Client] 2021/04/15 17:21:56 sent query to 10.90.36.38:50050
+[Client] 2021/04/15 17:21:56 query size in bytes 249
+[Client] 2021/04/15 17:21:56 done with block reconstruction
+[Client] 2021/04/15 17:21:56 PGP key retrieved from block
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Retrieved with VPIR
+
+xsBNBFvpyEwBCACwnbagSMWW6QMipo7nn0igJ4G5FNHtfz2AcRgB+JQGVh1B/DMm
+JX4iWz/IGppRnNFZR+UtMJNIXdEysCT50ynCS3b84qW5/6mciPBf/zWx3lVi/zK7
+DeuShUJP9C5730fjJuFOWgvnDs7Rw2ZPgqnPVep9JpQiNH4/xB3DcRLR3zuD6MPY
+3l0EPMqGCS1fs3ZBXi+OkGrE25Olm6+gBBwRM80UHY42ck8ftPGOuX+BeuuZC/DS
+EWYwVPKSSEdERIX7fes+SUk8BZoNuWD0ePhT9tVn0G/a0eVgciuDkGrDc4JymjKG
+dKgeTu9pjxBT55JeQ/fr3YhDyqIKYn5CyH1LABEBAAHNJkFsZXggQnJhdWxpbyA8
+YWxleC5icmF1bGlvQHZhcmlkaS5jb20+wsCUBBMBCAA+FiEEn0f4635JJda7Wpyx
++P2NKP2TF0cFAlvpyEwCGwMFCQPDy/QFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AA
+CgkQ+P2NKP2TF0fingf/TmSTfN/Xg+P9dKSEKMSfh0iVW9zOT2iJssC+Me4V1Z2w
+VTxDA6cwm1xt/Np0wLtKyRGu2/IqgUzyD3DoVPmUsy00YbWhUOT2Ty/S3i+G5A+K
+FPxtZlrMSlBBYogUWqDnuwqTQwoP2IWRG6oMEZVB6h0Fy/WrfTURTbznkxeAwYQj
+OP3ydiHrid98djLEuuf1huNrdYksr2UELng3zRQvRgmxetYJd7FQpHfACHC/ukCo
+xIuEKsLM3iKA2hDBDjdIAcdzx47M6px4HpHLAHEE4o/xjl3V1nPfKS8bp8BrriLp
+lQSkVXMLj8OHbA2v5UBnNQ/s3zgG/iWNpgi7zUQSsw==
+=lkY6
+-----END PGP PUBLIC KEY BLOCK-----
+[Client] 2021/04/15 17:21:56 stats,1,498,1.105948
+Wall-clock time to retrieve the key: 1.105947632s

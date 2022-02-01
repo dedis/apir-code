@@ -53,7 +53,8 @@ def plotPoint():
                 color='black', 
                 marker=markers[int(i / (len(schemes) / 2))],
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))]
+                label=schemeLabels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
         )
         axs[1].plot(
                 [x/GiB for x in sorted(stats.keys())], 
@@ -61,7 +62,8 @@ def plotPoint():
                 color='black', 
                 marker=markers[int(i / (len(schemes) / 2))],
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))]
+                label=schemeLabels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
         )
 
     ratioCPU = [cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]
@@ -410,8 +412,8 @@ def plotRealComplex():
             print(t, "&", bwUnauth, "&", bw, "\\\\")
         
 def plotReal():
-    schemes = ["email_complexVPIR"]
-    labels = ["Atomic", "Merkle", "PIR"]
+    schemes = ["merkle-dpf", "pir-dpf"]
+    labels = ["Authenticated", "Unauthenticated"]
     dbSizes = [12.485642 ,11.650396 ,11.907099,11.122669,11.702634 ,10.918602]
 
     fig, ax = plt.subplots()
@@ -450,10 +452,10 @@ def plotReal():
         
         if i % 2 == 0:
             #print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
-            print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", round(dbSizes[i], 2), "&", end=" ")
+            print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", end=" ")
         else:
             #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
-            print(round(worstLatency, 2), "&", round(dbSizes[i], 2), "\\\\") 
+            print(round(worstLatency, 2), "\\\\") 
 
 
 def print_latex_table_separate(results, numApproaches, get_printable_size):
