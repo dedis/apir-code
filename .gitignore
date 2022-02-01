@@ -26,6 +26,7 @@ cmd/grpc/client/client
 cmd/grpc/server/server
 cmd/aws/client/client
 cmd/aws/server/server
+cmd/grpc/client/interactive/interactive
 data/parser
 
 # log files
