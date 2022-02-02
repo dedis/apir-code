@@ -1,4 +1,7 @@
 # Authenticated PIR
+**WARNING**: This software is **not** production-ready and is full of security
+vulnerabilities.
+
 This repository contains the code for multi-server and
 single-server authenticated PIR schemes and the code
 for the proof of concept application, Keyd.
@@ -7,76 +10,48 @@ authenticated PIR.
 Keyd enable a client to privately retrieve a PGP key given an email address and
 to private compute several statistics over the set of PGP keys.
 
-<!---
-### Verifiable PIR taxonomy
-The repository contains different verifiable PIR schemes. Keyd will be based
-either on the multi-bit DPF-based scheme or on the multi-bit matrix-based
-scheme. These are called `dpf` and `it` schemes in the code, respectively. In
-particular, both [lib/client](lib/client) and [lib/server](lib/server) contain
-files `dpf.go` and `it.go` which contains the logic for the verifiable PIR
-schemes on which we build Keyd.
+# Keyd
 
-### Keyd workflow
-Keyd works with a client and two servers. The input of the system is an email
-address and the output is the public PGP key of the given email address.
-The client client gets the email address and hashes is to identify the index of
-the entry to be retrieved using the verifiable PIR scheme. Several email
-addresses map to the same database entry (which is in fact a column of field
-elements encoding PGP public keys). The client computes the verifiable PIR
-queries using the index and sends the queries to the servers. For this, the
-method `QueryBytes` (implemented by both DPF-based and matrix-based PIR) is
-used. Upon receiving a query, the server compute the appropriate answer using
-the `AnswerBytes` method and send the encoded answer to the client. 
-Upon receiving the two answers the client uses the `ReconstructBytes` function
-to check the correctness of the retrieved answers and reconstruct the database
-entry. Finally, the client scans all the keys in the reconstructed entry and
-returns the correct key with respect to the initial email address.
+## WARNING
+The original Go client and this [website](https://keyd.org/) are **not** production-ready software
+and they are full of security vulnerabilities.
+In particular, the queries issued from this website are sent to the servers in plaintext.
+The queries sent from the original Go client use hard-coded secret keys
+available on Github and
+should **not** be considered as private.
+The original Go client and this website are only a proof-of-concept for the sake
+of demonstrating the performance of Keyd and they should **not** be used for
+security-critical applications.
 
-### Code organization
-The [lib](lib) folder is organized as follows.
-  * [lib/client](lib/client): contains all the logic for the client operations
-    in the different (verifiable) PIR schemes. The file
-    [lib/client/client.go](lib/client/client.go) contains the definition of the
-    Client interface and general functions used to implement the client for
-    different schemes. The other files contains the types and functions specific
-    to each scheme.
-  * [lib/constants](lib/constants): defines the constant used by the schemes. 
-  * [lib/database](lib/database): contains the database's logic. The database
-      is created once by the servers  and this should not have a negative impact
-      on Keyd, which uses the `DB` type defined in
-      [lib/database/db.go](lib/database/db.go).
-  * [lib/dpf](lib/dpf): contains the implementation of the distributed point
-      function (DPF) used in combination with verifiable PIR. 
-  * [lib/field](lib/field): contains the logic of the field used by the
-      information-theoretic VPIR protocols.
-  * [lib/merkle](lib/merkle): is the library for the Merkle tree. This VPIR
-      approach is not used by Keyd and therefore this folder can be safely
-      ignored.
-  * [lib/monitor](lib/monitor): implements a CPU time timer, used only for tests
-      and evaluation.
-  * [lib/pgp](lib/pgp): contains the logic to parse the SKS dump (PGP keys
-      dump). 
-  * [lib/proto](lib/proto): contains the gRPC logic.
-  * [lib/server](lib/server): same structure as [lib/client](lib/client).
-  * [lib/utils](lib/utils): contains various utils.
+## Introduction
+Keyd is a PGP public-key directory that offers
+(1) classic key look-ups and
+(2) computation of statistics over keys.
+We implement Keyd in the two server model, where the security
+properties hold as long as at least one server is honest.
 
-The [cmd](cmd) folder is organized in two distinct folders, [cmd/grpc](cmd/grpc)
-and [cmd/aws](cmd/aws). The former implements the gRPC logic, the latter is to
-be considered useless now, since AWS Lambda is not a viable solution to deploy
-Keyd. 
+Keyd servers a snapshot of SKS PGP key directory that we downloaded on 24
+January 2021. We removed all the public keys larger than 8 KiB, because we
+found that this was enough to include all keys that did not include large
+attachments. We also removed all keys that had been revoked, keys with an
+invalid format, and keys that had no email address in their metadata.
+We also removed the subkeys of each public key, leaving only the primary key.
+If a key included multiple emails, we indexed this key by using the primary
+email. As a result, Keyd servers a total of 3,557,164 unique PGP keys.
 
-The file [config.toml](config.toml) contains the configurations for the
-client-server logic. Right now, it contains only IP addresses and ports of the
-servers.
+We provide two ways to use Keyd by querying the two servers holding an exact
+replica of the database.
 
-The [data](data) folder contains the data used by Keyd. In particular, it
-contains the files of the SKS dump, i.e. the set of PGP keys. These files are
-available on the shared Google Drive.
+## Go client
+The binary of the Go client is available at XYZ. The code for the client is
+available at [cmd/grpc/client/interactive](cmd/grpc/client/interactive) 
+and can be installed from source using `go get`.
 
-The test of the (V)PIR schemes are specified in the `*_test.go` files. 
-The test relative to Keyd and its underlying cryptographic primitives are in
-[key_test.go](key_test.go) and [vpir_test.go](vpir_test.go).
+## Website frontend
+This website is a frontened for the Keyd client introduced above.
+The queries issued through this website are sent in cleartext to a server, which
+act as a Keyd client and issue the real verifiable-PIR queries to the servers.
+The answers from the servers are sent to the server simulating the client, which
+executes the reconstruction procedure and forward the result to be presented on
+this website.
 
-[scripts](scripts) and [simulations](simulations) contain useful scripts and
-code for the evaluation of the cryptographic schemes. 
- --->
