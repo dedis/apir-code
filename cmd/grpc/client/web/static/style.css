@@ -8,7 +8,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 /* HEADER */
@@ -157,6 +157,11 @@ div.main div.count-emails div.content-wrap div.result > div {
   src: url(Silom.ttf);
 }
 
+@font-face {
+  font-family: inter;
+  src: url(Inter.ttf);
+}
+
 /* BUTTON */
 
 button.std-btn {
@@ -273,4 +278,32 @@ div.loader {
   div.main {
     flex-direction: column;
   }
+}
+
+/* PRESENTATION */
+
+div.presentation {
+  width: 100%;
+  max-width: 1024px;
+  margin: auto;
+  font-family: 'inter', sans-serif;
+  padding: 0 0 30px 0;
+}
+
+div.presentation h1 {
+  color: #444;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.2;
+  margin-top: 0;
+  margin-bottom: .5rem;
+}
+
+div.presentation p, div.presentation summary {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 30px;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1b1b1b;
 }
