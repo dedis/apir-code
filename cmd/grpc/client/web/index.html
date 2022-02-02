@@ -23,6 +23,77 @@
         </p>
     </div>
 
+    <div class="presentation">
+        <h1>WARNING</h1>
+
+        <p>
+        The original Go client and this website are <strong>not</strong> production-ready software
+        and they are full of security vulnerabilities. 
+        In particular, the queries issued from this website are sent to the servers in plaintext. 
+        The queries sent from the original Go client use hard-coded secret keys
+        available on Github and
+        should <strong>not</strong> be considered as private.
+        The original Go client and this website are only a proof-of-concept for the sake
+        of demonstrating the performance of Keyd and they should <strong>not</strong> be used for
+        security-critical applications.
+        </p>
+
+        <h1>Go client</h1>
+
+        <p>
+        The binary of the Go client is available at XYZ. The code for the client is
+        available at XYZ and can be installed from source using <code>go install</code>.
+        </p>
+
+        <details>
+            <summary>Presentation</summary>
+
+            <h1>Introduction</h1>
+
+            <p>
+            Keyd is a PGP public-key directory that offers
+            (1) classic key look-ups and
+            (2) computation of statistics over keys.
+            We implement Keyd in the two server model, where the security
+            properties hold as long as at least one server is honest.
+            </p>
+
+            <p>
+            Keyd servers a snapshot of SKS PGP key directory that we downloaded on 24
+            January 2021. We removed all the public keys larger than 8 KiB, because we
+            found that this was enough to include all keys that did not include large
+            attachments. We also removed all keys that had been revoked, keys with an
+            invalid format, and keys that had no email address in their metadata.
+            We also removed the subkeys of each public key, leaving only the primary key.
+            If a key included multiple emails, we indexed this key by using the primary
+            email. As a result, Keyd servers a total of 3,557,164 unique PGP keys.
+            </p>
+
+            <p>
+            We provide two ways to use Keyd by querying the two servers holding an exact
+            replica of the database.
+            </p>
+
+            <p>Website frontend</h1>
+
+            <p>
+            This website is a frontened for the Keyd client introduced above.
+            The queries issued through this website are sent in cleartext to a server, which
+            act as a Keyd client and issue the real verifiable-PIR queries to the servers.
+            The answers from the servers are sent to the server simulating the client, which
+            executes the reconstruction procedure and forward the result to be presented on
+            this website.
+            </p>
+
+            <h1>Contact</h1>
+
+            <p>
+            TODO: verify if this address work.
+            contact@keyd.org
+            </p>
+        </details>
+    </div>
+
     <div class="main">
         <div class="retrieve">
             <h2>Fetch PGP key</h2>
