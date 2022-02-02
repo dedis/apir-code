@@ -45,7 +45,7 @@ replica of the database.
 ## Go client
 The binary of the Go client is available at XYZ. The code for the client is
 available at [cmd/grpc/client/interactive](cmd/grpc/client/interactive) 
-and can be installed from source using `go get`.
+and can be installed from source using `go install`.
 
 ## Website frontend
 This website is a frontened for the Keyd client introduced above.
