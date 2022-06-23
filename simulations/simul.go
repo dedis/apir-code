@@ -37,6 +37,7 @@ type generalParam struct {
 type individualParam struct {
 	Name           string
 	Primitive      string
+	NumServers     []int
 	NumRows        int
 	BlockLength    int
 	ElementBitSize int
@@ -165,10 +166,28 @@ dbSizesLoop:
 		var results []*Chunk
 		switch s.Primitive {
 		case "pir-classic", "pir-merkle":
-			log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits",
-				s.Primitive, dbLen)
-			blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
-			results = pirIT(dbBytes, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			if len(s.NumServers) == 0 {
+				log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits",
+					s.Primitive, dbLen)
+				numServers := 2                                   // basic case with two servers
+				blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
+				results = pirIT(dbBytes, numServers, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+			} else {
+				// if NumServers is specified, we loop only through the number of servers
+				for _, numServers := range s.NumServers {
+					blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
+					results = pirIT(dbBytes, numServers, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
+					experiment.Results[numServers] = results
+				}
+
+				time.Sleep(3)
+				runtime.GC()
+				time.Sleep(3)
+
+				// Skip the rest of the loop
+				break dbSizesLoop
+
+			}
 		case "fss":
 			// In FSS, we iterate over input sizes instead of db sizes
 			for _, inputSize := range s.InputSizes {
@@ -347,10 +366,10 @@ func fssPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) 
 	return results
 }
 
-func pirIT(db *database.Bytes, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
+func pirIT(db *database.Bytes, numServers, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
 	prg := utils.RandomPRG()
 	c := client.NewPIR(prg, &db.Info)
-	ss := makePIRServers(db)
+	ss := makePIRServers(db, numServers)
 	numTotalBlocks := db.NumRows * db.NumColumns
 	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
 
@@ -514,10 +533,12 @@ func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
 }
 
-func makePIRServers(db *database.Bytes) []*server.PIR {
-	s0 := server.NewPIR(db)
-	s1 := server.NewPIR(db)
-	return []*server.PIR{s0, s1}
+func makePIRServers(db *database.Bytes, numServers int) []*server.PIR {
+	servers := make([]*server.PIR, numServers)
+	for i := range servers {
+		servers[i] = server.NewPIR(db)
+	}
+	return servers
 }
 
 func fssQueryByteLength(q *query.FSS) float64 {
