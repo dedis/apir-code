@@ -84,7 +84,7 @@ func NewUsing(data [][]byte, hash HashType) (*MerkleTree, error) {
 	branchesLen := int(math.Exp2(math.Ceil(math.Log2(float64(len(data))))))
 
 	// map with the original data to easily loop up the index
-	md := make(map[string]uint32)
+	md := make(map[string]uint32, len(data))
 	// We pad our data length up to the power of 2
 	nodes := make([][]byte, branchesLen+len(data)+(branchesLen-len(data)))
 	// Leaves
