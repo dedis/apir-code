@@ -16,7 +16,6 @@ package merkle
 
 import (
 	"encoding/binary"
-	"encoding/hex"
 	"errors"
 	"math"
 )
@@ -34,7 +33,7 @@ type MerkleTree struct {
 }
 
 func (t *MerkleTree) indexOf(input []byte) (uint32, error) {
-	if i, ok := t.data[hex.EncodeToString(input)]; ok {
+	if i, ok := t.data[string(input)]; ok {
 		return i, nil
 	}
 	return 0, errors.New("data not found")
@@ -92,7 +91,7 @@ func NewUsing(data [][]byte, hash HashType) (*MerkleTree, error) {
 	for i := range data {
 		ib := indexToBytes(i)
 		nodes[i+branchesLen] = hash.Hash(data[i], ib)
-		md[hex.EncodeToString(data[i])] = uint32(i)
+		md[string(data[i])] = uint32(i)
 	}
 	for i := len(data) + branchesLen; i < len(nodes); i++ {
 		nodes[i] = make([]byte, hash.HashLength())
