@@ -43,7 +43,7 @@ We provide two ways to use Keyd by querying the two servers holding an exact
 replica of the database.
 
 ## Go client
-The binary of the Go client is available at XYZ. The code for the client is
+The code for the client is
 available at [cmd/grpc/client/interactive](cmd/grpc/client/interactive) 
 and can be installed from source using `go install`.
 
