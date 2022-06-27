@@ -103,9 +103,8 @@ dbSizesLoop:
 		elemBitSize := s.ElementBitSize
 		nRows := s.NumRows
 
-		var numBlocks int
 		// Find the total number of blocks in the db
-		numBlocks = dbLen / (elemBitSize * blockLen)
+		numBlocks := dbLen / (elemBitSize * blockLen)
 		// matrix db
 		if nRows != 1 {
 			utils.IncreaseToNextSquare(&numBlocks)
@@ -126,6 +125,7 @@ dbSizesLoop:
 				dbBytes = database.CreateRandomBytes(dbPRG, dbLen, nRows, blockLen)
 			}
 		case "fss":
+			// num of identifiers in the random FSS database
 			numIdenfitiers := 100000
 			db, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
 			if err != nil {
@@ -158,6 +158,8 @@ dbSizesLoop:
 			} else {
 				// if NumServers is specified, we loop only through the number of servers
 				for _, numServers := range s.NumServers {
+					log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits from %d servers",
+						s.Primitive, dbLen, numServers)
 					blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
 					results = pirIT(dbBytes, numServers, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
 					experiment.Results[numServers] = results
@@ -169,7 +171,6 @@ dbSizesLoop:
 
 				// Skip the rest of the loop
 				break dbSizesLoop
-
 			}
 		case "fss":
 			// In FSS, we iterate over input sizes instead of db sizes
@@ -374,7 +375,7 @@ func pirIT(db *database.Bytes, numServers, blockSize, elemBitSize, numBitsToRetr
 			results[j].Bandwidth[i] = initBlock(len(ss))
 
 			m.Reset()
-			queries := c.Query(startIndex+i, 2)
+			queries := c.Query(startIndex+i, len(ss))
 			results[j].CPU[i].Query = m.RecordAndReset()
 			for r := range queries {
 				results[j].Bandwidth[i].Query += float64(len(queries[r]))
