@@ -17,6 +17,7 @@ package merkle
 import (
 	"encoding/binary"
 	"errors"
+	"hash/adler32"
 	"math"
 )
 
@@ -27,13 +28,13 @@ type MerkleTree struct {
 	// data is the data from which the Merkle tree is created
 	// data are stored as a map from the actual data encoded to string to
 	// the index of the data in the tree
-	data map[string]uint32
+	data map[uint32]uint32
 	// nodes are the leaf and branch nodes of the Merkle tree
 	nodes [][]byte
 }
 
 func (t *MerkleTree) indexOf(input []byte) (uint32, error) {
-	if i, ok := t.data[string(input)]; ok {
+	if i, ok := t.data[adler32.Checksum(input)]; ok {
 		return i, nil
 	}
 	return 0, errors.New("data not found")
@@ -71,7 +72,7 @@ func (t *MerkleTree) EncodedProofLength() int {
 // New creates a new Merkle tree using the provided raw data and default hash type.
 // data must contain at least one element for it to be valid.
 func New(data [][]byte) (*MerkleTree, error) {
-	return NewUsing(data, NewSHA256())
+	return NewUsing(data, NewBLAKE3())
 }
 
 // NewUsing creates a new Merkle tree using the provided raw data and supplied hash type.
@@ -84,14 +85,14 @@ func NewUsing(data [][]byte, hash HashType) (*MerkleTree, error) {
 	branchesLen := int(math.Exp2(math.Ceil(math.Log2(float64(len(data))))))
 
 	// map with the original data to easily loop up the index
-	md := make(map[string]uint32, len(data))
+	md := make(map[uint32]uint32, len(data))
 	// We pad our data length up to the power of 2
 	nodes := make([][]byte, branchesLen+len(data)+(branchesLen-len(data)))
 	// Leaves
 	for i := range data {
 		ib := indexToBytes(i)
 		nodes[i+branchesLen] = hash.Hash(data[i], ib)
-		md[string(data[i])] = uint32(i)
+		md[adler32.Checksum(data[i])] = uint32(i)
 	}
 	for i := len(data) + branchesLen; i < len(nodes); i++ {
 		nodes[i] = make([]byte, hash.HashLength())

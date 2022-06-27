@@ -1,0 +1,11 @@
+goos: linux
+goarch: amd64
+pkg: github.com/si-co/vpir-code/lib/merkle
+cpu: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz
+BenchmarkNew-8   	     858	   1416733 ns/op	  140820 B/op	    3058 allocs/op
+BenchmarkNew-8   	     847	   1378564 ns/op	  140818 B/op	    3058 allocs/op
+BenchmarkNew-8   	     864	   1389092 ns/op	  140801 B/op	    3058 allocs/op
+BenchmarkNew-8   	     868	   1403430 ns/op	  140838 B/op	    3058 allocs/op
+BenchmarkNew-8   	     837	   1417593 ns/op	  140815 B/op	    3058 allocs/op
+PASS
+ok  	github.com/si-co/vpir-code/lib/merkle	6.854s

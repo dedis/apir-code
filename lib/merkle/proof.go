@@ -43,7 +43,7 @@ func newProof(hashes [][]byte, index uint32) *Proof {
 //
 // This returns true if the proof is verified, otherwise false.
 func VerifyProof(data []byte, proof *Proof, root []byte) (bool, error) {
-	return VerifyProofUsing(data, proof, root, NewSHA256())
+	return VerifyProofUsing(data, proof, root, NewBLAKE3())
 }
 
 // VerifyProofUsing verifies a Merkle tree proof for a piece of data using the provided hash type.
