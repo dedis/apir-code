@@ -1,7 +1,7 @@
 .PHONY: run_simul benchmarks performance
 
 run_simul: 
-	env GOGC=8000 go run . -config=$(config) # -cpuprofile=$(config).prof
+	env GOGC=8000 go run . -config=$(config)
 
 point: 
 	$(MAKE) -s run_simul config=pirClassic.toml; \
