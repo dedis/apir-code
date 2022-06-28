@@ -40,6 +40,10 @@ func (m *Matrix) Set(r int, c int, v uint32) {
   m.data[m.cols * r + c] = v
 }
 
+func (m *Matrix) Get(r int, c int) uint32 {
+  return m.data[m.cols * r + c]
+}
+
 func (m *Matrix) Rows() int {
   return m.rows
 }
@@ -66,3 +70,22 @@ func Mul(a *Matrix, b *Matrix) *Matrix {
   return out
 }
 
+func (a *Matrix) Add(b *Matrix) {
+  if a.cols != b.cols || a.rows != b.rows{
+    panic("Dimension mismatch")
+  }
+
+  for i := 0; i < len(a.data); i++ {
+    a.data[i] += b.data[i]
+  }
+}
+
+func (a *Matrix) Sub(b *Matrix) {
+  if a.cols != b.cols || a.rows != b.rows{
+    panic("Dimension mismatch")
+  }
+
+  for i := 0; i < len(a.data); i++ {
+    a.data[i] -= b.data[i]
+  }
+}
