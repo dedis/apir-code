@@ -81,7 +81,7 @@ func Query(p *Params, digest *matrix.Matrix, i int, j int) (*State, *matrix.Matr
   // Query has dimension 1 x l
   query := matrix.Mul(state.secret, p.A)
 
-  // TODO: Replace with proper error sampling
+  // Error has dimension 1 x l
   e := matrix.NewGauss(1, p.l, p.sigma)
 
   msg := matrix.New(1, p.l)
