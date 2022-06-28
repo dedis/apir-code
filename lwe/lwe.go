@@ -128,6 +128,24 @@ func Reconstruct(p *Params, st *State, ans *matrix.Matrix) uint32 {
 }
 
 func main() {
+
+  /*
+  // Code that prints out the error distribution
+  vals := make(map[uint32]int)
+  for i := uint32(0); i < 30; i++ {
+    vals[i] = 0
+  }
+  e := matrix.NewGauss(1, 10000, 3.0)
+  for i := 0; i < e.Cols(); i++ {
+    vals[e.Get(0,i)] += 1
+  }
+
+  for i := uint32(0); i < 30; i++ {
+    v := uint32(0)
+    log.Printf("%v = %v %v\n", i, vals[v-uint32(i)], vals[i])
+  }
+  */
+
   i,j := 7, 12
 
   p := ParamsDefault()
@@ -140,5 +158,6 @@ func main() {
   if out != db.Get(i,j) {
     panic("Invalid reconstruction")
   }
+
 }
 

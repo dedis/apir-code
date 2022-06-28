@@ -49,11 +49,10 @@ func sampleGauss(sigma float64) uint32 {
   x := 0
   for ;; {
     // Sample random value in [-tau*sigma, tau-sigma]
-    x := rand.Intn(2*upper_bound + 1) - upper_bound
-
+    x = rand.Intn(2*upper_bound + 1) - upper_bound
     diff := float64(x)
     accept_with_prob := math.Exp(diff * diff * f)
-    if rand.Float64() >= accept_with_prob {
+    if rand.Float64() < accept_with_prob {
       break
     }
   }
