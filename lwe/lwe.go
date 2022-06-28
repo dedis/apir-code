@@ -13,6 +13,7 @@ const MOD = 1 << 32
 type Params struct {
   p uint32    // plaintext modulus
   n int       // lattice/secret dimension
+  sigma float64 // Error parameter
 
   l int       // number of rows of database
   m int       // number of columns of database
@@ -41,6 +42,7 @@ func ParamsDefault() *Params {
   p := &Params{
     p: 2,
     n: 1024,
+    sigma: 6.0,
     l: 512,
     m: 128,
     B: 1000,
@@ -80,7 +82,7 @@ func Query(p *Params, digest *matrix.Matrix, i int, j int) (*State, *matrix.Matr
   query := matrix.Mul(state.secret, p.A)
 
   // TODO: Replace with proper error sampling
-  e := matrix.NewRandom(1, p.l, 7)
+  e := matrix.NewGauss(1, p.l, p.sigma)
 
   msg := matrix.New(1, p.l)
   msg.Set(0, i, state.t)
@@ -126,7 +128,6 @@ func Reconstruct(p *Params, st *State, ans *matrix.Matrix) uint32 {
 }
 
 func main() {
-
   i,j := 7, 12
 
   p := ParamsDefault()
@@ -140,3 +141,4 @@ func main() {
     panic("Invalid reconstruction")
   }
 }
+
