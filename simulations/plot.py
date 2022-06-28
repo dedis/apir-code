@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results/"
-#resultFolder = "results/"
+#resultFolder = "final_results/"
+resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -458,6 +458,56 @@ def plotReal():
             print(round(worstLatency, 2), "\\\\") 
 
 
+def plotMulti():
+    schemes = ["pirClassicMulti.json", "pirMerkleMulti.json"]
+    schemeLabels = ["Unauthenticated", "Authenticated"]
+
+    fig, axs = plt.subplots(2, sharex=True) 
+
+    cpuArray = []
+    bwArray = []
+    x = []
+    for i, scheme in enumerate(schemes):
+        stats = allStats(resultFolder + scheme)
+        cpuArray.append([])
+        bwArray.append([])
+        for j, numServers in enumerate(sorted(stats.keys())):
+            # means
+            cpuMean = stats[numServers]['client']['cpu']['mean'] + stats[numServers]['server']['cpu']['mean']
+            bwMean = stats[numServers]['client']['bw']['mean'] + stats[numServers]['server']['bw']['mean']
+            cpuArray[i].append(cpuMean/1000)
+            bwArray[i].append(bwMean/MB)
+
+        axs[0].plot(
+                sorted(stats.keys()), 
+                cpuArray[i], 
+                color='black', 
+                marker=markers[int(i / (len(schemes) / 2))],
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=schemeLabels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
+        )
+        axs[1].plot(
+                sorted(stats.keys()), 
+                bwArray[i], 
+                color='black', 
+                marker=markers[int(i / (len(schemes) / 2))],
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=schemeLabels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
+        )
+
+    # cosmetics
+    axs[0].set_ylabel('CPU time [s]')
+    axs[0].set_xticks(sorted(stats.keys())), 
+    axs[1].set_ylabel('Bandwidth [MiB]')
+    axs[1].set_xlabel('Number of servers')
+    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, mode="expand", borderaxespad=0.)
+
+    plt.tight_layout(h_pad=1.5)
+    plt.savefig('figures/multi.eps', format='eps', dpi=300, transparent=True)
+
 def print_latex_table_separate(results, numApproaches, get_printable_size):
     for size, values in results.items():
         print(get_printable_size(size), end=" ")
@@ -530,5 +580,7 @@ if __name__ == "__main__":
         plotReal()
     elif EXPR == "realcomplex":
         plotRealComplex()
+    elif EXPR == "multi":
+        plotMulti()
     else:
         print("Unknown experiment: choose between benchmarks and performance")
