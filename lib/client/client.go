@@ -12,7 +12,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-// Client represents the client instance in both the IT and FSS based schemes.
+// Client represents the client for all (A)PIR clients implemented in the package
 type Client interface {
 	QueryBytes([]byte, int) ([][]byte, error)
 	ReconstructBytes([][]byte) (interface{}, error)
@@ -78,18 +78,14 @@ func reconstructPIR(answers [][]byte, dbInfo *database.Info, state *state) ([]by
 }
 
 func reconstructValuePIR(answers [][]byte, dbInfo *database.Info, state *state) ([]byte, error) {
-	sum := make([][]byte, dbInfo.NumRows)
-
 	// sum answers as vectors in GF(2)
 	bs := dbInfo.BlockSize
-	for i := 0; i < dbInfo.NumRows; i++ {
-		sum[i] = make([]byte, dbInfo.BlockSize)
-		for k := range answers {
-			fastxor.Bytes(sum[i], sum[i], answers[k][i*bs:bs*(i+1)])
-		}
+	sum := make([]byte, bs)
+	for k := range answers {
+		fastxor.Bytes(sum, sum, answers[k][state.ix*bs:bs*(state.ix+1)])
 	}
 
-	return sum[state.ix], nil
+	return sum, nil
 }
 
 // return true if the query inputs are invalid for IT schemes
