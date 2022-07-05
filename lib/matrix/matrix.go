@@ -5,9 +5,27 @@ import (
 	"io"
 	"math"
 	"math/rand"
+	"unsafe"
 
 	"github.com/si-co/vpir-code/lib/utils"
 )
+
+/*
+#cgo CFLAGS: -O3
+#include <stdint.h>
+
+void multiply(int aRows, int aCols, int bCols, uint32_t *a, uint32_t *b, uint32_t *out) {
+   	int i, j, k;
+	for (i = 0; i < aRows; i++) {
+		for (k = 0; k < aCols; k++) {
+			for (j = 0; j < bCols; j++) {
+				out[bCols*i+j] += a[aCols*i+k] * b[bCols*k+j];
+			}
+		}
+	}
+}
+*/
+import "C"
 
 type Matrix struct {
 	rows int
@@ -59,9 +77,13 @@ func NewRandom(rnd io.Reader, r int, c int, mod uint64) *Matrix {
 	}
 
 	m := New(r, c)
-	for i := 0; i < len(m.data); i++ {
-		m.data[i] = binary.BigEndian.Uint32(data[i*bytesMod : (i+1)*bytesMod])
-	}
+
+	// Convert slice header to an []int32
+	// for i := 0; i < len(m.data); i++ {
+	// 	m.data[i] = binary.BigEndian.Uint32(data[i*bytesMod : (i+1)*bytesMod])
+	// }
+	// TODO: this works but it is bad practice
+	m.data = *(*[]uint32)(unsafe.Pointer(&data))
 
 	return m
 }
@@ -118,17 +140,24 @@ func Mul(a *Matrix, b *Matrix) *Matrix {
 		panic("Dimension mismatch")
 	}
 
-	// TODO Implement this inner loop in C for performance
 	out := New(a.rows, b.cols)
-	for i := 0; i < a.rows; i++ {
-		for k := 0; k < a.cols; k++ {
-			for j := 0; j < b.cols; j++ {
-				out.data[b.cols*i+j] += a.data[a.cols*i+k] * b.data[b.cols*k+j]
-			}
-		}
-	}
+	C.multiply(C.int(a.rows), C.int(a.cols), C.int(b.cols),
+		(*C.uint32_t)(&a.data[0]), (*C.uint32_t)(&b.data[0]),
+		(*C.uint32_t)(&out.data[0]))
 
 	return out
+
+	// // TODO Implement this inner loop in C for performance
+	// out := New(a.rows, b.cols)
+	// for i := 0; i < a.rows; i++ {
+	// 	for k := 0; k < a.cols; k++ {
+	// 		for j := 0; j < b.cols; j++ {
+	// 			out.data[b.cols*i+j] += a.data[a.cols*i+k] * b.data[b.cols*k+j]
+	// 		}
+	// 	}
+	// }
+
+	// return out
 }
 
 func (a *Matrix) Add(b *Matrix) {
