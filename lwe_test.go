@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -24,15 +25,17 @@ func TestDefaultLWE(t *testing.T) {
 	s := server.NewLWE(db)
 
 	// query
-	i := 2
-	q, err := c.QueryBytes(i)
-	require.NoError(t, err)
+	for k := 0; k < 100; k++ {
+		i := rand.Intn(p.L * p.M)
+		q, err := c.QueryBytes(i)
+		require.NoError(t, err)
 
-	a, err := s.AnswerBytes(q)
-	require.NoError(t, err)
+		a, err := s.AnswerBytes(q)
+		require.NoError(t, err)
 
-	res, err := c.ReconstructBytes(a)
-	require.NoError(t, err)
+		res, err := c.ReconstructBytes(a)
+		require.NoError(t, err)
 
-	require.Equal(t, db.Matrix.Get(i/db.Info.NumColumns, i%db.Info.NumColumns), res)
+		require.Equal(t, db.Matrix.Get(i/db.Info.NumColumns, i%db.Info.NumColumns), res)
+	}
 }
