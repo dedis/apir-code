@@ -5,7 +5,6 @@ import (
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
-	"github.com/si-co/vpir-code/lib/matrix"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
@@ -26,15 +25,14 @@ func TestDefaultLWE(t *testing.T) {
 
 	// query
 	i := 2
-	j := 7
-	q := c.Query(i, j)
-	qBytes := matrix.MatrixToBytes(q)
+	q, err := c.QueryBytes(i)
+	require.NoError(t, err)
 
-	a, err := s.AnswerBytes(qBytes)
+	a, err := s.AnswerBytes(q)
 	require.NoError(t, err)
 
 	res, err := c.ReconstructBytes(a)
 	require.NoError(t, err)
 
-	require.Equal(t, db.Matrix.Get(i, j), res)
+	require.Equal(t, db.Matrix.Get(i/db.Info.NumColumns, i%db.Info.NumColumns), res)
 }
