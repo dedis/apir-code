@@ -19,6 +19,7 @@ type ParamsLWE struct {
 
 	SeedA *PRGKey // matrix  used to generate digest
 	Mod   uint64
+	Bytes int
 }
 
 func ParamsDefault() *ParamsLWE {
@@ -31,6 +32,7 @@ func ParamsDefault() *ParamsLWE {
 		B:     1000,
 		SeedA: GetDefaultSeedMatrixA(),
 		Mod:   1 << 32,
+		Bytes: 4,
 	}
 }
 

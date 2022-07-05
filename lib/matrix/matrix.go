@@ -1,11 +1,9 @@
 package matrix
 
 import (
-	crand "crypto/rand"
 	"encoding/binary"
 	"io"
 	"math"
-	"math/big"
 	"math/rand"
 
 	"github.com/si-co/vpir-code/lib/utils"
@@ -51,16 +49,18 @@ func BytesToMatrix(in []byte) *Matrix {
 }
 
 func NewRandom(rnd io.Reader, r int, c int, mod uint64) *Matrix {
-	modBig := big.NewInt(int64(mod))
+	if mod != 1<<32 {
+		panic("change function")
+	}
+	bytesMod := utils.ParamsDefault().Bytes
+	data := make([]byte, bytesMod*r*c)
+	if _, err := rnd.Read(data); err != nil {
+		panic(err)
+	}
 
-	// TODO: Replace with something much faster
 	m := New(r, c)
 	for i := 0; i < len(m.data); i++ {
-		v, err := crand.Int(rnd, modBig)
-		if err != nil {
-			panic("Error reading random int")
-		}
-		m.data[i] = uint32(v.Uint64())
+		m.data[i] = binary.BigEndian.Uint32(data[i*bytesMod : (i+1)*bytesMod])
 	}
 
 	return m

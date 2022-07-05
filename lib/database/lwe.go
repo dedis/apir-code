@@ -44,10 +44,17 @@ func CreateZeroLWE(numRows, numColumns int) *LWE {
 
 func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
 	m := matrix.New(numRows, numColumns)
+	// read random bytes for filling out the entries
+	// For simplicity, we use the whole byte to store 0 or 1
+	data := make([]byte, numRows*numColumns)
+	if _, err := rnd.Read(data); err != nil {
+		panic(err)
+	}
+
+	// TODO: create function to generate bits db
 	for i := 0; i < numRows; i++ {
 		for j := 0; j < numColumns; j++ {
-			// TODO LWE: Replace with something real
-			val := uint32(3*uint32(i)+7*uint32(j)) % plaintextModulus
+			val := uint32(data[i] & 1)
 			if val >= plaintextModulus {
 				panic("Plaintext value too large")
 			}
