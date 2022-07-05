@@ -17,11 +17,12 @@ const MOD = 1 << 32
 type LWE struct {
 	dbInfo *database.Info
 	state  *StateLWE
-	params *ParamsLWE
+	params *utils.ParamsLWE
 	rnd    io.Reader
 }
 
 type StateLWE struct {
+	A      *matrix.Matrix
 	digest *matrix.Matrix
 	secret *matrix.Matrix
 	i      int
@@ -29,59 +30,36 @@ type StateLWE struct {
 	t      uint32
 }
 
-type ParamsLWE struct {
-	p     uint32  // plaintext modulus
-	n     int     // lattice/secret dimension
-	sigma float64 // Error parameter
-
-	l int    // number of rows of database
-	m int    // number of columns of database
-	B uint32 // bound used in reconstruction
-
-	A *matrix.Matrix // matrix  used to generate digest
-}
-
-func ParamsDefault() *ParamsLWE {
-	p := &ParamsLWE{
-		p:     2,
-		n:     1024,
-		sigma: 6.0,
-		l:     512,
-		m:     128,
-		B:     1000,
-	}
-
-	p.A = matrix.NewRandom(utils.NewPRG(utils.GetDefaultSeedMatrixA()), p.n, p.l, MOD)
-	return p
-}
-
-func NewLWE(info *database.Info) *LWE {
+func NewLWE(rnd io.Reader, info *database.Info) *LWE {
 	return &LWE{
 		dbInfo: info,
-		params: ParamsDefault(),
+		params: utils.ParamsDefault(),
+		rnd:    rnd,
 	}
 }
 
-func (c *LWE) query(i, j int) *matrix.Matrix {
+func (c *LWE) Query(i, j int) *matrix.Matrix {
 	// Lazy way to sample a random scalar
 	rand := matrix.NewRandom(c.rnd, 1, 1, MOD)
 
 	// digest is already stored in the state when receiving the database info
-	state := &StateLWE{
-		secret: matrix.NewRandom(c.rnd, 1, c.params.n, MOD),
+	c.state = &StateLWE{
+		A:      matrix.NewRandom(utils.NewPRG(c.params.SeedA), c.params.N, c.params.L, MOD),
+		digest: matrix.BytesToMatrix(c.dbInfo.Digest),
+		secret: matrix.NewRandom(c.rnd, 1, c.params.N, MOD),
 		i:      i,
 		j:      j,
 		t:      rand.Get(0, 0),
 	}
 
 	// Query has dimension 1 x l
-	query := matrix.Mul(state.secret, c.params.A)
+	query := matrix.Mul(c.state.secret, c.state.A)
 
 	// Error has dimension 1 x l
-	e := matrix.NewGauss(1, c.params.l, c.params.sigma)
+	e := matrix.NewGauss(1, c.params.L, c.params.Sigma)
 
-	msg := matrix.New(1, c.params.l)
-	msg.Set(0, i, state.t)
+	msg := matrix.New(1, c.params.L)
+	msg.Set(0, i, c.state.t)
 
 	query.Add(e)
 	query.Add(msg)
@@ -90,7 +68,10 @@ func (c *LWE) query(i, j int) *matrix.Matrix {
 }
 
 func (c *LWE) QueryBytes(index int) ([]byte, error) {
-	panic("not yet implemented")
+	i := index / c.dbInfo.NumColumns
+	j := index % c.dbInfo.NumColumns
+	m := c.Query(i, j)
+	return matrix.MatrixToBytes(m), nil
 }
 
 func (c *LWE) reconstruct(answers *matrix.Matrix) uint32 {
@@ -98,8 +79,8 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) uint32 {
 	answers.Sub(s_trans_d)
 
 	good := true
-	outs := make([]uint32, c.params.m)
-	for i := 0; i < c.params.m; i++ {
+	outs := make([]uint32, c.params.M)
+	for i := 0; i < c.params.M; i++ {
 		v := answers.Get(0, i)
 		if c.inRange(v) {
 			outs[i] = 0
@@ -117,8 +98,8 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) uint32 {
 	return outs[c.state.j]
 }
 
-func (c *LWE) ReconstructBytes(a []byte) ([]uint64, error) {
-	panic("not yet implemented")
+func (c *LWE) ReconstructBytes(a []byte) (uint32, error) {
+	return c.reconstruct(matrix.BytesToMatrix(a)), nil
 }
 
 func (c *LWE) inRange(val uint32) bool {
