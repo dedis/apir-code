@@ -11,7 +11,7 @@ import (
 )
 
 /*
-#cgo CFLAGS: -O3
+#cgo CFLAGS: -std=c99 -O3
 #include <stdint.h>
 
 void multiply(int aRows, int aCols, int bCols, uint32_t *a, uint32_t *b, uint32_t *out) {
