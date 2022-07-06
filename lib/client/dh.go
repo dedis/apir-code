@@ -36,7 +36,7 @@ func NewDH(rnd io.Reader, info *database.Info) *DH {
 }
 
 // QueryBytes takes as input the index of an entry in the database and returns
-// the query for the server encoded in bytes.
+// the query for the server encoded in bytes
 func (c *DH) QueryBytes(index int) ([]byte, error) {
 	g := c.dbInfo.Group
 
