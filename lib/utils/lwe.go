@@ -2,6 +2,8 @@ package utils
 
 import (
 	"crypto/aes"
+
+	"lukechampine.com/uint128"
 )
 
 // WARNING: DO NOT USE THESE KEYS IN PRODUCTION!
@@ -16,9 +18,10 @@ type ParamsLWE struct {
 	M int    // number of columns of database
 	B uint32 // bound used in reconstruction
 
-	SeedA *PRGKey // matrix  used to generate digest
-	Mod   uint64
-	Bytes int
+	SeedA  *PRGKey // matrix  used to generate digest
+	Mod    uint64
+	Mod128 uint128.Uint128 // TODO: remove if we go with the 32-bits version
+	Bytes  int
 }
 
 func ParamsDefault() *ParamsLWE {
@@ -37,6 +40,23 @@ func ParamsDefault() *ParamsLWE {
 
 func ParamsWithDatabaseSize(rows, columns int) *ParamsLWE {
 	p := ParamsDefault()
+	p.L = rows
+	p.M = columns
+
+	return p
+}
+
+// TODO: remove if we go with the 32-bits version
+func ParamsDefault128() *ParamsLWE {
+	p := ParamsDefault()
+	p.Mod128 = uint128.Max
+	p.Bytes = 16
+
+	return p
+}
+
+func ParamsWithDatabaseSize128(rows, columns int) *ParamsLWE {
+	p := ParamsDefault128()
 	p.L = rows
 	p.M = columns
 

@@ -22,4 +22,5 @@ require (
 	google.golang.org/protobuf v1.26.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	lukechampine.com/blake3 v1.1.7
+	lukechampine.com/uint128 v1.2.0 // indirect
 )

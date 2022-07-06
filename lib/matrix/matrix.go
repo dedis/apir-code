@@ -71,8 +71,8 @@ func NewRandom(rnd io.Reader, r int, c int, mod uint64) *Matrix {
 		panic("change function")
 	}
 	bytesMod := utils.ParamsDefault().Bytes
-	data := make([]byte, bytesMod*r*c)
-	if _, err := rnd.Read(data); err != nil {
+	b := make([]byte, bytesMod*r*c)
+	if _, err := rnd.Read(b); err != nil {
 		panic(err)
 	}
 
@@ -83,7 +83,7 @@ func NewRandom(rnd io.Reader, r int, c int, mod uint64) *Matrix {
 	// 	m.data[i] = binary.BigEndian.Uint32(data[i*bytesMod : (i+1)*bytesMod])
 	// }
 	// TODO: this works but it is bad practice
-	m.data = *(*[]uint32)(unsafe.Pointer(&data))
+	m.data = *(*[]uint32)(unsafe.Pointer(&b))
 
 	return m
 }
