@@ -14,8 +14,9 @@ import (
 )
 
 func TestLWEMatrixOneMb(t *testing.T) {
-	p := utils.ParamsWithDatabaseSize(1024, 1024)
-	db := database.CreateRandomBinaryLWE(utils.RandomPRG(), p.L, p.M)
+	dbLen := 1024 * 1024 // dbLen is specified in bits
+	db := database.CreateRandomBinaryLWEWithLength(utils.RandomPRG(), dbLen)
+	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
 	retrieveBlocksLWE(t, db, p, "SingleMatrixLWEOneMb")
 }
 
@@ -43,6 +44,6 @@ func retrieveBlocksLWE(t *testing.T, db *database.LWE, params *utils.ParamsLWE, 
 		require.NoError(t, err)
 		require.Equal(t, db.Matrix.Get(utils.VectorToMatrixIndices(i, db.Info.NumColumns)), res)
 	}
-	fmt.Printf("\nTotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 
 }

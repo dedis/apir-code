@@ -46,6 +46,11 @@ func CreateZeroLWE(numRows, numColumns int) *LWE {
 	return db
 }
 
+func CreateRandomBinaryLWEWithLength(rnd io.Reader, dbLen int) *LWE {
+	numRows, numColumns := CalculateNumRowsAndColumns(dbLen, true)
+	return CreateRandomBinaryLWE(rnd, numRows, numColumns)
+}
+
 func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
 	m := matrix.New(numRows, numColumns)
 	// read random bytes for filling out the entries
