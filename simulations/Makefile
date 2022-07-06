@@ -13,6 +13,7 @@ complex:
 single:
 	$(MAKE) -s run_simul config=computationalPir.toml; \
 	$(MAKE) -s run_simul config=computationalVpir.toml; \
+	$(MAKE) -s run_simul config=computationalLWE.toml; \
 
 real:
 	bash real.sh
