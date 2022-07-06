@@ -104,7 +104,10 @@ dbSizesLoop:
 		nRows := s.NumRows
 
 		// Find the total number of blocks in the db
-		numBlocks := dbLen / (elemBitSize * blockLen)
+		numBlocks := dl
+		if s.Primitive[:3] != "cmp" {
+			numBlocks = dbLen / (elemBitSize * blockLen)
+		}
 		// matrix db
 		if nRows != 1 {
 			utils.IncreaseToNextSquare(&numBlocks)
