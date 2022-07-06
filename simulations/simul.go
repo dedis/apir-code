@@ -138,6 +138,9 @@ dbSizesLoop:
 			} else if s.Primitive == "cmp-vpir" {
 				log.Printf("Generating elliptic db of size %d\n", dbLen)
 				dbElliptic = database.CreateRandomEllipticWithDigest(dbPRG, dbLen, group.P256, true)
+			} else if s.Primitive == "cmp-vpir-lwe" {
+				log.Printf("Generating LWE db of size %d\n", dbLen)
+				dbLWE = database.CreateRandomBinaryLWEWithLength(dbPRG, dbLen)
 			}
 		}
 
@@ -419,12 +422,11 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 	c := client.NewLattice(&db.Info)
 	s := server.NewLattice(db)
 
-	var index int
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrievedBlocks)
 		// pick a random block index to start the retrieval
-		index = rand.Intn(db.NumRows * db.NumColumns)
+		index := rand.Intn(db.NumRows * db.NumColumns)
 		for i := 0; i < numRetrievedBlocks; i++ {
 			results[j].CPU[i] = initBlock(1)
 			results[j].Bandwidth[i] = initBlock(1)
@@ -470,19 +472,16 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 	c := client.NewDH(prg, &db.Info)
 	s := server.NewDH(db)
 
-	var index int
-	var err error
-	var query, answer []byte
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrievedBlocks)
 		// pick a random block index to start the retrieval
-		index = rand.Intn(db.NumRows * db.NumColumns)
+		index := rand.Intn(db.NumRows * db.NumColumns)
 		results[j].CPU[0] = initBlock(1)
 		results[j].Bandwidth[0] = initBlock(1)
 
 		m.Reset()
-		query, err = c.QueryBytes(index)
+		query, err := c.QueryBytes(index)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -490,7 +489,7 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 		results[j].Bandwidth[0].Query += float64(len(query))
 
 		// get server's answer
-		answer, err = s.AnswerBytes(query)
+		answer, err := s.AnswerBytes(query)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -596,5 +595,6 @@ func (s *Simulation) validSimulation() bool {
 		s.Primitive == "pir-merkle" ||
 		s.Primitive == "fss" ||
 		s.Primitive == "cmp-pir" ||
-		s.Primitive == "cmp-vpir"
+		s.Primitive == "cmp-vpir" ||
+		s.Primitive == "cmp-vpir-lwe"
 }
