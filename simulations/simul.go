@@ -200,6 +200,9 @@ dbSizesLoop:
 		case "cmp-vpir":
 			log.Printf("db info: %#v", dbElliptic.Info)
 			results = pirElliptic(dbElliptic, s.Repetitions)
+		case "cmp-vpir-lwe":
+			log.Printf("db info: %#v", dbLWE.Info)
+			results = pirLWE(dbLWE, s.Repetitions)
 		default:
 			log.Fatal("unknown primitive type")
 		}
@@ -458,6 +461,56 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 		runtime.GC()
 		time.Sleep(2)
 	}
+	return results
+}
+
+func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
+	numRetrievedBlocks := 1
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
+	c := client.NewLWE(utils.RandomPRG(), &db.Info, p)
+	s := server.NewLWE(db)
+
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = initChunk(numRetrievedBlocks)
+		// pick a random block index to start the retrieval
+		index := rand.Intn(db.NumRows * db.NumColumns)
+		results[j].CPU[0] = initBlock(1)
+		results[j].Bandwidth[0] = initBlock(1)
+
+		m.Reset()
+		query, err := c.QueryBytes(index)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Query = m.RecordAndReset()
+		results[j].Bandwidth[0].Query += float64(len(query))
+
+		// get server's answer
+		answer, err := s.AnswerBytes(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Answers[0] = m.RecordAndReset()
+		results[j].Bandwidth[0].Answers[0] = float64(len(answer))
+
+		_, err = c.ReconstructBytes(answer)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		results[j].Bandwidth[0].Reconstruct = 0
+
+		// GC after each repetition
+		runtime.GC()
+		time.Sleep(2)
+	}
+
 	return results
 }
 
