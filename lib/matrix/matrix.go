@@ -140,6 +140,9 @@ func Mul(a *Matrix, b *Matrix) *Matrix {
 		panic("Dimension mismatch")
 	}
 
+	// TODO: the overhead of the cgo call is quite high (more than 50% of
+	// total execution time for small matrices), we might want to
+	// replace this with native assmebly code in Go
 	out := New(a.rows, b.cols)
 	C.multiply(C.int(a.rows), C.int(a.cols), C.int(b.cols),
 		(*C.uint32_t)(&a.data[0]), (*C.uint32_t)(&b.data[0]),
