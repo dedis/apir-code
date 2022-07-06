@@ -117,6 +117,7 @@ dbSizesLoop:
 		dbBytes := new(database.Bytes)
 		dbRing := new(database.Ring)
 		dbElliptic := new(database.Elliptic)
+		dbLWE := new(database.LWE)
 		switch s.Primitive[:3] {
 		case "pir":
 			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
