@@ -5,8 +5,10 @@ package client
 import (
 	"bytes"
 	"encoding/gob"
+
 	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 type Lattice struct {
@@ -39,9 +41,10 @@ func (c *Lattice) QueryBytes(index int) ([]byte, error) {
 	rtk := kgen.GenRotationKeysPow2(sk)
 	encryptor := bfv.NewEncryptorFromPk(params, pk)
 	// saving to the client state
+	ix, iy := utils.VectorToMatrixIndices(index, c.dbInfo.NumColumns)
 	c.state = &state{
-		ix:  index / c.dbInfo.NumColumns,
-		iy:  index % c.dbInfo.NumColumns,
+		ix:  ix,
+		iy:  iy,
 		key: sk,
 	}
 
@@ -71,7 +74,7 @@ func (c *Lattice) ReconstructBytes(a []byte) ([]uint64, error) {
 			return nil, err
 		}
 		coeffs = encoder.DecodeUintNew(decryptor.DecryptNew(ctx))
-		if i / ciphertextSize == c.state.ix {
+		if i/ciphertextSize == c.state.ix {
 			return coeffs, nil
 		}
 	}

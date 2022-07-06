@@ -7,6 +7,7 @@ import (
 
 	"github.com/lukechampine/fastxor"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Information theoretic classical PIR client for scheme working in GF(2).
@@ -45,9 +46,10 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 		log.Fatal("invalid query inputs")
 	}
 	// set the client state. The entries specific to VPIR are not used
+	ix, iy := utils.VectorToMatrixIndices(index, c.dbInfo.NumColumns)
 	c.state = &state{
-		ix: index / c.dbInfo.NumColumns,
-		iy: index % c.dbInfo.NumColumns,
+		ix: ix,
+		iy: iy,
 	}
 	vectors, err := c.secretShare(numServers)
 	if err != nil {

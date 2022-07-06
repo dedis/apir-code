@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+// Given a vector index returns the indices for the matrix representation
+// of the vector
+func VectorToMatrixIndices(i, numColumns int) (int, int) {
+	return i / numColumns, i % numColumns
+}
+
 // MaxBytesLength get maximal []byte length in map[int][]byte
 func MaxBytesLength(in map[int][]byte) int {
 	max := 0

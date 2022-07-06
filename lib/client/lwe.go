@@ -68,8 +68,7 @@ func (c *LWE) Query(i, j int) *matrix.Matrix {
 }
 
 func (c *LWE) QueryBytes(index int) ([]byte, error) {
-	i := index / c.dbInfo.NumColumns
-	j := index % c.dbInfo.NumColumns
+	i, j := utils.VectorToMatrixIndices(index, c.dbInfo.NumColumns)
 	m := c.Query(i, j)
 	return matrix.MatrixToBytes(m), nil
 }

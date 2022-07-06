@@ -9,6 +9,7 @@ import (
 
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/utils"
 )
 
 // Single-server tag retrieval scheme
@@ -47,8 +48,7 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 
 	// compute the position in the db (vector or matrix)
 	// if db is a vector, ix always equals 0
-	st.ix = index / c.dbInfo.NumColumns
-	st.iy = index % c.dbInfo.NumColumns
+	st.ix, st.iy = utils.VectorToMatrixIndices(index, c.dbInfo.NumColumns)
 	st.r = r
 
 	// multithreading
