@@ -30,10 +30,10 @@ type StateLWE struct {
 	t      uint32
 }
 
-func NewLWE(rnd io.Reader, info *database.Info) *LWE {
+func NewLWE(rnd io.Reader, info *database.Info, params *utils.ParamsLWE) *LWE {
 	return &LWE{
 		dbInfo: info,
-		params: utils.ParamsDefault(),
+		params: params,
 		rnd:    rnd,
 	}
 }
