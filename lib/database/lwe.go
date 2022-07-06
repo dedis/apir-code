@@ -15,14 +15,18 @@ type LWE struct {
 const plaintextModulus = 2
 const blockSizeLWE = 1 // for backward compatibility
 
-func DefaultDigest(db *LWE) *matrix.Matrix {
+func DefaultDigestWithRows(db *LWE, rows int) *matrix.Matrix {
 	return matrix.Mul(
 		matrix.NewRandom(
 			utils.NewPRG(utils.ParamsDefault().SeedA),
 			utils.ParamsDefault().N,
-			utils.ParamsDefault().L,
+			rows,
 			utils.ParamsDefault().Mod,
 		), db.Matrix)
+}
+
+func DefaultDigest(db *LWE) *matrix.Matrix {
+	return DefaultDigestWithRows(db, utils.ParamsDefault().L)
 }
 
 func CreateZeroLWE(numRows, numColumns int) *LWE {
@@ -51,7 +55,6 @@ func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
 		panic(err)
 	}
 
-	// TODO: create function to generate bits db
 	for i := 0; i < numRows; i++ {
 		for j := 0; j < numColumns; j++ {
 			val := uint32(data[i] & 1)
@@ -72,7 +75,7 @@ func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
 	}
 
 	db.Auth = &Auth{
-		Digest: matrix.MatrixToBytes(DefaultDigest(db)),
+		Digest: matrix.MatrixToBytes(DefaultDigestWithRows(db, numRows)),
 	}
 
 	return db
