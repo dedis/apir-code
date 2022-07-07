@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"math/bits"
 	"math/rand"
 	"os"
-	"path"
 	"runtime"
 	"runtime/pprof"
 	"time"
@@ -51,6 +51,15 @@ type Simulation struct {
 func main() {
 	// seed non-cryptographic randomness
 	rand.Seed(time.Now().UnixNano())
+
+	// create results directory if not presenc
+	path := "results"
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(path, os.ModePerm)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	memprofile := flag.String("memprofile", "", "write mem profile to file")
