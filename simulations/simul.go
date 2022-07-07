@@ -10,6 +10,7 @@ import (
 	"math/bits"
 	"math/rand"
 	"os"
+	"path"
 	"runtime"
 	"runtime/pprof"
 	"time"
@@ -53,9 +54,9 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	// create results directory if not presenc
-	path := "results"
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(path, os.ModePerm)
+	folderPath := "results"
+	if _, err := os.Stat(folderPath); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(folderPath, os.ModePerm)
 		if err != nil {
 			log.Fatal(err)
 		}
