@@ -1,5 +1,5 @@
-Name = "computationalVpir"
-Primitive = "cmp-vpir"
+Name = "computationalLWE"
+Primitive = "cmp-vpir-lwe"
 NumRows = 0 # every NumRows != 1 indicate matrix
 BlockLength = 1
 ElementBitSize = 0
