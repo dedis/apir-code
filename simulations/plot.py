@@ -353,10 +353,10 @@ def plotSingle():
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
-            bw = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            bw = bwMean(stats, dbSize) 
             if scheme == schemes[0]:
                 bw -= LatticeRotKeysLen
-            cpu = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
+            cpu = cpuMean(stats, dbSize)
             cpuTable[dbSize].append(cpu / 1000)
             bwTable[dbSize].append(bw/MB)
 
@@ -468,10 +468,8 @@ def plotReal():
         worstLatency = latencyMean[1] + ping
         
         if i % 2 == 0:
-            #print(labels[int(i/2)], "&",  rounder2(worstLatency), "&", rounder(bestLatency), "&", end=" ")
             print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", end=" ")
         else:
-            #print(rounder2(worstLatency), "&", rounder2(bestLatency), "\\\\") 
             print(round(worstLatency, 2), "\\\\") 
 
 
@@ -490,8 +488,8 @@ def plotMulti():
         bwArray.append([])
         for j, numServers in enumerate(sorted(stats.keys())):
             # means
-            cpuMean = stats[numServers]['client']['cpu']['mean'] + stats[numServers]['server']['cpu']['mean']
-            bwMean = stats[numServers]['client']['bw']['mean'] + stats[numServers]['server']['bw']['mean']
+            cpuMean = cpuMean(stats, numServers)
+            bwMean = bwMean(stats, numServers)
             cpuArray[i].append(cpuMean/1000)
             bwArray[i].append(bwMean/MB)
 
