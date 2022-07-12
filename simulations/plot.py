@@ -23,8 +23,18 @@ MB = pow(1024, 2)
 KB = 1024
 GiB = 8589935000
 MiB = 1048576
+
+# TODO: where are these numbers coming from?
 LatticeRotKeysLen = 39322025
 LatticeCiphertextLen = 393221
+
+def cpuMean(stats, dbSize):
+    return stats[dbSize]['client']['cpu']['mean'] \
+            + stats[dbSize]['server']['cpu']['mean']
+
+def bwMean(stats, dbSize):
+    return stats[dbSize]['client']['bw']['mean'] \
+            + stats[dbSize]['server']['bw']['mean']
 
 def plotPoint():
     schemes = ["pirClassic.json", "pirMerkle.json"]
@@ -41,8 +51,10 @@ def plotPoint():
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
             # means
-            cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpuMean = cpuMean(stats, dbSize)
+            bwMean = bewMean(stats, dbSize) 
+
+            # store means
             cpuArray[i].append(cpuMean/1000)
             bwArray[i].append(bwMean/MB)
 
@@ -98,8 +110,10 @@ def plotComplex():
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
             # means
-            cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpuMean = cpuMean(stats, dbSize)
+            bwMean = bwMean(stats, dbSize)
+
+            # store means
             cpuArray[i].append(cpuMean/1000)
             bwArray[i].append(bwMean/1024)
 
@@ -149,8 +163,10 @@ def plotComplexBars():
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
             # means
-            cpuMean = stats[dbSize]['client']['cpu']['mean'] + stats[dbSize]['server']['cpu']['mean']
-            bwMean = stats[dbSize]['client']['bw']['mean'] + stats[dbSize]['server']['bw']['mean']
+            cpuMean = cpuMean(stats, dbSize) 
+            bwMean = bwMean(stats, dbSize)
+
+            # store means 
             cpuArray[i].append(cpuMean/1000)
             bwArray[i].append(bwMean/1024)
 
@@ -329,6 +345,7 @@ def plotVpirPerformanceLines():
 
 
 def plotSingle():
+    #schemes = ["computationalPir.json", "computationalVpir.json"]
     schemes = ["computationalPir.json", "computationalVpir.json"]
     labels = ["None", "Atomic"]
     cpuTable = defaultdict(list)

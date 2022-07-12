@@ -71,6 +71,7 @@ def parseResults(file):
                     # parse the results of a single block
                     for block in repetition:
                         client[param].append(block['Query'] + block['Reconstruct'])
+                        # sum the values for all the servers
                         server[param].append(np.sum(block['Answers']))
             parsedResults[int(dbSize)] = {"client": client, "server": server}
     return parsedResults
