@@ -9,7 +9,7 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/utils"
-	"github.com/tuneinsight/lattigo/v3/bfv"
+	"github.com/tuneinsight/lattigo/v3/rlwe"
 )
 
 // Client represents the client for all (A)PIR clients implemented in the package
@@ -31,7 +31,7 @@ type state struct {
 	// for single-server (DH)
 	r   group.Scalar
 	ht  group.Element
-	key *bfv.SecretKey // lattice secret key
+	key *rlwe.SecretKey // lattice secret key
 }
 
 // decodeAnswer decodes the gob-encoded answers from the servers and return

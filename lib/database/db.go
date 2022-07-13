@@ -45,7 +45,7 @@ type Info struct {
 	*Merkle
 
 	// Lattice parameters for the single-server data retrieval
-	LatParams *bfv.Parameters
+	LatParams bfv.Parameters
 }
 
 // Auth is authentication information for the single-server setting

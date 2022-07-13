@@ -16,7 +16,20 @@ type Ring struct {
 
 func CreateRandomRingDB(rnd io.Reader, dbLen int, rebalanced bool) *Ring {
 	// setting lattice parameters (N = 2^13 = 8192, t = 2^16)
-	params := bfv.DefaultParams[bfv.PN13QP218].WithT(65537)
+	// PN13QP218 is a set of default parameters with logN=13 and logQP=218
+	// PN13QP218 = ParametersLiteral{
+	// 	LogN:  13,
+	// 	T:     65537,
+	// 	Q:     []uint64{0x3fffffffef8001, 0x4000000011c001, 0x40000000120001},
+	// 	P:     []uint64{0x7ffffffffb4001},
+	// 	Sigma: rlwe.DefaultSigma,
+	// }
+	paramsDef := bfv.PN13QP218
+	paramsDef.T = 65537
+	params, err := bfv.NewParametersFromLiteral(paramsDef)
+	if err != nil {
+		log.Fatal(err)
+	}
 	encoder := bfv.NewEncoder(params)
 
 	blockLen := 1
@@ -40,7 +53,7 @@ func CreateRandomRingDB(rnd io.Reader, dbLen int, rebalanced bool) *Ring {
 			copy(tmp[len(tmp)-2:], randInput[(i*int(params.N())+l)*coeffSize:(i*int(params.N())+l+1)*coeffSize])
 			coefficients[l] = binary.BigEndian.Uint64(tmp)
 		}
-		encoder.EncodeUintMul(coefficients, entries[i])
+		encoder.EncodeMul(coefficients, entries[i])
 	}
 
 	return &Ring{Entries: entries,

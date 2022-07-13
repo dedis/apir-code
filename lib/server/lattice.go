@@ -11,6 +11,7 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/tuneinsight/lattigo/v3/bfv"
+	"github.com/tuneinsight/lattigo/v3/rlwe"
 )
 
 // Lattice is the server for the computational multi-bit scheme
@@ -48,7 +49,7 @@ func (s *Lattice) AnswerBytes(q []byte) ([]byte, error) {
 		maskCoeffs := make([]uint64, params.N())
 		maskCoeffs[i] = 1
 		plainMask[i] = bfv.NewPlaintextMul(params)
-		encoder.EncodeUintMul(maskCoeffs, plainMask[i])
+		encoder.EncodeMul(maskCoeffs, plainMask[i])
 	}
 
 	// multithreading
@@ -87,9 +88,9 @@ func (s *Lattice) AnswerBytes(q []byte) ([]byte, error) {
 }
 
 func (s *Lattice) processRows(begin, end int, encQuery *bfv.Ciphertext, masks []*bfv.PlaintextMul,
-	rtk *bfv.RotationKeys, replyTo chan<- []*bfv.Ciphertext) {
+	rtk *rlwe.RotationKeySet, replyTo chan<- []*bfv.Ciphertext) {
 	replies := make([]*bfv.Ciphertext, end-begin)
-	evaluator := bfv.NewEvaluator(s.db.LatParams)
+	evaluator := bfv.NewEvaluator(s.db.LatParams, rlwe.EvaluationKey{Rtks: rtk})
 	for i := begin; i < end; i++ {
 		prod := bfv.NewCiphertext(s.db.LatParams, 1)
 		for j := 0; j < s.db.NumColumns; j++ {
@@ -97,7 +98,7 @@ func (s *Lattice) processRows(begin, end int, encQuery *bfv.Ciphertext, masks []
 			// 1) Multiplication of the query with the plaintext mask
 			evaluator.Mul(encQuery, masks[j], tmp)
 			// 2) Inner sum (populate all the slots with the sum of all the slots)
-			evaluator.InnerSum(tmp, rtk, tmp)
+			evaluator.InnerSum(tmp, tmp)
 			// 3) Multiplication of 2) with the (i,j)-th plaintext of the db
 			evaluator.Mul(tmp, s.db.Entries[i*s.db.NumColumns+j], tmp)
 			// 4) Add the result of the column multiplication to the final row product
@@ -109,7 +110,7 @@ func (s *Lattice) processRows(begin, end int, encQuery *bfv.Ciphertext, masks []
 	replyTo <- replies
 }
 
-func (s *Lattice) unmarshalQuery(query []byte) (*bfv.Ciphertext, *bfv.RotationKeys, error) {
+func (s *Lattice) unmarshalQuery(query []byte) (*bfv.Ciphertext, *rlwe.RotationKeySet, error) {
 	var err error
 	// decode query
 	buf := bytes.NewBuffer(query)
@@ -124,7 +125,7 @@ func (s *Lattice) unmarshalQuery(query []byte) (*bfv.Ciphertext, *bfv.RotationKe
 	if err != nil {
 		return nil, nil, err
 	}
-	rtk := new(bfv.RotationKeys)
+	rtk := new(rlwe.RotationKeySet)
 	err = rtk.UnmarshalBinary(decoded.RotationKeys)
 	if err != nil {
 		return nil, nil, err

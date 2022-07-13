@@ -9,6 +9,7 @@ import (
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/tuneinsight/lattigo/v3/bfv"
+	"github.com/tuneinsight/lattigo/v3/rlwe"
 )
 
 type Lattice struct {
@@ -38,8 +39,9 @@ func (c *Lattice) QueryBytes(index int) ([]byte, error) {
 	// Key generation
 	kgen := bfv.NewKeyGenerator(params)
 	sk, pk := kgen.GenKeyPair()
-	rtk := kgen.GenRotationKeysPow2(sk)
-	encryptor := bfv.NewEncryptorFromPk(params, pk)
+	galEls := params.GaloisElementsForRowInnerSum()
+	rtk := kgen.GenRotationKeys(galEls, sk)
+	encryptor := bfv.NewEncryptor(params, pk)
 	// saving to the client state
 	ix, iy := utils.VectorToMatrixIndices(index, c.dbInfo.NumColumns)
 	c.state = &state{
@@ -82,20 +84,20 @@ func (c *Lattice) ReconstructBytes(a []byte) ([]uint64, error) {
 	return nil, nil
 }
 
-func genQuery(params *bfv.Parameters, queryIndex int, encoder bfv.Encoder, encryptor bfv.Encryptor) *bfv.Ciphertext {
+func genQuery(params bfv.Parameters, queryIndex int, encoder bfv.Encoder, encryptor bfv.Encryptor) *bfv.Ciphertext {
 	// Query ciphertext
 	queryCoeffs := make([]uint64, params.N())
 	queryCoeffs[queryIndex] = 1
 	query := bfv.NewPlaintext(params)
 
 	var encQuery *bfv.Ciphertext
-	encoder.EncodeUint(queryCoeffs, query)
+	encoder.Encode(queryCoeffs, query)
 	encQuery = encryptor.EncryptNew(query)
 
 	return encQuery
 }
 
-func encodeQuery(ct *bfv.Ciphertext, rtk *bfv.RotationKeys) ([]byte, error) {
+func encodeQuery(ct *bfv.Ciphertext, rtk *rlwe.RotationKeySet) ([]byte, error) {
 	// Marshal all the keys
 	ect, err := ct.MarshalBinary()
 	if err != nil {
