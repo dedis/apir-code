@@ -15,5 +15,9 @@ single:
 	$(MAKE) -s run_simul config=computationalVpir.toml; \
 	$(MAKE) -s run_simul config=computationalLWE.toml; \
 
+multi: 
+	$(MAKE) -s run_simul config=pirClassicMulti.toml; \
+	$(MAKE) -s run_simul config=pirMerkleMulti.toml \
+
 real:
 	bash real.sh
