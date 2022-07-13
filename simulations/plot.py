@@ -391,7 +391,7 @@ def print_latex_table_separate(results, numApproaches, get_printable_size):
             print("& %s " % rounder2(value), end="")
             # we need to compute the overhead over the baseline that is always at position i%numApproaches==0
             if i % numApproaches != 0:
-                print("& %s$\\times$ " % rounder(value / values[int(i / numApproaches) * numApproaches]), end="")
+                print("& %s$\\times$ " % rounder2(value / values[int(i / numApproaches) * numApproaches]), end="")
         print("\\\\")
 
 
