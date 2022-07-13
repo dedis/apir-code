@@ -337,8 +337,8 @@ def plotMulti():
         bwArray.append([])
         for j, numServers in enumerate(sorted(stats.keys())):
             # means
-            cpuArray[i].append(cpuMean/1000)
-            bwArray[i].append(bwMean/MB)
+            cpuArray[i].append(cpuMean(stats, numServers)/1000)
+            bwArray[i].append(bwMean(stats, numServers)/MB)
 
         axs[0].plot(
                 sorted(stats.keys()), 
