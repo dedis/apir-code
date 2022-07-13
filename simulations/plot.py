@@ -50,13 +50,9 @@ def plotPoint():
         cpuArray.append([])
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
-            # means
-            cpuMean = cpuMean(stats, dbSize)
-            bwMean = bewMean(stats, dbSize) 
-
             # store means
-            cpuArray[i].append(cpuMean/1000)
-            bwArray[i].append(bwMean/MB)
+            cpuArray[i].append(cpuMean(stats, dbSize)/1000)
+            bwArray[i].append(bwMean(stats, dbSize)/MB)
 
 
         axs[0].plot(
@@ -109,13 +105,9 @@ def plotComplex():
         cpuArray.append([])
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
-            # means
-            cpuMean = cpuMean(stats, dbSize)
-            bwMean = bwMean(stats, dbSize)
-
             # store means
-            cpuArray[i].append(cpuMean/1000)
-            bwArray[i].append(bwMean/1024)
+            cpuArray[i].append(cpuMean(stats, dbSize)/1000)
+            bwArray[i].append(bwMean(stats, dbSize)/1024)
 
         axs[0].plot(
                 [x for x in sorted(stats.keys())], 
@@ -162,13 +154,9 @@ def plotComplexBars():
         cpuArray.append([])
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
-            # means
-            cpuMean = cpuMean(stats, dbSize) 
-            bwMean = bwMean(stats, dbSize)
-
             # store means 
-            cpuArray[i].append(cpuMean/1000)
-            bwArray[i].append(bwMean/1024)
+            cpuArray[i].append(cpuMean(stats, dbSize)/1000)
+            bwArray[i].append(bwMean(stats, dbSize)/1024)
 
     print("mean ratio CPU:", np.median([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
     print("mean ratio BW:", np.median([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
@@ -349,8 +337,6 @@ def plotMulti():
         bwArray.append([])
         for j, numServers in enumerate(sorted(stats.keys())):
             # means
-            cpuMean = cpuMean(stats, numServers)
-            bwMean = bwMean(stats, numServers)
             cpuArray[i].append(cpuMean/1000)
             bwArray[i].append(bwMean/MB)
 
