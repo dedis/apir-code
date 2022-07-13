@@ -29,8 +29,8 @@ LatticeRotKeysLen = 39322025
 LatticeCiphertextLen = 393221
 
 def cpuMean(stats, key):
-    return stats[key]['client']['cpu']['mean'] \
-            + stats[key]['server']['cpu']['mean']
+    # always plotted in seconds
+    return (stats[key]['client']['cpu']['mean'] + stats[key]['server']['cpu']['mean'])/1000
 
 def bwMean(stats, key):
     return stats[key]['client']['bw']['mean'] \
@@ -51,7 +51,7 @@ def plotPoint():
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
             # store means
-            cpuArray[i].append(cpuMean(stats, dbSize)/1000)
+            cpuArray[i].append(cpuMean(stats, dbSize))
             bwArray[i].append(bwMean(stats, dbSize)/MB)
 
 
@@ -106,7 +106,7 @@ def plotComplex():
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
             # store means
-            cpuArray[i].append(cpuMean(stats, dbSize)/1000)
+            cpuArray[i].append(cpuMean(stats, dbSize))
             bwArray[i].append(bwMean(stats, dbSize)/1024)
 
         axs[0].plot(
@@ -155,7 +155,7 @@ def plotComplexBars():
         bwArray.append([])
         for j, dbSize in enumerate(sorted(stats.keys())):
             # store means 
-            cpuArray[i].append(cpuMean(stats, dbSize)/1000)
+            cpuArray[i].append(cpuMean(stats, dbSize))
             bwArray[i].append(bwMean(stats, dbSize)/1024)
 
     print("mean ratio CPU:", np.median([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
@@ -206,7 +206,7 @@ def plotSingle():
             if scheme == schemes[0]:
                 bw -= LatticeRotKeysLen
             cpu = cpuMean(stats, dbSize)
-            cpuTable[dbSize].append(cpu / 1000)
+            cpuTable[dbSize].append(cpu)
             bwTable[dbSize].append(bw/MB)
 
     print_latex_table_separate(cpuTable, len(schemes), get_size_in_bits)
@@ -337,7 +337,7 @@ def plotMulti():
         bwArray.append([])
         for j, numServers in enumerate(sorted(stats.keys())):
             # means
-            cpuArray[i].append(cpuMean(stats, numServers)/1000)
+            cpuArray[i].append(cpuMean(stats, numServers))
             bwArray[i].append(bwMean(stats, numServers)/MB)
 
         axs[0].plot(
