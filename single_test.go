@@ -9,13 +9,13 @@ import (
 	"testing"
 
 	"github.com/cloudflare/circl/group"
-	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
+	"github.com/tuneinsight/lattigo/v3/bfv"
 )
 
 func TestDHMatrixOneMb(t *testing.T) {

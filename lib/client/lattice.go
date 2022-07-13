@@ -6,9 +6,9 @@ import (
 	"bytes"
 	"encoding/gob"
 
-	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/utils"
+	"github.com/tuneinsight/lattigo/v3/bfv"
 )
 
 type Lattice struct {

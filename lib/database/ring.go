@@ -6,7 +6,7 @@ import (
 	"log"
 	"math"
 
-	"github.com/ldsec/lattigo/v2/bfv"
+	"github.com/tuneinsight/lattigo/v3/bfv"
 )
 
 type Ring struct {

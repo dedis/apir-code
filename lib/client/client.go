@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/cloudflare/circl/group"
-	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/lukechampine/fastxor"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/merkle"
 	"github.com/si-co/vpir-code/lib/utils"
+	"github.com/tuneinsight/lattigo/v3/bfv"
 )
 
 // Client represents the client for all (A)PIR clients implemented in the package

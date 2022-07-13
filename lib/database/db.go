@@ -11,10 +11,10 @@ import (
 	"golang.org/x/xerrors"
 
 	"github.com/cloudflare/circl/group"
-	"github.com/ldsec/lattigo/v2/bfv"
 	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
+	"github.com/tuneinsight/lattigo/v3/bfv"
 	"golang.org/x/crypto/blake2b"
 )
 

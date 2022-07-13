@@ -5,11 +5,12 @@ package server
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/ldsec/lattigo/v2/bfv"
-	"github.com/si-co/vpir-code/lib/client"
-	"github.com/si-co/vpir-code/lib/database"
 	"log"
 	"runtime"
+
+	"github.com/si-co/vpir-code/lib/client"
+	"github.com/si-co/vpir-code/lib/database"
+	"github.com/tuneinsight/lattigo/v3/bfv"
 )
 
 // Lattice is the server for the computational multi-bit scheme
