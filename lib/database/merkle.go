@@ -1,11 +1,14 @@
 package database
 
 import (
-	"github.com/si-co/vpir-code/lib/merkle"
 	"io"
 	"log"
 	"runtime"
+
+	"github.com/si-co/vpir-code/lib/merkle"
 )
+
+// TODO: to measure preprocessing, remove GC calls and parallelism
 
 // CreateRandomMerkle
 // blockLen is the number of byte in a block,
