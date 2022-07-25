@@ -31,6 +31,7 @@ func RandomMerkelDB(rnd io.Reader, dbLen, numRows, blockLen, nRepeat int) []*Chu
 	m := monitor.NewMonitor()
 
 	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		// we only generate the db once per repetition
 		results[j] = initChunk(1)
 		results[j].CPU[0] = initBlock(1)
