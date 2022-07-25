@@ -21,6 +21,13 @@ func RandomMerkelDB(rnd io.Reader, dbLen, numRows, blockLen, nRepeat int) []*Chu
 		log.Fatal(err)
 	}
 
+	blocks := make([][]byte, numBlocks)
+	for i := range blocks {
+		// generate random block
+		blocks[i] = make([]byte, blockLen)
+		copy(blocks[i], data[i*blockLen:(i+1)*blockLen])
+	}
+
 	m := monitor.NewMonitor()
 
 	for j := 0; j < nRepeat; j++ {
@@ -29,13 +36,6 @@ func RandomMerkelDB(rnd io.Reader, dbLen, numRows, blockLen, nRepeat int) []*Chu
 		results[j].CPU[0] = initBlock(1)
 
 		m.Reset()
-
-		blocks := make([][]byte, numBlocks)
-		for i := range blocks {
-			// generate random block
-			blocks[i] = make([]byte, blockLen)
-			copy(blocks[i], data[i*blockLen:(i+1)*blockLen])
-		}
 
 		// generate tree
 		tree, err := merkle.New(blocks)
