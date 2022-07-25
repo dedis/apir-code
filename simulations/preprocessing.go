@@ -3,6 +3,8 @@ package main
 import (
 	"io"
 	"log"
+	"runtime"
+	"time"
 
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/merkle"
@@ -57,6 +59,12 @@ func RandomMerkelDB(rnd io.Reader, dbLen, numRows, blockLen, nRepeat int) []*Chu
 		_ = generateMerkleProofs(blocks, tree, blockLen)
 
 		results[j].CPU[0].Answers[0] = m.RecordAndReset()
+
+		// GC after each repetition
+		runtime.GC()
+
+		// sleep after every iteration
+		time.Sleep(2 * time.Second)
 	}
 
 	return results
