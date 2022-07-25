@@ -663,5 +663,6 @@ func (s *Simulation) validSimulation() bool {
 		s.Primitive == "fss" ||
 		s.Primitive == "cmp-pir" ||
 		s.Primitive == "cmp-vpir" ||
-		s.Primitive == "cmp-vpir-lwe"
+		s.Primitive == "cmp-vpir-lwe" ||
+		s.Primitive == "preprocessing"
 }
