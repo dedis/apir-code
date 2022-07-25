@@ -217,6 +217,9 @@ dbSizesLoop:
 		case "cmp-vpir-lwe":
 			log.Printf("db info: %#v", dbLWE.Info)
 			results = pirLWE(dbLWE, s.Repetitions)
+		case "preprocessing":
+			log.Printf("Merkle preprocessing evaluation for dbLen %d bits\n", dbLen)
+			results = RandomMerkelDB(dbPRG, dbLen, nRows, blockLen, s.Repetitions)
 		default:
 			log.Fatal("unknown primitive type")
 		}

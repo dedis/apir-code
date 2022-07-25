@@ -1,0 +1,6 @@
+Name = "preprocessingMerkle"
+Primitive = "preprocessing"
+NumRows = 0 # every NumRows != 1 indicate matrix
+BlockLength = 1024
+ElementBitSize = 8
+NumServers = [2, 4, 6, 8, 10]

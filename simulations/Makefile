@@ -19,5 +19,8 @@ multi:
 	$(MAKE) -s run_simul config=pirClassicMulti.toml; \
 	$(MAKE) -s run_simul config=pirMerkleMulti.toml \
 
+preprocessing:
+	$(MAKE) -s run_simul config=preprocessing.toml \
+
 real:
 	bash real.sh
