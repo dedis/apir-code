@@ -30,6 +30,9 @@ func RandomMerkelDB(rnd io.Reader, dbLen, numRows, blockLen, nRepeat int) []*Chu
 		copy(blocks[i], data[i*blockLen:(i+1)*blockLen])
 	}
 
+	// clean memory since data is not needed anymore
+	runtime.GC()
+
 	m := monitor.NewMonitor()
 
 	for j := 0; j < nRepeat; j++ {
