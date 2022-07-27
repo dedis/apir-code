@@ -30,7 +30,7 @@ const (
 func main() {
 	sid := flag.Int("id", -1, "Server ID")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
-	scheme := flag.String("scheme", "", "scheme to use: pir-merkle")
+	scheme := flag.String("scheme", "", "scheme to use: pir-classic, pir-merkle")
 	dbLen := flag.Int("dbLen", -1, "DB length in bits")
 	nRows := flag.Int("nRows", -1, "number of rows in the DB representation")
 	blockLen := flag.Int("blockLen", -1, "block size for DB")
