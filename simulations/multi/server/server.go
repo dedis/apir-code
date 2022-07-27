@@ -35,6 +35,8 @@ func main() {
 	nRows := flag.Int("nRows", -1, "number of rows in the DB representation")
 	blockLen := flag.Int("blockLen", -1, "block size for DB")
 
+	flag.Parse()
+
 	log.Println("flags:", *sid, *logFile, *scheme, *dbLen, *nRows, *blockLen)
 
 	// write either to stdout or to logfile
