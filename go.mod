@@ -12,6 +12,7 @@ require (
 	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691
 	github.com/stretchr/testify v1.7.1
 	github.com/tuneinsight/lattigo/v3 v3.0.5
+	github.com/yahoo/vssh v0.0.0-20201122023451-bfa903e660fc
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/genproto v0.0.0-20210406143921-e86de6bf7a46 // indirect
