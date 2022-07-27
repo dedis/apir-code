@@ -125,7 +125,6 @@ func (lc *localClient) connectToServers() error {
 	}
 
 	// connect to servers and store connections
-	// TODO: move somewhere else, but mind the defer
 	lc.connections = make(map[string]*grpc.ClientConn)
 	for _, s := range lc.config.Addresses {
 		conn, err := connectToServer(creds, s)
