@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 from utils import *
 
 #resultFolder = "final_results/"
-resultFolder = "results/"
+#resultFolder = "results/"
+resultFolder = "results_106/"
 
 print("plotting from", resultFolder)
 
@@ -370,6 +371,54 @@ def plotMulti():
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/multi.eps', format='eps', dpi=300, transparent=True)
 
+
+def plotPreprocessing():
+    scheme = "preprocessingMerkle.json"
+    
+    # parse results, these are different from the others 
+    # since we only store preprocessing time
+    # using the server's Answer time
+    with open(resultFolder + scheme) as f:
+        data = json.load(f)
+        # dbResults is a dict containing all the results for the
+        # given size of the db, expressed in bits
+        dbResults = data['Results']
+        # iterate the (size, results) pairs
+        for dbSize, dbResult in dbResults.items():
+            print(dbSize, dbResult['CPU'])
+
+    fig, axs = plt.subplots() 
+
+    cpuArray = []
+    x = []
+    for i, scheme in enumerate(schemes):
+        stats = allStats(resultFolder + scheme)
+        cpuArray.append([])
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            # means
+            cpuArray[i].append(cpuMean(stats, dbSize))
+
+        axs[0].plot(
+                sorted(stats.keys()), 
+                cpuArray[i], 
+                color='black', 
+                marker=markers[int(i / (len(schemes) / 2))],
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=schemeLabels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
+        )
+
+    # cosmetics
+    axs[0].set_ylabel('CPU time [s]')
+    axs[0].set_xticks(sorted(stats.keys())), 
+    axs[1].set_ylabel('Bandwidth [MiB]')
+    axs[1].set_xlabel('Number of servers')
+    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, mode="expand", borderaxespad=0.)
+
+    plt.tight_layout(h_pad=1.5)
+    plt.savefig('figures/preprocessing.eps', format='eps', dpi=300, transparent=True)
+
 def print_latex_table_separate(results, numApproaches, get_printable_size):
     for size, values in results.items():
         print(get_printable_size(size), end=" ")
@@ -444,5 +493,7 @@ if __name__ == "__main__":
         plotRealComplex()
     elif EXPR == "multi":
         plotMulti()
+    elif EXPR == "preprocessing":
+        plotPreprocessing()
     else:
         print("Unknown experiment: choose between benchmarks and performance")
