@@ -37,8 +37,6 @@ func main() {
 
 	flag.Parse()
 
-	log.Println("flags:", *sid, *logFile, *scheme, *dbLen, *nRows, *blockLen)
-
 	// write either to stdout or to logfile
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
@@ -50,6 +48,8 @@ func main() {
 		defer f.Close()
 		log.SetOutput(f)
 	}
+
+	log.Println("flags:", *sid, *logFile, *scheme, *dbLen, *nRows, *blockLen)
 
 	// configs
 	configPath := os.Getenv(configEnvKey)
