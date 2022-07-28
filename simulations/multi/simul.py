@@ -42,26 +42,19 @@ def servers_pool():
 
 def server_setup(c, sid):
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
-        c.run('echo '+ str(sid) + ' >> server/sid')
+        c.run('echo '+ str(sid) + ' > server/sid')
         c.run('bash ' + 'setup.sh')
 
 def server_pir_classic(dbLen, elemBitSize, nRows, blockLen):
-    with c.cd(simul_dir + 'server'):
-        c.run(default_server_command.format('pir-classic', dbLen, elemBitSize, nRows, blockLen))
+    return default_server_command.format('pir-classic', dbLen, elemBitSize, nRows, blockLen)
 
-def server_pir_merkle(c, sid, dbLen, elemBitSize, nRows, blockLen):
-    with c.cd(simul_dir + 'server'):
-       c.run(default_server_command.format(sid, 'pir-merkle', dbLen, elemBitSize, nRows, blockLen))
+def server_pir_merkle(dbLen, elemBitSize, nRows, blockLen):
+   return default_server_command.format('pir-merkle', dbLen, elemBitSize, nRows, blockLen)
 
 def experiment_pir_classic(p):
     gc = load_general_config()
     ic = load_individual_config('pirClassic.toml')
-    with c.cd(simul_dir + 'server'):
-        p.run(default_server_command.format('pir-classic', gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']))
-    # second = [p[1], 1, gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']]
-    # arguments = [first, second]
-    # ppool = multiprocessing.Pool(2)
-    # ppool.apply_async(server_pir_classic, arguments)
+    p.run('cd ' + simul_dir + '/server && ' + server_pir_classic(gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']))
 
 pool = servers_pool()
 for i, c in enumerate(pool):
