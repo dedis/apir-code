@@ -18,7 +18,7 @@ import (
 const (
 	configEnvKey = "VPIR_CONFIG"
 
-	defaultConfigFile = "config.toml"
+	defaultConfigFile = "../config.toml"
 )
 
 type localClient struct {
@@ -125,6 +125,8 @@ func connectToServer(creds credentials.TransportCredentials, address string) (*g
 	if err != nil {
 		return nil, xerrors.Errorf("did not connect to %s: %v", address, err)
 	}
+
+	log.Println("connected to server", address)
 
 	return conn, nil
 }

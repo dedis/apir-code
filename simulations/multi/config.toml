@@ -1,8 +1,10 @@
 # Configuration for gRPC-based application
 
+client = "iccluster105.iccluster.epfl.ch"
+
 [servers]
   [servers.0]
-  ip = "iccluster106.iccluster.epfl.ch"
+ip = "iccluster106.iccluster.epfl.ch"
   port = 50050
 
   [servers.1]
