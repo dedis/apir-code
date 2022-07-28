@@ -95,7 +95,7 @@ func main() {
 
 	// run server with TLS
 	cfg := &tls.Config{
-		Certificates: []tls.Certificate{utils.ServerCertificates[*sid]},
+		Certificates: []tls.Certificate{utils.ServerCertificates[sid]},
 		ClientAuth:   tls.NoClientCert,
 	}
 	lis, err := net.Listen("tcp", addr)
