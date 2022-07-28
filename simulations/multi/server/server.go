@@ -29,7 +29,7 @@ const (
 )
 
 func main() {
-	sid := flag.Int("id", -1, "Server ID")
+	sid := readServerID()
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	scheme := flag.String("scheme", "", "scheme to use: pir-classic, pir-merkle")
 	elemBitSize := flag.Int("elemBitSize", -1, "bit size of element, in which block lengtht is specified")
@@ -41,7 +41,7 @@ func main() {
 
 	// write either to stdout or to logfile
 	log.SetOutput(os.Stdout)
-	log.SetPrefix(fmt.Sprintf("[Server %v] ", *sid))
+	log.SetPrefix(fmt.Sprintf("[Server %v] ", sid))
 	if len(*logFile) > 0 {
 		f, err := os.Create(*logFile)
 		if err != nil {
@@ -51,7 +51,7 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	log.Println("flags:", *sid, *logFile, *scheme, *elemBitSize, *dbLen, *nRows, *blockLen)
+	log.Println("flags:", sid, *logFile, *scheme, *dbLen, *elemBitSize, *nRows, *blockLen)
 
 	// configs
 	configPath := os.Getenv(configEnvKey)
@@ -63,7 +63,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not load the server config file: %v", err)
 	}
-	addr := config.Addresses[*sid]
+	addr := config.Addresses[sid]
 
 	// initialize DB PRG
 	dbPRG := utils.RandomPRG()
@@ -205,4 +205,20 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	}
 
 	return &proto.QueryResponse{Answer: a}, nil
+}
+
+func readServerID() int {
+	file, err := os.Open("sid")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var sid int
+
+	_, err = fmt.Fscanf(file, "%d\n", &sid) // give a patter to scan
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return sid
 }

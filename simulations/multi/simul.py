@@ -40,8 +40,9 @@ def servers_pool():
             connect_kwargs={'password': password,},
             )
 
-def server_setup(c):
+def server_setup(c, sid):
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
+        c.run('echo '+ str(sid) + ' >> server/sid')
         c.run('bash ' + 'setup.sh')
 
 def server_pir_classic(c, sid, dbLen, elemBitSize, nRows, blockLen):
@@ -59,7 +60,9 @@ def experiment_pir_classic(p):
     second = [p[1], 1, gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']]
     arguments = [first, second]
     ppool = multiprocessing.Pool(2)
-    ppool.starmap(server_pir_classic, arguments)
+    ppool.apply_async(server_pir_classic, arguments)
 
 pool = servers_pool()
-experiment_pir_classic(pool)
+for i, c in enumerate(pool):
+    server_setup(c, i)
+# experiment_pir_classic(pool)
