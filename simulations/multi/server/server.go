@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"net"
 	"net/http"
 	"os"
@@ -31,6 +32,7 @@ func main() {
 	sid := flag.Int("id", -1, "Server ID")
 	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
 	scheme := flag.String("scheme", "", "scheme to use: pir-classic, pir-merkle")
+	elemBitSize := flag.Int("elemBitSize", -1, "bit size of element, in which block lengtht is specified")
 	dbLen := flag.Int("dbLen", -1, "DB length in bits")
 	nRows := flag.Int("nRows", -1, "number of rows in the DB representation")
 	blockLen := flag.Int("blockLen", -1, "block size for DB")
@@ -49,7 +51,7 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	log.Println("flags:", *sid, *logFile, *scheme, *dbLen, *nRows, *blockLen)
+	log.Println("flags:", *sid, *logFile, *scheme, *elemBitSize, *dbLen, *nRows, *blockLen)
 
 	// configs
 	configPath := os.Getenv(configEnvKey)
@@ -65,6 +67,17 @@ func main() {
 
 	// initialize DB PRG
 	dbPRG := utils.RandomPRG()
+
+	// Find the total number of blocks in the db
+	numBlocks := *dbLen
+	if (*scheme)[:3] != "cmp" {
+		numBlocks = *dbLen / ((*elemBitSize) * (*blockLen))
+	}
+	// matrix db
+	if *nRows != 1 {
+		utils.IncreaseToNextSquare(&numBlocks)
+		*nRows = int(math.Sqrt(float64(numBlocks)))
+	}
 
 	// initialize db
 	var dbBytes *database.Bytes

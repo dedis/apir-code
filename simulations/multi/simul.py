@@ -7,8 +7,7 @@ from fabric import ThreadingGroup as Group
 user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
 simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
-
-default_server_command = "./server -id={} -scheme={} -dbLen={} -nRows={} -blockLen={}"
+default_server_command = "./server -id={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={}"
 
 def test_command():
     return 'uname -a'
@@ -45,28 +44,22 @@ def server_setup(c):
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
         c.run('bash ' + 'setup.sh')
 
-def server_pir_classic(c, sid, dbLen, nRows, blockLen):
+def server_pir_classic(c, sid, dbLen, elemBitSize, nRows, blockLen):
     with c.cd(simul_dir + 'server'):
-        print(default_server_command.format(sid, 'pir-classic', dbLen, nRows, blockLen))
-        c.run(default_server_command.format(sid, 'pir-classic', dbLen, nRows, blockLen))
+        c.run(default_server_command.format(sid, 'pir-classic', dbLen, elemBitSize, nRows, blockLen))
 
-def server_pir_merkle(c, sid, dbLen, nRows, blockLen):
+def server_pir_merkle(c, sid, dbLen, elemBitSize, nRows, blockLen):
     with c.cd(simul_dir + 'server'):
-       c.run(default_server_command.format(sid, 'pir-merkle', dbLen, nRows, blockLen))
+       c.run(default_server_command.format(sid, 'pir-merkle', dbLen, elemBitSize, nRows, blockLen))
 
 def experiment_pir_classic(p):
     gc = load_general_config()
     ic = load_individual_config('pirClassic.toml')
-    first = [p[0], 0, gc['DBBitLengths'][0], ic['NumRows'], ic['BlockLength']]
-    second = [p[1], 1, gc['DBBitLengths'][0], ic['NumRows'], ic['BlockLength']]
+    first = [p[0], 0, gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']]
+    second = [p[1], 1, gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']]
     arguments = [first, second]
     ppool = multiprocessing.Pool(2)
-    ppool.map(server_pir_classic, arguments)
-    # for i, c in enumerate(p):
-        # print(i)
-        # server_pir_classic(c, 0, gc['DBBitLengths'][0], ic['NumRows'], ic['BlockLength'])
+    ppool.starmap(server_pir_classic, arguments)
 
 pool = servers_pool()
-for c in pool:
-    server_setup(c)
 experiment_pir_classic(pool)
