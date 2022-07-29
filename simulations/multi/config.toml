@@ -4,11 +4,11 @@ client = "iccluster105.iccluster.epfl.ch"
 
 [servers]
   [servers.0]
-ip = "iccluster106.iccluster.epfl.ch"
+ip = "10.90.36.36"
   port = 50050
 
   [servers.1]
-  ip = "iccluster107.iccluster.epfl.ch"
+  ip = "10.90.36.37"
   port = 50051
 
   #[servers.2]
