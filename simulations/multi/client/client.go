@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"sync"
@@ -38,16 +40,51 @@ type localClient struct {
 	vpirClient client.Client
 }
 
+// TODO: remove useless flags
 type flags struct {
-	listenAddr string
+	// experiments flag
+	repetitions    int
+	elemBitSize    int
+	bitsToRetrieve int
 
-	scheme    string
-	id        string
+	// scheme flags
+	scheme string
+
+	// flags for point queries
+	id string
+
+	// flags for complex queries
 	target    string
 	fromStart int
 	fromEnd   int
 	and       bool
 	avg       bool
+}
+
+func parseFlags() *flags {
+	f := new(flags)
+
+	// experiments flags
+	flag.IntVar(&f.repetitions, "repetitions", -1, "experiment repetitions")
+	flag.IntVar(&f.elemBitSize, "elemBitSize", -1, "bit size of element, in which block lengtht is specified")
+	flag.IntVar(&f.bitsToRetrieve, "bitsRetrieve", -1, "number of bits to retrieve in experiment")
+
+	// scheme flags
+	flag.StringVar(&f.scheme, "scheme", "", "scheme to use")
+
+	// flag for point queries
+	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
+
+	// flag for complex queries
+	flag.StringVar(&f.target, "target", "", "target for complex query")
+	flag.IntVar(&f.fromStart, "from-start", 0, "from start parameter for complex query")
+	flag.IntVar(&f.fromEnd, "from-end", 0, "from end parameter for complex query")
+	flag.BoolVar(&f.and, "and", false, "and clause for complex query")
+	flag.BoolVar(&f.avg, "avg", false, "avg clause for complex query")
+
+	flag.Parse()
+
+	return f
 }
 
 func newLocalClient() *localClient {
@@ -149,27 +186,35 @@ func (lc *localClient) exec() (string, error) {
 
 func (lc *localClient) retrievePointPIR() {
 	numTotalBlocks := lc.dbInfo.NumRows * lc.dbInfo.NumColumns
-	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
+	numRetrieveBlocks := bitsToBlocks(lc.dbInfo.BlockSize, lc.flags.elemBitSize, lc.flags.bitsToRetrieve)
 
 	var startIndex int
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+	queryByte := make([]byte, 4)
+	for j := 0; j < lc.flags.repetitions; j++ {
+		log.Printf("start repetition %d out of %d", j+1, lc.flags.repetitions)
 
 		// pick a random block index to start the retrieval
 		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
-		for i := 0; i < numRetrieveBlocks; i++ {
-			queries := c.Query(startIndex+i, len(ss))
 
-			_, err := c.Reconstruct(answers)
-			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-			results[j].Bandwidth[i].Reconstruct = 0
+		for i := 0; i < numRetrieveBlocks; i++ {
+			binary.BigEndian.PutUint32(queryByte, uint32(startIndex+i))
+			queries, err := lc.vpirClient.QueryBytes(queryByte, len(lc.connections))
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("error when executing query:", err)
 			}
+			log.Printf("done with queries computation")
+
+			// send queries to servers
+			answers := lc.runQueries(queries)
+
+			// reconstruct
+			_, err = lc.vpirClient.ReconstructBytes(answers)
+			if err != nil {
+				log.Fatal("error during reconstruction:", err)
+			}
+			log.Printf("done with block reconstruction")
 		}
 	}
-
-	return results
 }
 
 func (lc *localClient) connectToServers() error {
@@ -281,23 +326,48 @@ func connectToServer(creds credentials.TransportCredentials, address string) (*g
 	return conn, nil
 }
 
-func parseFlags() *flags {
-	f := new(flags)
+// Converts number of bits to retrieve into the number of db blocks
+func bitsToBlocks(blockSize, elemSize, numBits int) int {
+	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
+}
 
-	// scheme flags
-	flag.StringVar(&f.scheme, "scheme", "", "scheme to use")
+func (lc *localClient) runQueries(queries [][]byte) [][]byte {
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
+	defer cancel()
 
-	// flag for point queries
-	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
+	wg := sync.WaitGroup{}
+	resCh := make(chan []byte, len(lc.connections))
+	j := 0
+	for _, conn := range lc.connections {
+		wg.Add(1)
+		go func(j int, conn *grpc.ClientConn) {
+			resCh <- queryServer(subCtx, conn, lc.callOptions, queries[j])
+			wg.Done()
+		}(j, conn)
+		j++
+	}
+	wg.Wait()
+	close(resCh)
 
-	// flag for complex queries
-	flag.StringVar(&f.target, "target", "", "target for complex query")
-	flag.IntVar(&f.fromStart, "from-start", 0, "from start parameter for complex query")
-	flag.IntVar(&f.fromEnd, "from-end", 0, "from end parameter for complex query")
-	flag.BoolVar(&f.and, "and", false, "and clause for complex query")
-	flag.BoolVar(&f.avg, "avg", false, "avg clause for complex query")
+	// combinate answers of all the servers
+	q := make([][]byte, 0)
+	for v := range resCh {
+		q = append(q, v)
+	}
 
-	flag.Parse()
+	return q
+}
 
-	return f
+func queryServer(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption, query []byte) []byte {
+	c := proto.NewVPIRClient(conn)
+	q := &proto.QueryRequest{Query: query}
+	answer, err := c.Query(ctx, q, opts...)
+	if err != nil {
+		log.Fatalf("could not query %s: %v",
+			conn.Target(), err)
+	}
+	log.Printf("sent query to %s", conn.Target())
+	log.Printf("query size in bytes %d", len(query))
+
+	return answer.GetAnswer()
 }
