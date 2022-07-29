@@ -11,6 +11,7 @@ user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
 simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
 default_server_command = "screen -dm ./server -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
+default_client_command = "./client -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
 
 def test_command():
     return 'uname -a'
@@ -77,7 +78,13 @@ def experiment_pir_classic(server_pool, client):
     gc = load_general_config()
     ic = load_individual_config('pirClassic.toml')
     print("\t Run", len(server_pool), "servers")
-    server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']))
+    # define experiment parameters
+    dl = gc['DBBitLengths'][0]
+    ebs = ic['ElementBitSize']
+    nr = c['NumRows']
+    bl = ic['BlockLength']
+    print("\t Running with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
+    server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(dl, ebs, nr, bl))
     time.sleep(10)
     print("\t Run", len(server_pool), "client")
     client.run('cd ' + simul_dir + 'client && ./client')
