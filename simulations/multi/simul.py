@@ -70,6 +70,11 @@ def client_setup(c):
 def server_pir_classic_command(dbLen, elemBitSize, nRows, blockLen):
     return default_server_command.format('pir-classic', dbLen, elemBitSize, nRows, blockLen)
 
+# TODO: add scheme
+# default_client_command = "./client -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
+def client_pir_classic_command(repetitions, elemBitSize, bitsToRetrieve):
+    return default_client_command.format(repetitions, elemBitSize, bitsToRetrieve)
+
 def server_pir_merkle_command(dbLen, elemBitSize, nRows, blockLen):
    return default_server_command.format('pir-merkle', dbLen, elemBitSize, nRows, blockLen)
 
