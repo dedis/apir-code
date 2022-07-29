@@ -65,6 +65,21 @@ func main() {
 	}
 	addr := config.Addresses[sid]
 
+	// run server with TLS
+	cfg := &tls.Config{
+		Certificates: []tls.Certificate{utils.ServerCertificates[sid]},
+		ClientAuth:   tls.NoClientCert,
+	}
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	rpcServer := grpc.NewServer(
+		grpc.MaxRecvMsgSize(1024*1024*1024),
+		grpc.MaxSendMsgSize(1024*1024*1024),
+		grpc.Creds(credentials.NewTLS(cfg)),
+	)
+
 	// initialize DB PRG
 	dbPRG := utils.RandomPRG()
 
@@ -92,21 +107,6 @@ func main() {
 
 	// GC after db creation
 	runtime.GC()
-
-	// run server with TLS
-	cfg := &tls.Config{
-		Certificates: []tls.Certificate{utils.ServerCertificates[sid]},
-		ClientAuth:   tls.NoClientCert,
-	}
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	rpcServer := grpc.NewServer(
-		grpc.MaxRecvMsgSize(1024*1024*1024),
-		grpc.MaxSendMsgSize(1024*1024*1024),
-		grpc.Creds(credentials.NewTLS(cfg)),
-	)
 
 	// select correct server
 	var s server.Server
