@@ -20,7 +20,7 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/encoding/gzip"
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 const (
@@ -76,7 +76,6 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	rpcServer := grpc.NewServer(
-		grpc.UseCompressor(gzip.Name),
 		grpc.MaxRecvMsgSize(1024*1024*1024),
 		grpc.MaxSendMsgSize(1024*1024*1024),
 		grpc.Creds(credentials.NewTLS(cfg)),
