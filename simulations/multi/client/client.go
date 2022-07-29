@@ -98,13 +98,14 @@ func main() {
 
 func (lc *localClient) exec() (string, error) {
 	// get and store db info.
-	// This function queries the servers for the database information.
-	// In the Keyd PoC application, we will hardcode the database
-	// information in the client.
 	lc.retrieveDBInfo()
 
-	// // start correct client, which can be either IT or DPF.
-	// switch lc.flags.scheme {
+	// start correct client
+	switch lc.flags.scheme {
+
+	default:
+		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
+	}
 	// case "pointPIR", "pointVPIR":
 	// 	lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
 
