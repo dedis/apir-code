@@ -48,13 +48,23 @@ def servers_pool():
             )
 
 def server_setup(c, sid):
+    # enable agent forwarding for git pull
+    c.forward_agent = True
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
+        c.run('git pull', warn=True)
         c.run('echo '+ str(sid) + ' > server/sid')
         c.run('bash ' + 'setup.sh')
+    # disable now useless agent forwarding
+    c.forward_agent = False
 
 def client_setup(c):
+    # enable agent forwarding for git pull
+    c.forward_agent = True
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
+        c.run('git pull', warn = True)
         c.run('bash ' + 'setup.sh')
+    # disable now useless agent forwarding
+    c.forward_agent = False
 
 def server_pir_classic_command(dbLen, elemBitSize, nRows, blockLen):
     return default_server_command.format('pir-classic', dbLen, elemBitSize, nRows, blockLen)
@@ -63,15 +73,20 @@ def server_pir_merkle_command(dbLen, elemBitSize, nRows, blockLen):
    return default_server_command.format('pir-merkle', dbLen, elemBitSize, nRows, blockLen)
 
 def experiment_pir_classic(server_pool, client):
+    print('Experiment PIR classic')
     gc = load_general_config()
     ic = load_individual_config('pirClassic.toml')
+    print("\t Run", len(server_pool), "servers")
     server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']))
     time.sleep(10)
+    print("\t Run", len(server_pool), "client")
     client.run('cd ' + simul_dir + 'client && ./client')
 
+print("Servers' setup")
 pool = servers_pool()
 for i, c in enumerate(pool):
     server_setup(c, i)
+print("Client's setup")
 client_host = client_address()
 client = Connection(client_host, user=user, connect_kwargs={'password': password,})
 client_setup(client)
