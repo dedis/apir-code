@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
+	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
@@ -29,6 +32,7 @@ type localClient struct {
 	prg    *utils.PRGReader
 	config *utils.Config
 	flags  *flags
+	dbInfo *database.Info
 }
 
 type flags struct {
@@ -84,6 +88,58 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	_, err = lc.exec()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func (lc *localClient) exec() (string, error) {
+	// get and store db info.
+	// This function queries the servers for the database information.
+	// In the Keyd PoC application, we will hardcode the database
+	// information in the client.
+	lc.retrieveDBInfo()
+
+	// // start correct client, which can be either IT or DPF.
+	// switch lc.flags.scheme {
+	// case "pointPIR", "pointVPIR":
+	// 	lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
+
+	// 	// get id
+	// 	if lc.flags.id == "" {
+	// 		var id string
+	// 		fmt.Print("please enter the id: ")
+	// 		fmt.Scanln(&id)
+	// 		if id == "" {
+	// 			log.Fatal("id not provided")
+	// 		}
+	// 		lc.flags.id = id
+	// 	}
+
+	// 	// retrieve the key corresponding to the id
+	// 	return lc.retrieveKeyGivenId(lc.flags.id)
+	// case "complexPIR":
+	// 	lc.vpirClient = client.NewPredicatePIR(lc.prg, lc.dbInfo)
+	// 	out, err := lc.retrieveComplexQuery()
+	// 	if err != nil {
+	// 		return "", err
+	// 	}
+	// 	return strconv.FormatUint(uint64(out), 10), nil
+	// case "complexVPIR":
+	// 	lc.vpirClient = client.NewPredicateAPIR(lc.prg, lc.dbInfo)
+	// 	out, err := lc.retrieveComplexQuery()
+	// 	if err != nil {
+	// 		return "", err
+	// 	}
+	// 	return strconv.FormatUint(uint64(out), 10), nil
+	// default:
+	// 	return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
+	// }
+
+	return "", nil
 }
 
 func (lc *localClient) connectToServers() error {
@@ -114,6 +170,70 @@ func (lc *localClient) closeConnections() {
 			log.Printf("failed to close conn: %v", err)
 		}
 	}
+}
+
+func (lc *localClient) retrieveDBInfo() {
+	subCtx, cancel := context.WithTimeout(lc.ctx, time.Hour)
+	defer cancel()
+
+	wg := sync.WaitGroup{}
+	resCh := make(chan *database.Info, len(lc.connections))
+	for _, conn := range lc.connections {
+		wg.Add(1)
+		go func(conn *grpc.ClientConn) {
+			resCh <- dbInfo(subCtx, conn, lc.callOptions)
+			wg.Done()
+		}(conn)
+	}
+	wg.Wait()
+	close(resCh)
+
+	dbInfo := make([]*database.Info, 0)
+	for i := range resCh {
+		dbInfo = append(dbInfo, i)
+	}
+
+	// check if db info are all equal before returning
+	if !equalDBInfo(dbInfo) {
+		log.Fatal("got different database info from servers")
+	}
+
+	log.Printf("databaseInfo: %#v", dbInfo[0])
+
+	lc.dbInfo = dbInfo[0]
+}
+
+func dbInfo(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption) *database.Info {
+	c := proto.NewVPIRClient(conn)
+	q := &proto.DatabaseInfoRequest{}
+	answer, err := c.DatabaseInfo(ctx, q, opts...)
+	if err != nil {
+		log.Fatalf("could not send database info request to %s: %v",
+			conn.Target(), err)
+	}
+	log.Printf("sent databaseInfo request to %s", conn.Target())
+
+	dbInfo := &database.Info{
+		NumRows:    int(answer.GetNumRows()),
+		NumColumns: int(answer.GetNumColumns()),
+		BlockSize:  int(answer.GetBlockLength()),
+		PIRType:    answer.GetPirType(),
+		Merkle:     &database.Merkle{Root: answer.GetRoot(), ProofLen: int(answer.GetProofLen())},
+	}
+
+	return dbInfo
+}
+
+func equalDBInfo(info []*database.Info) bool {
+	for i := range info {
+		if info[0].NumRows != info[i].NumRows ||
+			info[0].NumColumns != info[i].NumColumns ||
+			info[0].BlockSize != info[i].BlockSize {
+			return false
+		}
+	}
+
+	return true
 }
 
 func connectToServer(creds credentials.TransportCredentials, address string) (*grpc.ClientConn, error) {
