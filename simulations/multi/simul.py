@@ -1,3 +1,5 @@
+import time
+import requests
 import multiprocessing
 from multiprocessing import Process
 import os
@@ -8,7 +10,7 @@ from fabric import Connection
 user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
 simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
-default_server_command = "./server -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={}"
+default_server_command = "screen -dm ./server -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
 
 def test_command():
     return 'uname -a'
@@ -63,8 +65,9 @@ def server_pir_merkle_command(dbLen, elemBitSize, nRows, blockLen):
 def experiment_pir_classic(server_pool, client):
     gc = load_general_config()
     ic = load_individual_config('pirClassic.toml')
-    server_pool.run('cd ' + simul_dir + '/server && ' + server_pir_classic_command(gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']))
-    client.run('cd' + simul_dir + '/client && client')
+    server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(gc['DBBitLengths'][0], ic['ElementBitSize'], ic['NumRows'], ic['BlockLength']))
+    time.sleep(10)
+    client.run('cd ' + simul_dir + 'client && ./client')
 
 pool = servers_pool()
 for i, c in enumerate(pool):
