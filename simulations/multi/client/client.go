@@ -5,10 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"sync"
 	"time"
 
+	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -29,10 +31,11 @@ type localClient struct {
 	callOptions []grpc.CallOption
 	connections map[string]*grpc.ClientConn
 
-	prg    *utils.PRGReader
-	config *utils.Config
-	flags  *flags
-	dbInfo *database.Info
+	prg        *utils.PRGReader
+	config     *utils.Config
+	flags      *flags
+	dbInfo     *database.Info
+	vpirClient client.Client
 }
 
 type flags struct {
@@ -102,7 +105,8 @@ func (lc *localClient) exec() (string, error) {
 
 	// start correct client
 	switch lc.flags.scheme {
-
+	case "pir-classic", "pir-merkle":
+		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
@@ -141,6 +145,31 @@ func (lc *localClient) exec() (string, error) {
 	// }
 
 	return "", nil
+}
+
+func (lc *localClient) retrievePointPIR() {
+	numTotalBlocks := lc.dbInfo.NumRows * lc.dbInfo.NumColumns
+	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
+
+	var startIndex int
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+
+		// pick a random block index to start the retrieval
+		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
+		for i := 0; i < numRetrieveBlocks; i++ {
+			queries := c.Query(startIndex+i, len(ss))
+
+			_, err := c.Reconstruct(answers)
+			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			results[j].Bandwidth[i].Reconstruct = 0
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+
+	return results
 }
 
 func (lc *localClient) connectToServers() error {
