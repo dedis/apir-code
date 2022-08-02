@@ -1,14 +1,14 @@
 # Configuration for gRPC-based application
 
-client = "iccluster105.iccluster.epfl.ch"
+client = "10.90.40.3"
 
 [servers]
   [servers.0]
-ip = "10.90.36.36"
+  ip = "10.90.39.17"
   port = 50050
 
   [servers.1]
-  ip = "10.90.36.37"
+  ip = "10.90.39.23"
   port = 50051
 
   #[servers.2]
