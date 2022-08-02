@@ -67,7 +67,7 @@ func parseFlags() *flags {
 	// experiments flags
 	flag.IntVar(&f.repetitions, "repetitions", -1, "experiment repetitions")
 	flag.IntVar(&f.elemBitSize, "elemBitSize", -1, "bit size of element, in which block lengtht is specified")
-	flag.IntVar(&f.bitsToRetrieve, "bitsRetrieve", -1, "number of bits to retrieve in experiment")
+	flag.IntVar(&f.bitsToRetrieve, "bitsToRetrieve", -1, "number of bits to retrieve in experiment")
 
 	// scheme flags
 	flag.StringVar(&f.scheme, "scheme", "", "scheme to use")
