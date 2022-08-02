@@ -8,8 +8,7 @@ import matplotlib.pyplot as plt
 from utils import *
 
 #resultFolder = "final_results/"
-#resultFolder = "results/"
-resultFolder = "results_106/"
+resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -375,6 +374,7 @@ def plotMulti():
 def plotPreprocessing():
     scheme = "preprocessingMerkle.json"
     
+    results = dict()
     # parse results, these are different from the others 
     # since we only store preprocessing time
     # using the server's Answer time
@@ -385,36 +385,34 @@ def plotPreprocessing():
         dbResults = data['Results']
         # iterate the (size, results) pairs
         for dbSize, dbResult in dbResults.items():
-            print(dbSize, dbResult['CPU'])
+            results[int(dbSize)] = []
+            for r in dbResult:
+                results[int(dbSize)].append(r['CPU'][0]['Answers'][0])
 
-    fig, axs = plt.subplots() 
+    # take mean
+    for k, v in results.items():
+        results[k] = np.mean(v)
 
-    cpuArray = []
-    x = []
-    for i, scheme in enumerate(schemes):
-        stats = allStats(resultFolder + scheme)
-        cpuArray.append([])
-        for j, dbSize in enumerate(sorted(stats.keys())):
-            # means
-            cpuArray[i].append(cpuMean(stats, dbSize))
+    print(results)
 
-        axs[0].plot(
-                sorted(stats.keys()), 
-                cpuArray[i], 
-                color='black', 
-                marker=markers[int(i / (len(schemes) / 2))],
-                linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))],
-                linewidth=0.5,
-        )
+    plt.plot(
+    range(len(results)), 
+    [x/1000 for x in sorted(results.values())],
+    color='black', 
+    marker=markers[0],
+    linestyle=linestyles[0],
+    linewidth=0.5,
+    )
+
+    # fig, axs = plt.subplots() 
 
     # cosmetics
-    axs[0].set_ylabel('CPU time [s]')
-    axs[0].set_xticks(sorted(stats.keys())), 
-    axs[1].set_ylabel('Bandwidth [MiB]')
-    axs[1].set_xlabel('Number of servers')
-    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           ncol=2, mode="expand", borderaxespad=0.)
+    plt.xticks(range(len(results)), [int(x/GiB) for x in sorted(results.keys())])
+    plt.ylabel('CPU time [s]')
+    # axs.set_xticks(sorted(results.keys())), 
+    plt.xlabel('Database size')
+    # axs.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           # ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/preprocessing.eps', format='eps', dpi=300, transparent=True)
