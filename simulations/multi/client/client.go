@@ -144,6 +144,7 @@ func (lc *localClient) exec() (string, error) {
 	switch lc.flags.scheme {
 	case "pir-classic", "pir-merkle":
 		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
+		lc.retrievePointPIR()
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
