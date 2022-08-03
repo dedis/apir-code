@@ -31,7 +31,7 @@ const (
 
 func main() {
 	sid := readServerID()
-	logFile := flag.String("log", "", "write log to file instead of stdout/stderr")
+	logFile := flag.String("logFile", "", "write log to file instead of stdout/stderr")
 	scheme := flag.String("scheme", "", "scheme to use: pir-classic, pir-merkle")
 	elemBitSize := flag.Int("elemBitSize", -1, "bit size of element, in which block lengtht is specified")
 	dbLen := flag.Int("dbLen", -1, "DB length in bits")

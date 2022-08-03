@@ -106,7 +106,7 @@ def experiment_pir_classic(server_pool, client):
         server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(logFile, dl, ebs, nr, bl))
         time.sleep(10)
         print("\t Run client")
-        client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command(logFile, rep, ebs, btr))
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command("logFile", rep, ebs, btr))
         # kill servers
         for s in servers_addresses():
             requests.get("http://" + s + ":8080")
