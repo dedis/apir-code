@@ -45,6 +45,7 @@ type flags struct {
 	// experiments flag
 	logFile        string
 	repetitions    int
+	numServers     int
 	elemBitSize    int
 	bitsToRetrieve int
 
@@ -68,6 +69,8 @@ func parseFlags() *flags {
 	// experiments flags
 	flag.StringVar(&f.logFile, "logFile", "", "file to store logs")
 	flag.IntVar(&f.repetitions, "repetitions", -1, "experiment repetitions")
+	// default number of servers is 2
+	flag.IntVar(&f.numServers, "numServers", 2, "number of servers for the experiment")
 	flag.IntVar(&f.elemBitSize, "elemBitSize", -1, "bit size of element, in which block lengtht is specified")
 	flag.IntVar(&f.bitsToRetrieve, "bitsToRetrieve", -1, "number of bits to retrieve in experiment")
 
@@ -132,7 +135,7 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	err := lc.connectToServers()
+	err := lc.connectToServers(lc.flags.numServers)
 	defer lc.closeConnections()
 
 	if err != nil {
@@ -239,7 +242,7 @@ func (lc *localClient) retrievePointPIR() {
 	}
 }
 
-func (lc *localClient) connectToServers() error {
+func (lc *localClient) connectToServers(numServers int) error {
 	// load servers certificates
 	creds, err := utils.LoadServersCertificates()
 	if err != nil {
@@ -248,7 +251,7 @@ func (lc *localClient) connectToServers() error {
 
 	// connect to servers and store connections
 	lc.connections = make(map[string]*grpc.ClientConn)
-	for _, s := range lc.config.Addresses {
+	for _, s := range lc.config.Addresses[0:numServers] {
 		conn, err := connectToServer(creds, s)
 		if err != nil {
 			return xerrors.Errorf("failed to connect: %v", err)
