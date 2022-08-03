@@ -11,7 +11,8 @@ user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
 simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
 default_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
-default_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}, -numServers={}"
+default_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
+default_client_multi_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={} -numServers={}"
 results_dir = "results"
 
 def test_command():
@@ -75,7 +76,7 @@ def client_pir_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve
     return default_client_command.format(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve)
 
 def client_pir_multi_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve, numServers):
-    return default_client_command.format(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve, numServers)
+    return default_client_multi_command.format(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve, numServers)
 
 def experiment_pir(pir_type, server_pool, client):
     print('Experiment PIR', pir_type)
@@ -114,10 +115,9 @@ def experiment_pir(pir_type, server_pool, client):
         client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
 
 def experiment_pir_multi(pir_type, server_pool, client):
-    print('Experiment PIR multi', pir_type)
+    # print('Experiment PIR multi', pir_type)
     gc = load_general_config()
     ic = load_individual_config('pir_' + pir_type + '_multi.toml')
-    print("\t Run", len(server_pool), "servers")
     # define experiment parameters
     dl = 8589935000 # 1 GiB for this experiment
     rep = gc['Repetitions']
@@ -130,11 +130,12 @@ def experiment_pir_multi(pir_type, server_pool, client):
     # run experiment on all database lengths
     for s in numServers:
         logFile = "pir_" + pir_type + "_multi_" + str(s) + ".log"
-        print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
+        print("\t Starting", str(s), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
         print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
         server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
-        time.sleep(300)
+        time.sleep(30)
         print("\t Run client")
+        print("\t client command:", client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
         client.run('cd ' + simul_dir + 'client && ' + client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
         # kill servers
         for s in servers_addresses():
@@ -149,6 +150,14 @@ def experiment_pir_multi(pir_type, server_pool, client):
 
         print("\t client", "log file location:", simul_dir + 'client/' + logFile)
         client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
+
+        # delete useless logs from servers that weren't used in the specific iteration
+        directory = os.fsencode(results_dir)
+        for file in os.listdir(directory):
+            filename = os.fsdecode(file)
+            if "multi" in filename and 'stats' not in open(results_dir + "/" + filename).read():
+                print("removing uselss log file", filename)
+                os.remove(results_dir + "/" + filename)
 
 def experiment_pir_classic(server_pool, client):
     experiment_pir("classic", server_pool, client)
@@ -166,6 +175,7 @@ def experiment_pir_multi_merkle(server_pool, client):
 print("Servers' setup")
 pool = servers_pool()
 for i, c in enumerate(pool):
+    print("\t Setting up server", i, "with Fabric connection", c)
     server_setup(c, i)
 print("Client's setup")
 client_host = client_address()
@@ -173,9 +183,9 @@ client = Connection(client_host, user=user, connect_kwargs={'password': password
 client_setup(client)
 
 # run experiments, in this case only with two servers
-experiment_pir_classic(pool[0:2], client)
-experiment_pir_merkle(pool[0:2], client)
+#experiment_pir_classic(pool[0:2], client)
+#experiment_pir_merkle(pool[0:2], client)
 
 # run multi experiments, with all the servers
-experiment_pir_multi_classic(pool, client)
-experiment_pir_multi_merkle(pool, client)
+#experiment_pir_multi_classic(pool, client)
+#experiment_pir_multi_merkle(pool, client)
