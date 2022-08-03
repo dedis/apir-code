@@ -101,7 +101,7 @@ def experiment_pir_classic(server_pool, client):
 
     # run experiment on all database lengths
     for dl in databaseLengths:
-        logFile = "pir_classic" + dl + ".log"
+        logFile = "pir_classic" + str(dl) + ".log"
         print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
         server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(logFile, dl, ebs, nr, bl))
         time.sleep(10)
