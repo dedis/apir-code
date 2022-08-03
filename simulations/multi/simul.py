@@ -77,7 +77,7 @@ def client_pir_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve
 def experiment_pir(pir_type, server_pool, client):
     print('Experiment PIR', pir_type)
     gc = load_general_config()
-    ic = load_individual_config('pir' + pir_type + '.toml')
+    ic = load_individual_config('pir_' + pir_type + '.toml')
     print("\t Run", len(server_pool), "servers")
     # define experiment parameters
     databaseLengths = gc['DBBitLengths']
@@ -91,10 +91,10 @@ def experiment_pir(pir_type, server_pool, client):
     for dl in databaseLengths:
         logFile = "pir_" + pir_type + "_" + str(dl) + ".log"
         print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
-        server_pool.run('cd ' + simul_dir + 'server && ' + server_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
         time.sleep(10)
         print("\t Run client")
-        client.run('cd ' + simul_dir + 'client && ' + client_command(logFile, "pir-" + pir_type, rep, ebs, btr))
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_command("", "pir-" + pir_type, rep, ebs, btr))
         # kill servers
         for s in servers_addresses():
             requests.get("http://" + s + ":8080")
@@ -109,8 +109,8 @@ def experiment_pir(pir_type, server_pool, client):
         print("\t client", "log file location:", simul_dir + 'client/' + logFile)
         client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
 
-def experiment_pir_classic(server_pool, client):
-    experiment_pir("classic", server_pool, client)
+# def experiment_pir_classic(server_pool, client):
+    # experiment_pir("classic", server_pool, client)
 
 def experiment_pir_merkle(server_pool, client):
     experiment_pir("merkle", server_pool, client)
@@ -123,4 +123,4 @@ print("Client's setup")
 client_host = client_address()
 client = Connection(client_host, user=user, connect_kwargs={'password': password,})
 client_setup(client)
-experiment_pir_classic(pool, client)
+experiment_pir_merkle(pool, client)

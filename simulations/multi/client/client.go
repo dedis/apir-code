@@ -318,6 +318,7 @@ func dbInfo(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOption) 
 		Merkle:     &database.Merkle{Root: answer.GetRoot(), ProofLen: int(answer.GetProofLen())},
 	}
 
+	fmt.Println(answer.GetRoot())
 	return dbInfo
 }
 
