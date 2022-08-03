@@ -24,9 +24,9 @@ import (
 )
 
 const (
-	configEnvKey = "VPIR_CONFIG"
-
+	configEnvKey      = "VPIR_CONFIG"
 	defaultConfigFile = "../config.toml"
+	dbPRGkey          = "asuperstrong16db" //32 bit key for AES-256
 )
 
 func main() {
@@ -82,7 +82,9 @@ func main() {
 	)
 
 	// initialize DB PRG
-	dbPRG := utils.RandomPRG()
+	var prgKey *utils.PRGKey
+	copy(prgKey[:], []byte(dbPRGkey))
+	dbPRG := utils.NewPRG(prgKey)
 
 	// Find the total number of blocks in the db
 	numBlocks := *dbLen
