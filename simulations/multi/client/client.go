@@ -43,6 +43,7 @@ type localClient struct {
 // TODO: remove useless flags
 type flags struct {
 	// experiments flag
+	logFile        string
 	repetitions    int
 	elemBitSize    int
 	bitsToRetrieve int
@@ -65,6 +66,7 @@ func parseFlags() *flags {
 	f := new(flags)
 
 	// experiments flags
+	flag.StringVar(&f.logFile, "logFile", "", "file to store logs")
 	flag.IntVar(&f.repetitions, "repetitions", -1, "experiment repetitions")
 	flag.IntVar(&f.elemBitSize, "elemBitSize", -1, "bit size of element, in which block lengtht is specified")
 	flag.IntVar(&f.bitsToRetrieve, "bitsToRetrieve", -1, "number of bits to retrieve in experiment")
@@ -103,6 +105,14 @@ func newLocalClient() *localClient {
 	// set logs to stdout
 	log.SetOutput(os.Stdout)
 	log.SetPrefix(fmt.Sprintf("[Client] "))
+	if len(lc.flags.logFile) > 0 {
+		f, err := os.Create(lc.flags.logFile)
+		if err != nil {
+			log.Fatal("Could not open file: ", err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	}
 
 	// load configs
 	configPath := os.Getenv(configEnvKey)

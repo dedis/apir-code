@@ -10,8 +10,8 @@ from fabric import Connection
 user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
 simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
-default_server_command = "screen -dm ./server -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
-default_client_command = "./client -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
+default_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
+default_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
 
 def test_command():
     return 'uname -a'
@@ -67,23 +67,23 @@ def client_setup(c):
     # disable now useless agent forwarding
     c.forward_agent = False
 
-def server_command(scheme, dbLen, elemBitSize, nRows, blockLen):
-    return default_server_command.format(scheme, dbLen, elemBitSize, nRows, blockLen)
+def server_command(logFile, scheme, dbLen, elemBitSize, nRows, blockLen):
+    return default_server_command.format(logFile, scheme, dbLen, elemBitSize, nRows, blockLen)
 
-def server_pir_classic_command(dbLen, elemBitSize, nRows, blockLen):
-    return server_command('pir-classic', dbLen, elemBitSize, nRows, blockLen)
+def server_pir_classic_command(logFile, dbLen, elemBitSize, nRows, blockLen):
+    return server_command(logFile, 'pir-classic', dbLen, elemBitSize, nRows, blockLen)
 
-def server_pir_merkle_command(dbLen, elemBitSize, nRows, blockLen):
-   return server_command('pir-merkle', dbLen, elemBitSize, nRows, blockLen)
+def server_pir_merkle_command(logFile, dbLen, elemBitSize, nRows, blockLen):
+   return server_command(logFile, 'pir-merkle', dbLen, elemBitSize, nRows, blockLen)
 
-def client_command(scheme, repetitions, elemBitSize, bitsToRetrieve):
-    return default_client_command.format('pir-classic', repetitions, elemBitSize, bitsToRetrieve)
+def client_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve):
+    return default_client_command.format(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve)
 
-def client_pir_classic_command(repetitions, elemBitSize, bitsToRetrieve):
-    return client_command('pir-classic', repetitions, elemBitSize, bitsToRetrieve)
+def client_pir_classic_command(logFile, repetitions, elemBitSize, bitsToRetrieve):
+    return client_command(logFile, 'pir-classic', repetitions, elemBitSize, bitsToRetrieve)
 
-def client_pir_merkle_command(repetitions, elemBitSize, bitsToRetrieve):
-    return client_command('pir-merkle', repetitions, elemBitSize, bitsToRetrieve)
+def client_pir_merkle_command(logFile, repetitions, elemBitSize, bitsToRetrieve):
+    return client_command(logFile, 'pir-merkle', repetitions, elemBitSize, bitsToRetrieve)
 
 
 def experiment_pir_classic(server_pool, client):
@@ -98,15 +98,25 @@ def experiment_pir_classic(server_pool, client):
     nr = ic['NumRows']
     bl = ic['BlockLength']
     btr = gc['BitsToRetrieve']
+
+    # run experiment on all database lengths
     for dl in databaseLengths:
+        logFile = "pir_classic" + dl + ".log"
         print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
-        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(dl, ebs, nr, bl))
+        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(logFile, dl, ebs, nr, bl))
         time.sleep(10)
         print("\t Run client")
-        client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command(rep, ebs, btr))
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command(logFile, rep, ebs, btr))
         # kill servers
         for s in servers_addresses():
             requests.get("http://" + s + ":8080")
+
+    # get all log files
+    for dl in databaseLengths:
+        logFile = "pir_classic" + dl + ".log"
+        for i, c in enumerate(servers_pool):
+            c.get(logFile, "server_" + str(i) + logFile)
+        client.get(logFile, "client_" + logFile)
 
 print("Servers' setup")
 pool = servers_pool()
