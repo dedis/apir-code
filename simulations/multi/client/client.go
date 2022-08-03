@@ -157,25 +157,14 @@ func (lc *localClient) exec() (string, error) {
 	case "pir-classic", "pir-merkle":
 		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
 		lc.retrievePointPIR()
+	case "fss-classic":
+		lc.vpirClient = client.NewPredicatePIR(lc.prg, lc.dbInfo)
+	case "fss-auth":
+		lc.vpirClient = client.NewPredicateAPIR(lc.prg, lc.dbInfo)
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
-	// case "pointPIR", "pointVPIR":
-	// 	lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
 
-	// 	// get id
-	// 	if lc.flags.id == "" {
-	// 		var id string
-	// 		fmt.Print("please enter the id: ")
-	// 		fmt.Scanln(&id)
-	// 		if id == "" {
-	// 			log.Fatal("id not provided")
-	// 		}
-	// 		lc.flags.id = id
-	// 	}
-
-	// 	// retrieve the key corresponding to the id
-	// 	return lc.retrieveKeyGivenId(lc.flags.id)
 	// case "complexPIR":
 	// 	lc.vpirClient = client.NewPredicatePIR(lc.prg, lc.dbInfo)
 	// 	out, err := lc.retrieveComplexQuery()
@@ -196,6 +185,19 @@ func (lc *localClient) exec() (string, error) {
 
 	return "", nil
 }
+
+// func (lc *localClient) retrieveComplexPIR() {
+// 	stringToSearch := utils.Ranstring(inputSize)
+
+// 	in := utils.ByteToBits([]byte(stringToSearch))
+// 	q := &query.ClientFSS{
+// 		Info:  &query.Info{Target: query.UserId, FromStart: inputSize},
+// 		Input: in,
+// 	}
+// 	for j := 0; j < lc.flags.repetitions; j++ {
+
+// 	}
+// }
 
 func (lc *localClient) retrievePointPIR() {
 	numTotalBlocks := lc.dbInfo.NumRows * lc.dbInfo.NumColumns
