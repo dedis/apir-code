@@ -38,7 +38,6 @@ type localClient struct {
 	flags      *flags
 	dbInfo     *database.Info
 	vpirClient client.Client
-	logFile    *os.File
 }
 
 // TODO: remove useless flags
@@ -103,18 +102,6 @@ func newLocalClient() *localClient {
 		flags: parseFlags(),
 	}
 
-	// set logs to stdout
-	log.SetOutput(os.Stdout)
-	log.SetPrefix(fmt.Sprintf("[Client] "))
-	if len(lc.flags.logFile) > 0 {
-		f, err := os.Create(lc.flags.logFile)
-		if err != nil {
-			log.Fatal("Could not open file: ", err)
-		}
-		lc.logFile = f
-		log.SetOutput(f)
-	}
-
 	// load configs
 	configPath := os.Getenv(configEnvKey)
 	if configPath == "" {
@@ -133,6 +120,18 @@ func newLocalClient() *localClient {
 func main() {
 	lc := newLocalClient()
 
+	// set logs to stdout
+	log.SetOutput(os.Stdout)
+	log.SetPrefix(fmt.Sprintf("[Client] "))
+	if len(lc.flags.logFile) > 0 {
+		f, err := os.Create(lc.flags.logFile)
+		if err != nil {
+			log.Fatal("Could not open file: ", err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	}
+
 	err := lc.connectToServers()
 	defer lc.closeConnections()
 
@@ -144,10 +143,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// close logFile
-	lc.logFile.Close()
-
 }
 
 func (lc *localClient) exec() (string, error) {
