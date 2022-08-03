@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "results/"
+resultFolder = "final_results/"
+#resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -393,8 +393,6 @@ def plotPreprocessing():
     for k, v in results.items():
         results[k] = np.mean(v)
 
-    print(results)
-
     plt.plot(
     range(len(results)), 
     [x/1000 for x in sorted(results.values())],
@@ -410,7 +408,7 @@ def plotPreprocessing():
     plt.xticks(range(len(results)), [int(x/GiB) for x in sorted(results.keys())])
     plt.ylabel('CPU time [s]')
     # axs.set_xticks(sorted(results.keys())), 
-    plt.xlabel('Database size')
+    plt.xlabel('Database size [GiB]')
     # axs.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            # ncol=2, mode="expand", borderaxespad=0.)
 
