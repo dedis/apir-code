@@ -183,14 +183,15 @@ func (lc *localClient) exec() (string, error) {
 }
 
 // func (lc *localClient) retrieveComplexPIR() {
-// 	stringToSearch := utils.Ranstring(inputSize)
+// 	stringToSearch := utils.Ranstring(lc.flags.inputSize)
 
 // 	in := utils.ByteToBits([]byte(stringToSearch))
 // 	q := &query.ClientFSS{
-// 		Info:  &query.Info{Target: query.UserId, FromStart: inputSize},
+// 		Info:  &query.Info{Target: query.UserId, FromStart: lc.flags.inputSize},
 // 		Input: in,
 // 	}
 // 	for j := 0; j < lc.flags.repetitions; j++ {
+// 		log.Printf("start repetition %d out of %d", j+1, lc.flags.repetitions)
 
 // 	}
 // }

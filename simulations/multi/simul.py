@@ -184,9 +184,9 @@ client = Connection(client_host, user=user, connect_kwargs={'password': password
 client_setup(client)
 
 # run experiments, in this case only with two servers
-#experiment_pir_classic(pool[0:2], client)
-#experiment_pir_merkle(pool[0:2], client)
+experiment_pir_classic(pool[0:2], client)
+experiment_pir_merkle(pool[0:2], client)
 
 # run multi experiments, with all the servers
-#experiment_pir_multi_classic(pool, client)
-#experiment_pir_multi_merkle(pool, client)
+experiment_pir_multi_classic(pool, client)
+experiment_pir_multi_merkle(pool, client)
