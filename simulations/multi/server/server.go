@@ -200,10 +200,7 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 		return nil, err
 	}
 	answerLen := len(a)
-	log.Printf("answer size in bytes: %d", answerLen)
-	if s.experiment {
-		log.Printf("stats,%d,%d", s.cores, answerLen)
-	}
+	log.Printf("stats,%d", answerLen)
 
 	return &proto.QueryResponse{Answer: a}, nil
 }

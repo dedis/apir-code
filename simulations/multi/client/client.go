@@ -206,6 +206,9 @@ func (lc *localClient) retrievePointPIR() {
 		// pick a random block index to start the retrieval
 		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
 
+		// bandwidth for statistics
+		bw := 0
+		t := time.Now()
 		for i := 0; i < numRetrieveBlocks; i++ {
 			binary.BigEndian.PutUint32(queryByte, uint32(startIndex+i))
 			queries, err := lc.vpirClient.QueryBytes(queryByte, len(lc.connections))
@@ -213,6 +216,11 @@ func (lc *localClient) retrievePointPIR() {
 				log.Fatal("error when executing query:", err)
 			}
 			log.Printf("done with queries computation")
+
+			// store bw for queries
+			for _, q := range queries {
+				bw += len(q)
+			}
 
 			// send queries to servers
 			answers := lc.runQueries(queries)
@@ -224,6 +232,10 @@ func (lc *localClient) retrievePointPIR() {
 			}
 			log.Printf("done with block reconstruction")
 		}
+
+		// user time elapsed
+		elapsedTime := time.Since(t)
+		log.Printf("stats,%d,%d,%f", j, bw, elapsedTime.Seconds())
 	}
 }
 
@@ -377,7 +389,6 @@ func queryServer(ctx context.Context, conn *grpc.ClientConn, opts []grpc.CallOpt
 			conn.Target(), err)
 	}
 	log.Printf("sent query to %s", conn.Target())
-	log.Printf("query size in bytes %d", len(query))
 
 	return answer.GetAnswer()
 }

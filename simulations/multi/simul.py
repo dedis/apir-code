@@ -12,6 +12,7 @@ password = os.getenv('APIR_PASSWORD')
 simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
 default_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
 default_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
+results_dir = "results"
 
 def test_command():
     return 'uname -a'
@@ -106,17 +107,20 @@ def experiment_pir_classic(server_pool, client):
         server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(logFile, dl, ebs, nr, bl))
         time.sleep(10)
         print("\t Run client")
-        client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command("logFile", rep, ebs, btr))
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command(logFile, rep, ebs, btr))
         # kill servers
         for s in servers_addresses():
             requests.get("http://" + s + ":8080")
 
     # get all log files
     for dl in databaseLengths:
-        logFile = "pir_classic" + dl + ".log"
-        for i, c in enumerate(servers_pool):
-            c.get(simul_dir + 'server/' + logFile, "server_" + str(i) + logFile)
-        client.get(simul_dir + 'client/' + logFile, "client_" + logFile)
+        logFile = "pir_classic_" + str(dl) + ".log"
+        for i, c in enumerate(server_pool):
+            print("\t server", str(i), "log file location:", simul_dir + 'server/' + logFile)
+            c.get(simul_dir + 'server/' + logFile, results_dir + "/server_" + str(i) + "_" + logFile)
+
+        print("\t client", "log file location:", simul_dir + 'client/' + logFile)
+        client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
 
 print("Servers' setup")
 pool = servers_pool()
