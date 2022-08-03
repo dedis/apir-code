@@ -82,7 +82,7 @@ func main() {
 	)
 
 	// initialize DB PRG
-	var prgKey *utils.PRGKey
+	prgKey := new(utils.PRGKey)
 	copy(prgKey[:], []byte(dbPRGkey))
 	dbPRG := utils.NewPRG(prgKey)
 
