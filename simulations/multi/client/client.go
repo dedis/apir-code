@@ -38,6 +38,7 @@ type localClient struct {
 	flags      *flags
 	dbInfo     *database.Info
 	vpirClient client.Client
+	logFile    *os.File
 }
 
 // TODO: remove useless flags
@@ -110,7 +111,7 @@ func newLocalClient() *localClient {
 		if err != nil {
 			log.Fatal("Could not open file: ", err)
 		}
-		defer f.Close()
+		lc.logFile = f
 		log.SetOutput(f)
 	}
 
@@ -143,6 +144,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// close logFile
+	lc.logFile.Close()
 
 }
 
