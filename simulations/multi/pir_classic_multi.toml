@@ -1,0 +1,6 @@
+Name = "pirClassicMulti"
+Primitive = "pir-classic"
+NumRows = 0 # every NumRows != 1 indicate matrix
+BlockLength = 1024
+ElementBitSize = 8
+NumServers = [2, 3, 4, 5]
