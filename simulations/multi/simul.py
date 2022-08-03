@@ -13,6 +13,7 @@ simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
 default_pir_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
 default_pir_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
 default_pir_client_multi_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={} -numServers={}"
+default_fss_client_command = "./client -logFile={} -scheme={} -repetitions={} -inputSize={}"
 results_dir = "results"
 
 def test_command():

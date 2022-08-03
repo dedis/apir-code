@@ -52,10 +52,8 @@ type flags struct {
 	// scheme flags
 	scheme string
 
-	// flags for point queries
-	id string
-
 	// flags for complex queries
+	inputSize int
 	target    string
 	fromStart int
 	fromEnd   int
@@ -77,10 +75,8 @@ func parseFlags() *flags {
 	// scheme flags
 	flag.StringVar(&f.scheme, "scheme", "", "scheme to use")
 
-	// flag for point queries
-	flag.StringVar(&f.id, "id", "", "id of key to retrieve")
-
 	// flag for complex queries
+	flag.IntVar(&f.inputSize, "inputSize", -1, "input of string to search of")
 	flag.StringVar(&f.target, "target", "", "target for complex query")
 	flag.IntVar(&f.fromStart, "from-start", 0, "from start parameter for complex query")
 	flag.IntVar(&f.fromEnd, "from-end", 0, "from end parameter for complex query")
