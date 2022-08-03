@@ -93,9 +93,9 @@ def experiment_pir(pir_type, server_pool, client):
         print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
         print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
         server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
-        time.sleep(20)
+        time.sleep(120)
         print("\t Run client")
-        client.run('cd ' + simul_dir + 'client && ' + client_pir_command("", "pir-" + pir_type, rep, ebs, btr))
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_command(logFile, "pir-" + pir_type, rep, ebs, btr))
         # kill servers
         for s in servers_addresses():
             requests.get("http://" + s + ":8080")
