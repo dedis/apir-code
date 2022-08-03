@@ -92,17 +92,21 @@ def experiment_pir_classic(server_pool, client):
     ic = load_individual_config('pirClassic.toml')
     print("\t Run", len(server_pool), "servers")
     # define experiment parameters
-    dl = gc['DBBitLengths'][0]
+    databaseLengths = gc['DBBitLengths']
     rep = gc['Repetitions']
     ebs = ic['ElementBitSize']
     nr = ic['NumRows']
     bl = ic['BlockLength']
     btr = gc['BitsToRetrieve']
-    print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
-    server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(dl, ebs, nr, bl))
-    time.sleep(10)
-    print("\t Run client")
-    client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command(rep, ebs, btr))
+    for dl in databaseLengths:
+        print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
+        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_classic_command(dl, ebs, nr, bl))
+        time.sleep(10)
+        print("\t Run client")
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_classic_command(rep, ebs, btr))
+        # kill servers
+        for s in servers_addresses():
+            requests.get(s + ":8080")
 
 print("Servers' setup")
 pool = servers_pool()
