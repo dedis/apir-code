@@ -109,7 +109,7 @@ func main() {
 		numIdenfitiers := 100000
 		dbFSS, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	default:
 		log.Fatal("unknow scheme: " + string(*scheme))
