@@ -1,0 +1,6 @@
+Name = "fss"
+Primitive = "fss"
+NumRows = 1
+BlockLength = 2
+ElementBitSize = 31
+InputSizes = [1, 4, 8, 12, 16, 20, 24, 28, 32]
