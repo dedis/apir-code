@@ -51,6 +51,14 @@ def servers_pool():
             connect_kwargs={'password': password,},
             )
 
+def two_servers_pool():
+    servers = servers_addresses()
+    two_servers = servers[0:2]
+    return Group(*two_servers, 
+            user=user, 
+            connect_kwargs={'password': password,},
+            )
+
 def server_setup(c, sid):
     # enable agent forwarding for git pull
     c.forward_agent = True
@@ -178,14 +186,15 @@ pool = servers_pool()
 for i, c in enumerate(pool):
     print("\t Setting up server", i, "with Fabric connection", c)
     server_setup(c, i)
+two_pool = two_servers_pool()
 print("Client's setup")
 client_host = client_address()
 client = Connection(client_host, user=user, connect_kwargs={'password': password,})
 client_setup(client)
 
 # run experiments, in this case only with two servers
-experiment_pir_classic(pool[0:2], client)
-experiment_pir_merkle(pool[0:2], client)
+experiment_pir_classic(two_pool, client)
+experiment_pir_merkle(two_pool, client)
 
 # run multi experiments, with all the servers
 experiment_pir_multi_classic(pool, client)
