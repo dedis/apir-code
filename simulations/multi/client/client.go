@@ -146,12 +146,11 @@ func main() {
 }
 
 func (lc *localClient) exec() (string, error) {
-	// get and store db info.
-	lc.retrieveDBInfo()
-
 	// start correct client
 	switch lc.flags.scheme {
 	case "pir-classic", "pir-merkle":
+		// get and store db info.
+		lc.retrieveDBInfo()
 		lc.vpirClient = client.NewPIR(lc.prg, lc.dbInfo)
 		lc.retrievePointPIR()
 	case "fss-classic":
