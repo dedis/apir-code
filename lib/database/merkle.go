@@ -68,7 +68,7 @@ func CreateRandomMerkle(rnd io.Reader, dbLen, numRows, blockLen int) *Bytes {
 func makeMerkleEntries(blocks [][]byte, tree *merkle.MerkleTree, nRows, nColumns, blockLen int) []byte {
 	output := make([]byte, 0)
 	var begin, end int
-	NGoRoutines := runtime.NumCPU()
+	NGoRoutines := 1
 	replies := make([]chan []byte, NGoRoutines)
 	blocksPerRoutine := nRows * nColumns / NGoRoutines
 	for i := 0; i < NGoRoutines; i++ {
