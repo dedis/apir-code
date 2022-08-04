@@ -204,12 +204,11 @@ def experiment_fss(fss_type, server_pool, client):
     # run experiment on all database lengths
     for inputSize in inputSizes:
         logFile = "fss_" + fss_type + "_" + str(inputSize) + ".log"
-        print("\t Starting", len(server_pool), "servers")
         print("\t server command:", server_fss_command(logFile, "fss-" + fss_type))
         server_pool.run('cd ' + simul_dir + 'server && ' + server_fss_command(logFile, "fss-" + fss_type))
-        time.sleep(30)
+        time.sleep(300)
         print("\t Run client")
-        client.run('cd ' + simul_dir + 'client && ' + client_fss_command(logFile, "fss-" + fss_type, rep, inputSize))
+        client.run('cd ' + simul_dir + 'client && ' + client_fss_command("", "fss-" + fss_type, rep, inputSize))
         # kill servers
         for s in servers_addresses():
             requests.get("http://" + s + ":8080")
@@ -242,9 +241,13 @@ client = Connection(client_host, user=user, connect_kwargs={'password': password
 client_setup(client)
 
 # run experiments, in this case only with two servers
-#experiment_pir_classic(pool, client)
-#experiment_pir_merkle(pool, client)
+experiment_pir_classic(pool, client)
+experiment_pir_merkle(pool, client)
 
 # run multi experiments, with all the servers
 # experiment_pir_multi_classic(pool, client)
 # experiment_pir_multi_merkle(pool, client)
+
+# run experiments for fss with only two servers
+#experiment_fss_classic(pool, client)
+#experiment_fss_auth(pool, client)
