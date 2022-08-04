@@ -226,7 +226,7 @@ func readServerID() int {
 
 	var sid int
 
-	_, err = fmt.Fscanf(file, "%d\n", &sid) // give a patter to scan
+	_, err = fmt.Fscanf(file, "%d\n", &sid) // give a pattern to scan
 	if err != nil {
 		log.Fatal(err)
 	}

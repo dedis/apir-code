@@ -15,6 +15,7 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/proto"
+	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
@@ -182,35 +183,69 @@ func (lc *localClient) exec() (string, error) {
 	return "", nil
 }
 
-// func (lc *localClient) retrieveComplexPIR() {
-// 	stringToSearch := utils.Ranstring(lc.flags.inputSize)
+func (lc *localClient) retrieveComplexPIR() {
+	stringToSearch := utils.Ranstring(lc.flags.inputSize)
 
-// 	in := utils.ByteToBits([]byte(stringToSearch))
-// 	q := &query.ClientFSS{
-// 		Info:  &query.Info{Target: query.UserId, FromStart: lc.flags.inputSize},
-// 		Input: in,
-// 	}
-// 	for j := 0; j < lc.flags.repetitions; j++ {
-// 		log.Printf("start repetition %d out of %d", j+1, lc.flags.repetitions)
+	in := utils.ByteToBits([]byte(stringToSearch))
+	q := &query.ClientFSS{
+		Info:  &query.Info{Target: query.UserId, FromStart: lc.flags.inputSize},
+		Input: in,
+	}
+	for j := 0; j < lc.flags.repetitions; j++ {
+		log.Printf("start repetition %d out of %d", j+1, lc.flags.repetitions)
 
-// 	}
-// }
+		// data for statistics
+		bw := 0
+		t := time.Now()
+
+		queryBytes, err := q.Encode()
+		if err != nil {
+			log.Fatal(err)
+		}
+		queries, err := lc.vpirClient.QueryBytes(queryBytes, len(lc.connections))
+		if err != nil {
+			log.Fatal("error when executing query:", err)
+		}
+		log.Printf("done with queries computation")
+
+		// store bw for queries
+		for _, q := range queries {
+			bw += len(q)
+		}
+
+		// send queries to servers
+		answers := lc.runQueries(queries)
+
+		// reconstruct
+		_, err = lc.vpirClient.ReconstructBytes(answers)
+		if err != nil {
+			log.Fatal("error during reconstruction:", err)
+		}
+		log.Printf("done with block reconstruction")
+
+		// user time elapsed
+		elapsedTime := time.Since(t)
+		log.Printf("stats,%d,%d,%f", j, bw, elapsedTime.Seconds())
+	}
+
+}
 
 func (lc *localClient) retrievePointPIR() {
 	numTotalBlocks := lc.dbInfo.NumRows * lc.dbInfo.NumColumns
 	numRetrieveBlocks := bitsToBlocks(lc.dbInfo.BlockSize, lc.flags.elemBitSize, lc.flags.bitsToRetrieve)
 
-	var startIndex int
+	// pick a random block index to start the retrieval
+	startIndex := rand.Intn(numTotalBlocks - numRetrieveBlocks)
+
 	queryByte := make([]byte, 4)
 	for j := 0; j < lc.flags.repetitions; j++ {
 		log.Printf("start repetition %d out of %d", j+1, lc.flags.repetitions)
 
-		// pick a random block index to start the retrieval
-		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
-
-		// bandwidth for statistics
+		// data for statistics
 		bw := 0
 		t := time.Now()
+
+		// retrieve appropriate number of blocks
 		for i := 0; i < numRetrieveBlocks; i++ {
 			binary.BigEndian.PutUint32(queryByte, uint32(startIndex+i))
 			queries, err := lc.vpirClient.QueryBytes(queryByte, len(lc.connections))
