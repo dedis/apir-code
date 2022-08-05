@@ -26,7 +26,9 @@ import (
 const (
 	configEnvKey      = "VPIR_CONFIG"
 	defaultConfigFile = "../config.toml"
-	dbPRGkey          = "asuperstrong16db" //32 bit key for AES-256
+
+	// this key is used only for evaluation purposes
+	dbPRGkey = "asuperstrong16db" // 16 bytes key for AES-128
 )
 
 func main() {
@@ -133,8 +135,8 @@ func main() {
 
 	// start server
 	proto.RegisterVPIRServer(rpcServer, &vpirServer{
-		Server:     s,
-		experiment: true,
+		Server: s,
+		scheme: *scheme,
 	})
 	log.Printf("is listening at %s", addr)
 
@@ -151,7 +153,6 @@ func main() {
 	}()
 
 	// start HTTP server for tests
-	// TODO: remove this in application
 	host, _, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.Fatal("impossible to parse addr for HTTP server")
@@ -180,11 +181,10 @@ func main() {
 // vpirServer is used to implement VPIR Server protocol.
 type vpirServer struct {
 	proto.UnimplementedVPIRServer
-	Server server.Server // both IT and DPF-based server
+	Server server.Server
 
-	// only for experiments
-	experiment bool
-	cores      int
+	scheme string
+	cores  int
 }
 
 func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequest) (
@@ -192,6 +192,11 @@ func (s *vpirServer) DatabaseInfo(ctx context.Context, r *proto.DatabaseInfoRequ
 	log.Print("got databaseInfo request")
 
 	dbInfo := s.Server.DBInfo()
+
+	if s.scheme[:3] == "fss" {
+		return &proto.DatabaseInfoResponse{NumColumns: uint32(dbInfo.NumColumns)}, nil
+	}
+
 	resp := &proto.DatabaseInfoResponse{
 		NumRows:     uint32(dbInfo.NumRows),
 		NumColumns:  uint32(dbInfo.NumColumns),
