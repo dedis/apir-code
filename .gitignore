@@ -57,3 +57,4 @@ data/mmap.d/
 # add final_results
 !simulations/final_results/*
 !simulations/final_results_new/*
+!simulations/multi/final_results/*
