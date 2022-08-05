@@ -6,20 +6,23 @@ import tomli
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "results/"
+resultFolder = "final_results/"
+#resultFolder = "results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
 linestyles = ['-', '--', ':', '-.']
 patterns = ['', '//', '.']
 
+# constants
+GiB = 8589934592
+
 def load_config(file):
     with open(file, 'rb') as f:
         return tomli.load(f)
 
 def statistic(a):
-    return np.median(a)
+    return np.mean(a)
 
 def parseClientLog(file):
     tm, bw = [], []
@@ -44,10 +47,17 @@ def parseServerLog(file):
 
     return bw
 
+def getClientStats(scheme, key):
+    # parse client logs
+    client_log = "client_" + scheme + "_" + str(key) + ".log"   
+    return parseClientLog(resultFolder + client_log)
+
 def plotPoint():
     schemes = ["pir_classic", "pir_merkle"]
     config = load_config("simul.toml")
     scheme_labels = ["Unauthenticated", "Authenticated"]
+
+    fig, axs = plt.subplots(2, sharex=True)
 
     db_lengths = config['DBBitLengths']
     time = []
@@ -56,7 +66,46 @@ def plotPoint():
         time.append([])
         bandwidth.append([])
         for dl in db_lengths:
-            print(dl)
+            bw, tm = getClientStats(scheme, dl)
+
+            # parse servers log, in this case we have only 
+            # two servers
+            for k in range(0, 2):
+                server_log = "server_" + str(k) + "_" + scheme + "_" + str(dl) + ".log"
+                bw = [a + b for a,b in zip(bw, parseServerLog(resultFolder + server_log))]
+             
+            time[i].append(statistic(tm))
+            bandwidth[i].append(statistic(bw))
+
+        axs[0].plot(
+                db_lengths,
+                time[i], 
+                color='black', 
+                marker=markers[int(i / (len(schemes) / 2))],
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=scheme_labels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
+        )
+        axs[1].plot(
+                db_lengths,
+                [x*1e-6 for x in bandwidth[i]],
+                color='black', 
+                marker=markers[int(i / (len(schemes) / 2))],
+                linestyle=linestyles[int(i / (len(schemes) / 2))],
+                label=scheme_labels[int(i / (len(schemes) / 2))],
+                linewidth=0.5,
+        )
+
+    # cosmetics
+    axs[0].set_ylabel('User time [s]')
+    axs[0].set_xticks(db_lengths), 
+    axs[1].set_ylabel('Bandwidth [MiB]')
+    axs[1].set_xlabel('Database size [GiB]')
+    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, mode="expand", borderaxespad=0.)
+
+    plt.tight_layout(h_pad=1.5)
+    plt.savefig('figures/point.eps', format='eps', dpi=300, transparent=True)
 
 
 def plotPointMulti():
@@ -73,15 +122,11 @@ def plotPointMulti():
         time.append([])
         bandwidth.append([])
         for j in range(2,num_servers+1):
-            # parse client logs
-            client_log = "client_" + scheme + "_" + str(j) + ".log"   
-            #print("parsing", client_log)
-            bw, tm = parseClientLog(resultFolder + client_log)
+            bw, tm = getClientStats(scheme, j)
 
             # parse servers log
             for k in range(0, j):
                 server_log = "server_" + str(k) + "_" + scheme + "_" + str(j) + ".log"
-                #print("parsing", server_log)
                 bw = [a + b for a,b in zip(bw, parseServerLog(resultFolder + server_log))]
              
             time[i].append(statistic(tm))
@@ -119,4 +164,6 @@ def plotPointMulti():
 
 ## plots
 prepare_for_latex()
-#plotPointMulti()
+
+plotPoint()
+plotPointMulti()
