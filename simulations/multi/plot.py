@@ -47,7 +47,6 @@ def parseServerLog(file):
 def plotPoint():
     schemes = ["pir_classic", "pir_merkle"]
     config = load_config("simul.toml")
-    print(config)
     scheme_labels = ["Unauthenticated", "Authenticated"]
 
     db_lengths = config['DBBitLengths']
@@ -119,7 +118,5 @@ def plotPointMulti():
     plt.savefig('figures/multi.eps', format='eps', dpi=300, transparent=True)
 
 ## plots
-print("here")
 prepare_for_latex()
 #plotPointMulti()
-plotPoint()
