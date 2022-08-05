@@ -1,0 +1,65 @@
+[Server 3] 2022/08/04 08:58:47 flags: 3 pir_classic_multi_5.log pir-classic 8589935000 8 0 1024
+[Server 3] 2022/08/04 08:58:50 is listening at 10.90.40.8:50053
+[Server 3] 2022/08/04 08:58:50 starting grpc server
+[Server 3] 2022/08/04 08:59:33 got databaseInfo request
+[Server 3] 2022/08/04 08:59:33 got query request
+[Server 3] 2022/08/04 08:59:33 stats,1048576
+[Server 3] 2022/08/04 08:59:33 got query request
+[Server 3] 2022/08/04 08:59:33 stats,1048576
+[Server 3] 2022/08/04 08:59:33 got query request
+[Server 3] 2022/08/04 08:59:33 stats,1048576
+[Server 3] 2022/08/04 08:59:33 got query request
+[Server 3] 2022/08/04 08:59:33 stats,1048576
+[Server 3] 2022/08/04 08:59:33 got query request
+[Server 3] 2022/08/04 08:59:33 stats,1048576
+[Server 3] 2022/08/04 08:59:33 got query request
+[Server 3] 2022/08/04 08:59:33 stats,1048576
+[Server 3] 2022/08/04 08:59:33 got query request
+[Server 3] 2022/08/04 08:59:33 stats,1048576
+[Server 3] 2022/08/04 08:59:34 got query request
+[Server 3] 2022/08/04 08:59:34 stats,1048576
+[Server 3] 2022/08/04 08:59:34 got query request
+[Server 3] 2022/08/04 08:59:34 stats,1048576
+[Server 3] 2022/08/04 08:59:34 got query request
+[Server 3] 2022/08/04 08:59:34 stats,1048576
+[Server 3] 2022/08/04 08:59:34 got query request
+[Server 3] 2022/08/04 08:59:34 stats,1048576
+[Server 3] 2022/08/04 08:59:34 got query request
+[Server 3] 2022/08/04 08:59:34 stats,1048576
+[Server 3] 2022/08/04 08:59:34 got query request
+[Server 3] 2022/08/04 08:59:34 stats,1048576
+[Server 3] 2022/08/04 08:59:34 got query request
+[Server 3] 2022/08/04 08:59:34 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:35 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:35 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:35 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:35 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:35 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:35 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:35 stats,1048576
+[Server 3] 2022/08/04 08:59:35 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:36 stats,1048576
+[Server 3] 2022/08/04 08:59:36 got query request
+[Server 3] 2022/08/04 08:59:37 stats,1048576
+[Server 3] 2022/08/04 08:59:37 clean shutdown of server done

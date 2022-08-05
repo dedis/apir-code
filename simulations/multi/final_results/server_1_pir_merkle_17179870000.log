@@ -1,0 +1,65 @@
+[Server 1] 2022/08/04 18:19:23 flags: 1 pir_merkle_17179870000.log pir-merkle 17179870000 8 0 1024
+[Server 1] 2022/08/04 18:19:50 is listening at 10.90.39.23:50051
+[Server 1] 2022/08/04 18:19:50 starting grpc server
+[Server 1] 2022/08/04 18:34:38 got databaseInfo request
+[Server 1] 2022/08/04 18:34:38 got query request
+[Server 1] 2022/08/04 18:34:39 stats,2470545
+[Server 1] 2022/08/04 18:34:39 got query request
+[Server 1] 2022/08/04 18:34:40 stats,2470545
+[Server 1] 2022/08/04 18:34:40 got query request
+[Server 1] 2022/08/04 18:34:40 stats,2470545
+[Server 1] 2022/08/04 18:34:40 got query request
+[Server 1] 2022/08/04 18:34:41 stats,2470545
+[Server 1] 2022/08/04 18:34:41 got query request
+[Server 1] 2022/08/04 18:34:42 stats,2470545
+[Server 1] 2022/08/04 18:34:42 got query request
+[Server 1] 2022/08/04 18:34:42 stats,2470545
+[Server 1] 2022/08/04 18:34:42 got query request
+[Server 1] 2022/08/04 18:34:43 stats,2470545
+[Server 1] 2022/08/04 18:34:43 got query request
+[Server 1] 2022/08/04 18:34:43 stats,2470545
+[Server 1] 2022/08/04 18:34:44 got query request
+[Server 1] 2022/08/04 18:34:44 stats,2470545
+[Server 1] 2022/08/04 18:34:44 got query request
+[Server 1] 2022/08/04 18:34:45 stats,2470545
+[Server 1] 2022/08/04 18:34:45 got query request
+[Server 1] 2022/08/04 18:34:45 stats,2470545
+[Server 1] 2022/08/04 18:34:45 got query request
+[Server 1] 2022/08/04 18:34:46 stats,2470545
+[Server 1] 2022/08/04 18:34:46 got query request
+[Server 1] 2022/08/04 18:34:47 stats,2470545
+[Server 1] 2022/08/04 18:34:47 got query request
+[Server 1] 2022/08/04 18:34:47 stats,2470545
+[Server 1] 2022/08/04 18:34:47 got query request
+[Server 1] 2022/08/04 18:34:48 stats,2470545
+[Server 1] 2022/08/04 18:34:48 got query request
+[Server 1] 2022/08/04 18:34:49 stats,2470545
+[Server 1] 2022/08/04 18:34:49 got query request
+[Server 1] 2022/08/04 18:34:49 stats,2470545
+[Server 1] 2022/08/04 18:34:49 got query request
+[Server 1] 2022/08/04 18:34:50 stats,2470545
+[Server 1] 2022/08/04 18:34:50 got query request
+[Server 1] 2022/08/04 18:34:50 stats,2470545
+[Server 1] 2022/08/04 18:34:51 got query request
+[Server 1] 2022/08/04 18:34:51 stats,2470545
+[Server 1] 2022/08/04 18:34:51 got query request
+[Server 1] 2022/08/04 18:34:52 stats,2470545
+[Server 1] 2022/08/04 18:34:52 got query request
+[Server 1] 2022/08/04 18:34:52 stats,2470545
+[Server 1] 2022/08/04 18:34:52 got query request
+[Server 1] 2022/08/04 18:34:53 stats,2470545
+[Server 1] 2022/08/04 18:34:53 got query request
+[Server 1] 2022/08/04 18:34:53 stats,2470545
+[Server 1] 2022/08/04 18:34:54 got query request
+[Server 1] 2022/08/04 18:34:54 stats,2470545
+[Server 1] 2022/08/04 18:34:54 got query request
+[Server 1] 2022/08/04 18:34:55 stats,2470545
+[Server 1] 2022/08/04 18:34:55 got query request
+[Server 1] 2022/08/04 18:34:55 stats,2470545
+[Server 1] 2022/08/04 18:34:55 got query request
+[Server 1] 2022/08/04 18:34:56 stats,2470545
+[Server 1] 2022/08/04 18:34:56 got query request
+[Server 1] 2022/08/04 18:34:56 stats,2470545
+[Server 1] 2022/08/04 18:34:57 got query request
+[Server 1] 2022/08/04 18:34:57 stats,2470545
+[Server 1] 2022/08/04 18:34:57 clean shutdown of server done
