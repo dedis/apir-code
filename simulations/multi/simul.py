@@ -7,14 +7,21 @@ import tomli
 from fabric import ThreadingGroup as Group
 from fabric import Connection
 
+# servers data
 user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
+
+# simulations directory on servers
 simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
+
+# commands 
 default_pir_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
 default_fss_server_command = "screen -dm ./server -logFile={} -scheme={} && sleep 15"
 default_pir_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
 default_pir_client_multi_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={} -numServers={}"
 default_fss_client_command = "./client -logFile={} -scheme={} -repetitions={} -inputSize={}"
+
+# local directories
 results_dir = "results"
 
 def test_command():
@@ -40,6 +47,10 @@ def servers_addresses():
         addrs.append(s['ip'])
 
     return addrs
+
+def kill_servers(servers):
+    for s in servers:
+        requests.get("http://" + s + ":8080")
 
 def client_address():
     config = load_servers_config()
@@ -120,9 +131,8 @@ def experiment_pir(pir_type, server_pool, client):
             time.sleep(900)
         print("\t Run client")
         client.run('cd ' + simul_dir + 'client && ' + client_pir_command(logFile, "pir-" + pir_type, rep, ebs, btr))
-        # kill servers
-        for s in servers_addresses():
-            requests.get("http://" + s + ":8080")
+
+        kill_servers(servers_addresses())
 
     # get all log files
     for dl in databaseLengths:
@@ -135,12 +145,12 @@ def experiment_pir(pir_type, server_pool, client):
         client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
 
 def experiment_pir_multi(pir_type, server_pool, client):
-    # print('Experiment PIR multi', pir_type)
+    print('Experiment PIR multi', pir_type)
     gc = load_general_config()
     ic = load_individual_config('pir_' + pir_type + '_multi.toml')
+
     # define experiment parameters
-    #dl = 8589935000 # 1 GiB for this experiment
-    dl = 42949672960 # 5 GiB
+    dl = 8589935000 # 1 GiB for this experiment
     rep = gc['Repetitions']
     ebs = ic['ElementBitSize']
     nr = ic['NumRows']
@@ -158,9 +168,8 @@ def experiment_pir_multi(pir_type, server_pool, client):
         print("\t Run client")
         print("\t client command:", client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
         client.run('cd ' + simul_dir + 'client && ' + client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
-        # kill servers
-        for s in servers_addresses():
-            requests.get("http://" + s + ":8080")
+
+        kill_servers(servers_addresses())
 
     # get all log files
     for s in numServers:
@@ -201,17 +210,16 @@ def experiment_fss(fss_type, server_pool, client):
     rep = gc['Repetitions']
     inputSizes = ic['InputSizes']
 
-    # run experiment on all database lengths
+    # run experiment on all input sizes
     for inputSize in inputSizes:
         logFile = "fss_" + fss_type + "_" + str(inputSize) + ".log"
         print("\t server command:", server_fss_command(logFile, "fss-" + fss_type))
         server_pool.run('cd ' + simul_dir + 'server && ' + server_fss_command(logFile, "fss-" + fss_type))
-        time.sleep(300)
+        time.sleep(30)
         print("\t Run client")
         client.run('cd ' + simul_dir + 'client && ' + client_fss_command("", "fss-" + fss_type, rep, inputSize))
-        # kill servers
-        for s in servers_addresses():
-            requests.get("http://" + s + ":8080")
+
+        kill_servers(servers_addresses())
 
     # get all log files
     for inputSize in inputSizes:
@@ -241,13 +249,13 @@ client = Connection(client_host, user=user, connect_kwargs={'password': password
 client_setup(client)
 
 # run experiments, in this case only with two servers
-experiment_pir_classic(pool, client)
-experiment_pir_merkle(pool, client)
+#experiment_pir_classic(pool, client)
+#experiment_pir_merkle(pool, client)
 
 # run multi experiments, with all the servers
 # experiment_pir_multi_classic(pool, client)
 # experiment_pir_multi_merkle(pool, client)
 
 # run experiments for fss with only two servers
-#experiment_fss_classic(pool, client)
-#experiment_fss_auth(pool, client)
+experiment_fss_classic(pool, client)
+experiment_fss_auth(pool, client)

@@ -108,7 +108,7 @@ func main() {
 	case "pir-merkle":
 		dbBytes = database.CreateRandomMerkle(dbPRG, *dbLen, *nRows, *blockLen)
 	case "fss-classic", "fss-auth":
-		numIdenfitiers := 100000
+		numIdenfitiers := 3000000
 		dbFSS, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
 		if err != nil {
 			log.Fatal(err)
