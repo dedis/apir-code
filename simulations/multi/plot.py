@@ -78,7 +78,7 @@ def plotPoint():
             bandwidth[i].append(statistic(bw))
 
         axs[0].plot(
-                db_lengths,
+                [int(x/GiB) for x in db_lengths],
                 time[i], 
                 color='black', 
                 marker=markers[int(i / (len(schemes) / 2))],
@@ -87,7 +87,7 @@ def plotPoint():
                 linewidth=0.5,
         )
         axs[1].plot(
-                db_lengths,
+                [int(x/GiB) for x in db_lengths],
                 [x*1e-6 for x in bandwidth[i]],
                 color='black', 
                 marker=markers[int(i / (len(schemes) / 2))],
@@ -98,7 +98,7 @@ def plotPoint():
 
     # cosmetics
     axs[0].set_ylabel('User time [s]')
-    axs[0].set_xticks(db_lengths), 
+    axs[0].set_xticks([int(x/GiB) for x in db_lengths]), 
     axs[1].set_ylabel('Bandwidth [MiB]')
     axs[1].set_xlabel('Database size [GiB]')
     axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
