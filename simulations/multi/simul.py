@@ -217,7 +217,7 @@ def experiment_fss(fss_type, server_pool, client):
         server_pool.run('cd ' + simul_dir + 'server && ' + server_fss_command(logFile, "fss-" + fss_type))
         time.sleep(30)
         print("\t Run client")
-        client.run('cd ' + simul_dir + 'client && ' + client_fss_command("", "fss-" + fss_type, rep, inputSize))
+        client.run('cd ' + simul_dir + 'client && ' + client_fss_command(logFile, "fss-" + fss_type, rep, inputSize))
 
         kill_servers(servers_addresses())
 
