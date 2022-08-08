@@ -70,6 +70,7 @@ def plotComplex():
     time = []
     bandwidth = []
     for i, scheme in enumerate(schemes):
+        print(scheme)
         time.append([])
         bandwidth.append([])
         for input_size in input_sizes:
@@ -78,18 +79,18 @@ def plotComplex():
             for k in range(0, 2):
                 bw = [a + b for a,b in zip(bw, getServerStats(k, scheme, input_size))]
 
-    ratio_time = [time[1][i]/time[0][i] for i in range(len(time[0]))]
-    ratio_bw = [bandwidth[1][i]/bandiwdth[0][i] for i in range(len(time[0]))]
+            time[i].append(statistic(tm))
+            bandwidth[i].append(statistic(bw))
 
-    print(ratio_time)
-    print(ratio_bw)
+    ratio_time = [time[1][i]/time[0][i] for i in range(len(time[0]))]
+    ratio_bw = [bandwidth[1][i]/bandwidth[0][i] for i in range(len(time[0]))]
 
     x = np.arange(len(ratio_time))
     
     rects1 = ax.bar(
             x - width/2, 
             ratio_time, width, 
-            label='CPU', 
+            label='User time', 
             color='0.3', 
             edgecolor='black', 
             )
@@ -104,7 +105,7 @@ def plotComplex():
 
     # cosmetics
     ax.set_ylabel('Relative overhead between \n authenticated and unauthenticated PIR')
-    ax.set_xticks(input_sizes, [x for x in sorted(input_sizes)])
+    ax.set_xticks(x, [x for x in sorted(input_sizes)])
     ax.set_xlabel('Function-secret-sharing input size [bytes]')
     ax.set_ylim(bottom=0.9)
     ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
