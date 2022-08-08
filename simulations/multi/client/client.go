@@ -156,8 +156,10 @@ func (lc *localClient) exec() (string, error) {
 		lc.retrievePointPIR()
 	case "fss-classic":
 		lc.vpirClient = client.NewPredicatePIR(lc.prg, lc.dbInfo)
+		lc.retrieveComplexPIR()
 	case "fss-auth":
 		lc.vpirClient = client.NewPredicateAPIR(lc.prg, lc.dbInfo)
+		lc.retrieveComplexPIR()
 	default:
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
