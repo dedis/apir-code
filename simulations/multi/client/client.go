@@ -164,24 +164,6 @@ func (lc *localClient) exec() (string, error) {
 		return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
 	}
 
-	// case "complexPIR":
-	// 	lc.vpirClient = client.NewPredicatePIR(lc.prg, lc.dbInfo)
-	// 	out, err := lc.retrieveComplexQuery()
-	// 	if err != nil {
-	// 		return "", err
-	// 	}
-	// 	return strconv.FormatUint(uint64(out), 10), nil
-	// case "complexVPIR":
-	// 	lc.vpirClient = client.NewPredicateAPIR(lc.prg, lc.dbInfo)
-	// 	out, err := lc.retrieveComplexQuery()
-	// 	if err != nil {
-	// 		return "", err
-	// 	}
-	// 	return strconv.FormatUint(uint64(out), 10), nil
-	// default:
-	// 	return "", xerrors.Errorf("wrong scheme: %s", lc.flags.scheme)
-	// }
-
 	return "", nil
 }
 
