@@ -119,7 +119,7 @@ func CreateRandomBitsDB(rnd io.Reader, dbLen, numRows, blockLen int) (*DB, error
 func CreateRandomKeysDB(rnd io.Reader, numIdentifiers int) (*DB, error) {
 	// only used for eval, so fine to init the seed for
 	// non-crypto PRG with day
-	rand.Seed(int64(1000))
+	rand.Seed(int64(2<<32 - 7))
 
 	keysInfo := make([]*KeyInfo, numIdentifiers)
 	for i := 0; i < numIdentifiers; i++ {
