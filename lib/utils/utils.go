@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -38,22 +39,22 @@ func IncreaseToNextSquare(num *int) {
 // source: https://stackoverflow.com/questions/43495745/how-to-generate-random-date-in-go-lang/43497333
 // this is probably biased, but we don't care since it is only for tests
 func Randate() time.Time {
-	rand.Seed(int64(time.Now().Day()))
 	min := time.Date(2000, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
 	max := time.Date(2021, 12, 0, 0, 0, 0, 0, time.UTC).Unix()
 	delta := max - min
 
 	sec := rand.Int63n(delta) + min
+	log.Println(sec)
 	return time.Unix(sec, 0)
 }
 
 func Ranstring(n int) string {
-	rand.Seed(int64(time.Now().Day()))
 	var letters = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
 
 	s := make([]rune, n)
 	for i := range s {
 		s[i] = letters[rand.Intn(len(letters))]
 	}
+	log.Println(s)
 	return string(s)
 }
