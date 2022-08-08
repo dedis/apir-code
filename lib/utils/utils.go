@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -44,7 +43,6 @@ func Randate() time.Time {
 	delta := max - min
 
 	sec := rand.Int63n(delta) + min
-	log.Println(sec)
 	return time.Unix(sec, 0)
 }
 
@@ -55,6 +53,5 @@ func Ranstring(n int) string {
 	for i := range s {
 		s[i] = letters[rand.Intn(len(letters))]
 	}
-	log.Println(s)
 	return string(s)
 }
