@@ -258,4 +258,4 @@ client_setup(client)
 
 # run experiments for fss with only two servers
 experiment_fss_classic(pool, client)
-experiment_fss_auth(pool, client)
+#experiment_fss_auth(pool, client)
