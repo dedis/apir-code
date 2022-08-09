@@ -56,8 +56,6 @@ def getServerStats(server_id, scheme, key):
     server_log = "server_" + str(server_id) + "_" + scheme + "_" + str(key) + ".log"
     return parseServerLog(resultFolder + server_log)
 
-    #bw = [a + b for a,b in zip(bw, parseServerLog(resultFolder + server_log))]
-
 def plotComplex():
     schemes = ["fss_classic", "fss_auth"]
     config = load_config("fss_classic.toml")
@@ -79,11 +77,14 @@ def plotComplex():
             for k in range(0, 2):
                 bw = [a + b for a,b in zip(bw, getServerStats(k, scheme, input_size))]
 
-            time[i].append(statistic(tm))
-            bandwidth[i].append(statistic(bw))
+            time[i].append(tm)
+            bandwidth[i].append(bw)
+    
+    time_np = np.array(time)
+    bandwidth_np = np.array(bandwidth)
 
-    ratio_time = [time[1][i]/time[0][i] for i in range(len(time[0]))]
-    ratio_bw = [bandwidth[1][i]/bandwidth[0][i] for i in range(len(time[0]))]
+    ratio_time = [statistic(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))]
+    ratio_bw = [statistic(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
 
     x = np.arange(len(ratio_time))
     
