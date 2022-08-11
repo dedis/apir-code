@@ -4,5 +4,5 @@ DBBitLengths = [838860800, 8589935000, 17179870000, 34359740000, 51539610000, 68
 #DBBitLengths = [838860800] # 100MiB
 #Repetitions = 200
 #DBBitLengths = [8388608, 83886080, 838860800] # 1, 10, 100 MiB
-Repetitions = 30
+Repetitions = 100
 BitsToRetrieve = 8192
