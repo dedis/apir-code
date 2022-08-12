@@ -1,0 +1,205 @@
+[Server 0] 2022/08/11 16:53:22 flags: 0 fss_classic_24.log fss-classic -1 -1 -1 -1
+[Server 0] 2022/08/11 16:53:22 is listening at 10.90.39.17:50050
+[Server 0] 2022/08/11 16:53:22 starting grpc server
+[Server 0] 2022/08/11 16:54:07 got databaseInfo request
+[Server 0] 2022/08/11 16:54:07 got query request
+[Server 0] 2022/08/11 16:54:11 stats,4
+[Server 0] 2022/08/11 16:54:11 got query request
+[Server 0] 2022/08/11 16:54:14 stats,4
+[Server 0] 2022/08/11 16:54:14 got query request
+[Server 0] 2022/08/11 16:54:17 stats,4
+[Server 0] 2022/08/11 16:54:17 got query request
+[Server 0] 2022/08/11 16:54:20 stats,4
+[Server 0] 2022/08/11 16:54:20 got query request
+[Server 0] 2022/08/11 16:54:24 stats,4
+[Server 0] 2022/08/11 16:54:24 got query request
+[Server 0] 2022/08/11 16:54:27 stats,4
+[Server 0] 2022/08/11 16:54:27 got query request
+[Server 0] 2022/08/11 16:54:30 stats,4
+[Server 0] 2022/08/11 16:54:30 got query request
+[Server 0] 2022/08/11 16:54:33 stats,4
+[Server 0] 2022/08/11 16:54:33 got query request
+[Server 0] 2022/08/11 16:54:37 stats,4
+[Server 0] 2022/08/11 16:54:37 got query request
+[Server 0] 2022/08/11 16:54:40 stats,4
+[Server 0] 2022/08/11 16:54:40 got query request
+[Server 0] 2022/08/11 16:54:43 stats,4
+[Server 0] 2022/08/11 16:54:43 got query request
+[Server 0] 2022/08/11 16:54:47 stats,4
+[Server 0] 2022/08/11 16:54:47 got query request
+[Server 0] 2022/08/11 16:54:50 stats,4
+[Server 0] 2022/08/11 16:54:50 got query request
+[Server 0] 2022/08/11 16:54:53 stats,4
+[Server 0] 2022/08/11 16:54:53 got query request
+[Server 0] 2022/08/11 16:54:56 stats,4
+[Server 0] 2022/08/11 16:54:56 got query request
+[Server 0] 2022/08/11 16:55:00 stats,4
+[Server 0] 2022/08/11 16:55:00 got query request
+[Server 0] 2022/08/11 16:55:03 stats,4
+[Server 0] 2022/08/11 16:55:03 got query request
+[Server 0] 2022/08/11 16:55:06 stats,4
+[Server 0] 2022/08/11 16:55:06 got query request
+[Server 0] 2022/08/11 16:55:09 stats,4
+[Server 0] 2022/08/11 16:55:09 got query request
+[Server 0] 2022/08/11 16:55:13 stats,4
+[Server 0] 2022/08/11 16:55:13 got query request
+[Server 0] 2022/08/11 16:55:16 stats,4
+[Server 0] 2022/08/11 16:55:16 got query request
+[Server 0] 2022/08/11 16:55:19 stats,4
+[Server 0] 2022/08/11 16:55:19 got query request
+[Server 0] 2022/08/11 16:55:23 stats,4
+[Server 0] 2022/08/11 16:55:23 got query request
+[Server 0] 2022/08/11 16:55:26 stats,4
+[Server 0] 2022/08/11 16:55:26 got query request
+[Server 0] 2022/08/11 16:55:29 stats,4
+[Server 0] 2022/08/11 16:55:29 got query request
+[Server 0] 2022/08/11 16:55:33 stats,4
+[Server 0] 2022/08/11 16:55:33 got query request
+[Server 0] 2022/08/11 16:55:36 stats,4
+[Server 0] 2022/08/11 16:55:36 got query request
+[Server 0] 2022/08/11 16:55:39 stats,4
+[Server 0] 2022/08/11 16:55:39 got query request
+[Server 0] 2022/08/11 16:55:42 stats,4
+[Server 0] 2022/08/11 16:55:42 got query request
+[Server 0] 2022/08/11 16:55:46 stats,4
+[Server 0] 2022/08/11 16:55:46 got query request
+[Server 0] 2022/08/11 16:55:49 stats,4
+[Server 0] 2022/08/11 16:55:49 got query request
+[Server 0] 2022/08/11 16:55:52 stats,4
+[Server 0] 2022/08/11 16:55:52 got query request
+[Server 0] 2022/08/11 16:55:55 stats,4
+[Server 0] 2022/08/11 16:55:55 got query request
+[Server 0] 2022/08/11 16:55:59 stats,4
+[Server 0] 2022/08/11 16:55:59 got query request
+[Server 0] 2022/08/11 16:56:02 stats,4
+[Server 0] 2022/08/11 16:56:02 got query request
+[Server 0] 2022/08/11 16:56:05 stats,4
+[Server 0] 2022/08/11 16:56:05 got query request
+[Server 0] 2022/08/11 16:56:08 stats,4
+[Server 0] 2022/08/11 16:56:09 got query request
+[Server 0] 2022/08/11 16:56:12 stats,4
+[Server 0] 2022/08/11 16:56:12 got query request
+[Server 0] 2022/08/11 16:56:15 stats,4
+[Server 0] 2022/08/11 16:56:15 got query request
+[Server 0] 2022/08/11 16:56:18 stats,4
+[Server 0] 2022/08/11 16:56:18 got query request
+[Server 0] 2022/08/11 16:56:22 stats,4
+[Server 0] 2022/08/11 16:56:22 got query request
+[Server 0] 2022/08/11 16:56:25 stats,4
+[Server 0] 2022/08/11 16:56:25 got query request
+[Server 0] 2022/08/11 16:56:28 stats,4
+[Server 0] 2022/08/11 16:56:28 got query request
+[Server 0] 2022/08/11 16:56:32 stats,4
+[Server 0] 2022/08/11 16:56:32 got query request
+[Server 0] 2022/08/11 16:56:35 stats,4
+[Server 0] 2022/08/11 16:56:35 got query request
+[Server 0] 2022/08/11 16:56:38 stats,4
+[Server 0] 2022/08/11 16:56:38 got query request
+[Server 0] 2022/08/11 16:56:41 stats,4
+[Server 0] 2022/08/11 16:56:41 got query request
+[Server 0] 2022/08/11 16:56:45 stats,4
+[Server 0] 2022/08/11 16:56:45 got query request
+[Server 0] 2022/08/11 16:56:48 stats,4
+[Server 0] 2022/08/11 16:56:48 got query request
+[Server 0] 2022/08/11 16:56:51 stats,4
+[Server 0] 2022/08/11 16:56:51 got query request
+[Server 0] 2022/08/11 16:56:55 stats,4
+[Server 0] 2022/08/11 16:56:55 got query request
+[Server 0] 2022/08/11 16:56:58 stats,4
+[Server 0] 2022/08/11 16:56:58 got query request
+[Server 0] 2022/08/11 16:57:01 stats,4
+[Server 0] 2022/08/11 16:57:01 got query request
+[Server 0] 2022/08/11 16:57:04 stats,4
+[Server 0] 2022/08/11 16:57:04 got query request
+[Server 0] 2022/08/11 16:57:08 stats,4
+[Server 0] 2022/08/11 16:57:08 got query request
+[Server 0] 2022/08/11 16:57:11 stats,4
+[Server 0] 2022/08/11 16:57:11 got query request
+[Server 0] 2022/08/11 16:57:14 stats,4
+[Server 0] 2022/08/11 16:57:14 got query request
+[Server 0] 2022/08/11 16:57:18 stats,4
+[Server 0] 2022/08/11 16:57:18 got query request
+[Server 0] 2022/08/11 16:57:21 stats,4
+[Server 0] 2022/08/11 16:57:21 got query request
+[Server 0] 2022/08/11 16:57:24 stats,4
+[Server 0] 2022/08/11 16:57:24 got query request
+[Server 0] 2022/08/11 16:57:28 stats,4
+[Server 0] 2022/08/11 16:57:28 got query request
+[Server 0] 2022/08/11 16:57:31 stats,4
+[Server 0] 2022/08/11 16:57:31 got query request
+[Server 0] 2022/08/11 16:57:34 stats,4
+[Server 0] 2022/08/11 16:57:34 got query request
+[Server 0] 2022/08/11 16:57:37 stats,4
+[Server 0] 2022/08/11 16:57:37 got query request
+[Server 0] 2022/08/11 16:57:41 stats,4
+[Server 0] 2022/08/11 16:57:41 got query request
+[Server 0] 2022/08/11 16:57:44 stats,4
+[Server 0] 2022/08/11 16:57:44 got query request
+[Server 0] 2022/08/11 16:57:47 stats,4
+[Server 0] 2022/08/11 16:57:47 got query request
+[Server 0] 2022/08/11 16:57:51 stats,4
+[Server 0] 2022/08/11 16:57:51 got query request
+[Server 0] 2022/08/11 16:57:54 stats,4
+[Server 0] 2022/08/11 16:57:54 got query request
+[Server 0] 2022/08/11 16:57:57 stats,4
+[Server 0] 2022/08/11 16:57:57 got query request
+[Server 0] 2022/08/11 16:58:00 stats,4
+[Server 0] 2022/08/11 16:58:00 got query request
+[Server 0] 2022/08/11 16:58:04 stats,4
+[Server 0] 2022/08/11 16:58:04 got query request
+[Server 0] 2022/08/11 16:58:07 stats,4
+[Server 0] 2022/08/11 16:58:07 got query request
+[Server 0] 2022/08/11 16:58:10 stats,4
+[Server 0] 2022/08/11 16:58:10 got query request
+[Server 0] 2022/08/11 16:58:14 stats,4
+[Server 0] 2022/08/11 16:58:14 got query request
+[Server 0] 2022/08/11 16:58:17 stats,4
+[Server 0] 2022/08/11 16:58:17 got query request
+[Server 0] 2022/08/11 16:58:20 stats,4
+[Server 0] 2022/08/11 16:58:20 got query request
+[Server 0] 2022/08/11 16:58:23 stats,4
+[Server 0] 2022/08/11 16:58:23 got query request
+[Server 0] 2022/08/11 16:58:27 stats,4
+[Server 0] 2022/08/11 16:58:27 got query request
+[Server 0] 2022/08/11 16:58:30 stats,4
+[Server 0] 2022/08/11 16:58:30 got query request
+[Server 0] 2022/08/11 16:58:33 stats,4
+[Server 0] 2022/08/11 16:58:33 got query request
+[Server 0] 2022/08/11 16:58:37 stats,4
+[Server 0] 2022/08/11 16:58:37 got query request
+[Server 0] 2022/08/11 16:58:40 stats,4
+[Server 0] 2022/08/11 16:58:40 got query request
+[Server 0] 2022/08/11 16:58:43 stats,4
+[Server 0] 2022/08/11 16:58:43 got query request
+[Server 0] 2022/08/11 16:58:46 stats,4
+[Server 0] 2022/08/11 16:58:46 got query request
+[Server 0] 2022/08/11 16:58:50 stats,4
+[Server 0] 2022/08/11 16:58:50 got query request
+[Server 0] 2022/08/11 16:58:53 stats,4
+[Server 0] 2022/08/11 16:58:53 got query request
+[Server 0] 2022/08/11 16:58:56 stats,4
+[Server 0] 2022/08/11 16:58:56 got query request
+[Server 0] 2022/08/11 16:59:00 stats,4
+[Server 0] 2022/08/11 16:59:00 got query request
+[Server 0] 2022/08/11 16:59:03 stats,4
+[Server 0] 2022/08/11 16:59:03 got query request
+[Server 0] 2022/08/11 16:59:06 stats,4
+[Server 0] 2022/08/11 16:59:06 got query request
+[Server 0] 2022/08/11 16:59:09 stats,4
+[Server 0] 2022/08/11 16:59:09 got query request
+[Server 0] 2022/08/11 16:59:13 stats,4
+[Server 0] 2022/08/11 16:59:13 got query request
+[Server 0] 2022/08/11 16:59:16 stats,4
+[Server 0] 2022/08/11 16:59:16 got query request
+[Server 0] 2022/08/11 16:59:19 stats,4
+[Server 0] 2022/08/11 16:59:19 got query request
+[Server 0] 2022/08/11 16:59:22 stats,4
+[Server 0] 2022/08/11 16:59:22 got query request
+[Server 0] 2022/08/11 16:59:26 stats,4
+[Server 0] 2022/08/11 16:59:26 got query request
+[Server 0] 2022/08/11 16:59:29 stats,4
+[Server 0] 2022/08/11 16:59:29 got query request
+[Server 0] 2022/08/11 16:59:32 stats,4
+[Server 0] 2022/08/11 16:59:32 got query request
+[Server 0] 2022/08/11 16:59:36 stats,4
+[Server 0] 2022/08/11 16:59:36 clean shutdown of server done

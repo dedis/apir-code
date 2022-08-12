@@ -1,0 +1,605 @@
+[Client] 2022/08/11 17:07:30 connected to server 10.90.39.17:50050
+[Client] 2022/08/11 17:07:30 connected to server 10.90.39.23:50051
+[Client] 2022/08/11 17:07:30 sent databaseInfo request to 10.90.39.23:50051
+[Client] 2022/08/11 17:07:30 sent databaseInfo request to 10.90.39.17:50050
+[Client] 2022/08/11 17:07:30 databaseInfo: &database.Info{NumRows:0, NumColumns:100000, BlockSize:0, BlockLengths:[]int(nil), PIRType:"", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc0000c8140), LatParams:bfv.Parameters{Parameters:rlwe.Parameters{logN:0, qi:[]uint64(nil), pi:[]uint64(nil), sigma:0, h:0, ringQ:(*ring.Ring)(nil), ringP:(*ring.Ring)(nil), ringType:0}, ringQMul:(*ring.Ring)(nil), ringT:(*ring.Ring)(nil)}}
+[Client] 2022/08/11 17:07:30 start repetition 1 out of 100
+[Client] 2022/08/11 17:07:30 done with queries computation
+[Client] 2022/08/11 17:07:34 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:07:34 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:07:34 done with block reconstruction
+[Client] 2022/08/11 17:07:34 stats,0,10294,4.365158
+[Client] 2022/08/11 17:07:34 start repetition 2 out of 100
+[Client] 2022/08/11 17:07:34 done with queries computation
+[Client] 2022/08/11 17:07:38 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:07:38 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:07:38 done with block reconstruction
+[Client] 2022/08/11 17:07:38 stats,1,10294,4.380215
+[Client] 2022/08/11 17:07:38 start repetition 3 out of 100
+[Client] 2022/08/11 17:07:38 done with queries computation
+[Client] 2022/08/11 17:07:43 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:07:43 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:07:43 done with block reconstruction
+[Client] 2022/08/11 17:07:43 stats,2,10302,4.443722
+[Client] 2022/08/11 17:07:43 start repetition 4 out of 100
+[Client] 2022/08/11 17:07:43 done with queries computation
+[Client] 2022/08/11 17:07:47 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:07:47 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:07:47 done with block reconstruction
+[Client] 2022/08/11 17:07:47 stats,3,10294,4.357612
+[Client] 2022/08/11 17:07:47 start repetition 5 out of 100
+[Client] 2022/08/11 17:07:47 done with queries computation
+[Client] 2022/08/11 17:07:51 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:07:51 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:07:51 done with block reconstruction
+[Client] 2022/08/11 17:07:51 stats,4,10302,4.370085
+[Client] 2022/08/11 17:07:51 start repetition 6 out of 100
+[Client] 2022/08/11 17:07:51 done with queries computation
+[Client] 2022/08/11 17:07:56 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:07:56 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:07:56 done with block reconstruction
+[Client] 2022/08/11 17:07:56 stats,5,10294,4.354604
+[Client] 2022/08/11 17:07:56 start repetition 7 out of 100
+[Client] 2022/08/11 17:07:56 done with queries computation
+[Client] 2022/08/11 17:08:00 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:00 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:00 done with block reconstruction
+[Client] 2022/08/11 17:08:00 stats,6,10302,4.341447
+[Client] 2022/08/11 17:08:00 start repetition 8 out of 100
+[Client] 2022/08/11 17:08:00 done with queries computation
+[Client] 2022/08/11 17:08:04 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:04 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:04 done with block reconstruction
+[Client] 2022/08/11 17:08:04 stats,7,10294,4.322835
+[Client] 2022/08/11 17:08:04 start repetition 9 out of 100
+[Client] 2022/08/11 17:08:04 done with queries computation
+[Client] 2022/08/11 17:08:09 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:09 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:09 done with block reconstruction
+[Client] 2022/08/11 17:08:09 stats,8,10294,4.334522
+[Client] 2022/08/11 17:08:09 start repetition 10 out of 100
+[Client] 2022/08/11 17:08:09 done with queries computation
+[Client] 2022/08/11 17:08:13 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:13 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:13 done with block reconstruction
+[Client] 2022/08/11 17:08:13 stats,9,10294,4.316170
+[Client] 2022/08/11 17:08:13 start repetition 11 out of 100
+[Client] 2022/08/11 17:08:13 done with queries computation
+[Client] 2022/08/11 17:08:18 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:18 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:18 done with block reconstruction
+[Client] 2022/08/11 17:08:18 stats,10,10302,4.373698
+[Client] 2022/08/11 17:08:18 start repetition 12 out of 100
+[Client] 2022/08/11 17:08:18 done with queries computation
+[Client] 2022/08/11 17:08:22 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:22 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:22 done with block reconstruction
+[Client] 2022/08/11 17:08:22 stats,11,10302,4.347875
+[Client] 2022/08/11 17:08:22 start repetition 13 out of 100
+[Client] 2022/08/11 17:08:22 done with queries computation
+[Client] 2022/08/11 17:08:26 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:26 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:26 done with block reconstruction
+[Client] 2022/08/11 17:08:26 stats,12,10302,4.351736
+[Client] 2022/08/11 17:08:26 start repetition 14 out of 100
+[Client] 2022/08/11 17:08:26 done with queries computation
+[Client] 2022/08/11 17:08:31 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:31 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:31 done with block reconstruction
+[Client] 2022/08/11 17:08:31 stats,13,10302,4.356820
+[Client] 2022/08/11 17:08:31 start repetition 15 out of 100
+[Client] 2022/08/11 17:08:31 done with queries computation
+[Client] 2022/08/11 17:08:35 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:35 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:35 done with block reconstruction
+[Client] 2022/08/11 17:08:35 stats,14,10294,4.350563
+[Client] 2022/08/11 17:08:35 start repetition 16 out of 100
+[Client] 2022/08/11 17:08:35 done with queries computation
+[Client] 2022/08/11 17:08:39 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:39 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:39 done with block reconstruction
+[Client] 2022/08/11 17:08:39 stats,15,10302,4.369281
+[Client] 2022/08/11 17:08:39 start repetition 17 out of 100
+[Client] 2022/08/11 17:08:39 done with queries computation
+[Client] 2022/08/11 17:08:44 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:44 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:44 done with block reconstruction
+[Client] 2022/08/11 17:08:44 stats,16,10294,4.378519
+[Client] 2022/08/11 17:08:44 start repetition 18 out of 100
+[Client] 2022/08/11 17:08:44 done with queries computation
+[Client] 2022/08/11 17:08:48 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:48 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:48 done with block reconstruction
+[Client] 2022/08/11 17:08:48 stats,17,10294,4.325988
+[Client] 2022/08/11 17:08:48 start repetition 19 out of 100
+[Client] 2022/08/11 17:08:48 done with queries computation
+[Client] 2022/08/11 17:08:52 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:52 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:52 done with block reconstruction
+[Client] 2022/08/11 17:08:52 stats,18,10302,4.340859
+[Client] 2022/08/11 17:08:52 start repetition 20 out of 100
+[Client] 2022/08/11 17:08:52 done with queries computation
+[Client] 2022/08/11 17:08:57 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:08:57 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:08:57 done with block reconstruction
+[Client] 2022/08/11 17:08:57 stats,19,10294,4.407111
+[Client] 2022/08/11 17:08:57 start repetition 21 out of 100
+[Client] 2022/08/11 17:08:57 done with queries computation
+[Client] 2022/08/11 17:09:01 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:01 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:01 done with block reconstruction
+[Client] 2022/08/11 17:09:01 stats,20,10302,4.385199
+[Client] 2022/08/11 17:09:01 start repetition 22 out of 100
+[Client] 2022/08/11 17:09:01 done with queries computation
+[Client] 2022/08/11 17:09:05 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:05 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:05 done with block reconstruction
+[Client] 2022/08/11 17:09:05 stats,21,10302,4.304947
+[Client] 2022/08/11 17:09:05 start repetition 23 out of 100
+[Client] 2022/08/11 17:09:05 done with queries computation
+[Client] 2022/08/11 17:09:10 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:10 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:10 done with block reconstruction
+[Client] 2022/08/11 17:09:10 stats,22,10294,4.362181
+[Client] 2022/08/11 17:09:10 start repetition 24 out of 100
+[Client] 2022/08/11 17:09:10 done with queries computation
+[Client] 2022/08/11 17:09:14 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:14 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:14 done with block reconstruction
+[Client] 2022/08/11 17:09:14 stats,23,10302,4.332116
+[Client] 2022/08/11 17:09:14 start repetition 25 out of 100
+[Client] 2022/08/11 17:09:14 done with queries computation
+[Client] 2022/08/11 17:09:18 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:18 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:18 done with block reconstruction
+[Client] 2022/08/11 17:09:18 stats,24,10294,4.356461
+[Client] 2022/08/11 17:09:18 start repetition 26 out of 100
+[Client] 2022/08/11 17:09:18 done with queries computation
+[Client] 2022/08/11 17:09:23 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:23 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:23 done with block reconstruction
+[Client] 2022/08/11 17:09:23 stats,25,10294,4.374527
+[Client] 2022/08/11 17:09:23 start repetition 27 out of 100
+[Client] 2022/08/11 17:09:23 done with queries computation
+[Client] 2022/08/11 17:09:27 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:27 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:27 done with block reconstruction
+[Client] 2022/08/11 17:09:27 stats,26,10294,4.374767
+[Client] 2022/08/11 17:09:27 start repetition 28 out of 100
+[Client] 2022/08/11 17:09:27 done with queries computation
+[Client] 2022/08/11 17:09:32 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:32 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:32 done with block reconstruction
+[Client] 2022/08/11 17:09:32 stats,27,10302,4.372019
+[Client] 2022/08/11 17:09:32 start repetition 29 out of 100
+[Client] 2022/08/11 17:09:32 done with queries computation
+[Client] 2022/08/11 17:09:36 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:36 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:36 done with block reconstruction
+[Client] 2022/08/11 17:09:36 stats,28,10294,4.348724
+[Client] 2022/08/11 17:09:36 start repetition 30 out of 100
+[Client] 2022/08/11 17:09:36 done with queries computation
+[Client] 2022/08/11 17:09:40 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:40 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:40 done with block reconstruction
+[Client] 2022/08/11 17:09:40 stats,29,10294,4.367833
+[Client] 2022/08/11 17:09:40 start repetition 31 out of 100
+[Client] 2022/08/11 17:09:40 done with queries computation
+[Client] 2022/08/11 17:09:45 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:45 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:45 done with block reconstruction
+[Client] 2022/08/11 17:09:45 stats,30,10294,4.330988
+[Client] 2022/08/11 17:09:45 start repetition 32 out of 100
+[Client] 2022/08/11 17:09:45 done with queries computation
+[Client] 2022/08/11 17:09:49 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:49 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:49 done with block reconstruction
+[Client] 2022/08/11 17:09:49 stats,31,10294,4.341004
+[Client] 2022/08/11 17:09:49 start repetition 33 out of 100
+[Client] 2022/08/11 17:09:49 done with queries computation
+[Client] 2022/08/11 17:09:53 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:53 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:53 done with block reconstruction
+[Client] 2022/08/11 17:09:53 stats,32,10302,4.337561
+[Client] 2022/08/11 17:09:53 start repetition 34 out of 100
+[Client] 2022/08/11 17:09:53 done with queries computation
+[Client] 2022/08/11 17:09:58 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:09:58 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:09:58 done with block reconstruction
+[Client] 2022/08/11 17:09:58 stats,33,10302,4.336600
+[Client] 2022/08/11 17:09:58 start repetition 35 out of 100
+[Client] 2022/08/11 17:09:58 done with queries computation
+[Client] 2022/08/11 17:10:02 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:02 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:02 done with block reconstruction
+[Client] 2022/08/11 17:10:02 stats,34,10294,4.356133
+[Client] 2022/08/11 17:10:02 start repetition 36 out of 100
+[Client] 2022/08/11 17:10:02 done with queries computation
+[Client] 2022/08/11 17:10:06 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:06 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:06 done with block reconstruction
+[Client] 2022/08/11 17:10:06 stats,35,10294,4.447678
+[Client] 2022/08/11 17:10:06 start repetition 37 out of 100
+[Client] 2022/08/11 17:10:06 done with queries computation
+[Client] 2022/08/11 17:10:11 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:11 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:11 done with block reconstruction
+[Client] 2022/08/11 17:10:11 stats,36,10294,4.354600
+[Client] 2022/08/11 17:10:11 start repetition 38 out of 100
+[Client] 2022/08/11 17:10:11 done with queries computation
+[Client] 2022/08/11 17:10:15 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:15 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:15 done with block reconstruction
+[Client] 2022/08/11 17:10:15 stats,37,10302,4.374433
+[Client] 2022/08/11 17:10:15 start repetition 39 out of 100
+[Client] 2022/08/11 17:10:15 done with queries computation
+[Client] 2022/08/11 17:10:20 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:20 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:20 done with block reconstruction
+[Client] 2022/08/11 17:10:20 stats,38,10302,4.368580
+[Client] 2022/08/11 17:10:20 start repetition 40 out of 100
+[Client] 2022/08/11 17:10:20 done with queries computation
+[Client] 2022/08/11 17:10:24 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:24 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:24 done with block reconstruction
+[Client] 2022/08/11 17:10:24 stats,39,10302,4.325266
+[Client] 2022/08/11 17:10:24 start repetition 41 out of 100
+[Client] 2022/08/11 17:10:24 done with queries computation
+[Client] 2022/08/11 17:10:28 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:28 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:28 done with block reconstruction
+[Client] 2022/08/11 17:10:28 stats,40,10294,4.359884
+[Client] 2022/08/11 17:10:28 start repetition 42 out of 100
+[Client] 2022/08/11 17:10:28 done with queries computation
+[Client] 2022/08/11 17:10:33 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:33 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:33 done with block reconstruction
+[Client] 2022/08/11 17:10:33 stats,41,10302,4.400529
+[Client] 2022/08/11 17:10:33 start repetition 43 out of 100
+[Client] 2022/08/11 17:10:33 done with queries computation
+[Client] 2022/08/11 17:10:37 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:37 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:37 done with block reconstruction
+[Client] 2022/08/11 17:10:37 stats,42,10302,4.382820
+[Client] 2022/08/11 17:10:37 start repetition 44 out of 100
+[Client] 2022/08/11 17:10:37 done with queries computation
+[Client] 2022/08/11 17:10:41 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:41 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:41 done with block reconstruction
+[Client] 2022/08/11 17:10:41 stats,43,10302,4.332725
+[Client] 2022/08/11 17:10:41 start repetition 45 out of 100
+[Client] 2022/08/11 17:10:41 done with queries computation
+[Client] 2022/08/11 17:10:46 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:46 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:46 done with block reconstruction
+[Client] 2022/08/11 17:10:46 stats,44,10294,4.364105
+[Client] 2022/08/11 17:10:46 start repetition 46 out of 100
+[Client] 2022/08/11 17:10:46 done with queries computation
+[Client] 2022/08/11 17:10:50 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:50 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:50 done with block reconstruction
+[Client] 2022/08/11 17:10:50 stats,45,10294,4.349558
+[Client] 2022/08/11 17:10:50 start repetition 47 out of 100
+[Client] 2022/08/11 17:10:50 done with queries computation
+[Client] 2022/08/11 17:10:54 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:54 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:54 done with block reconstruction
+[Client] 2022/08/11 17:10:54 stats,46,10302,4.347078
+[Client] 2022/08/11 17:10:54 start repetition 48 out of 100
+[Client] 2022/08/11 17:10:54 done with queries computation
+[Client] 2022/08/11 17:10:59 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:10:59 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:10:59 done with block reconstruction
+[Client] 2022/08/11 17:10:59 stats,47,10294,4.420061
+[Client] 2022/08/11 17:10:59 start repetition 49 out of 100
+[Client] 2022/08/11 17:10:59 done with queries computation
+[Client] 2022/08/11 17:11:03 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:03 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:03 done with block reconstruction
+[Client] 2022/08/11 17:11:03 stats,48,10294,4.334640
+[Client] 2022/08/11 17:11:03 start repetition 50 out of 100
+[Client] 2022/08/11 17:11:03 done with queries computation
+[Client] 2022/08/11 17:11:08 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:08 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:08 done with block reconstruction
+[Client] 2022/08/11 17:11:08 stats,49,10302,4.373619
+[Client] 2022/08/11 17:11:08 start repetition 51 out of 100
+[Client] 2022/08/11 17:11:08 done with queries computation
+[Client] 2022/08/11 17:11:12 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:12 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:12 done with block reconstruction
+[Client] 2022/08/11 17:11:12 stats,50,10294,4.329557
+[Client] 2022/08/11 17:11:12 start repetition 52 out of 100
+[Client] 2022/08/11 17:11:12 done with queries computation
+[Client] 2022/08/11 17:11:16 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:16 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:16 done with block reconstruction
+[Client] 2022/08/11 17:11:16 stats,51,10302,4.383276
+[Client] 2022/08/11 17:11:16 start repetition 53 out of 100
+[Client] 2022/08/11 17:11:16 done with queries computation
+[Client] 2022/08/11 17:11:21 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:21 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:21 done with block reconstruction
+[Client] 2022/08/11 17:11:21 stats,52,10302,4.417070
+[Client] 2022/08/11 17:11:21 start repetition 54 out of 100
+[Client] 2022/08/11 17:11:21 done with queries computation
+[Client] 2022/08/11 17:11:25 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:25 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:25 done with block reconstruction
+[Client] 2022/08/11 17:11:25 stats,53,10294,4.397225
+[Client] 2022/08/11 17:11:25 start repetition 55 out of 100
+[Client] 2022/08/11 17:11:25 done with queries computation
+[Client] 2022/08/11 17:11:29 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:29 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:29 done with block reconstruction
+[Client] 2022/08/11 17:11:29 stats,54,10294,4.339315
+[Client] 2022/08/11 17:11:29 start repetition 56 out of 100
+[Client] 2022/08/11 17:11:29 done with queries computation
+[Client] 2022/08/11 17:11:34 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:34 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:34 done with block reconstruction
+[Client] 2022/08/11 17:11:34 stats,55,10294,4.332854
+[Client] 2022/08/11 17:11:34 start repetition 57 out of 100
+[Client] 2022/08/11 17:11:34 done with queries computation
+[Client] 2022/08/11 17:11:38 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:38 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:38 done with block reconstruction
+[Client] 2022/08/11 17:11:38 stats,56,10294,4.379766
+[Client] 2022/08/11 17:11:38 start repetition 58 out of 100
+[Client] 2022/08/11 17:11:38 done with queries computation
+[Client] 2022/08/11 17:11:42 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:42 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:42 done with block reconstruction
+[Client] 2022/08/11 17:11:42 stats,57,10294,4.337449
+[Client] 2022/08/11 17:11:42 start repetition 59 out of 100
+[Client] 2022/08/11 17:11:42 done with queries computation
+[Client] 2022/08/11 17:11:47 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:47 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:47 done with block reconstruction
+[Client] 2022/08/11 17:11:47 stats,58,10294,4.374231
+[Client] 2022/08/11 17:11:47 start repetition 60 out of 100
+[Client] 2022/08/11 17:11:47 done with queries computation
+[Client] 2022/08/11 17:11:51 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:51 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:51 done with block reconstruction
+[Client] 2022/08/11 17:11:51 stats,59,10302,4.338820
+[Client] 2022/08/11 17:11:51 start repetition 61 out of 100
+[Client] 2022/08/11 17:11:51 done with queries computation
+[Client] 2022/08/11 17:11:56 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:11:56 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:11:56 done with block reconstruction
+[Client] 2022/08/11 17:11:56 stats,60,10294,4.400279
+[Client] 2022/08/11 17:11:56 start repetition 62 out of 100
+[Client] 2022/08/11 17:11:56 done with queries computation
+[Client] 2022/08/11 17:12:00 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:00 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:00 done with block reconstruction
+[Client] 2022/08/11 17:12:00 stats,61,10302,4.389197
+[Client] 2022/08/11 17:12:00 start repetition 63 out of 100
+[Client] 2022/08/11 17:12:00 done with queries computation
+[Client] 2022/08/11 17:12:04 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:04 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:04 done with block reconstruction
+[Client] 2022/08/11 17:12:04 stats,62,10302,4.392144
+[Client] 2022/08/11 17:12:04 start repetition 64 out of 100
+[Client] 2022/08/11 17:12:04 done with queries computation
+[Client] 2022/08/11 17:12:09 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:09 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:09 done with block reconstruction
+[Client] 2022/08/11 17:12:09 stats,63,10294,4.462595
+[Client] 2022/08/11 17:12:09 start repetition 65 out of 100
+[Client] 2022/08/11 17:12:09 done with queries computation
+[Client] 2022/08/11 17:12:13 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:13 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:13 done with block reconstruction
+[Client] 2022/08/11 17:12:13 stats,64,10302,4.379442
+[Client] 2022/08/11 17:12:13 start repetition 66 out of 100
+[Client] 2022/08/11 17:12:13 done with queries computation
+[Client] 2022/08/11 17:12:18 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:18 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:18 done with block reconstruction
+[Client] 2022/08/11 17:12:18 stats,65,10294,4.338862
+[Client] 2022/08/11 17:12:18 start repetition 67 out of 100
+[Client] 2022/08/11 17:12:18 done with queries computation
+[Client] 2022/08/11 17:12:22 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:22 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:22 done with block reconstruction
+[Client] 2022/08/11 17:12:22 stats,66,10302,4.366420
+[Client] 2022/08/11 17:12:22 start repetition 68 out of 100
+[Client] 2022/08/11 17:12:22 done with queries computation
+[Client] 2022/08/11 17:12:26 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:26 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:26 done with block reconstruction
+[Client] 2022/08/11 17:12:26 stats,67,10302,4.368182
+[Client] 2022/08/11 17:12:26 start repetition 69 out of 100
+[Client] 2022/08/11 17:12:26 done with queries computation
+[Client] 2022/08/11 17:12:31 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:31 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:31 done with block reconstruction
+[Client] 2022/08/11 17:12:31 stats,68,10294,4.344582
+[Client] 2022/08/11 17:12:31 start repetition 70 out of 100
+[Client] 2022/08/11 17:12:31 done with queries computation
+[Client] 2022/08/11 17:12:35 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:35 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:35 done with block reconstruction
+[Client] 2022/08/11 17:12:35 stats,69,10302,4.341117
+[Client] 2022/08/11 17:12:35 start repetition 71 out of 100
+[Client] 2022/08/11 17:12:35 done with queries computation
+[Client] 2022/08/11 17:12:39 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:39 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:39 done with block reconstruction
+[Client] 2022/08/11 17:12:39 stats,70,10294,4.330526
+[Client] 2022/08/11 17:12:39 start repetition 72 out of 100
+[Client] 2022/08/11 17:12:39 done with queries computation
+[Client] 2022/08/11 17:12:44 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:44 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:44 done with block reconstruction
+[Client] 2022/08/11 17:12:44 stats,71,10302,4.379903
+[Client] 2022/08/11 17:12:44 start repetition 73 out of 100
+[Client] 2022/08/11 17:12:44 done with queries computation
+[Client] 2022/08/11 17:12:48 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:48 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:48 done with block reconstruction
+[Client] 2022/08/11 17:12:48 stats,72,10302,4.408294
+[Client] 2022/08/11 17:12:48 start repetition 74 out of 100
+[Client] 2022/08/11 17:12:48 done with queries computation
+[Client] 2022/08/11 17:12:52 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:52 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:52 done with block reconstruction
+[Client] 2022/08/11 17:12:52 stats,73,10302,4.377157
+[Client] 2022/08/11 17:12:52 start repetition 75 out of 100
+[Client] 2022/08/11 17:12:52 done with queries computation
+[Client] 2022/08/11 17:12:57 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:12:57 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:12:57 done with block reconstruction
+[Client] 2022/08/11 17:12:57 stats,74,10294,4.360753
+[Client] 2022/08/11 17:12:57 start repetition 76 out of 100
+[Client] 2022/08/11 17:12:57 done with queries computation
+[Client] 2022/08/11 17:13:01 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:01 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:01 done with block reconstruction
+[Client] 2022/08/11 17:13:01 stats,75,10302,4.338260
+[Client] 2022/08/11 17:13:01 start repetition 77 out of 100
+[Client] 2022/08/11 17:13:01 done with queries computation
+[Client] 2022/08/11 17:13:05 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:05 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:05 done with block reconstruction
+[Client] 2022/08/11 17:13:05 stats,76,10302,4.313504
+[Client] 2022/08/11 17:13:05 start repetition 78 out of 100
+[Client] 2022/08/11 17:13:05 done with queries computation
+[Client] 2022/08/11 17:13:10 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:10 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:10 done with block reconstruction
+[Client] 2022/08/11 17:13:10 stats,77,10302,4.423270
+[Client] 2022/08/11 17:13:10 start repetition 79 out of 100
+[Client] 2022/08/11 17:13:10 done with queries computation
+[Client] 2022/08/11 17:13:14 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:14 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:14 done with block reconstruction
+[Client] 2022/08/11 17:13:14 stats,78,10302,4.327843
+[Client] 2022/08/11 17:13:14 start repetition 80 out of 100
+[Client] 2022/08/11 17:13:14 done with queries computation
+[Client] 2022/08/11 17:13:19 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:19 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:19 done with block reconstruction
+[Client] 2022/08/11 17:13:19 stats,79,10302,4.363202
+[Client] 2022/08/11 17:13:19 start repetition 81 out of 100
+[Client] 2022/08/11 17:13:19 done with queries computation
+[Client] 2022/08/11 17:13:23 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:23 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:23 done with block reconstruction
+[Client] 2022/08/11 17:13:23 stats,80,10294,4.350864
+[Client] 2022/08/11 17:13:23 start repetition 82 out of 100
+[Client] 2022/08/11 17:13:23 done with queries computation
+[Client] 2022/08/11 17:13:27 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:27 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:27 done with block reconstruction
+[Client] 2022/08/11 17:13:27 stats,81,10302,4.382255
+[Client] 2022/08/11 17:13:27 start repetition 83 out of 100
+[Client] 2022/08/11 17:13:27 done with queries computation
+[Client] 2022/08/11 17:13:32 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:32 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:32 done with block reconstruction
+[Client] 2022/08/11 17:13:32 stats,82,10302,4.390250
+[Client] 2022/08/11 17:13:32 start repetition 84 out of 100
+[Client] 2022/08/11 17:13:32 done with queries computation
+[Client] 2022/08/11 17:13:36 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:36 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:36 done with block reconstruction
+[Client] 2022/08/11 17:13:36 stats,83,10302,4.339059
+[Client] 2022/08/11 17:13:36 start repetition 85 out of 100
+[Client] 2022/08/11 17:13:36 done with queries computation
+[Client] 2022/08/11 17:13:40 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:40 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:40 done with block reconstruction
+[Client] 2022/08/11 17:13:40 stats,84,10294,4.406655
+[Client] 2022/08/11 17:13:40 start repetition 86 out of 100
+[Client] 2022/08/11 17:13:40 done with queries computation
+[Client] 2022/08/11 17:13:45 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:45 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:45 done with block reconstruction
+[Client] 2022/08/11 17:13:45 stats,85,10294,4.353629
+[Client] 2022/08/11 17:13:45 start repetition 87 out of 100
+[Client] 2022/08/11 17:13:45 done with queries computation
+[Client] 2022/08/11 17:13:49 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:49 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:49 done with block reconstruction
+[Client] 2022/08/11 17:13:49 stats,86,10302,4.361664
+[Client] 2022/08/11 17:13:49 start repetition 88 out of 100
+[Client] 2022/08/11 17:13:49 done with queries computation
+[Client] 2022/08/11 17:13:54 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:54 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:54 done with block reconstruction
+[Client] 2022/08/11 17:13:54 stats,87,10302,4.378300
+[Client] 2022/08/11 17:13:54 start repetition 89 out of 100
+[Client] 2022/08/11 17:13:54 done with queries computation
+[Client] 2022/08/11 17:13:58 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:13:58 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:13:58 done with block reconstruction
+[Client] 2022/08/11 17:13:58 stats,88,10294,4.347902
+[Client] 2022/08/11 17:13:58 start repetition 90 out of 100
+[Client] 2022/08/11 17:13:58 done with queries computation
+[Client] 2022/08/11 17:14:02 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:02 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:02 done with block reconstruction
+[Client] 2022/08/11 17:14:02 stats,89,10302,4.430994
+[Client] 2022/08/11 17:14:02 start repetition 91 out of 100
+[Client] 2022/08/11 17:14:02 done with queries computation
+[Client] 2022/08/11 17:14:07 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:07 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:07 done with block reconstruction
+[Client] 2022/08/11 17:14:07 stats,90,10294,4.366030
+[Client] 2022/08/11 17:14:07 start repetition 92 out of 100
+[Client] 2022/08/11 17:14:07 done with queries computation
+[Client] 2022/08/11 17:14:11 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:11 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:11 done with block reconstruction
+[Client] 2022/08/11 17:14:11 stats,91,10294,4.355538
+[Client] 2022/08/11 17:14:11 start repetition 93 out of 100
+[Client] 2022/08/11 17:14:11 done with queries computation
+[Client] 2022/08/11 17:14:15 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:15 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:15 done with block reconstruction
+[Client] 2022/08/11 17:14:15 stats,92,10302,4.405997
+[Client] 2022/08/11 17:14:15 start repetition 94 out of 100
+[Client] 2022/08/11 17:14:15 done with queries computation
+[Client] 2022/08/11 17:14:20 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:20 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:20 done with block reconstruction
+[Client] 2022/08/11 17:14:20 stats,93,10302,4.442126
+[Client] 2022/08/11 17:14:20 start repetition 95 out of 100
+[Client] 2022/08/11 17:14:20 done with queries computation
+[Client] 2022/08/11 17:14:24 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:24 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:24 done with block reconstruction
+[Client] 2022/08/11 17:14:24 stats,94,10302,4.346804
+[Client] 2022/08/11 17:14:24 start repetition 96 out of 100
+[Client] 2022/08/11 17:14:24 done with queries computation
+[Client] 2022/08/11 17:14:29 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:29 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:29 done with block reconstruction
+[Client] 2022/08/11 17:14:29 stats,95,10294,4.349360
+[Client] 2022/08/11 17:14:29 start repetition 97 out of 100
+[Client] 2022/08/11 17:14:29 done with queries computation
+[Client] 2022/08/11 17:14:33 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:33 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:33 done with block reconstruction
+[Client] 2022/08/11 17:14:33 stats,96,10294,4.361538
+[Client] 2022/08/11 17:14:33 start repetition 98 out of 100
+[Client] 2022/08/11 17:14:33 done with queries computation
+[Client] 2022/08/11 17:14:37 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:37 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:37 done with block reconstruction
+[Client] 2022/08/11 17:14:37 stats,97,10294,4.373065
+[Client] 2022/08/11 17:14:37 start repetition 99 out of 100
+[Client] 2022/08/11 17:14:37 done with queries computation
+[Client] 2022/08/11 17:14:42 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:42 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:42 done with block reconstruction
+[Client] 2022/08/11 17:14:42 stats,98,10302,4.349017
+[Client] 2022/08/11 17:14:42 start repetition 100 out of 100
+[Client] 2022/08/11 17:14:42 done with queries computation
+[Client] 2022/08/11 17:14:46 sent query to 10.90.39.23:50051
+[Client] 2022/08/11 17:14:46 sent query to 10.90.39.17:50050
+[Client] 2022/08/11 17:14:46 done with block reconstruction
+[Client] 2022/08/11 17:14:46 stats,99,10302,4.369600
