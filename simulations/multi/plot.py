@@ -6,8 +6,8 @@ import tomli
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "results/"
+resultFolder = "final_results/"
+#resultFolder = "results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -68,7 +68,6 @@ def plotComplex():
     time = []
     bandwidth = []
     for i, scheme in enumerate(schemes):
-        print(scheme)
         time.append([])
         bandwidth.append([])
         for input_size in input_sizes:
@@ -86,18 +85,28 @@ def plotComplex():
     ratio_time = [statistic(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))]
     ratio_bw = [statistic(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
 
+    print("predicate queries max ratio user-time:", max(ratio_time))
+    print("predicate queries max ratio bandwidth:", max(ratio_bw))
+
+    err_time = [np.std(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))]
+    err_bw = [np.std(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
+
     x = np.arange(len(ratio_time))
     
     rects1 = ax.bar(
             x - width/2, 
-            ratio_time, width, 
+            ratio_time, 
+            width, 
+            #yerr=err_time,
             label='User time', 
             color='0.3', 
             edgecolor='black', 
             )
     rects2 = ax.bar(
             x + width/2, 
-            ratio_bw, width, 
+            ratio_bw, 
+            width, 
+            #yerr=err_time,
             label='Bandwidth',
             color='0.7', 
             edgecolor = 'black',
@@ -114,6 +123,7 @@ def plotComplex():
 
     plt.tight_layout()
     #plt.show()
+    #plt.savefig('figures/complex_bars_std.eps', format='eps', dpi=300, transparent=True)
     plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
 
 def plotPoint():
@@ -158,6 +168,14 @@ def plotPoint():
                 label=scheme_labels[int(i / (len(schemes) / 2))],
                 linewidth=0.5,
         )
+
+    time_np = np.array(time)
+    bandwidth_np = np.array(bandwidth)
+    ratio_time = [statistic(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))]
+    ratio_bw = [statistic(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
+
+    print("point queries max ratio user-time:", max(ratio_time))
+    print("point queries max ratio bandwidth:", max(ratio_bw))
 
     # cosmetics
     axs[0].set_ylabel('User time [s]')
@@ -226,7 +244,6 @@ def plotPointMulti():
 
 ## plots
 prepare_for_latex()
-
 #plotPoint()
 #plotPointMulti()
 plotComplex()
