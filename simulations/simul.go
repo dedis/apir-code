@@ -99,25 +99,15 @@ func main() {
 	log.Printf("running simulation %#v\n", s)
 	// initialize experiment
 	experiment := &Experiment{Results: make(map[int][]*Chunk, 0)}
-	var experimentv *Experiment
-	if s.Primitive[:3] == "fss" {
-		experimentv = &Experiment{Results: make(map[int][]*Chunk, 0)}
-	}
 
 	// range over all the DB lengths specified in the general simulation config
-dbSizesLoop:
 	for _, dl := range s.DBBitLengths {
 		// compute database data
 		dbLen := dl
 		blockLen := s.BlockLength
-		elemBitSize := s.ElementBitSize
 		nRows := s.NumRows
-
-		// Find the total number of blocks in the db
 		numBlocks := dl
-		if s.Primitive[:3] != "cmp" {
-			numBlocks = dbLen / (elemBitSize * blockLen)
-		}
+
 		// matrix db
 		if nRows != 1 {
 			utils.IncreaseToNextSquare(&numBlocks)
@@ -126,25 +116,10 @@ dbSizesLoop:
 
 		// setup db, this is the same for DPF or IT
 		dbPRG := utils.RandomPRG()
-		db := new(database.DB)
-		dbBytes := new(database.Bytes)
 		dbRing := new(database.Ring)
 		dbElliptic := new(database.Elliptic)
 		dbLWE := new(database.LWE)
 		switch s.Primitive[:3] {
-		case "pir":
-			if s.Primitive[len(s.Primitive)-6:] == "merkle" {
-				dbBytes = database.CreateRandomMerkle(dbPRG, dbLen, nRows, blockLen)
-			} else {
-				dbBytes = database.CreateRandomBytes(dbPRG, dbLen, nRows, blockLen)
-			}
-		case "fss":
-			// num of identifiers in the random FSS database
-			numIdenfitiers := 100000
-			db, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
-			if err != nil {
-				panic(err)
-			}
 		case "cmp":
 			if s.Primitive == "cmp-pir" {
 				log.Printf("Generating lattice db of size %d\n", dbLen)
@@ -165,49 +140,6 @@ dbSizesLoop:
 		// run experiment
 		var results []*Chunk
 		switch s.Primitive {
-		case "pir-classic", "pir-merkle":
-			if len(s.NumServers) == 0 {
-				log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits",
-					s.Primitive, dbLen)
-				numServers := 2                                   // basic case with two servers
-				blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
-				results = pirIT(dbBytes, numServers, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-			} else {
-				// if NumServers is specified, we loop only through the number of servers
-				for _, numServers := range s.NumServers {
-					log.Printf("retrieving blocks with primitive %s from DB with dbLen = %d bits from %d servers",
-						s.Primitive, dbLen, numServers)
-					blockSize := dbBytes.BlockSize - dbBytes.ProofLen // ProofLen = 0 for PIR
-					results = pirIT(dbBytes, numServers, blockSize, s.ElementBitSize, s.BitsToRetrieve, s.Repetitions)
-					experiment.Results[numServers] = results
-				}
-
-				time.Sleep(3)
-				runtime.GC()
-				time.Sleep(3)
-
-				// Skip the rest of the loop
-				break dbSizesLoop
-			}
-		case "fss":
-			// In FSS, we iterate over input sizes instead of db sizes
-			for _, inputSize := range s.InputSizes {
-				stringToSearch := utils.Ranstring(inputSize)
-				// Non-verifiable FSS
-				results = fssPIR(db, inputSize, stringToSearch, s.Repetitions)
-				log.Printf("retrieving with non-verifiable FSS with input size of %d bytes\n", inputSize)
-				experiment.Results[inputSize] = results
-				// Authenticated FSS
-				results = fssVPIR(db, inputSize, stringToSearch, s.Repetitions)
-				log.Printf("retrieving with verifiable FSS with the input size of %d bytes\n", inputSize)
-				experimentv.Results[inputSize] = results
-
-				time.Sleep(3)
-				runtime.GC()
-				time.Sleep(3)
-			}
-			// Skip the rest of the loop
-			break dbSizesLoop
 		case "cmp-pir":
 			log.Printf("db info: %#v", dbRing.Info)
 			results = pirLattice(dbRing, s.Repetitions)
@@ -239,17 +171,6 @@ dbSizesLoop:
 		panic(err)
 	}
 
-	if s.Primitive[:3] == "fss" {
-		resv, err := json.Marshal(experimentv)
-		if err != nil {
-			panic(err)
-		}
-		fileName := "auth" + s.Name + ".json"
-		if err = ioutil.WriteFile(path.Join("results", fileName), resv, 0644); err != nil {
-			panic(err)
-		}
-	}
-
 	// mem profiling
 	if *memprofile != "" {
 		f, err := os.Create(*memprofile)
@@ -263,173 +184,6 @@ dbSizesLoop:
 		}
 	}
 	log.Println("simulation terminated successfully")
-}
-
-func fssVPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) []*Chunk {
-	c := client.NewPredicateAPIR(utils.RandomPRG(), &db.Info)
-	ss := []*server.PredicateAPIR{server.NewPredicateAPIR(db, 0), server.NewPredicateAPIR(db, 1)}
-
-	// create main monitor for CPU time
-	m := monitor.NewMonitor()
-	// run the experiment nRepeat times
-	results := make([]*Chunk, nRepeat)
-
-	in := utils.ByteToBits([]byte(stringToSearch))
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromStart: inputSize},
-		Input: in,
-	}
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = initChunk(1)
-		results[j].CPU[0] = initBlock(len(ss))
-		results[j].Bandwidth[0] = initBlock(len(ss))
-
-		m.Reset()
-		queries := c.Query(q, 2)
-		results[j].CPU[0].Query = m.RecordAndReset()
-		for r := range queries {
-			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
-		}
-
-		// get servers answers
-		answers := make([][]uint32, len(ss))
-		for k := range ss {
-			m.Reset()
-			answers[k] = ss[k].Answer(queries[k])
-			results[j].CPU[0].Answers[k] = m.RecordAndReset()
-			results[j].Bandwidth[0].Answers[k] = fieldVectorByteLength(answers[k])
-		}
-
-		m.Reset()
-		_, err := c.Reconstruct(answers)
-		results[j].CPU[0].Reconstruct = m.RecordAndReset()
-		if err != nil {
-			log.Fatal(err)
-		}
-		results[j].Bandwidth[0].Reconstruct = 0
-
-		// GC after each repetition
-		runtime.GC()
-
-		// sleep after every iteration
-		time.Sleep(2 * time.Second)
-	}
-
-	return results
-}
-
-func fssPIR(db *database.DB, inputSize int, stringToSearch string, nRepeat int) []*Chunk {
-	c := client.NewPredicatePIR(utils.RandomPRG(), &db.Info)
-	ss := []*server.PredicatePIR{server.NewPredicatePIR(db, 0), server.NewPredicatePIR(db, 1)}
-
-	// create main monitor for CPU time
-	m := monitor.NewMonitor()
-	// run the experiment nRepeat times
-	results := make([]*Chunk, nRepeat)
-
-	in := utils.ByteToBits([]byte(stringToSearch))
-	q := &query.ClientFSS{
-		Info:  &query.Info{Target: query.UserId, FromStart: inputSize},
-		Input: in,
-	}
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = initChunk(1)
-		results[j].CPU[0] = initBlock(len(ss))
-		results[j].Bandwidth[0] = initBlock(len(ss))
-
-		m.Reset()
-		queries := c.Query(q, 2)
-		results[j].CPU[0].Query = m.RecordAndReset()
-		for r := range queries {
-			results[j].Bandwidth[0].Query += fssQueryByteLength(queries[r])
-		}
-
-		// get servers answers
-		answers := make([][]uint32, len(ss))
-		for k := range ss {
-			m.Reset()
-			answers[k] = ss[k].Answer(queries[k])
-			results[j].CPU[0].Answers[k] = m.RecordAndReset()
-			results[j].Bandwidth[0].Answers[k] = float64(bits.UintSize / 8)
-		}
-
-		m.Reset()
-		_, err := c.Reconstruct(answers)
-		results[j].CPU[0].Reconstruct = m.RecordAndReset()
-		if err != nil {
-			log.Fatal(err)
-		}
-		results[j].Bandwidth[0].Reconstruct = 0
-
-		// GC after each repetition
-		runtime.GC()
-
-		// sleep after every iteration
-		time.Sleep(2 * time.Second)
-	}
-
-	return results
-}
-
-func pirIT(db *database.Bytes, numServers, blockSize, elemBitSize, numBitsToRetrieve, nRepeat int) []*Chunk {
-	prg := utils.RandomPRG()
-	c := client.NewPIR(prg, &db.Info)
-	ss := makePIRServers(db, numServers)
-	numTotalBlocks := db.NumRows * db.NumColumns
-	numRetrieveBlocks := bitsToBlocks(blockSize, elemBitSize, numBitsToRetrieve)
-
-	// create main monitor for CPU time
-	m := monitor.NewMonitor()
-
-	// run the experiment nRepeat times
-	results := make([]*Chunk, nRepeat)
-
-	var startIndex int
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = initChunk(numRetrieveBlocks)
-
-		// pick a random block index to start the retrieval
-		startIndex = rand.Intn(numTotalBlocks - numRetrieveBlocks)
-		for i := 0; i < numRetrieveBlocks; i++ {
-			results[j].CPU[i] = initBlock(len(ss))
-			results[j].Bandwidth[i] = initBlock(len(ss))
-
-			m.Reset()
-			queries := c.Query(startIndex+i, len(ss))
-			results[j].CPU[i].Query = m.RecordAndReset()
-			for r := range queries {
-				results[j].Bandwidth[i].Query += float64(len(queries[r]))
-			}
-
-			// get servers answers
-			answers := make([][]byte, len(ss))
-			for k := range ss {
-				m.Reset()
-				answers[k] = ss[k].Answer(queries[k])
-				results[j].CPU[i].Answers[k] = m.RecordAndReset()
-				results[j].Bandwidth[i].Answers[k] = float64(len(answers[k]))
-			}
-
-			m.Reset()
-			_, err := c.Reconstruct(answers)
-			results[j].CPU[i].Reconstruct = m.RecordAndReset()
-			results[j].Bandwidth[i].Reconstruct = 0
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		// GC after each repetition
-		runtime.GC()
-
-		// sleep after every iteration
-		time.Sleep(2 * time.Second)
-	}
-
-	return results
 }
 
 func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
@@ -586,31 +340,6 @@ func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
 }
 
-func makePIRServers(db *database.Bytes, numServers int) []*server.PIR {
-	servers := make([]*server.PIR, numServers)
-	for i := range servers {
-		servers[i] = server.NewPIR(db)
-	}
-	return servers
-}
-
-func fssQueryByteLength(q *query.FSS) float64 {
-	totalLen := 0
-
-	// Count the bytes of FssKey
-	totalLen += len(q.FssKey.SInit)
-	totalLen += 1 // q.FssKey.TInit
-	totalLen += len(q.FssKey.FinalCW) * field.Bytes
-	for i := range q.FssKey.CW {
-		totalLen += len(q.FssKey.CW[i])
-	}
-
-	// Count the bytes of Info
-	totalLen += infoSizeByte(q.Info)
-
-	return float64(totalLen)
-}
-
 func infoSizeByte(q *query.Info) int {
 	totalLen := 0
 	// Count the bytes of Info
@@ -661,10 +390,7 @@ func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
 }
 
 func (s *Simulation) validSimulation() bool {
-	return s.Primitive == "pir-classic" ||
-		s.Primitive == "pir-merkle" ||
-		s.Primitive == "fss" ||
-		s.Primitive == "cmp-pir" ||
+	return s.Primitive == "cmp-pir" ||
 		s.Primitive == "cmp-vpir" ||
 		s.Primitive == "cmp-vpir-lwe" ||
 		s.Primitive == "preprocessing"
