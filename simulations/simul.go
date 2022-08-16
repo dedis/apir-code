@@ -119,6 +119,7 @@ func main() {
 		dbRing := new(database.Ring)
 		dbElliptic := new(database.Elliptic)
 		dbLWE := new(database.LWE)
+		dbLWE128 := new(database.LWE128)
 		switch s.Primitive[:3] {
 		case "cmp":
 			if s.Primitive == "cmp-pir" {
@@ -130,6 +131,11 @@ func main() {
 			} else if s.Primitive == "cmp-vpir-lwe" {
 				log.Printf("Generating LWE db of size %d\n", dbLen)
 				dbLWE = database.CreateRandomBinaryLWEWithLength(dbPRG, dbLen)
+			} else if s.Primitive == "cmp-vpir-lwe-128" {
+				log.Printf("Generating LWE128 db of size %d\n", dbLen)
+				dbLWE128 = database.CreateRandomBinaryLWEWithLength128(dbPRG, dbLen)
+			} else {
+				log.Fatal("unknow primitive type:", s.Primitive)
 			}
 		}
 
@@ -149,11 +155,14 @@ func main() {
 		case "cmp-vpir-lwe":
 			log.Printf("db info: %#v", dbLWE.Info)
 			results = pirLWE(dbLWE, s.Repetitions)
+		case "cmp-vpir-lwe-128":
+			log.Printf("db info: %#v", dbLWE128.Info)
+			results = pirLWE128(dbLWE128, s.Repetitions)
 		case "preprocessing":
 			log.Printf("Merkle preprocessing evaluation for dbLen %d bits\n", dbLen)
 			results = RandomMerkleDB(dbPRG, dbLen, nRows, blockLen, s.Repetitions)
 		default:
-			log.Fatal("unknown primitive type")
+			log.Fatal("unknown primitive type:", s.Primitive)
 		}
 		experiment.Results[dbLen] = results
 
@@ -245,6 +254,56 @@ func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
 	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
 	c := client.NewLWE(utils.RandomPRG(), &db.Info, p)
 	s := server.NewLWE(db)
+
+	for j := 0; j < nRepeat; j++ {
+		log.Printf("start repetition %d out of %d", j+1, nRepeat)
+		results[j] = initChunk(numRetrievedBlocks)
+		// pick a random block index to start the retrieval
+		index := rand.Intn(db.NumRows * db.NumColumns)
+		results[j].CPU[0] = initBlock(1)
+		results[j].Bandwidth[0] = initBlock(1)
+
+		m.Reset()
+		query, err := c.QueryBytes(index)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Query = m.RecordAndReset()
+		results[j].Bandwidth[0].Query += float64(len(query))
+
+		// get server's answer
+		answer, err := s.AnswerBytes(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Answers[0] = m.RecordAndReset()
+		results[j].Bandwidth[0].Answers[0] = float64(len(answer))
+
+		_, err = c.ReconstructBytes(answer)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		results[j].Bandwidth[0].Reconstruct = 0
+
+		// GC after each repetition
+		runtime.GC()
+		time.Sleep(2)
+	}
+
+	return results
+}
+
+func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {
+	numRetrievedBlocks := 1
+	// create main monitor for CPU time
+	m := monitor.NewMonitor()
+	// run the experiment nRepeat times
+	results := make([]*Chunk, nRepeat)
+
+	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
+	c := client.NewLWE128(utils.RandomPRG(), &db.Info, p)
+	s := server.NewLWE128(db)
 
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
