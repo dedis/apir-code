@@ -56,6 +56,95 @@ def getServerStats(server_id, scheme, key):
     server_log = "server_" + str(server_id) + "_" + scheme + "_" + str(key) + ".log"
     return parseServerLog(resultFolder + server_log)
 
+def plotComplexLine():
+    schemes = ["fss_classic", "fss_auth"]
+    config = load_config("fss_classic.toml")
+    scheme_labels = ["Unauthenticated", "Authenticated"]
+
+    fig, axs = plt.subplots(2, sharex=True, sharey=True)
+
+    input_sizes = config['InputSizes']
+    time = []
+    time_err = []
+    bandwidth = []
+    bandwidth_err = []
+    for i, scheme in enumerate(schemes):
+        time.append([])
+        bandwidth.append([])
+        time_err.append([])
+        bandwidth_err.append([])
+        for input_size in input_sizes:
+            bw, tm = getClientStats(scheme, input_size)
+
+            for k in range(0, 2):
+                bw = [a + b for a,b in zip(bw, getServerStats(k, scheme, input_size))]
+
+            time[i].append(tm)
+            bandwidth[i].append(bw)
+
+    time_np = np.array(time)
+    bandwidth_np = np.array(bandwidth)
+
+    ratio_time = np.array([statistic(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))])
+    ratio_bw = np.array([statistic(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))])
+
+    print("predicate queries max ratio user-time:", max(ratio_time))
+    print("predicate queries max ratio bandwidth:", max(ratio_bw))
+
+    err_time = np.array([np.std(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))])
+    err_bw = np.array([np.std(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))])
+
+    axs[0].plot(
+            input_sizes,
+            ratio_time, 
+            color='black', 
+            marker='x',
+            markersize=2,
+            linestyle=linestyles[0],
+            linewidth=0.5,
+    )
+    axs[0].fill_between(
+            input_sizes,
+            np.array(ratio_time) - np.array(err_time), 
+            np.array(ratio_time) + np.array(err_time), 
+            color='grey',
+    )
+    axs[0].axhline(y = 1, color ='black', linestyle = '--', linewidth=0.5)
+    axs[1].plot(
+            input_sizes,
+            ratio_bw,
+            color='black', 
+            marker='x',
+            markersize=2,
+            linestyle=linestyles[0],
+            linewidth=0.5,
+    )
+    axs[1].fill_between(
+            input_sizes,
+            np.array(ratio_bw) - np.array(err_bw), 
+            np.array(ratio_bw) + np.array(err_bw), 
+            color='grey',
+    )
+    axs[1].axhline(y = 1, color ='black', linestyle = '--', linewidth=0.5)
+
+    time_np = np.array(time)
+    bandwidth_np = np.array(bandwidth)
+    ratio_time = [statistic(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))]
+    ratio_bw = [statistic(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
+
+    # cosmetics
+    axs[0].set_ylabel('User time ratio')
+    axs[0].set_xticks(input_sizes), 
+    axs[1].set_ylabel('Bandwidth ratio')
+    axs[1].set_xlabel('Function-secret-sharing input size [bytes]')
+
+    plt.tight_layout(h_pad=1.5)
+    plt.savefig('figures/complex_lines.eps', format='eps', dpi=300, transparent=True)
+
+    
+    # print("predicate queries max ratio user-time:", max(ratio_time))
+    # print("predicate queries max ratio bandwidth:", max(ratio_bw))
+
 def plotComplex():
     schemes = ["fss_classic", "fss_auth"]
     config = load_config("fss_classic.toml")
@@ -246,4 +335,5 @@ def plotPointMulti():
 prepare_for_latex()
 #plotPoint()
 #plotPointMulti()
-plotComplex()
+#plotComplex()
+plotComplexLine()
