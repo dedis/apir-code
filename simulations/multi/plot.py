@@ -136,7 +136,7 @@ def plotComplexLine():
     axs[0].set_ylabel('User-time ratio')
     axs[0].set_xticks(input_sizes), 
     axs[1].set_ylabel('Bandwidth ratio')
-    axs[1].set_xlabel('Function-secret-sharing input size [bytes]')
+    axs[1].set_xlabel('Function-secret-sharing input size [B]')
 
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/complex_lines.eps', format='eps', dpi=300, transparent=True)
