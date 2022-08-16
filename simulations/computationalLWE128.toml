@@ -1,0 +1,5 @@
+Name = "computationalLWE"
+Primitive = "cmp-vpir-lwe-128"
+NumRows = 0 # every NumRows != 1 indicate matrix
+BlockLength = 1
+ElementBitSize = 0
