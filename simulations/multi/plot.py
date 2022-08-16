@@ -133,7 +133,7 @@ def plotComplexLine():
     ratio_bw = [statistic(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
 
     # cosmetics
-    axs[0].set_ylabel('User time ratio')
+    axs[0].set_ylabel('User-time ratio')
     axs[0].set_xticks(input_sizes), 
     axs[1].set_ylabel('Bandwidth ratio')
     axs[1].set_xlabel('Function-secret-sharing input size [bytes]')
