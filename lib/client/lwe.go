@@ -80,6 +80,8 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) (uint32, error) {
 
 	good := true
 	outs := make([]uint32, c.params.M)
+	// TODO: shouldn't we break the loop if good == false?
+	// or equivalently immediately return a REJECT?
 	for i := 0; i < c.params.M; i++ {
 		v := answers.Get(0, i)
 		if c.inRange(v) {
