@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"io"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -71,7 +72,7 @@ func (c *LWE128) QueryBytes(index int) ([]byte, error) {
 	return matrix.Matrix128ToBytes(m), nil
 }
 
-func (c *LWE128) reconstruct(answers *matrix.Matrix128) uint32 {
+func (c *LWE128) reconstruct(answers *matrix.Matrix128) (uint32, error) {
 	s_trans_d := matrix.Mul128(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
@@ -89,14 +90,14 @@ func (c *LWE128) reconstruct(answers *matrix.Matrix128) uint32 {
 	}
 
 	if !good {
-		panic("Incorrect reconstruction")
+		return 0, errors.New("Incorrect reconstruction")
 	}
 
-	return outs[c.state.j]
+	return outs[c.state.j], nil
 }
 
 func (c *LWE128) ReconstructBytes(a []byte) (uint32, error) {
-	return c.reconstruct(matrix.BytesToMatrix128(a)), nil
+	return c.reconstruct(matrix.BytesToMatrix128(a))
 }
 
 // TODO: check how to set B

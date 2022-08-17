@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -104,8 +103,5 @@ func (c *LWE) ReconstructBytes(a []byte) (uint32, error) {
 }
 
 func (c *LWE) inRange(val uint32) bool {
-	fmt.Println("input", val)
-	fmt.Println("param", c.params.B)
-	fmt.Println("difference", val-c.params.B)
 	return (val <= c.params.B) || (val >= -c.params.B)
 }
