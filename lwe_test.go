@@ -20,6 +20,13 @@ func TestLWEMatrixOneMb(t *testing.T) {
 	retrieveBlocksLWE(t, db, p, "SingleMatrixLWEOneMb")
 }
 
+func TestLWEMatrixBigDB(t *testing.T) {
+	dbLen := 100000000 // dbLen is specified in bits
+	db := database.CreateRandomBinaryLWEWithLength(utils.RandomPRG(), dbLen)
+	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
+	retrieveBlocksLWE(t, db, p, "SingleMatrixLWEBigDB")
+}
+
 func TestDefaultLWE(t *testing.T) {
 	// get default parameters
 	p := utils.ParamsDefault()
