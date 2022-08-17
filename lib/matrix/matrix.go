@@ -149,7 +149,6 @@ func Mul(a *Matrix, b *Matrix) *Matrix {
 
 	return out
 
-	// // TODO Implement this inner loop in C for performance
 	// out := New(a.rows, b.cols)
 	// for i := 0; i < a.rows; i++ {
 	// 	for k := 0; k < a.cols; k++ {

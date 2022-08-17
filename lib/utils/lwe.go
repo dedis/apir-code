@@ -24,6 +24,7 @@ type ParamsLWE struct {
 	Bytes  int
 }
 
+// TODO: clarify parameters selection
 // TODO: how to pick the value of B?
 func ParamsDefault() *ParamsLWE {
 	return &ParamsLWE{
