@@ -5,6 +5,7 @@ import (
 	"io"
 	"math"
 	"math/rand"
+	"unsafe"
 
 	"github.com/si-co/vpir-code/lib/utils"
 )
@@ -78,11 +79,11 @@ func NewRandom(rnd io.Reader, r int, c int, mod uint64) *Matrix {
 	m := New(r, c)
 
 	//Convert slice header to an []int32
-	for i := 0; i < len(m.data); i++ {
-		m.data[i] = binary.BigEndian.Uint32(b[i*bytesMod : (i+1)*bytesMod])
-	}
+	// for i := 0; i < len(m.data); i++ {
+	// 	m.data[i] = binary.BigEndian.Uint32(b[i*bytesMod : (i+1)*bytesMod])
+	// }
 	// TODO: this works but it is bad practice
-	//m.data = *(*[]uint32)(unsafe.Pointer(&b))
+	m.data = *(*[]uint32)(unsafe.Pointer(&b))
 
 	return m
 }
