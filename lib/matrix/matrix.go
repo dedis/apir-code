@@ -107,6 +107,10 @@ func sampleGauss(sigma float64) uint32 {
 		}
 	}
 
+	if x >= math.MaxUint32 {
+		panic("too big")
+	}
+
 	return uint32(x)
 }
 
