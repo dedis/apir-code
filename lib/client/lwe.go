@@ -1,6 +1,8 @@
 package client
 
 import (
+	"errors"
+	"fmt"
 	"io"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -73,7 +75,7 @@ func (c *LWE) QueryBytes(index int) ([]byte, error) {
 	return matrix.MatrixToBytes(m), nil
 }
 
-func (c *LWE) reconstruct(answers *matrix.Matrix) uint32 {
+func (c *LWE) reconstruct(answers *matrix.Matrix) (uint32, error) {
 	s_trans_d := matrix.Mul(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
@@ -91,16 +93,19 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) uint32 {
 	}
 
 	if !good {
-		panic("Incorrect reconstruction")
+		return 0, errors.New("REJECT")
 	}
 
-	return outs[c.state.j]
+	return outs[c.state.j], nil
 }
 
 func (c *LWE) ReconstructBytes(a []byte) (uint32, error) {
-	return c.reconstruct(matrix.BytesToMatrix(a)), nil
+	return c.reconstruct(matrix.BytesToMatrix(a))
 }
 
 func (c *LWE) inRange(val uint32) bool {
+	fmt.Println("input", val)
+	fmt.Println("param", c.params.B)
+	fmt.Println("difference", val-c.params.B)
 	return (val <= c.params.B) || (val >= -c.params.B)
 }
