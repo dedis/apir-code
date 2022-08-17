@@ -24,6 +24,7 @@ type ParamsLWE struct {
 	Bytes  int
 }
 
+// TODO: how to pick the value of B?
 func ParamsDefault() *ParamsLWE {
 	return &ParamsLWE{
 		P:     2,
@@ -55,6 +56,7 @@ func ParamsDefault128() *ParamsLWE {
 	return p
 }
 
+// TODO: remove if we go with the 32-bits version
 func ParamsWithDatabaseSize128(rows, columns int) *ParamsLWE {
 	p := ParamsDefault128()
 	p.L = rows
