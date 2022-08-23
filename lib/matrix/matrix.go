@@ -73,9 +73,6 @@ func NewRandom(rnd io.Reader, r int, c int) *Matrix {
 
 	m := New(r, c)
 
-	// for i := 0; i < len(m.data); i++ {
-	// 	m.data[i] = binary.BigEndian.Uint32(b[i*bytesMod : (i+1)*bytesMod])
-	// }
 	// TODO: this works but it is bad practice
 	m.data = *(*[]uint64)(unsafe.Pointer(&b))
 
