@@ -119,8 +119,7 @@ func NewBufPRG(prg *PRGReader) *BufPRGReader {
 func (b *BufPRGReader) RandInt(mod *big.Int) *big.Int {
 	out, err := rand.Int(b.stream, mod)
 	if err != nil {
-		// TODO: Replace this with non-absurd error handling.
-		panic("Catastrophic randomness failure!")
+		panic("catastrophic randomness failure!")
 	}
 	return out
 }
