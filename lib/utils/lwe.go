@@ -2,6 +2,7 @@ package utils
 
 import (
 	"crypto/aes"
+	"math"
 )
 
 // WARNING: DO NOT USE THESE KEYS IN PRODUCTION!
@@ -21,7 +22,6 @@ type ParamsLWE struct {
 	Bytes int
 }
 
-// TODO: how to pick the value of B?
 func ParamsDefault() *ParamsLWE {
 	return &ParamsLWE{
 		P: 2,
@@ -41,6 +41,7 @@ func ParamsWithDatabaseSize(rows, columns int) *ParamsLWE {
 	p := ParamsDefault()
 	p.L = rows
 	p.M = columns
+	p.B = uint32(rows * 12 * int(math.Ceil(p.Sigma))) // rows is equal to sqrt(\ell), 12 is ~ sqrt(128)
 
 	return p
 }
