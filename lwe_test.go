@@ -41,7 +41,6 @@ func retrieveBlocksLWE(t *testing.T, db *database.LWE, params *utils.ParamsLWE, 
 	totalTimer := monitor.NewMonitor()
 	repetitions := 100
 	for j := 0; j < repetitions; j++ {
-		fmt.Println("repetition", j, "out of", repetitions)
 		i := rand.Intn(params.L * params.M)
 		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
