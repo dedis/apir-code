@@ -28,9 +28,11 @@ type ParamsLWE struct {
 // TODO: how to pick the value of B?
 func ParamsDefault() *ParamsLWE {
 	return &ParamsLWE{
-		P:     2,
-		N:     1024,
-		Sigma: 6.0,
+		P: 2,
+		//N:     1024,
+		N: 4096,
+		//Sigma: 6.0,
+		Sigma: 3.2,
 		L:     512,
 		M:     128,
 		B:     1000,
