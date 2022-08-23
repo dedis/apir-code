@@ -21,7 +21,6 @@ func DefaultDigestWithRows(db *LWE, rows int) *matrix.Matrix {
 			utils.NewPRG(utils.ParamsDefault().SeedA),
 			utils.ParamsDefault().N,
 			rows,
-			utils.ParamsDefault().Mod,
 		), db.Matrix)
 }
 
@@ -62,7 +61,7 @@ func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
 
 	for i := 0; i < numRows; i++ {
 		for j := 0; j < numColumns; j++ {
-			val := uint32(data[i] & 1)
+			val := uint64(data[i] & 1)
 			if val >= plaintextModulus {
 				panic("Plaintext value too large")
 			}

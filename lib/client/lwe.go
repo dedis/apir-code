@@ -11,9 +11,6 @@ import (
 
 // LEW based authenticated single server PIR client
 
-// Ciphertext modulus
-const MOD = 1 << 32
-
 // Client description
 type LWE struct {
 	dbInfo *database.Info
@@ -28,7 +25,7 @@ type StateLWE struct {
 	secret *matrix.Matrix
 	i      int
 	j      int
-	t      uint32
+	t      uint64
 }
 
 func NewLWE(rnd io.Reader, info *database.Info, params *utils.ParamsLWE) *LWE {
@@ -41,13 +38,13 @@ func NewLWE(rnd io.Reader, info *database.Info, params *utils.ParamsLWE) *LWE {
 
 func (c *LWE) Query(i, j int) *matrix.Matrix {
 	// Lazy way to sample a random scalar
-	rand := matrix.NewRandom(c.rnd, 1, 1, MOD)
+	rand := matrix.NewRandom(c.rnd, 1, 1)
 
 	// digest is already stored in the state when receiving the database info
 	c.state = &StateLWE{
-		A:      matrix.NewRandom(utils.NewPRG(c.params.SeedA), c.params.N, c.params.L, MOD),
+		A:      matrix.NewRandom(utils.NewPRG(c.params.SeedA), c.params.N, c.params.L),
 		digest: matrix.BytesToMatrix(c.dbInfo.Digest),
-		secret: matrix.NewRandom(c.rnd, 1, c.params.N, MOD),
+		secret: matrix.NewRandom(c.rnd, 1, c.params.N),
 		i:      i,
 		j:      j,
 		t:      rand.Get(0, 0),
@@ -74,12 +71,12 @@ func (c *LWE) QueryBytes(index int) ([]byte, error) {
 	return matrix.MatrixToBytes(m), nil
 }
 
-func (c *LWE) reconstruct(answers *matrix.Matrix) (uint32, error) {
+func (c *LWE) reconstruct(answers *matrix.Matrix) (uint64, error) {
 	s_trans_d := matrix.Mul(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
 	good := true
-	outs := make([]uint32, c.params.M)
+	outs := make([]uint64, c.params.M)
 	// TODO: shouldn't we break the loop if good == false?
 	// or equivalently immediately return a REJECT?
 	for i := 0; i < c.params.M; i++ {
@@ -100,10 +97,10 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) (uint32, error) {
 	return outs[c.state.j], nil
 }
 
-func (c *LWE) ReconstructBytes(a []byte) (uint32, error) {
+func (c *LWE) ReconstructBytes(a []byte) (uint64, error) {
 	return c.reconstruct(matrix.BytesToMatrix(a))
 }
 
-func (c *LWE) inRange(val uint32) bool {
+func (c *LWE) inRange(val uint64) bool {
 	return (val <= c.params.B) || (val >= -c.params.B)
 }
