@@ -57,7 +57,7 @@ func (c *LWE) Query(i, j int) *matrix.Matrix {
 	query := matrix.Mul(c.state.secret, c.state.A)
 
 	// Error has dimension 1 x l
-	e := matrix.NewGauss(c.rnd.(*utils.PRGReader), 1, c.params.L, c.params.Sigma)
+	e := matrix.NewGauss(1, c.params.L, c.params.Sigma)
 
 	msg := matrix.New(1, c.params.L)
 	msg.Set(0, i, c.state.t)
