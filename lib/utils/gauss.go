@@ -27,8 +27,8 @@ var cdf_table = [...]float64{
 // The function below is modeled on Martin Albrecht's discrete-Gaussian
 // sampler included in his dgs library:
 //    https://github.com/malb/dgs
-func GaussSample() int64 {
-	mrand := MathRand()
+func GaussSample(prg *PRGReader) int64 {
+	mrand := MathRandWithPRG(&PRGReader{})
 
 	var x int64
 	var y float64

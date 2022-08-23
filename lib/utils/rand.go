@@ -50,6 +50,10 @@ func MathRand() *mrand.Rand {
 	return mrand.New(bufPrgReader)
 }
 
+func MathRandWithPRG(prg *PRGReader) *mrand.Rand {
+	return mrand.New(NewBufPRG(prg))
+}
+
 // We use the AES-CTR to generate pseudo-random  numbers using a
 // stream cipher. Go's native rand.Reader is extremely slow because
 // it makes tons of system calls to generate a small number of
