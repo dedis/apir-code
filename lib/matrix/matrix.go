@@ -3,8 +3,6 @@ package matrix
 import (
 	"encoding/binary"
 	"io"
-	"math"
-	"math/rand"
 	"unsafe"
 
 	"github.com/si-co/vpir-code/lib/utils"
@@ -87,32 +85,10 @@ func NewRandom(rnd io.Reader, r int, c int, mod uint64) *Matrix {
 	return m
 }
 
-func sampleGauss(sigma float64) uint32 {
-	// TODO: Replace with cryptographic RNG
-
-	// Inspired by https://github.com/malb/dgs/
-	tau := float64(18)
-	upper_bound := int(math.Ceil(sigma * tau))
-	f := -1.0 / (2.0 * sigma * sigma)
-
-	x := 0
-	for {
-		// Sample random value in [-tau*sigma, tau-sigma]
-		x = rand.Intn(2*upper_bound+1) - upper_bound
-		diff := float64(x)
-		accept_with_prob := math.Exp(diff * diff * f)
-		if rand.Float64() < accept_with_prob {
-			break
-		}
-	}
-
-	return uint32(x)
-}
-
 func NewGauss(r int, c int, sigma float64) *Matrix {
 	m := New(r, c)
 	for i := 0; i < len(m.data); i++ {
-		m.data[i] = sampleGauss(sigma)
+		m.data[i] = uint32(utils.GaussSample())
 	}
 
 	return m
