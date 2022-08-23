@@ -75,10 +75,7 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) (uint64, error) {
 	s_trans_d := matrix.Mul(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
-	good := true
 	outs := make([]uint64, c.params.M)
-	// TODO: shouldn't we break the loop if good == false?
-	// or equivalently immediately return a REJECT?
 	for i := 0; i < c.params.M; i++ {
 		v := answers.Get(0, i)
 		if c.inRange(v) {
@@ -86,12 +83,8 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) (uint64, error) {
 		} else if c.inRange(v - c.state.t) {
 			outs[i] = 1
 		} else {
-			good = false
+			return 0, errors.New("REJECT")
 		}
-	}
-
-	if !good {
-		return 0, errors.New("REJECT")
 	}
 
 	return outs[c.state.j], nil
