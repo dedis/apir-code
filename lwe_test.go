@@ -11,13 +11,9 @@ import (
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/sys/cpu"
 )
 
 func TestLWEMatrixOneMb(t *testing.T) {
-	if cpu.X86.HasSSE2 == false || cpu.X86.HasAVX2 == false {
-		panic("we need sse2 and avx")
-	}
 	dbLen := 1024 * 1024 // dbLen is specified in bits
 	db := database.CreateRandomBinaryLWEWithLength(utils.RandomPRG(), dbLen)
 	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
