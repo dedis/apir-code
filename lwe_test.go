@@ -17,14 +17,14 @@ func TestLWEMatrixOneMb(t *testing.T) {
 	dbLen := 1024 * 1024 // dbLen is specified in bits
 	db := database.CreateRandomBinaryLWEWithLength(utils.RandomPRG(), dbLen)
 	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
-	retrieveBlocksLWE(t, db, p, "SingleMatrixLWEOneMb")
+	retrieveBlocksLWE(t, db, p, "TestLWEMatrixOneMb")
 }
 
 func TestLWEMatrixBigDB(t *testing.T) {
 	dbLen := 100000000 // dbLen is specified in bits
 	db := database.CreateRandomBinaryLWEWithLength(utils.RandomPRG(), dbLen)
 	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
-	retrieveBlocksLWE(t, db, p, "SingleMatrixLWEBigDB")
+	retrieveBlocksLWE(t, db, p, "TestLWEMatrixBigDB")
 }
 
 func TestDefaultLWE(t *testing.T) {

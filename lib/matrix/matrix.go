@@ -85,10 +85,10 @@ func NewRandom(rnd io.Reader, r int, c int, mod uint64) *Matrix {
 	return m
 }
 
-func NewGauss(r int, c int, sigma float64) *Matrix {
+func NewGauss(prg *utils.PRGReader, r int, c int, sigma float64) *Matrix {
 	m := New(r, c)
 	for i := 0; i < len(m.data); i++ {
-		m.data[i] = uint32(utils.GaussSample())
+		m.data[i] = uint32(utils.GaussSample(prg))
 	}
 
 	return m
