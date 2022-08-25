@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results/"
-#resultFolder = "results/"
+#resultFolder = "final_results/"
+resultFolder = "results_061/"
 
 print("plotting from", resultFolder)
 
@@ -195,23 +195,32 @@ def plotComplexBars():
     plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
 
 def plotSingle():
-    schemes = ["computationalPir.json", "computationalVpir.json"]
-    labels = ["None", "Atomic"]
+    schemes = ["computationalPir.json", "computationalVpir.json", "computationalLWE.json"]
+    labels = ["Unauth.", "Auth. DDH", "Auth. LWE"]
     cpuTable = defaultdict(list)
     bwTable = defaultdict(list)
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
             bw = bwMean(stats, dbSize) 
-            if scheme == schemes[0]:
-                bw -= LatticeRotKeysLen
+            # if scheme == schemes[0]:
+                # bw -= LatticeRotKeysLen
             cpu = cpuMean(stats, dbSize)
             cpuTable[dbSize].append(cpu)
             bwTable[dbSize].append(bw/MB)
+        
+    for size, values in cpuTable.items():
+        # time
+        print(get_size_in_bits(size), end = " ")
+        print("& x & ", rounder2(values[1]), " & x$\\times$ &", end = " ")
+        print(rounder2(values[2]), " & x$\\times$", end = " ")
+        # bw
+        print("& x & ", rounder2(bwTable[size][1]), " & x$\\times$ &", end = " ")
+        print(rounder2(bwTable[size][2]), " & x$\\times$ \\\\")
 
-    print_latex_table_separate(cpuTable, len(schemes), get_size_in_bits)
-    print("")
-    print_latex_table_separate(bwTable, len(schemes), get_size_in_bits)
+    # print_latex_table_joint(cpuTable, len(schemes), get_size_in_bits)
+    # print("")
+    # print_latex_table_joint(bwTable, len(schemes), get_size_in_bits)
 
 
 def plotRealComplex():
