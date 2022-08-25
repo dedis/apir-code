@@ -23,9 +23,8 @@ type ParamsLWE struct {
 
 func ParamsDefault() *ParamsLWE {
 	return &ParamsLWE{
-		P: 2,
-		//N:     1024,
-		N:        2816,
+		P:        2,
+		N:        2300,
 		Sigma:    6.4,
 		L:        512,
 		M:        128,
