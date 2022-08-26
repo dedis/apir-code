@@ -7,8 +7,9 @@ type Block struct {
 }
 
 type Chunk struct {
-	CPU            []*Block
-	Bandwidth      []*Block
+	CPU       []*Block
+	Bandwidth []*Block
+	Digest    float64
 }
 
 type Experiment struct {

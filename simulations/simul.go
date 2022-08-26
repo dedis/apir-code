@@ -207,6 +207,10 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrievedBlocks)
+
+		// store digest size
+		results[j].Digest = float64(len(db.SubDigests))
+
 		// pick a random block index to start the retrieval
 		index := rand.Intn(db.NumRows * db.NumColumns)
 		for i := 0; i < numRetrievedBlocks; i++ {
@@ -261,6 +265,10 @@ func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrievedBlocks)
+
+		// store digest size
+		results[j].Digest = float64(len(db.Auth.Digest))
+
 		// pick a random block index to start the retrieval
 		index := rand.Intn(db.NumRows * db.NumColumns)
 		results[j].CPU[0] = initBlock(1)
@@ -312,6 +320,10 @@ func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrievedBlocks)
+
+		// store digest size
+		results[j].Digest = float64(len(db.Auth.Digest))
+
 		// pick a random block index to start the retrieval
 		index := rand.Intn(db.NumRows * db.NumColumns)
 		results[j].CPU[0] = initBlock(1)
@@ -363,6 +375,10 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
 		results[j] = initChunk(numRetrievedBlocks)
+
+		// store digest size
+		results[j].Digest = float64(len(db.SubDigests))
+
 		// pick a random block index to start the retrieval
 		index := rand.Intn(db.NumRows * db.NumColumns)
 		results[j].CPU[0] = initBlock(1)
@@ -430,6 +446,7 @@ func initChunk(numRetrieveBlocks int) *Chunk {
 	return &Chunk{
 		CPU:       make([]*Block, numRetrieveBlocks),
 		Bandwidth: make([]*Block, numRetrieveBlocks),
+		Digest:    0,
 	}
 }
 
@@ -460,5 +477,6 @@ func (s *Simulation) validSimulation() bool {
 	return s.Primitive == "cmp-pir" ||
 		s.Primitive == "cmp-vpir" ||
 		s.Primitive == "cmp-vpir-lwe" ||
+		s.Primitive == "cmp-vpir-lwe-128" ||
 		s.Primitive == "preprocessing"
 }
