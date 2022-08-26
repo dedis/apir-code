@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"log"
-	"runtime"
 
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
@@ -53,7 +52,7 @@ func (s *Lattice) AnswerBytes(q []byte) ([]byte, error) {
 	}
 
 	// multithreading
-	NGoRoutines := runtime.NumCPU()
+	NGoRoutines := 1
 	// make sure that we do not need up with routines processing 0 elements
 	if NGoRoutines > s.db.NumRows {
 		NGoRoutines = s.db.NumRows

@@ -2,7 +2,6 @@ package server
 
 import (
 	"math"
-	"runtime"
 
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/database"
@@ -23,7 +22,7 @@ func (s *DH) AnswerBytes(q []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	NGoRoutines := runtime.NumCPU()
+	NGoRoutines := 1
 	// make sure that we do not need up with routines processing 0 elements
 	if NGoRoutines > s.db.NumRows {
 		NGoRoutines = s.db.NumRows
