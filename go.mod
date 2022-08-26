@@ -18,4 +18,5 @@ require (
 	google.golang.org/grpc v1.36.1
 	google.golang.org/protobuf v1.26.0
 	lukechampine.com/blake3 v1.1.7
+	lukechampine.com/uint128 v1.2.0
 )

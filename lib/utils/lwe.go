@@ -47,3 +47,20 @@ func GetDefaultSeedMatrixA() *PRGKey {
 	key := PRGKey(SeedMatrixA)
 	return &key
 }
+
+// TODO: remove if we go with the 32-bits version
+func ParamsDefault128() *ParamsLWE {
+	p := ParamsDefault()
+	p.BytesMod = 16
+
+	return p
+}
+
+// TODO: remove if we go with the 32-bits version
+func ParamsWithDatabaseSize128(rows, columns int) *ParamsLWE {
+	p := ParamsDefault128()
+	p.L = rows
+	p.M = columns
+
+	return p
+}

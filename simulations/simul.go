@@ -20,7 +20,6 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/monitor"
 	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -191,7 +190,7 @@ func main() {
 func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 	numRetrievedBlocks := 1
 	// create main monitor for CPU time
-	m := monitor.NewMonitor()
+	//m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
@@ -207,26 +206,30 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 			results[j].CPU[i] = initBlock(1)
 			results[j].Bandwidth[i] = initBlock(1)
 
-			m.Reset()
+			//m.Reset()
+			t := time.Now()
 			query, err := c.QueryBytes(index + i)
 			if err != nil {
 				log.Fatal(err)
 			}
-			results[j].CPU[i].Query = m.RecordAndReset()
+			//results[j].CPU[i].Query = m.RecordAndReset()
+			results[j].CPU[i].Query = 0
 			results[j].Bandwidth[i].Query = float64(len(query))
 
 			answer, err := s.AnswerBytes(query)
 			if err != nil {
 				log.Fatal(err)
 			}
-			results[j].CPU[i].Answers[0] = m.RecordAndReset()
+			//results[j].CPU[i].Answers[0] = m.RecordAndReset()
+			results[j].CPU[i].Answers[0] = 0
 			results[j].Bandwidth[i].Answers[0] = float64(len(answer))
 
 			_, err = c.ReconstructBytes(answer)
 			if err != nil {
 				log.Fatal(err)
 			}
-			results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			//results[j].CPU[i].Reconstruct = m.RecordAndReset()
+			results[j].CPU[i].Reconstruct = time.Since(t).Seconds()
 			results[j].Bandwidth[i].Reconstruct = 0
 		}
 
@@ -240,7 +243,7 @@ func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
 func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
 	numRetrievedBlocks := 1
 	// create main monitor for CPU time
-	m := monitor.NewMonitor()
+	//m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
@@ -256,12 +259,13 @@ func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
 		results[j].CPU[0] = initBlock(1)
 		results[j].Bandwidth[0] = initBlock(1)
 
-		m.Reset()
+		//m.Reset()
+		t := time.Now()
 		query, err := c.QueryBytes(index)
 		if err != nil {
 			log.Fatal(err)
 		}
-		results[j].CPU[0].Query = m.RecordAndReset()
+		results[j].CPU[0].Query = 0
 		results[j].Bandwidth[0].Query += float64(len(query))
 
 		// get server's answer
@@ -269,14 +273,14 @@ func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
 		if err != nil {
 			log.Fatal(err)
 		}
-		results[j].CPU[0].Answers[0] = m.RecordAndReset()
+		results[j].CPU[0].Answers[0] = 0
 		results[j].Bandwidth[0].Answers[0] = float64(len(answer))
 
 		_, err = c.ReconstructBytes(answer)
 		if err != nil {
 			log.Fatal(err)
 		}
-		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		results[j].CPU[0].Reconstruct = time.Since(t).Seconds()
 		results[j].Bandwidth[0].Reconstruct = 0
 
 		// GC after each repetition
@@ -290,7 +294,7 @@ func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
 func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 	numRetrievedBlocks := 1
 	// create main monitor for CPU time
-	m := monitor.NewMonitor()
+	//m := monitor.NewMonitor()
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
@@ -306,12 +310,14 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 		results[j].CPU[0] = initBlock(1)
 		results[j].Bandwidth[0] = initBlock(1)
 
-		m.Reset()
+		//m.Reset()
+		t := time.Now()
 		query, err := c.QueryBytes(index)
 		if err != nil {
 			log.Fatal(err)
 		}
-		results[j].CPU[0].Query = m.RecordAndReset()
+		//results[j].CPU[0].Query = m.RecordAndReset()
+		results[j].CPU[0].Query = 0
 		results[j].Bandwidth[0].Query += float64(len(query))
 
 		// get server's answer
@@ -319,14 +325,15 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 		if err != nil {
 			log.Fatal(err)
 		}
-		results[j].CPU[0].Answers[0] = m.RecordAndReset()
+		//results[j].CPU[0].Answers[0] = m.RecordAndReset()
+		results[j].CPU[0].Answers[0] = 0
 		results[j].Bandwidth[0].Answers[0] = float64(len(answer))
 
 		_, err = c.ReconstructBytes(answer)
 		if err != nil {
 			log.Fatal(err)
 		}
-		results[j].CPU[0].Reconstruct = m.RecordAndReset()
+		results[j].CPU[0].Reconstruct = time.Since(t).Seconds()
 		results[j].Bandwidth[0].Reconstruct = 0
 
 		// GC after each repetition
