@@ -31,7 +31,7 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, dbLen int, g group.Group, reb
 	NGoRoutines := runtime.NumCPU()
 	// for small dbs use one core
 	if dbLen <= 1048576 {
-		NGoRoutines = 1
+		NGoRoutines = 4
 	}
 	h := crypto.BLAKE2b_256
 	rowsPerRoutine := int(math.Ceil(float64(numRows) / float64(NGoRoutines)))
