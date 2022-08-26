@@ -28,8 +28,10 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, dbLen int, g group.Group, reb
 	for i := 0; i < len(data); i++ {
 		data[i] = data[i] & 1
 	}
-
 	NGoRoutines := runtime.NumCPU()
+	if dbLen == 1024 {
+		NGoRoutines = 1
+	}
 	h := crypto.BLAKE2b_256
 	rowsPerRoutine := int(math.Ceil(float64(numRows) / float64(NGoRoutines)))
 	replies := make([]chan []byte, NGoRoutines)
@@ -60,10 +62,10 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, dbLen int, g group.Group, reb
 			NumRows:   numRows,
 			BlockSize: 1,
 			Auth: &Auth{
-				Digest: hasher.Sum(nil),
-				SubDigests: digests,
-				Group:  g,
-				Hash:   h,
+				Digest:      hasher.Sum(nil),
+				SubDigests:  digests,
+				Group:       g,
+				Hash:        h,
 				ElementSize: getGroupElementSize(g),
 			},
 		},
