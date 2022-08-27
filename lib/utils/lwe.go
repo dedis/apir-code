@@ -38,7 +38,7 @@ func ParamsWithDatabaseSize(rows, columns int) *ParamsLWE {
 	p := ParamsDefault()
 	p.L = rows
 	p.M = columns
-	p.B = uint64(rows * 12 * int(math.Ceil(p.Sigma))) // rows is equal to sqrt(\ell), 12 is ~ sqrt(128)
+	p.B = computeB(rows, p.Sigma)
 
 	return p
 }
@@ -48,19 +48,24 @@ func GetDefaultSeedMatrixA() *PRGKey {
 	return &key
 }
 
-// TODO: remove if we go with the 32-bits version
 func ParamsDefault128() *ParamsLWE {
 	p := ParamsDefault()
+	p.N = 4800
 	p.BytesMod = 16
 
 	return p
 }
 
-// TODO: remove if we go with the 32-bits version
 func ParamsWithDatabaseSize128(rows, columns int) *ParamsLWE {
 	p := ParamsDefault128()
 	p.L = rows
 	p.M = columns
+	p.B = computeB(rows, p.Sigma)
 
 	return p
+}
+
+func computeB(rows int, sigma float64) uint64 {
+	// rows is equal to sqrt(\ell), 12 is ~ sqrt(128)
+	return uint64(rows * 12 * int(math.Ceil(sigma)))
 }
