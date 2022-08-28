@@ -25,7 +25,7 @@ type StateLWE struct {
 	secret *matrix.Matrix
 	i      int
 	j      int
-	t      uint64
+	t      uint32
 }
 
 func NewLWE(rnd io.Reader, info *database.Info, params *utils.ParamsLWE) *LWE {
@@ -71,11 +71,11 @@ func (c *LWE) QueryBytes(index int) ([]byte, error) {
 	return matrix.MatrixToBytes(m), nil
 }
 
-func (c *LWE) reconstruct(answers *matrix.Matrix) (uint64, error) {
+func (c *LWE) reconstruct(answers *matrix.Matrix) (uint32, error) {
 	s_trans_d := matrix.Mul(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
-	outs := make([]uint64, c.params.M)
+	outs := make([]uint32, c.params.M)
 	for i := 0; i < c.params.M; i++ {
 		v := answers.Get(0, i)
 		if c.inRange(v) {
@@ -90,10 +90,10 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) (uint64, error) {
 	return outs[c.state.j], nil
 }
 
-func (c *LWE) ReconstructBytes(a []byte) (uint64, error) {
+func (c *LWE) ReconstructBytes(a []byte) (uint32, error) {
 	return c.reconstruct(matrix.BytesToMatrix(a))
 }
 
-func (c *LWE) inRange(val uint64) bool {
+func (c *LWE) inRange(val uint32) bool {
 	return (val <= c.params.B) || (val >= -c.params.B)
 }

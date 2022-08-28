@@ -7,12 +7,12 @@ import (
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
-type LWE struct {
+type Amplify struct {
 	Matrix *matrix.Matrix
 	Info
 }
 
-const plaintextModulus = 2
+const plaintextModulusAmplify = 2
 const blockSizeLWE = 1 // for backward compatibility
 
 func DefaultDigestWithRows(db *LWE, rows int) *matrix.Matrix {

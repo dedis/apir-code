@@ -15,7 +15,7 @@ type ParamsLWE struct {
 
 	L int    // number of rows of database
 	M int    // number of columns of database
-	B uint64 // bound used in reconstruction
+	B uint32 // bound used in reconstruction
 
 	SeedA    *PRGKey // matrix  used to generate digest
 	BytesMod int     // bytes of the modulo, either 4 for 32 bits or 8 for 64
@@ -30,7 +30,7 @@ func ParamsDefault() *ParamsLWE {
 		M:        128,
 		B:        1000,
 		SeedA:    GetDefaultSeedMatrixA(),
-		BytesMod: 8,
+		BytesMod: 4,
 	}
 }
 
@@ -65,7 +65,7 @@ func ParamsWithDatabaseSize128(rows, columns int) *ParamsLWE {
 	return p
 }
 
-func computeB(rows int, sigma float64) uint64 {
+func computeB(rows int, sigma float64) uint32 {
 	// rows is equal to sqrt(\ell), 12 is ~ sqrt(128)
-	return uint64(rows * 12 * int(math.Ceil(sigma)))
+	return uint32(rows * 12 * int(math.Ceil(sigma)))
 }

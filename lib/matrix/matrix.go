@@ -12,7 +12,7 @@ import (
 #cgo CFLAGS: -std=c99 -O3 -march=native -msse4.1 -maes -mavx2 -mavx
 #include <stdint.h>
 
-void multiply(int aRows, int aCols, int bCols, uint64_t *a, uint64_t *b, uint64_t *out) {
+void multiply(int aRows, int aCols, int bCols, uint32_t *a, uint32_t *b, uint32_t *out) {
    	int i, j, k;
 	for (i = 0; i < aRows; i++) {
 		for (k = 0; k < aCols; k++) {
@@ -28,14 +28,14 @@ import "C"
 type Matrix struct {
 	rows int
 	cols int
-	data []uint64
+	data []uint32
 }
 
 func New(r int, c int) *Matrix {
 	return &Matrix{
 		rows: r,
 		cols: c,
-		data: make([]uint64, r*c),
+		data: make([]uint32, r*c),
 	}
 }
 
@@ -47,7 +47,7 @@ func MatrixToBytes(in *Matrix) []byte {
 	binary.BigEndian.PutUint32(c, uint32(in.cols))
 	params := append(r, c...)
 	// finally we store the data and append the params in front of them
-	return append(params, utils.Uint64SliceToByteSlice(in.data)...)
+	return append(params, utils.Uint32SliceToByteSlice(in.data)...)
 }
 
 func BytesToMatrix(in []byte) *Matrix {
@@ -56,7 +56,7 @@ func BytesToMatrix(in []byte) *Matrix {
 	rows := int(binary.BigEndian.Uint32(r))
 	c := in[4:8]
 	cols := int(binary.BigEndian.Uint32(c))
-	data := utils.ByteSliceToUint64Slice(in[8:])
+	data := utils.ByteSliceToUint32Slice(in[8:])
 	return &Matrix{
 		rows: rows,
 		cols: cols,
@@ -74,7 +74,7 @@ func NewRandom(rnd io.Reader, r int, c int) *Matrix {
 	m := New(r, c)
 
 	// TODO: this works but it is bad practice
-	m.data = *(*[]uint64)(unsafe.Pointer(&b))
+	m.data = *(*[]uint32)(unsafe.Pointer(&b))
 
 	return m
 }
@@ -82,17 +82,17 @@ func NewRandom(rnd io.Reader, r int, c int) *Matrix {
 func NewGauss(r int, c int, sigma float64) *Matrix {
 	m := New(r, c)
 	for i := 0; i < len(m.data); i++ {
-		m.data[i] = uint64(utils.GaussSample())
+		m.data[i] = uint32(utils.GaussSample())
 	}
 
 	return m
 }
 
-func (m *Matrix) Set(r int, c int, v uint64) {
+func (m *Matrix) Set(r int, c int, v uint32) {
 	m.data[m.cols*r+c] = v
 }
 
-func (m *Matrix) Get(r int, c int) uint64 {
+func (m *Matrix) Get(r int, c int) uint32 {
 	return m.data[m.cols*r+c]
 }
 
@@ -111,8 +111,8 @@ func Mul(a *Matrix, b *Matrix) *Matrix {
 
 	out := New(a.rows, b.cols)
 	C.multiply(C.int(a.rows), C.int(a.cols), C.int(b.cols),
-		(*C.uint64_t)(&a.data[0]), (*C.uint64_t)(&b.data[0]),
-		(*C.uint64_t)(&out.data[0]))
+		(*C.uint32_t)(&a.data[0]), (*C.uint32_t)(&b.data[0]),
+		(*C.uint32_t)(&out.data[0]))
 
 	return out
 }
