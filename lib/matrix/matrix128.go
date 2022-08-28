@@ -3,8 +3,6 @@ package matrix
 import (
 	"encoding/binary"
 	"io"
-	"math"
-	"math/rand"
 
 	"github.com/si-co/vpir-code/lib/utils"
 	"lukechampine.com/uint128"
@@ -72,33 +70,10 @@ func NewRandom128(rnd io.Reader, r int, c int) *Matrix128 {
 	return m
 }
 
-// TODO: verify if correct
-func sampleGauss128(sigma float64) uint128.Uint128 {
-	// TODO: Replace with cryptographic RNG
-
-	// Inspired by https://github.com/malb/dgs/
-	tau := float64(18)
-	upper_bound := int64(math.Ceil(sigma * tau))
-	f := -1.0 / (2.0 * sigma * sigma)
-
-	x := int64(0)
-	for {
-		// Sample random value in [-tau*sigma, tau-sigma]
-		x = rand.Int63n(2*upper_bound+1) - upper_bound
-		diff := float64(x)
-		accept_with_prob := math.Exp(diff * diff * f)
-		if rand.Float64() < accept_with_prob {
-			break
-		}
-	}
-
-	return uint128.From64(uint64(x))
-}
-
 func NewGauss128(r int, c int, sigma float64) *Matrix128 {
 	m := New128(r, c)
 	for i := 0; i < len(m.data); i++ {
-		m.data[i] = sampleGauss128(sigma)
+		m.data[i] = uint128.From64(uint64(utils.GaussSample()))
 	}
 
 	return m
@@ -125,7 +100,6 @@ func Mul128(a *Matrix128, b *Matrix128) *Matrix128 {
 		panic("Dimension mismatch")
 	}
 
-	// TODO Implement this inner loop in C for performance
 	out := New128(a.rows, b.cols)
 	for i := 0; i < a.rows; i++ {
 		for k := 0; k < a.cols; k++ {

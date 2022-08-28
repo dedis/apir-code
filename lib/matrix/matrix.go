@@ -9,7 +9,7 @@ import (
 )
 
 /*
-#cgo CFLAGS: -std=c99 -O3
+#cgo CFLAGS: -std=c99 -O3 -march=native -msse4.1 -maes -mavx2 -mavx
 #include <stdint.h>
 
 void multiply(int aRows, int aCols, int bCols, uint64_t *a, uint64_t *b, uint64_t *out) {
