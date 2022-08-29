@@ -205,14 +205,14 @@ def plotSingle():
             bw = bwMean(stats, dbSize) 
             cpu = cpuMean(stats, dbSize)
             cpuTable[dbSize].append(cpu*1000)
-            bwTable[dbSize].append(bw)
+            bwTable[dbSize].append(bw*9.765625e-4)
     
 
     for size, values in cpuTable.items():
         # time
         print(get_size_in_bits(size), end = " ")
-        print("& x & ", rounder3(values[0]), " & x$\\times$ &", end = " ")
-        print(rounder3(values[1]), " & x$\\times$", end = " ")
+        print("& x & ", rounder2(values[0]), " & x$\\times$ &", end = " ")
+        print(rounder2(values[1]), " & x$\\times$", end = " ")
         # bw
         print("& x & ", rounder2(bwTable[size][0]), " & x$\\times$ &", end = " ")
         print(rounder2(bwTable[size][1]), " & x$\\times$ \\\\")

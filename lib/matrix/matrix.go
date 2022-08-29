@@ -81,7 +81,6 @@ func NewRandom(rnd io.Reader, r int, c int) *Matrix {
 
 	m := New(r, c)
 
-	// TODO: this works but it is bad practice
 	m.data = *(*[]uint32)(unsafe.Pointer(&b))
 
 	return m

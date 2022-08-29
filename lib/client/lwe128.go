@@ -100,7 +100,6 @@ func (c *LWE128) ReconstructBytes(a []byte) (uint32, error) {
 	return c.reconstruct(matrix.BytesToMatrix128(a))
 }
 
-// TODO: check how to set B
 func (c *LWE128) inRange(val uint128.Uint128) bool {
 	if val.Cmp(uint128.From64(uint64(c.params.B))) != 1 {
 		return false
