@@ -20,13 +20,6 @@ func TestLWEMatrixOneMb128(t *testing.T) {
 	retrieveBlocksLWE128(t, db, p, "SingleMatrixLWEOneMb_128")
 }
 
-func TestDefaultLWE128(t *testing.T) {
-	// get default parameters
-	p := utils.ParamsDefault128()
-	db := database.CreateRandomBinaryLWE128(utils.RandomPRG(), p.L, p.M)
-	retrieveBlocksLWE128(t, db, p, "SingleDefaultLWE128")
-}
-
 func retrieveBlocksLWE128(t *testing.T, db *database.LWE128, params *utils.ParamsLWE, testName string) {
 	c := client.NewLWE128(utils.RandomPRG(), &db.Info, params)
 	s := server.NewLWE128(db)
