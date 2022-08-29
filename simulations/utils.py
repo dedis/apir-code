@@ -14,6 +14,7 @@ def allStats(file):
     parsedResults = parseResults(file)
     for dbSize, results in parsedResults.items():
         s[dbSize] = {
+            "digest": results["digest"],
             "client": stats(results["client"]),  
             "server": stats(results["server"])
         }
@@ -64,16 +65,20 @@ def parseResults(file):
         for dbSize, dbResult in dbResults.items():
             client = defaultdict(list)
             server = defaultdict(list)
+            digest = 0
             # Read the results for CPU and bandwidth in each dbResult
             for measure in dbResult:
                 # iterate over the repetitions of the test
                 for param, repetition in measure.items():
                     # parse the results of a single block
+                    if param == "Digest":
+                        digest = repetition
+                        continue
                     for block in repetition:
                         client[param].append(block['Query'] + block['Reconstruct'])
                         # sum the values for all the servers
                         server[param].append(np.sum(block['Answers']))
-            parsedResults[int(dbSize)] = {"client": client, "server": server}
+            parsedResults[int(dbSize)] = {"digest": digest, "client": client, "server": server}
     return parsedResults
 
 

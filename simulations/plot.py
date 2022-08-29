@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from utils import *
 
 #resultFolder = "final_results/"
-resultFolder = "results_061/"
+resultFolder = 'results_061/'
 
 print("plotting from", resultFolder)
 
@@ -195,28 +195,27 @@ def plotComplexBars():
     plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
 
 def plotSingle():
-    schemes = ["computationalPir.json", "computationalVpir.json", "computationalLWE.json"]
-    labels = ["Unauth.", "Auth. DDH", "Auth. LWE"]
+    schemes = ["computationalVpir.json", "computationalLWE128.json"]
+    labels = ["Auth. DDH", "Auth. LWE"]
     cpuTable = defaultdict(list)
     bwTable = defaultdict(list)
     for i, scheme in enumerate(schemes):
         stats = allStats(resultFolder + scheme)
         for j, dbSize in enumerate(sorted(stats.keys())):
             bw = bwMean(stats, dbSize) 
-            # if scheme == schemes[0]:
-                # bw -= LatticeRotKeysLen
             cpu = cpuMean(stats, dbSize)
-            cpuTable[dbSize].append(cpu)
-            bwTable[dbSize].append(bw/MB)
-        
+            cpuTable[dbSize].append(cpu*1000)
+            bwTable[dbSize].append(bw)
+    
+
     for size, values in cpuTable.items():
         # time
         print(get_size_in_bits(size), end = " ")
-        print("& x & ", rounder2(values[1]), " & x$\\times$ &", end = " ")
-        print(rounder2(values[2]), " & x$\\times$", end = " ")
+        print("& x & ", rounder3(values[0]), " & x$\\times$ &", end = " ")
+        print(rounder3(values[1]), " & x$\\times$", end = " ")
         # bw
-        print("& x & ", rounder2(bwTable[size][1]), " & x$\\times$ &", end = " ")
-        print(rounder2(bwTable[size][2]), " & x$\\times$ \\\\")
+        print("& x & ", rounder2(bwTable[size][0]), " & x$\\times$ &", end = " ")
+        print(rounder2(bwTable[size][1]), " & x$\\times$ \\\\")
 
     # print_latex_table_joint(cpuTable, len(schemes), get_size_in_bits)
     # print("")
