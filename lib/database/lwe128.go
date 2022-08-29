@@ -39,10 +39,6 @@ func CreateRandomBinaryLWE128(rnd io.Reader, numRows, numColumns int) *LWE128 {
 	for i := 0; i < numRows; i++ {
 		for j := 0; j < numColumns; j++ {
 			val := uint128.From64(uint64(data[i] & 1))
-			// TODO repristinate this check
-			// if val >= plaintextModulus {
-			// 	panic("Plaintext value too large")
-			// }
 			m.Set(i, j, val)
 		}
 	}
