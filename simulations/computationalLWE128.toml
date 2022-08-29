@@ -1,4 +1,4 @@
-Name = "computationalLWE"
+Name = "computationalLWE128"
 Primitive = "cmp-vpir-lwe-128"
 NumRows = 0 # every NumRows != 1 indicate matrix
 BlockLength = 1
