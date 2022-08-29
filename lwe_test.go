@@ -27,13 +27,6 @@ func TestLWEMatrixBigDB(t *testing.T) {
 	retrieveBlocksLWE(t, db, p, "TestLWEMatrixBigDB")
 }
 
-func TestDefaultLWE(t *testing.T) {
-	// get default parameters
-	p := utils.ParamsDefault()
-	db := database.CreateRandomBinaryLWE(utils.RandomPRG(), p.L, p.M)
-	retrieveBlocksLWE(t, db, p, "SingleDefaultLWE")
-}
-
 func retrieveBlocksLWE(t *testing.T, db *database.LWE, params *utils.ParamsLWE, testName string) {
 	c := client.NewLWE(utils.RandomPRG(), &db.Info, params)
 	s := server.NewLWE(db)
