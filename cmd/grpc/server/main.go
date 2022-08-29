@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -178,32 +177,6 @@ func main() {
 			errCh <- err
 		}
 	}()
-
-	// start HTTP server for tests
-	// TODO: remove this in application
-	host, _, err := net.SplitHostPort(addr)
-	if err != nil {
-		log.Fatal("impossible to parse addr for HTTP server")
-	}
-	h := func(w http.ResponseWriter, _ *http.Request) {
-		sigCh <- os.Interrupt
-	}
-	httpAddr := fmt.Sprintf("%s:%s", host, "8080")
-	srv := &http.Server{Addr: httpAddr}
-	http.HandleFunc("/", h)
-	go func() {
-		srv.ListenAndServe()
-	}()
-
-	select {
-	case err := <-errCh:
-		log.Fatalf("failed to serve: %v", err)
-	case <-sigCh:
-		rpcServer.GracefulStop()
-		lis.Close()
-		srv.Shutdown(context.Background())
-		log.Println("clean shutdown of server done")
-	}
 }
 
 // vpirServer is used to implement VPIR Server protocol.
