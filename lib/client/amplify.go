@@ -1,30 +1,54 @@
 package client
 
 import (
+	"errors"
 	"io"
 
 	"github.com/si-co/vpir-code/lib/database"
+	"github.com/si-co/vpir-code/lib/ecc"
 	"github.com/si-co/vpir-code/lib/matrix"
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
 type Amplify struct {
-	t   int  // ECC parameter
-	lwe *LWE // base client
+	repetitions int    // 2*t + 1
+	lwes        []*LWE // base client to each element of output of ECC
 }
 
-func NewAmplify(rnd io.Reader, info *database.Info, params *utils.ParamsLWE, t int) *Amplify {
+func NewAmplify(rnd io.Reader, info *database.Info, params *utils.ParamsLWE, tECC int) *Amplify {
+	repetitions := tECC*2 + 1
+
+	lwes := make([]*LWE, repetitions)
+	for i := range lwes {
+		lwes[i] = NewLWE(rnd, info, params)
+	}
+
 	return &Amplify{
-		t:   t,
-		lwe: NewLWE(rnd, info, params),
+		repetitions: repetitions,
+		lwes:        lwes,
 	}
 }
 
+// TODO: run in parallel?
 func (a *Amplify) Query(i, j int) []*matrix.Matrix {
-	query := make([]*matrix.Matrix, a.t+1)
-
+	queries := make([]*matrix.Matrix, a.repetitions)
+	for k := 0; k < a.repetitions; k++ {
+		queries[k] = a.lwes[k].Query(i, j)
+	}
+	return queries
 }
 
 func (a *Amplify) Reconstruct(answers []*matrix.Matrix) (uint32, error) {
+	outputs := make([]uint32, a.repetitions)
+	var err error
+	for i := range outputs {
+		outputs[i], err = a.lwes[i].Reconstruct(answers[i])
+		if err != nil {
+			return 0, errors.New("REJECT")
+		}
+	}
 
+	// find and return majority
+	ecc := ecc.New((a.repetitions - 1) / 2)
+	return ecc.Decode(outputs)
 }
