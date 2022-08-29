@@ -13,34 +13,13 @@ type LWE128 struct {
 	Info
 }
 
-func DefaultDigestWithRows128(db *LWE128, rows int) *matrix.Matrix128 {
+func Digest128(db *LWE128, rows int) *matrix.Matrix128 {
 	return matrix.Mul128(
 		matrix.NewRandom128(
 			utils.NewPRG(utils.ParamsDefault128().SeedA),
 			utils.ParamsDefault128().N,
 			rows,
 		), db.Matrix)
-}
-
-func DefaultDigest128(db *LWE128) *matrix.Matrix128 {
-	return DefaultDigestWithRows128(db, utils.ParamsDefault128().L)
-}
-
-func CreateZeroLWE128(numRows, numColumns int) *LWE128 {
-	m := matrix.New128(numRows, numColumns)
-
-	db := &LWE128{
-		Matrix: m,
-		Info: Info{
-			NumRows:    numRows,
-			NumColumns: numColumns,
-			BlockSize:  blockSizeLWE,
-		},
-	}
-
-	db.Auth.Digest = matrix.Matrix128ToBytes(DefaultDigest128(db))
-
-	return db
 }
 
 func CreateRandomBinaryLWEWithLength128(rnd io.Reader, dbLen int) *LWE128 {
@@ -78,7 +57,7 @@ func CreateRandomBinaryLWE128(rnd io.Reader, numRows, numColumns int) *LWE128 {
 	}
 
 	db.Auth = &Auth{
-		Digest: matrix.Matrix128ToBytes(DefaultDigestWithRows128(db, numRows)),
+		Digest: matrix.Matrix128ToBytes(Digest128(db, numRows)),
 	}
 
 	return db

@@ -39,6 +39,14 @@ func New(r int, c int) *Matrix {
 	}
 }
 
+func NewWithData(r int, c int, data []uint32) *Matrix {
+	return &Matrix{
+		rows: r,
+		cols: c,
+		data: data,
+	}
+}
+
 func MatrixToBytes(in *Matrix) []byte {
 	// we first store rows and cols to allow reconstruction
 	r := make([]byte, 4)
