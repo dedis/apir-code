@@ -38,7 +38,7 @@ type Info struct {
 	BlockSize    int
 	BlockLengths []int // length of data in blocks defined in number of elements
 
-	// PIR type: classical, merkle, signature
+	// PIR type: classical, merkle
 	PIRType string
 
 	*Auth
@@ -53,7 +53,11 @@ type Auth struct {
 	// The global digest that is a hash of all the row digests. Public.
 	Digest []byte
 	// One digest per row, authenticating all the elements in that row.
+	// also used in the integrity amplification scheme to store
+	// all the digests
 	SubDigests []byte
+	// length in bytes of the subdiget
+	SubDigestLength int
 	// ECC group and hash algorithm used for digest computation and PIR itself
 	Group group.Group
 	Hash  crypto.Hash

@@ -14,6 +14,7 @@ type Amplify struct {
 const plaintextModulusAmplify = 2
 const blockSizeAmplify = 1 // for backward compatibility
 
+// TODO: need to have a function with rows and cols and one with length?
 func DigestAmplify(t int, data []uint32) []*matrix.Matrix {
 	// initialize ECC
 	ecc := ecc.New(t)
@@ -27,7 +28,7 @@ func DigestAmplify(t int, data []uint32) []*matrix.Matrix {
 
 	// compute digests
 	digests := make([]*matrix.Matrix, t+1)
-	zj := make([]uint32, 0, t+1)
+	zj := make([]uint32, 0, len(data))
 	for j := 0; j < t+1; j++ {
 		for i := range data {
 			zj = append(zj, dataAmplified[i*(t+1)+j])
@@ -38,7 +39,7 @@ func DigestAmplify(t int, data []uint32) []*matrix.Matrix {
 			Info:   Info{}}, len(zj),
 		)
 
-		zj = make([]uint32, 0, t+1)
+		zj = make([]uint32, 0, len(data))
 	}
 
 	return digests
