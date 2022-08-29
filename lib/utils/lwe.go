@@ -24,11 +24,8 @@ type ParamsLWE struct {
 func ParamsDefault() *ParamsLWE {
 	return &ParamsLWE{
 		P:        2,
-		N:        2300,
+		N:        1100,
 		Sigma:    6.4,
-		L:        512,
-		M:        128,
-		B:        1000,
 		SeedA:    GetDefaultSeedMatrixA(),
 		BytesMod: 4,
 	}
@@ -66,6 +63,6 @@ func ParamsWithDatabaseSize128(rows, columns int) *ParamsLWE {
 }
 
 func computeB(rows int, sigma float64) uint32 {
-	// rows is equal to sqrt(\ell), 12 is ~ sqrt(128)
+	// rows is equal to sqrt(dbSize), 12 is ~ sqrt(128)
 	return uint32(rows * 12 * int(math.Ceil(sigma)))
 }
