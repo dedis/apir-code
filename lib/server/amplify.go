@@ -1,6 +1,9 @@
 package server
 
 import (
+	"bytes"
+	"encoding/gob"
+
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/matrix"
 )
@@ -27,4 +30,18 @@ func (a *Amplify) Answer(qq []*matrix.Matrix) []*matrix.Matrix {
 	}
 
 	return ans
+}
+
+func (a *Amplify) AnswerBytes(qq []byte) ([]byte, error) {
+	var mm []*matrix.Matrix
+	gob.NewDecoder(bytes.NewBuffer(qq)).Decode(&mm)
+
+	ans := a.Answer(mm)
+
+	// encode
+	buf := new(bytes.Buffer)
+	enc := gob.NewEncoder(buf)
+	enc.Encode(ans)
+
+	return buf.Bytes(), nil
 }

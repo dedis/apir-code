@@ -1,7 +1,10 @@
 package client
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/si-co/vpir-code/lib/database"
@@ -38,6 +41,20 @@ func (a *Amplify) Query(i, j int) []*matrix.Matrix {
 	return queries
 }
 
+func (a *Amplify) QueryBytes(index int) ([]byte, error) {
+	i, j := utils.VectorToMatrixIndices(index, a.lwes[0].dbInfo.NumColumns)
+	ms := a.Query(i, j)
+
+	// encode
+	buf := new(bytes.Buffer)
+	enc := gob.NewEncoder(buf)
+	for i := range ms {
+		enc.Encode(*ms[i])
+	}
+
+	return buf.Bytes(), nil
+}
+
 func (a *Amplify) Reconstruct(answers []*matrix.Matrix) (uint32, error) {
 	outputs := make([]uint32, a.repetitions)
 	var err error
@@ -51,4 +68,11 @@ func (a *Amplify) Reconstruct(answers []*matrix.Matrix) (uint32, error) {
 	// find and return majority
 	ecc := ecc.New((a.repetitions - 1) / 2)
 	return ecc.Decode(outputs)
+}
+
+func (a *Amplify) ReconstructBytes(answers []byte) (uint32, error) {
+	var aa []*matrix.Matrix
+	gob.NewDecoder(bytes.NewBuffer(answers)).Decode(&aa)
+	fmt.Println(aa)
+	return a.Reconstruct(aa)
 }

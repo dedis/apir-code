@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/client"
@@ -28,17 +29,16 @@ func retrieveBlocksAmplify(t *testing.T, db *database.LWE, params *utils.ParamsL
 	totalTimer := monitor.NewMonitor()
 	repetitions := 100
 	for k := 0; k < repetitions; k++ {
-		i := 112
-		j := 14
-		query := c.Query(i, j)
-		//require.NoError(t, err)
-
-		a := s.Answer(query)
-		//require.NoError(t, err)
-
-		res, err := c.Reconstruct(a)
+		i := rand.Intn(params.L * params.M)
+		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
-		require.Equal(t, db.Matrix.Get(i, j), res)
+
+		a, err := s.AnswerBytes(query)
+		require.NoError(t, err)
+
+		res, err := c.ReconstructBytes(a)
+		require.NoError(t, err)
+		require.Equal(t, db.Matrix.Get(utils.VectorToMatrixIndices(i, db.Info.NumColumns)), res)
 	}
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 
