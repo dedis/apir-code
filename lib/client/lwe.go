@@ -71,7 +71,7 @@ func (c *LWE) QueryBytes(index int) ([]byte, error) {
 	return matrix.MatrixToBytes(m), nil
 }
 
-func (c *LWE) reconstruct(answers *matrix.Matrix) (uint32, error) {
+func (c *LWE) Reconstruct(answers *matrix.Matrix) (uint32, error) {
 	s_trans_d := matrix.Mul(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
@@ -91,7 +91,7 @@ func (c *LWE) reconstruct(answers *matrix.Matrix) (uint32, error) {
 }
 
 func (c *LWE) ReconstructBytes(a []byte) (uint32, error) {
-	return c.reconstruct(matrix.BytesToMatrix(a))
+	return c.Reconstruct(matrix.BytesToMatrix(a))
 }
 
 func (c *LWE) inRange(val uint32) bool {
