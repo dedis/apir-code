@@ -12,7 +12,7 @@ func New(t int) *ECC {
 }
 
 func (e *ECC) Encode(in uint32) []uint32 {
-	out := make([]uint32, e.t+1)
+	out := make([]uint32, 2*e.t+1)
 	for i := range out {
 		out[i] = in
 	}
@@ -39,7 +39,7 @@ func (e *ECC) Decode(in []uint32) (uint32, error) {
 		}
 	}
 
-	if count > e.t/2 {
+	if count > len(in)/2 {
 		return decoded, nil
 	}
 
