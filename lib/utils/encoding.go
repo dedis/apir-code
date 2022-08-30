@@ -25,7 +25,7 @@ func ByteSliceToUint32Slice(in []byte) []uint32 {
 }
 
 func ByteToBits(data []byte) []bool {
-	out := make([]bool, len(data)*8) // Performance x 2 as no append occurs.
+	out := make([]bool, len(data)*8)
 	for i, d := range data {
 		for j := 0; j < 8; j++ {
 			if bits.LeadingZeros8(d) == 0 {
