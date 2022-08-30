@@ -19,7 +19,7 @@ func (a *Amplify) DBInfo() *database.Info {
 	return &a.lwe.db.Info
 }
 
-// TODO: run in parallel?
+// TODO: use Go routines on a single thread?
 func (a *Amplify) Answer(qq []*matrix.Matrix) []*matrix.Matrix {
 	ans := make([]*matrix.Matrix, len(qq))
 	for i, q := range qq {

@@ -46,6 +46,7 @@ func (a *Amplify) QueryBytes(index int) ([]byte, error) {
 	return matrix.MatricesToBytes(ms), nil
 }
 
+// TODO: use Go routines on a single thread?
 func (a *Amplify) Reconstruct(answers []*matrix.Matrix) (uint32, error) {
 	outputs := make([]uint32, a.repetitions)
 	var err error
