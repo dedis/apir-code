@@ -24,25 +24,6 @@ func ByteSliceToUint32Slice(in []byte) []uint32 {
 	return out
 }
 
-func Uint64SliceToByteSlice(in []uint64) []byte {
-	nb := 8
-	out := make([]byte, len(in)*nb)
-	for i := range in {
-		binary.BigEndian.PutUint64(out[i*nb:(i+1)*nb], in[i])
-	}
-
-	return out
-}
-
-func ByteSliceToUint64Slice(in []byte) []uint64 {
-	nb := 8
-	out := make([]uint64, len(in)/nb)
-	for i := range out {
-		out[i] = binary.BigEndian.Uint64(in[i*nb:])
-	}
-	return out
-}
-
 func ByteToBits(data []byte) []bool {
 	out := make([]bool, len(data)*8) // Performance x 2 as no append occurs.
 	for i, d := range data {
