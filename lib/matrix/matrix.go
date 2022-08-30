@@ -72,6 +72,46 @@ func BytesToMatrix(in []byte) *Matrix {
 	}
 }
 
+func MatricesToBytes(in []*Matrix) []byte {
+	for i := range in {
+		if in[0].rows != in[i].rows || in[0].cols != in[i].cols {
+			panic("dimension mismatch")
+		}
+	}
+	// the matrices are all the same, so
+	// we can use MatrixToBytes to see how many
+	// bytes are necessary for one, and then encode the length
+	// and all the matrices
+	b := MatrixToBytes(in[0])
+
+	out := make([]byte, 4+len(b)*len(in))
+	binary.BigEndian.PutUint32(out[:4], uint32(len(b)))
+	copy(out[4:], b)
+
+	// first matrix is already encoded
+	for i := 1; i < len(in); i++ {
+		copy(out[4+len(b)*i:], MatrixToBytes(in[i]))
+	}
+
+	return out
+}
+
+func BytesToMatrices(in []byte) []*Matrix {
+	// retrieve length of single encoded matrix
+	length := int(binary.BigEndian.Uint32(in[:4]))
+
+	// how many matrices?
+	n := uint32((len(in) - 4) / length)
+
+	out := make([]*Matrix, n)
+
+	for i := range out {
+		out[i] = BytesToMatrix(in[4+i*length : 4+(i+1)*length])
+	}
+
+	return out
+}
+
 func NewRandom(rnd io.Reader, r int, c int) *Matrix {
 	bytesMod := utils.ParamsDefault().BytesMod
 	b := make([]byte, bytesMod*r*c)
