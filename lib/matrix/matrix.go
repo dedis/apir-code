@@ -73,11 +73,6 @@ func BytesToMatrix(in []byte) *Matrix {
 }
 
 func MatricesToBytes(in []*Matrix) []byte {
-	for i := range in {
-		if in[0].rows != in[i].rows || in[0].cols != in[i].cols {
-			panic("dimension mismatch")
-		}
-	}
 	// the matrices are all the same, so
 	// we can use MatrixToBytes to see how many
 	// bytes are necessary for one, and then encode the length
@@ -90,6 +85,9 @@ func MatricesToBytes(in []*Matrix) []byte {
 
 	// first matrix is already encoded
 	for i := 1; i < len(in); i++ {
+		if in[0].rows != in[i].rows || in[0].cols != in[i].cols {
+			panic("dimension mismatch")
+		}
 		copy(out[4+len(b)*i:], MatrixToBytes(in[i]))
 	}
 
