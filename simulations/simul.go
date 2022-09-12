@@ -115,16 +115,12 @@ func main() {
 
 		// setup db, this is the same for DPF or IT
 		dbPRG := utils.RandomPRG()
-		dbRing := new(database.Ring)
 		dbElliptic := new(database.Elliptic)
 		dbLWE := new(database.LWE)
 		dbLWE128 := new(database.LWE128)
 		switch s.Primitive[:3] {
 		case "cmp":
-			if s.Primitive == "cmp-pir" {
-				log.Printf("Generating lattice db of size %d\n", dbLen)
-				dbRing = database.CreateRandomRingDB(dbPRG, dbLen, true)
-			} else if s.Primitive == "cmp-vpir" {
+			if s.Primitive == "cmp-vpir" {
 				log.Printf("Generating elliptic db of size %d\n", dbLen)
 				dbElliptic = database.CreateRandomEllipticWithDigest(dbPRG, dbLen, group.P256, true)
 			} else if s.Primitive == "cmp-vpir-lwe" {
@@ -145,9 +141,6 @@ func main() {
 		// run experiment
 		var results []*Chunk
 		switch s.Primitive {
-		case "cmp-pir":
-			log.Printf("db info: %#v", dbRing.Info)
-			results = pirLattice(dbRing, s.Repetitions)
 		case "cmp-vpir":
 			log.Printf("db info: %#v", dbElliptic.Info)
 			results = pirElliptic(dbElliptic, s.Repetitions)
@@ -192,63 +185,6 @@ func main() {
 		}
 	}
 	log.Println("simulation terminated successfully")
-}
-
-func pirLattice(db *database.Ring, nRepeat int) []*Chunk {
-	numRetrievedBlocks := 1
-	// create main monitor for CPU time
-	//m := monitor.NewMonitor()
-	// run the experiment nRepeat times
-	results := make([]*Chunk, nRepeat)
-
-	c := client.NewLattice(&db.Info)
-	s := server.NewLattice(db)
-
-	for j := 0; j < nRepeat; j++ {
-		log.Printf("start repetition %d out of %d", j+1, nRepeat)
-		results[j] = initChunk(numRetrievedBlocks)
-
-		// store digest size
-		results[j].Digest = float64(len(db.SubDigests))
-
-		// pick a random block index to start the retrieval
-		index := rand.Intn(db.NumRows * db.NumColumns)
-		for i := 0; i < numRetrievedBlocks; i++ {
-			results[j].CPU[i] = initBlock(1)
-			results[j].Bandwidth[i] = initBlock(1)
-
-			//m.Reset()
-			t := time.Now()
-			query, err := c.QueryBytes(index + i)
-			if err != nil {
-				log.Fatal(err)
-			}
-			//results[j].CPU[i].Query = m.RecordAndReset()
-			results[j].CPU[i].Query = 0
-			results[j].Bandwidth[i].Query = float64(len(query))
-
-			answer, err := s.AnswerBytes(query)
-			if err != nil {
-				log.Fatal(err)
-			}
-			//results[j].CPU[i].Answers[0] = m.RecordAndReset()
-			results[j].CPU[i].Answers[0] = 0
-			results[j].Bandwidth[i].Answers[0] = float64(len(answer))
-
-			_, err = c.ReconstructBytes(answer)
-			if err != nil {
-				log.Fatal(err)
-			}
-			//results[j].CPU[i].Reconstruct = m.RecordAndReset()
-			results[j].CPU[i].Reconstruct = time.Since(t).Seconds()
-			results[j].Bandwidth[i].Reconstruct = 0
-		}
-
-		// GC after each repetition
-		runtime.GC()
-		time.Sleep(2)
-	}
-	return results
 }
 
 func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {

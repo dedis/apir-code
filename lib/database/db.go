@@ -14,7 +14,6 @@ import (
 	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/field"
 	"github.com/si-co/vpir-code/lib/utils"
-	"github.com/tuneinsight/lattigo/v3/bfv"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -43,9 +42,6 @@ type Info struct {
 
 	*Auth
 	*Merkle
-
-	// Lattice parameters for the single-server data retrieval
-	LatParams bfv.Parameters
 }
 
 // Auth is authentication information for the single-server setting
