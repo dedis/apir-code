@@ -1,5 +1,0 @@
-Name = "computationalPir"
-Primitive = "cmp-pir"
-NumRows = 0 # every NumRows != 1 indicate matrix
-BlockLength = 0
-ElementBitSize = 0

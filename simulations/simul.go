@@ -410,8 +410,7 @@ func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
 }
 
 func (s *Simulation) validSimulation() bool {
-	return s.Primitive == "cmp-pir" ||
-		s.Primitive == "cmp-vpir" ||
+	return s.Primitive == "cmp-vpir" ||
 		s.Primitive == "cmp-vpir-lwe" ||
 		s.Primitive == "cmp-vpir-lwe-128" ||
 		s.Primitive == "preprocessing"
