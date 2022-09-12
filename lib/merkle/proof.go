@@ -82,7 +82,7 @@ func DecodeProof(p []byte) *Proof {
 	numHashes := binary.LittleEndian.Uint32(p[:numHashesByteSize])
 
 	// hashes
-	hashLength := uint32(32) // sha256
+	hashLength := 32 // blake3
 	hashes := make([][]byte, numHashes)
 	for i := uint32(0); i < numHashes; i++ {
 		hashes[i] = p[4+hashLength*i : 4+hashLength*(i+1)]
@@ -99,8 +99,7 @@ func DecodeProof(p []byte) *Proof {
 
 func EncodeProof(p *Proof) []byte {
 	// out length is 4 bytes for numHashes, number of bytes for the hashes
-	// and 8 bytes for encoded index
-	// TODO: specify what 32 is
+	// (32 bytes for each hash) and 8 bytes for encoded index
 	outLen := numHashesByteSize + len(p.Hashes)*32 + indexByteSize
 	out := make([]byte, outLen)
 

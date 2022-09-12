@@ -29,7 +29,6 @@ func NewAmplify(rnd io.Reader, info *database.Info, params *utils.ParamsLWE, tEC
 	}
 }
 
-// TODO: run in parallel?
 func (a *Amplify) Query(i, j int) []*matrix.Matrix {
 	queries := make([]*matrix.Matrix, a.repetitions)
 	for k := 0; k < a.repetitions; k++ {
@@ -46,7 +45,6 @@ func (a *Amplify) QueryBytes(index int) ([]byte, error) {
 	return matrix.MatricesToBytes(ms), nil
 }
 
-// TODO: use Go routines on a single thread?
 func (a *Amplify) Reconstruct(answers []*matrix.Matrix) (uint32, error) {
 	outputs := make([]uint32, a.repetitions)
 	var err error

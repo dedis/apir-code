@@ -24,10 +24,6 @@ KB = 1024
 GiB = 8589935000
 MiB = 1048576
 
-# TODO: where are these numbers coming from?
-LatticeRotKeysLen = 39322025
-LatticeCiphertextLen = 393221
-
 def cpuMean(stats, key):
     # always plotted in seconds
     return (stats[key]['client']['cpu']['mean'] + stats[key]['server']['cpu']['mean'])/1000

@@ -41,7 +41,6 @@ type localClient struct {
 	vpirClient client.Client
 }
 
-// TODO: remove useless flags
 type flags struct {
 	// experiments flag
 	logFile        string
@@ -55,11 +54,6 @@ type flags struct {
 
 	// flags for complex queries
 	inputSize int
-	target    string
-	fromStart int
-	fromEnd   int
-	and       bool
-	avg       bool
 }
 
 func parseFlags() *flags {
@@ -78,11 +72,6 @@ func parseFlags() *flags {
 
 	// flag for complex queries
 	flag.IntVar(&f.inputSize, "inputSize", -1, "input of string to search of")
-	flag.StringVar(&f.target, "target", "", "target for complex query")
-	flag.IntVar(&f.fromStart, "from-start", 0, "from start parameter for complex query")
-	flag.IntVar(&f.fromEnd, "from-end", 0, "from end parameter for complex query")
-	flag.BoolVar(&f.and, "and", false, "and clause for complex query")
-	flag.BoolVar(&f.avg, "avg", false, "avg clause for complex query")
 
 	flag.Parse()
 
