@@ -3,7 +3,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -82,7 +82,7 @@ func DecodeProof(p []byte) *Proof {
 	numHashes := binary.LittleEndian.Uint32(p[:numHashesByteSize])
 
 	// hashes
-	hashLength := 32 // blake3
+	hashLength := uint32(32) // blake3
 	hashes := make([][]byte, numHashes)
 	for i := uint32(0); i < numHashes; i++ {
 		hashes[i] = p[4+hashLength*i : 4+hashLength*(i+1)]
