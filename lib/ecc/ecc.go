@@ -24,7 +24,7 @@ func (e *ECC) Encode(in uint32) []uint32 {
 func (e *ECC) Decode(in []uint32) (uint32, error) {
 	decoded := in[0]
 	votes := 1
-	for i := range in[1:] {
+	for i := 1; i < len(in); i++ {
 		if in[i] == decoded {
 			votes++
 		} else {
