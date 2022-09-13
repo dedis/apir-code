@@ -192,7 +192,7 @@ func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {
 	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
-	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
+	p := utils.ParamsWithDatabaseSize128(db.Info.NumRows, db.Info.NumColumns)
 	c := client.NewLWE128(utils.RandomPRG(), &db.Info, p)
 	s := server.NewLWE128(db)
 
