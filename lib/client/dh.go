@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"log"
-	"runtime"
 
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/database"
@@ -37,7 +36,6 @@ func NewDH(rnd io.Reader, info *database.Info) *DH {
 
 // QueryBytes takes as input the index of an entry in the database and returns
 // the query for the server encoded in bytes
-// TODO: single thread
 func (c *DH) QueryBytes(index int) ([]byte, error) {
 	g := c.dbInfo.Group
 
@@ -52,28 +50,9 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 	st.ix, st.iy = utils.VectorToMatrixIndices(index, c.dbInfo.NumColumns)
 	st.r = r
 
-	// multithreading
-	NGoRoutines := runtime.NumCPU()
-	columnsPerRoutine := c.dbInfo.NumColumns / NGoRoutines
-	replies := make([]chan []group.Element, NGoRoutines)
-	for i := 0; i < NGoRoutines; i++ {
-		begin, end := i*columnsPerRoutine, (i+1)*columnsPerRoutine
-		if i == NGoRoutines-1 {
-			end = c.dbInfo.NumColumns
-		}
-		replyChan := make(chan []group.Element, 1)
-		replies[i] = replyChan
-		go generateBlindedElements(begin, end, r, c.dbInfo, replyChan)
-	}
-
-	// Combine the generated chunks from all the routines.
-	// We wait for each routines in the initial order so
-	// it is ok to simply append the results one after another.
 	query := make([]group.Element, 0, c.dbInfo.NumColumns*c.dbInfo.BlockSize)
-	for i, reply := range replies {
-		chunk := <-reply
-		query = append(query, chunk...)
-		close(replies[i])
+	for j := 0; j < c.dbInfo.NumColumns; j++ {
+		query = append(query, database.CommitScalarToIndex(r, uint64(j), c.dbInfo.Group))
 	}
 
 	// Add the additional blinding t to the the retrieval index.
@@ -126,13 +105,4 @@ func (c *DH) ReconstructBytes(a []byte) (interface{}, error) {
 	}
 
 	return res, nil
-}
-
-// Hash indices to group elements and multiply by the blinding scalar
-func generateBlindedElements(begin, end int, blinding group.Scalar, info *database.Info, replyTo chan<- []group.Element) {
-	elements := make([]group.Element, 0, (end-begin)*info.BlockSize)
-	for j := begin; j < end; j++ {
-		elements = append(elements, database.CommitScalarToIndex(blinding, uint64(j), info.Group))
-	}
-	replyTo <- elements
 }

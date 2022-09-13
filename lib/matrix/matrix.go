@@ -72,8 +72,6 @@ func BytesToMatrix(in []byte) *Matrix {
 	}
 }
 
-// TODO: here we store all the times the rows and columns of the matrices
-// (since we use MatrixToBytes): store only once to avoid wasting bytes
 func MatricesToBytes(in []*Matrix) []byte {
 	// the matrices are all the same, so
 	// we can use MatrixToBytes to see how many
