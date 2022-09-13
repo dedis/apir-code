@@ -97,6 +97,14 @@ func main() {
 	// initialize experiment
 	experiment := &Experiment{Results: make(map[int][]*Chunk, 0)}
 
+	// amplification parameters (found via script in /scripts/integrity_amplification.py)
+	// KiB, MiB, GiB
+	tECC := map[int]int{
+		1024:      3,
+		1048576:   4,
+		107374182: 6,
+	}
+
 	// range over all the DB lengths specified in the general simulation config
 	for _, dl := range s.DBBitLengths {
 		// compute database data
@@ -142,9 +150,9 @@ func main() {
 		case "cmp-vpir-dh":
 			log.Printf("db info: %#v", dbElliptic.Info)
 			results = pirElliptic(dbElliptic, s.Repetitions)
-		case "cmp-vpir-lwe":
+		case "cmp-vpir-lwe": // LWE uses Amplify
 			log.Printf("db info: %#v", dbLWE.Info)
-			results = pirLWE(dbLWE, s.Repetitions)
+			results = pirLWE(dbLWE, s.Repetitions, tECC[dbLen])
 		case "cmp-vpir-lwe-128":
 			log.Printf("db info: %#v", dbLWE128.Info)
 			results = pirLWE128(dbLWE128, s.Repetitions)
@@ -240,7 +248,8 @@ func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {
 	return results
 }
 
-func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
+// LWE uses Amplify
+func pirLWE(db *database.LWE, nRepeat, tECC int) []*Chunk {
 	numRetrievedBlocks := 1
 	// create main monitor for CPU time
 	//m := monitor.NewMonitor()
@@ -248,8 +257,8 @@ func pirLWE(db *database.LWE, nRepeat int) []*Chunk {
 	results := make([]*Chunk, nRepeat)
 
 	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
-	c := client.NewLWE(utils.RandomPRG(), &db.Info, p)
-	s := server.NewLWE(db)
+	c := client.NewAmplify(utils.RandomPRG(), &db.Info, p, tECC)
+	s := server.NewAmplify(db)
 
 	for j := 0; j < nRepeat; j++ {
 		log.Printf("start repetition %d out of %d", j+1, nRepeat)
