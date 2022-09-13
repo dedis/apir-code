@@ -1,5 +1,5 @@
-Name = "computationalVpir"
-Primitive = "cmp-vpir"
+Name = "computationalDH"
+Primitive = "cmp-vpir-dh"
 NumRows = 0 # every NumRows != 1 indicate matrix
 BlockLength = 0
 ElementBitSize = 0
