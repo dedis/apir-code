@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
-	"math/bits"
 	"math/rand"
 	"os"
 	"path"
@@ -20,7 +19,6 @@ import (
 	"github.com/si-co/vpir-code/lib/client"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/field"
-	"github.com/si-co/vpir-code/lib/query"
 	"github.com/si-co/vpir-code/lib/server"
 	"github.com/si-co/vpir-code/lib/utils"
 )
@@ -120,7 +118,7 @@ func main() {
 		dbLWE128 := new(database.LWE128)
 		switch s.Primitive[:3] {
 		case "cmp":
-			if s.Primitive == "cmp-vpir" {
+			if s.Primitive == "cmp-vpir-dh" {
 				log.Printf("Generating elliptic db of size %d\n", dbLen)
 				dbElliptic = database.CreateRandomEllipticWithDigest(dbPRG, dbLen, group.P256, true)
 			} else if s.Primitive == "cmp-vpir-lwe" {
@@ -141,7 +139,7 @@ func main() {
 		// run experiment
 		var results []*Chunk
 		switch s.Primitive {
-		case "cmp-vpir":
+		case "cmp-vpir-dh":
 			log.Printf("db info: %#v", dbElliptic.Info)
 			results = pirElliptic(dbElliptic, s.Repetitions)
 		case "cmp-vpir-lwe":
@@ -359,21 +357,6 @@ func bitsToBlocks(blockSize, elemSize, numBits int) int {
 	return int(math.Ceil(float64(numBits) / float64(blockSize*elemSize)))
 }
 
-func infoSizeByte(q *query.Info) int {
-	totalLen := 0
-	// Count the bytes of Info
-	// q.Target and q.Targets are uint8 and []uint8,
-	// respectively
-	totalLen += len(q.Targets) + 1 // q.Target
-	// The size of int is platform dependent
-	totalLen += bits.UintSize / 8 //q.FromStart
-	totalLen += bits.UintSize / 8 // q.FromEnd
-	// And is bool
-	totalLen += 1
-
-	return totalLen
-}
-
 func fieldVectorByteLength(vec []uint32) float64 {
 	return float64(len(vec) * field.Bytes)
 }
@@ -410,7 +393,7 @@ func loadSimulationConfigs(genFile, indFile string) (*Simulation, error) {
 }
 
 func (s *Simulation) validSimulation() bool {
-	return s.Primitive == "cmp-vpir" ||
+	return s.Primitive == "cmp-vpir-dh" ||
 		s.Primitive == "cmp-vpir-lwe" ||
 		s.Primitive == "cmp-vpir-lwe-128" ||
 		s.Primitive == "preprocessing"
