@@ -100,9 +100,9 @@ func main() {
 	// amplification parameters (found via script in /scripts/integrity_amplification.py)
 	// KiB, MiB, GiB
 	tECC := map[int]int{
-		1024:      3,
-		1048576:   4,
-		107374182: 6,
+		8192:       3,
+		8389000:    4,
+		8590000000: 7,
 	}
 
 	// range over all the DB lengths specified in the general simulation config
