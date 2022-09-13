@@ -134,6 +134,10 @@ func NewGauss(r int, c int, sigma float64) *Matrix {
 	return m
 }
 
+func (m *Matrix) SetData(i int, v uint32) {
+	m.data[i] = v
+}
+
 func (m *Matrix) Set(r int, c int, v uint32) {
 	m.data[m.cols*r+c] = v
 }
@@ -148,6 +152,10 @@ func (m *Matrix) Rows() int {
 
 func (m *Matrix) Cols() int {
 	return m.cols
+}
+
+func (m *Matrix) Len() int {
+	return len(m.data)
 }
 
 func Mul(a *Matrix, b *Matrix) *Matrix {
