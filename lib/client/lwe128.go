@@ -72,7 +72,7 @@ func (c *LWE128) QueryBytes(index int) ([]byte, error) {
 	return matrix.Matrix128ToBytes(m), nil
 }
 
-func (c *LWE128) reconstruct(answers *matrix.Matrix128) (uint32, error) {
+func (c *LWE128) Reconstruct(answers *matrix.Matrix128) (uint32, error) {
 	s_trans_d := matrix.Mul128(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
@@ -97,7 +97,7 @@ func (c *LWE128) reconstruct(answers *matrix.Matrix128) (uint32, error) {
 }
 
 func (c *LWE128) ReconstructBytes(a []byte) (uint32, error) {
-	return c.reconstruct(matrix.BytesToMatrix128(a))
+	return c.Reconstruct(matrix.BytesToMatrix128(a))
 }
 
 func (c *LWE128) inRange(val uint128.Uint128) bool {
