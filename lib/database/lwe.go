@@ -39,7 +39,7 @@ func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
 
 	for i := 0; i < m.Len(); i++ {
 		val := uint32((data[i/8] >> (i % 8)) & 1)
-		if val > plaintextModulus {
+		if val >= plaintextModulus {
 			panic("Plaintext value too large")
 		}
 		m.SetData(i, val)
