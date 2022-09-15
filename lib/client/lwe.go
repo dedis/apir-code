@@ -95,5 +95,5 @@ func (c *LWE) ReconstructBytes(a []byte) (uint32, error) {
 }
 
 func (c *LWE) inRange(val uint32) bool {
-	return (val <= c.params.B) || (val >= -c.params.B)
+	return (val < c.params.B) || (val > -c.params.B)
 }
