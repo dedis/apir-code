@@ -18,7 +18,7 @@ type ParamsLWE struct {
 	B uint32 // bound used in reconstruction
 
 	SeedA    *PRGKey // matrix  used to generate digest
-	BytesMod int     // bytes of the modulo, either 4 for 32 bits or 8 for 64
+	BytesMod int     // bytes of the modulo
 }
 
 func ParamsDefault() *ParamsLWE {
