@@ -55,7 +55,7 @@ func (c *LWE128) Query(i, j int) *matrix.Matrix128 {
 	query := matrix.Mul128(c.state.secret, c.state.A)
 
 	// Error has dimension 1 x l
-	e := matrix.NewGauss128(1, c.params.L, c.params.Sigma)
+	e := matrix.NewGauss128(1, c.params.L)
 
 	msg := matrix.New128(1, c.params.L)
 	msg.Set(0, i, c.state.t)

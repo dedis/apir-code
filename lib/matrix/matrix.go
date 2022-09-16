@@ -125,7 +125,7 @@ func NewRandom(rnd io.Reader, r int, c int) *Matrix {
 	return m
 }
 
-func NewGauss(r int, c int, sigma float64) *Matrix {
+func NewGauss(r int, c int) *Matrix {
 	m := New(r, c)
 	for i := 0; i < len(m.data); i++ {
 		m.data[i] = uint32(utils.GaussSample())

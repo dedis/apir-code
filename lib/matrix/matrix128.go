@@ -68,7 +68,7 @@ func NewRandom128(rnd io.Reader, r int, c int) *Matrix128 {
 	return m
 }
 
-func NewGauss128(r int, c int, sigma float64) *Matrix128 {
+func NewGauss128(r int, c int) *Matrix128 {
 	m := New128(r, c)
 	for i := 0; i < len(m.data); i++ {
 		g := utils.GaussSample()
