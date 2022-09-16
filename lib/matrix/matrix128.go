@@ -118,7 +118,6 @@ func BinaryMul128(a *Matrix128, b *MatrixBytes) *Matrix128 {
 	}
 
 	return out
-
 }
 
 func Mul128(a *Matrix128, b *Matrix128) *Matrix128 {

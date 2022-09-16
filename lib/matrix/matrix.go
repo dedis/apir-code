@@ -158,6 +158,25 @@ func (m *Matrix) Len() int {
 	return len(m.data)
 }
 
+func BinaryMul(a *Matrix, b *MatrixBytes) *Matrix {
+	if a.cols != b.rows {
+		panic("Dimension mismatch")
+	}
+
+	out := New(a.rows, b.cols)
+	for i := 0; i < a.rows; i++ {
+		for k := 0; k < a.cols; k++ {
+			for j := 0; j < b.cols; j++ {
+				if b.data[b.cols*k+j] != byte(0) {
+					out.data[b.cols*i+j] += a.data[a.cols*i+k]
+				}
+			}
+		}
+	}
+
+	return out
+}
+
 func Mul(a *Matrix, b *Matrix) *Matrix {
 	if a.cols != b.rows {
 		panic("Dimension mismatch")

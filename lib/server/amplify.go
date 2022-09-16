@@ -22,7 +22,7 @@ func (a *Amplify) DBInfo() *database.Info {
 func (a *Amplify) Answer(qq []*matrix.Matrix) []*matrix.Matrix {
 	ans := make([]*matrix.Matrix, len(qq))
 	for i, q := range qq {
-		ans[i] = matrix.Mul(q, a.lwe.db.Matrix)
+		ans[i] = matrix.BinaryMul(q, a.lwe.db.Matrix)
 	}
 
 	return ans

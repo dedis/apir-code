@@ -8,7 +8,7 @@ import (
 )
 
 type LWE struct {
-	Matrix *matrix.Matrix
+	Matrix *matrix.MatrixBytes
 	Info
 }
 
@@ -16,7 +16,7 @@ const plaintextModulus = 2
 const blockSizeLWE = 1 // for backward compatibility
 
 func Digest(db *LWE, rows int) *matrix.Matrix {
-	return matrix.Mul(
+	return matrix.BinaryMul(
 		matrix.NewRandom(
 			utils.NewPRG(utils.ParamsDefault().SeedA),
 			utils.ParamsDefault().N,
@@ -30,7 +30,7 @@ func CreateRandomBinaryLWEWithLength(rnd io.Reader, dbLen int) *LWE {
 }
 
 func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
-	m := matrix.New(numRows, numColumns)
+	m := matrix.NewBytes(numRows, numColumns)
 	// read random bytes for filling out the entries
 	data := make([]byte, (numRows*numColumns)/8+1)
 	if _, err := rnd.Read(data); err != nil {
@@ -38,7 +38,7 @@ func CreateRandomBinaryLWE(rnd io.Reader, numRows, numColumns int) *LWE {
 	}
 
 	for i := 0; i < m.Len(); i++ {
-		val := uint32((data[i/8] >> (i % 8)) & 1)
+		val := (data[i/8] >> (i % 8)) & 1
 		if val >= plaintextModulus {
 			panic("Plaintext value too large")
 		}
