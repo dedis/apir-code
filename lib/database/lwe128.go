@@ -30,8 +30,7 @@ func CreateRandomBinaryLWE128(rnd io.Reader, numRows, numColumns int) *LWE128 {
 	m := matrix.NewBytes(numRows, numColumns)
 	// read random bytes for filling out the entries
 	// the +1 takes into account a float division by 8
-	// CHECK +1
-	data := make([]byte, numRows*numColumns/8)
+	data := make([]byte, numRows*numColumns/8+1)
 	if _, err := rnd.Read(data); err != nil {
 		panic(err)
 	}
