@@ -10,18 +10,7 @@ import (
 
 /*
 #cgo CFLAGS: -std=c99 -O3 -march=native -msse4.1 -maes -mavx2 -mavx
-#include <stdint.h>
-
-void multiply(int aRows, int aCols, int bCols, uint32_t *a, uint32_t *b, uint32_t *out) {
-   	int i, j, k;
-	for (i = 0; i < aRows; i++) {
-		for (k = 0; k < aCols; k++) {
-			for (j = 0; j < bCols; j++) {
-				out[bCols*i+j] += a[aCols*i+k] * b[bCols*k+j];
-			}
-		}
-	}
-}
+#include <matrix.h>
 */
 import "C"
 
@@ -164,15 +153,19 @@ func BinaryMul(a *Matrix, b *MatrixBytes) *Matrix {
 	}
 
 	out := New(a.rows, b.cols)
-	for i := 0; i < a.rows; i++ {
-		for k := 0; k < a.cols; k++ {
-			for j := 0; j < b.cols; j++ {
-				if b.data[b.cols*k+j] != byte(0) {
-					out.data[b.cols*i+j] += a.data[a.cols*i+k]
-				}
-			}
-		}
-	}
+	C.binary_multiply(C.int(a.rows), C.int(a.cols), C.int(b.cols),
+		(*C.uint32_t)(&a.data[0]), (*C.uint8_t)(&b.data[0]),
+		(*C.uint32_t)(&out.data[0]))
+
+	// for i := 0; i < a.rows; i++ {
+	// 	for k := 0; k < a.cols; k++ {
+	// 		for j := 0; j < b.cols; j++ {
+	// 			if b.data[b.cols*k+j] != byte(0) {
+	// 				out.data[b.cols*i+j] += a.data[a.cols*i+k]
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	return out
 }
