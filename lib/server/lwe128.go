@@ -25,5 +25,5 @@ func (s *LWE128) AnswerBytes(q []byte) ([]byte, error) {
 // Answer function for the LWE-based scheme. The query is represented as a
 // vector
 func (s *LWE128) Answer(q *matrix.Matrix128) *matrix.Matrix128 {
-	return matrix.Mul128(q, s.db.Matrix)
+	return matrix.BinaryMul128(q, s.db.Matrix)
 }
