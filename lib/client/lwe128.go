@@ -10,7 +10,7 @@ import (
 	"lukechampine.com/uint128"
 )
 
-// LEW based authenticated single server PIR client
+// LEW128 based authenticated single server PIR client
 
 // Client description
 type LWE128 struct {
@@ -76,21 +76,16 @@ func (c *LWE128) Reconstruct(answers *matrix.Matrix128) (uint32, error) {
 	s_trans_d := matrix.Mul128(c.state.secret, c.state.digest)
 	answers.Sub(s_trans_d)
 
-	good := true
 	outs := make([]uint32, c.params.M)
 	for i := 0; i < c.params.M; i++ {
 		v := answers.Get(0, i)
 		if c.inRange(v) {
 			outs[i] = 0
-		} else if c.inRange(v.Sub(c.state.t)) {
+		} else if c.inRange(v.SubWrap(c.state.t)) {
 			outs[i] = 1
 		} else {
-			good = false
+			return 0, errors.New("REJECT")
 		}
-	}
-
-	if !good {
-		return 0, errors.New("Incorrect reconstruction")
 	}
 
 	return outs[c.state.j], nil
@@ -101,11 +96,7 @@ func (c *LWE128) ReconstructBytes(a []byte) (uint32, error) {
 }
 
 func (c *LWE128) inRange(val uint128.Uint128) bool {
-	if val.Cmp(uint128.From64(uint64(c.params.B))) != 1 {
-		return false
-	} else if val.Cmp(uint128.Max.Sub(uint128.From64(uint64(c.params.B)))) != -1 {
-		return false
-	} else {
-		return true
-	}
+	// max is q-1, so we add + 1 to B
+	tmp := uint128.Max.Sub(uint128.From64(uint64(c.params.B + 1)))
+	return val.Cmp64(uint64(c.params.B)) == -1 || val.Cmp(tmp) == 1
 }
