@@ -39,13 +39,11 @@ func Matrix128ToBytes(in *Matrix128) []byte {
 
 func BytesToMatrix128(in []byte) *Matrix128 {
 	// retrieve the matrix dimensions
-	r := in[:4]
-	rows := int(binary.BigEndian.Uint32(r))
-	c := in[4:8]
-	cols := int(binary.BigEndian.Uint32(c))
+	rows := int(binary.BigEndian.Uint32(in[:4]))
+	cols := int(binary.BigEndian.Uint32(in[4:]))
 	data := make([]uint128.Uint128, len(in[8:])/16)
 	for i := range data {
-		data[i] = uint128.FromBytes(in[i*16 : (i+1)*16])
+		data[i] = uint128.FromBytes(in[8+i*16:])
 	}
 	return &Matrix128{
 		rows: rows,
@@ -73,7 +71,12 @@ func NewRandom128(rnd io.Reader, r int, c int) *Matrix128 {
 func NewGauss128(r int, c int, sigma float64) *Matrix128 {
 	m := New128(r, c)
 	for i := 0; i < len(m.data); i++ {
-		m.data[i] = uint128.From64(uint64(utils.GaussSample()))
+		g := utils.GaussSample()
+		if g >= 0 {
+			m.data[i] = uint128.From64(uint64(g))
+		} else {
+			m.data[i] = uint128.Max.Sub64(uint64(-g))
+		}
 	}
 
 	return m
@@ -93,6 +96,29 @@ func (m *Matrix128) Rows() int {
 
 func (m *Matrix128) Cols() int {
 	return m.cols
+}
+
+func BinaryMul128(a *Matrix128, b *MatrixBytes) *Matrix128 {
+	if a.cols != b.rows {
+		panic("Dimension mismatch")
+	}
+
+	out := New128(a.rows, b.cols)
+	for i := 0; i < a.rows; i++ {
+		for k := 0; k < a.cols; k++ {
+			for j := 0; j < b.cols; j++ {
+				if b.data[b.cols*k+j] != byte(0) {
+					out.data[b.cols*i+j] = out.data[b.cols*i+j].AddWrap(a.data[a.cols*i+k])
+				}
+				// if (b.Data[(b.cols*k+j)/8]>>(b.cols*k+j)%8)&1 != byte(0) {
+				// 	out.data[b.cols*i+j] = out.data[b.cols*i+j].AddWrap(a.data[a.cols*i+k])
+				// }
+			}
+		}
+	}
+
+	return out
+
 }
 
 func Mul128(a *Matrix128, b *Matrix128) *Matrix128 {
