@@ -112,7 +112,9 @@ func BenchmarkBinaryMul128(b *testing.B) {
 		utils.ParamsDefault128().N,
 		rows)
 
+  b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+    fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
 		d := BinaryMul128(rm, m)
 		// to avoid compiler optimization
 		fmt.Println(d.Rows())

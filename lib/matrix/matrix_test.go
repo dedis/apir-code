@@ -35,7 +35,7 @@ func TestEncoding(t *testing.T) {
 	}
 }
 
-func BenchmarkBinaryMul(b *testing.B) {
+func BenchmarkBinaryMul32(b *testing.B) {
 	rows, columns := 1024, 1024
 	buff := make([]byte, rows*columns/8+1)
 	rnd := utils.RandomPRG()
@@ -54,7 +54,9 @@ func BenchmarkBinaryMul(b *testing.B) {
 		utils.ParamsDefault().N,
 		rows)
 
+  b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+    fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
 		d := BinaryMul(rm, m)
 		// to avoid compiler optimization
 		fmt.Println(d.Rows())
