@@ -1,6 +1,7 @@
 package matrix
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 
@@ -90,4 +91,31 @@ func TestMatrix128ToBytes(t *testing.T) {
 	m := NewRandom128(utils.RandomPRG(), rows, cols)
 	b := Matrix128ToBytes(m)
 	require.Equal(t, m, BytesToMatrix128(b))
+}
+
+func BenchmarkBinaryMul128(b *testing.B) {
+	rows, columns := 1024, 1024
+	buff := make([]byte, rows*columns/8+1)
+	rnd := utils.RandomPRG()
+	if _, err := rnd.Read(buff); err != nil {
+		panic("insufficient randomness")
+	}
+
+	m := NewBytes(rows, columns)
+	for i := 0; i < m.Len(); i++ {
+		val := (buff[i/8] >> (i % 8)) & 1
+		m.SetData(i, val)
+	}
+
+	rm := NewRandom128(
+		utils.NewPRG(utils.ParamsDefault128().SeedA),
+		utils.ParamsDefault128().N,
+		rows)
+
+	for i := 0; i < b.N; i++ {
+		d := BinaryMul128(rm, m)
+		// to avoid compiler optimization
+		fmt.Println(d.Rows())
+	}
+
 }
