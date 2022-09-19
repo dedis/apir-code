@@ -3,6 +3,9 @@ package matrix
 import (
 	"encoding/binary"
 	"io"
+	"math"
+	"runtime"
+	"sync"
 
 	"github.com/si-co/vpir-code/lib/utils"
 	"lukechampine.com/uint128"
@@ -128,6 +131,46 @@ func BinaryMul128(a *Matrix128, b *MatrixBytes) *Matrix128 {
 	}
 
 	return out
+}
+
+func BinaryMul128Parallel(a *Matrix128, b *MatrixBytes) *Matrix128 {
+	aa := make([]byte, 16*a.rows*a.cols)
+	for i := range a.data {
+		a.data[i].PutBytes(aa[16*i:])
+	}
+
+	oo := make([]byte, 16*a.rows*b.cols)
+
+	nRoutines := runtime.NumCPU()
+
+	rowsPerRoutine := int(math.Ceil(float64(a.rows) / float64(nRoutines)))
+	var begin, end int
+	wg := new(sync.WaitGroup)
+	for i := 0; i < nRoutines; i++ {
+		begin, end = i*rowsPerRoutine, (i+1)*rowsPerRoutine
+		// make the last routine take all the left-over (from division) rows
+		if end > a.rows {
+			end = a.rows
+		}
+		wg.Add(1)
+		go func(begin, end int, a *Matrix128, b *MatrixBytes, oo []byte) {
+			defer wg.Done()
+			C.binary_multiply128_parallel(C.int(begin), C.int(end), C.int(a.cols), C.int(b.cols),
+				(*C.__uint128_t)((*[16]byte)(aa[:16])),
+				(*C.uint8_t)(&b.data[0]),
+				(*C.__uint128_t)((*[16]byte)(oo[:16])),
+			)
+		}(begin, end, a, b, oo)
+	}
+	wg.Wait()
+
+	out := New128(a.rows, b.cols)
+	for i := range out.data {
+		out.data[i] = uint128.FromBytes(oo[i*16:])
+	}
+
+	return out
+
 }
 
 func Mul128(a *Matrix128, b *Matrix128) *Matrix128 {
