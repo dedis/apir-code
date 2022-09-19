@@ -8,6 +8,12 @@ import (
 	"lukechampine.com/uint128"
 )
 
+/*
+#cgo CFLAGS: -std=c99 -O3 -march=native -msse4.1 -maes -mavx2 -mavx
+#include <matrix.h>
+*/
+import "C"
+
 type Matrix128 struct {
 	rows int
 	cols int
@@ -103,18 +109,22 @@ func BinaryMul128(a *Matrix128, b *MatrixBytes) *Matrix128 {
 		panic("Dimension mismatch")
 	}
 
+	aa := make([]byte, 16*a.rows*a.cols)
+	for i := range a.data {
+		a.data[i].PutBytes(aa[16*i:])
+	}
+
+	oo := make([]byte, 16*a.rows*b.cols)
+
+	C.binary_multiply128(C.int(a.rows), C.int(a.cols), C.int(b.cols),
+		(*C.__uint128_t)((*[16]byte)(aa[:16])),
+		(*C.uint8_t)(&b.data[0]),
+		(*C.__uint128_t)((*[16]byte)(oo[:16])),
+	)
+
 	out := New128(a.rows, b.cols)
-	for i := 0; i < a.rows; i++ {
-		for k := 0; k < a.cols; k++ {
-			for j := 0; j < b.cols; j++ {
-				if b.data[b.cols*k+j] != byte(0) {
-					out.data[b.cols*i+j] = out.data[b.cols*i+j].AddWrap(a.data[a.cols*i+k])
-				}
-				// if (b.Data[(b.cols*k+j)/8]>>(b.cols*k+j)%8)&1 != byte(0) {
-				// 	out.data[b.cols*i+j] = out.data[b.cols*i+j].AddWrap(a.data[a.cols*i+k])
-				// }
-			}
-		}
+	for i := range out.data {
+		out.data[i] = uint128.FromBytes(oo[i*16:])
 	}
 
 	return out
@@ -125,14 +135,27 @@ func Mul128(a *Matrix128, b *Matrix128) *Matrix128 {
 		panic("Dimension mismatch")
 	}
 
+	aa := make([]byte, 16*a.rows*a.cols)
+	for i := range a.data {
+		a.data[i].PutBytes(aa[16*i:])
+	}
+
+	bb := make([]byte, 16*b.rows*b.cols)
+	for i := range b.data {
+		b.data[i].PutBytes(bb[16*i:])
+	}
+
+	oo := make([]byte, 16*a.rows*b.cols)
+
+	C.multiply128(C.int(a.rows), C.int(a.cols), C.int(b.cols),
+		(*C.__uint128_t)((*[16]byte)(aa[:16])),
+		(*C.__uint128_t)((*[16]byte)(bb[:16])),
+		(*C.__uint128_t)((*[16]byte)(oo[:16])),
+	)
+
 	out := New128(a.rows, b.cols)
-	for i := 0; i < a.rows; i++ {
-		for k := 0; k < a.cols; k++ {
-			for j := 0; j < b.cols; j++ {
-				tmp := a.data[a.cols*i+k].MulWrap(b.data[b.cols*k+j])
-				out.data[b.cols*i+j] = out.data[b.cols*i+j].AddWrap(tmp)
-			}
-		}
+	for i := range out.data {
+		out.data[i] = uint128.FromBytes(oo[i*16:])
 	}
 
 	return out
