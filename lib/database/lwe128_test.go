@@ -3,13 +3,15 @@ package database
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/si-co/vpir-code/lib/matrix"
 	"github.com/si-co/vpir-code/lib/utils"
 )
 
 func TestLWE(t *testing.T) {
-	rows, columns := CalculateNumRowsAndColumns(8590000000, true)
+	//rows, columns := CalculateNumRowsAndColumns(8389000, true) // 1 MiB
+	rows, columns := 2048, 2048
 	fmt.Println(rows, columns)
 	b := make([]byte, rows*columns/8+1)
 	rnd := utils.RandomPRG()
@@ -50,9 +52,9 @@ func TestLWE(t *testing.T) {
 
 	fmt.Println("start digest computation BinaryMul")
 
-	d := matrix.BinaryMul128(rm, db.Matrix)
-
-	fmt.Println("done with digest computation")
+	ti := time.Now()
+	d := matrix.BinaryMul128Parallel(rm, db.Matrix)
+	fmt.Println("done with digest computation in time:", time.Since(ti).Seconds())
 
 	db.Auth = &Auth{
 		Digest: matrix.Matrix128ToBytes(d),
