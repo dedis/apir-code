@@ -47,3 +47,16 @@ void binary_multiply128(int aRows, int aCols, int bCols, __uint128_t *a, uint8_t
 		}
 	}
 }
+
+void binary_multiply128_parallel(int aRowsBegin, int aRowsEnd, int aCols, int bCols, __uint128_t *a, uint8_t *b, __uint128_t *out) {
+   	int i, j, k;
+	for (i = aRowsBegin; i < aRowsEnd; i++) {
+		for (k = 0; k < aCols; k++) {
+			for (j = 0; j < bCols; j++) {
+				if (b[bCols*k+j] == 1) {
+					out[bCols*i+j] += a[aCols*i+k];
+				}
+			}
+		}
+	}
+}
