@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"runtime"
 
 	"github.com/cloudflare/circl/group"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -27,7 +28,7 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, dbLen int, g group.Group, reb
 	for i := 0; i < len(data); i++ {
 		data[i] = data[i] & 1
 	}
-	NGoRoutines := 4
+	NGoRoutines := runtime.NumCPU()
 	h := crypto.BLAKE2b_256
 	rowsPerRoutine := int(math.Ceil(float64(numRows) / float64(NGoRoutines)))
 	replies := make([]chan []byte, NGoRoutines)
