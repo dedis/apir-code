@@ -47,28 +47,7 @@ func retrieveBlocksAmplify(t *testing.T, db *database.LWE, params *utils.ParamsL
 
 		res, err := c.ReconstructBytes(a)
 		require.NoError(t, err)
-		require.Equal(t, db.Matrix.Get(utils.VectorToMatrixIndices(i, db.Info.NumColumns)), res)
-	}
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
-
-}
-
-func retrieveBlocksAmplifyNoBytes(t *testing.T, db *database.LWE, params *utils.ParamsLWE, threshold int, testName string) {
-	c := client.NewAmplify(utils.RandomPRG(), &db.Info, params, threshold)
-	s := server.NewAmplify(db)
-
-	totalTimer := monitor.NewMonitor()
-	repetitions := 10
-	for k := 0; k < repetitions; k++ {
-		i := rand.Intn(params.L * params.M)
-		ii, jj := utils.VectorToMatrixIndices(i, db.Info.NumColumns)
-		query := c.Query(ii, jj)
-
-		a := s.Answer(query)
-
-		res, err := c.Reconstruct(a)
-		require.NoError(t, err)
-		require.Equal(t, db.Matrix.Get(ii, jj), res)
+		require.Equal(t, uint32(db.Matrix.Get(utils.VectorToMatrixIndices(i, db.Info.NumColumns))), res)
 	}
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 
