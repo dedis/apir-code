@@ -2,7 +2,6 @@ package matrix
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/utils"
@@ -86,8 +85,10 @@ func TestBinaryMultiply128(t *testing.T) {
 }
 
 func TestMatrix128ToBytes(t *testing.T) {
-	rows := rand.Intn(500)
-	cols := rand.Intn(600)
+	//rows := rand.Intn(500)
+	//cols := rand.Intn(600)
+	rows := 4800
+	cols := 5000
 	m := NewRandom128(utils.RandomPRG(), rows, cols)
 	b := Matrix128ToBytes(m)
 	require.Equal(t, m, BytesToMatrix128(b))
@@ -112,9 +113,9 @@ func BenchmarkBinaryMul128(b *testing.B) {
 		utils.ParamsDefault128().N,
 		rows)
 
-  b.ResetTimer()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-    fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
+		fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
 		d := BinaryMul128(rm, m)
 		// to avoid compiler optimization
 		fmt.Println(d.Rows())

@@ -119,7 +119,8 @@ func BinaryMul128(a *Matrix128, b *MatrixBytes) *Matrix128 {
 
 	oo := make([]byte, 16*a.rows*b.cols)
 
-	C.binary_multiply128(C.int(a.rows), C.int(a.cols), C.int(b.cols),
+	C.binary_multiply128(
+		C.int(a.rows), C.int(a.cols), C.int(b.cols),
 		(*C.__uint128_t)((*[16]byte)(aa[:16])),
 		(*C.uint8_t)(&b.data[0]),
 		(*C.__uint128_t)((*[16]byte)(oo[:16])),

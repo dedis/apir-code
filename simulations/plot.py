@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = 'results_061/'
+resultFolder = "final_results/"
+resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -191,8 +191,9 @@ def plotComplexBars():
     plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
 
 def plotSingle():
-    schemes = ["computationalVpir.json", "computationalLWE128.json"]
-    labels = ["Auth. DDH", "Auth. LWE"]
+    size_to_unit = {8192: "1 KiB", 8389000: "1 MiB", 8590000000: "1 GiB"}
+    schemes = ["computationalDH.json", "computationalLWE.json"]
+    labels = ["Auth. DH", "Auth. LWE"]
     cpuTable = defaultdict(list)
     bwTable = defaultdict(list)
     for i, scheme in enumerate(schemes):
@@ -200,18 +201,25 @@ def plotSingle():
         for j, dbSize in enumerate(sorted(stats.keys())):
             bw = bwMean(stats, dbSize) 
             cpu = cpuMean(stats, dbSize)
-            cpuTable[dbSize].append(cpu*1000)
+            cpuTable[dbSize].append(cpu*1000) # print in seconds
             bwTable[dbSize].append(bw*9.765625e-4)
     
-
     for size, values in cpuTable.items():
-        # time
-        print(get_size_in_bits(size), end = " ")
-        print("& x & ", rounder2(values[0]), " & x$\\times$ &", end = " ")
-        print(rounder2(values[1]), " & x$\\times$", end = " ")
-        # bw
-        print("& x & ", rounder2(bwTable[size][0]), " & x$\\times$ &", end = " ")
-        print(rounder2(bwTable[size][1]), " & x$\\times$ \\\\")
+        # DH is not compute for 1GiB
+        if size == 8590000000:
+            print(size_to_unit[size], end = " ")
+            print("& x & N/A & x$\\times$ &", end = " ")
+            print(rounder2(values[0]), " & x$\\times$", end = " ")
+            # bw
+            print("& x & N/A & x$\\times$ &", end = " ")
+            print(rounder2(bwTable[size][0]), " & x$\\times$ \\\\")
+        else:
+            print(size_to_unit[size], end = " ")
+            print("& x & ", rounder2(values[0]), " & x$\\times$ &", end = " ")
+            print(rounder2(values[1]), " & x$\\times$", end = " ")
+            # bw
+            print("& x & ", rounder2(bwTable[size][0]), " & x$\\times$ &", end = " ")
+            print(rounder2(bwTable[size][1]), " & x$\\times$ \\\\")
 
     # print_latex_table_joint(cpuTable, len(schemes), get_size_in_bits)
     # print("")
@@ -485,7 +493,6 @@ if __name__ == "__main__":
         plotComplex()
     elif EXPR == "complexBars":
         plotComplexBars()
-    elif EXPR == "single":
         plotSingle()
     elif EXPR == "real":
         plotReal()
