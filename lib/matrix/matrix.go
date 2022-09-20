@@ -202,3 +202,7 @@ func (a *Matrix) Sub(b *Matrix) {
 		a.data[i] -= b.data[i]
 	}
 }
+
+func (a *Matrix) BytesSize() float64 {
+	return float64(a.rows * a.cols * 4)
+}

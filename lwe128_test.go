@@ -13,12 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLWEMatrixOneMb128(t *testing.T) {
+func TestLWE128(t *testing.T) {
 	dbLen := 1024 * 1024 // dbLen is specified in bits
 	//dbLen := 4 * 4
 	db := database.CreateRandomBinaryLWEWithLength128(utils.RandomPRG(), dbLen)
 	p := utils.ParamsWithDatabaseSize128(db.Info.NumRows, db.Info.NumColumns)
-	retrieveBlocksLWE128(t, db, p, "SingleMatrixLWEOneMb_128")
+	retrieveBlocksLWE128(t, db, p, "TestLWE128")
 }
 
 func retrieveBlocksLWE128(t *testing.T, db *database.LWE128, params *utils.ParamsLWE, testName string) {

@@ -195,6 +195,9 @@ func main() {
 
 func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {
 	numRetrievedBlocks := 1
+	// create main monitor for CPU time
+	//m := monitor.NewMonitor()
+	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
 	p := utils.ParamsWithDatabaseSize128(db.Info.NumRows, db.Info.NumColumns)
@@ -206,26 +209,36 @@ func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {
 		results[j] = initChunk(numRetrievedBlocks)
 
 		// store digest size
-		results[j].Digest = db.Auth.DigestLWE128.BytesSize()
+		results[j].Digest = float64(len(db.Auth.Digest))
 
 		// pick a random block index to start the retrieval
-		ii := rand.Intn(db.NumRows)
-		jj := rand.Intn(db.NumColumns)
+		index := rand.Intn(db.NumRows * db.NumColumns)
 		results[j].CPU[0] = initBlock(1)
 		results[j].Bandwidth[0] = initBlock(1)
 
+		//m.Reset()
 		t := time.Now()
-
-		query := c.Query(ii, jj)
-		answer := s.Answer(query)
-		if _, err := c.Reconstruct(answer); err != nil {
+		query, err := c.QueryBytes(index)
+		if err != nil {
 			log.Fatal(err)
 		}
+		results[j].CPU[0].Query = 0
+		results[j].Bandwidth[0].Query += float64(len(query))
 
-		// store eval results
+		// get server's answer
+		answer, err := s.AnswerBytes(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Answers[0] = 0
+		results[j].Bandwidth[0].Answers[0] = float64(len(answer))
+
+		_, err = c.ReconstructBytes(answer)
+		if err != nil {
+			log.Fatal(err)
+		}
 		results[j].CPU[0].Reconstruct = time.Since(t).Seconds()
-		results[j].Bandwidth[0].Query = query.BytesSize()
-		results[j].Bandwidth[0].Answers[0] = answer.BytesSize()
+		results[j].Bandwidth[0].Reconstruct = 0
 
 		// GC after each repetition
 		runtime.GC()
@@ -238,6 +251,9 @@ func pirLWE128(db *database.LWE128, nRepeat int) []*Chunk {
 // LWE uses Amplify
 func pirLWE(db *database.LWE, nRepeat, tECC int) []*Chunk {
 	numRetrievedBlocks := 1
+	// create main monitor for CPU time
+	//m := monitor.NewMonitor()
+	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
 	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
@@ -249,26 +265,36 @@ func pirLWE(db *database.LWE, nRepeat, tECC int) []*Chunk {
 		results[j] = initChunk(numRetrievedBlocks)
 
 		// store digest size
-		// TODO: want normal digest, not bytes
-		results[j].Digest = db.Auth.DigestLWE.BytesSize()
+		results[j].Digest = float64(len(db.Auth.Digest))
 
 		// pick a random block index to start the retrieval
-		ii := rand.Intn(db.NumRows)
-		jj := rand.Intn(db.NumColumns)
+		index := rand.Intn(db.NumRows * db.NumColumns)
 		results[j].CPU[0] = initBlock(1)
 		results[j].Bandwidth[0] = initBlock(1)
 
+		//m.Reset()
 		t := time.Now()
-
-		query := c.Query(ii, jj)
-		answer := s.Answer(query)
-		if _, err := c.Reconstruct(answer); err != nil {
+		query, err := c.QueryBytes(index)
+		if err != nil {
 			log.Fatal(err)
 		}
+		results[j].CPU[0].Query = 0
+		results[j].Bandwidth[0].Query += float64(len(query))
 
+		// get server's answer
+		answer, err := s.AnswerBytes(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results[j].CPU[0].Answers[0] = 0
+		results[j].Bandwidth[0].Answers[0] = float64(len(answer))
+
+		_, err = c.ReconstructBytes(answer)
+		if err != nil {
+			log.Fatal(err)
+		}
 		results[j].CPU[0].Reconstruct = time.Since(t).Seconds()
-		results[j].Bandwidth[0].Query = query[0].BytesSize() * float64(len(query))        // all matrices equal
-		results[j].Bandwidth[0].Answers[0] = float64(len(answer)) * answer[0].BytesSize() // all matrices equal
+		results[j].Bandwidth[0].Reconstruct = 0
 
 		// GC after each repetition
 		runtime.GC()
@@ -280,6 +306,9 @@ func pirLWE(db *database.LWE, nRepeat, tECC int) []*Chunk {
 
 func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 	numRetrievedBlocks := 1
+	// create main monitor for CPU time
+	//m := monitor.NewMonitor()
+	// run the experiment nRepeat times
 	results := make([]*Chunk, nRepeat)
 
 	prg := utils.RandomPRG()

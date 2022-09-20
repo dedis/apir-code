@@ -224,3 +224,7 @@ func (a *Matrix128) Sub(b *Matrix128) {
 		a.data[i] = a.data[i].SubWrap(b.data[i])
 	}
 }
+
+func (a *Matrix128) BytesSize() float64 {
+	return float64(a.rows * a.cols * 16)
+}

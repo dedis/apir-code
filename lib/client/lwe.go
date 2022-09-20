@@ -43,7 +43,7 @@ func (c *LWE) Query(i, j int) *matrix.Matrix {
 	// digest is already stored in the state when receiving the database info
 	c.state = &StateLWE{
 		A:      matrix.NewRandom(utils.NewPRG(c.params.SeedA), c.params.N, c.params.L),
-		digest: matrix.BytesToMatrix(c.dbInfo.Digest),
+		digest: c.dbInfo.DigestLWE,
 		secret: matrix.NewRandom(c.rnd, 1, c.params.N),
 		i:      i,
 		j:      j,

@@ -44,7 +44,7 @@ func (c *LWE128) Query(i, j int) *matrix.Matrix128 {
 	// digest is already stored in the state when receiving the database info
 	c.state = &StateLWE128{
 		A:      matrix.NewRandom128(utils.NewPRG(c.params.SeedA), c.params.N, c.params.L),
-		digest: matrix.BytesToMatrix128(c.dbInfo.Digest),
+		digest: c.dbInfo.DigestLWE128,
 		secret: matrix.NewRandom128(c.rnd, 1, c.params.N),
 		i:      i,
 		j:      j,

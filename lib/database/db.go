@@ -13,6 +13,7 @@ import (
 	"github.com/cloudflare/circl/group"
 	"github.com/nikirill/go-crypto/openpgp/packet"
 	"github.com/si-co/vpir-code/lib/field"
+	"github.com/si-co/vpir-code/lib/matrix"
 	"github.com/si-co/vpir-code/lib/utils"
 	"golang.org/x/crypto/blake2b"
 )
@@ -46,6 +47,9 @@ type Info struct {
 
 // Auth is authentication information for the single-server setting
 type Auth struct {
+	DigestLWE    *matrix.Matrix
+	DigestLWE128 *matrix.Matrix128
+
 	// The global digest that is a hash of all the row digests. Public.
 	Digest []byte
 	// One digest per row, authenticating all the elements in that row.

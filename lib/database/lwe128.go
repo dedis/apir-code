@@ -53,7 +53,7 @@ func CreateRandomBinaryLWE128(rnd io.Reader, numRows, numColumns int) *LWE128 {
 	}
 
 	db.Auth = &Auth{
-		Digest: matrix.Matrix128ToBytes(Digest128(db, numRows)),
+		DigestLWE128: Digest128(db, numRows),
 	}
 
 	return db
