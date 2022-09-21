@@ -95,7 +95,7 @@ func TestMatrix128ToBytes(t *testing.T) {
 }
 
 func BenchmarkBinaryMul128(b *testing.B) {
-	rows, columns := 1024, 1024
+	rows, columns := 2048, 2048
 	buff := make([]byte, rows*columns/8+1)
 	rnd := utils.RandomPRG()
 	if _, err := rnd.Read(buff); err != nil {
@@ -115,7 +115,7 @@ func BenchmarkBinaryMul128(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
+		//fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
 		d := BinaryMul128(rm, m)
 		// to avoid compiler optimization
 		fmt.Println(d.Rows())
