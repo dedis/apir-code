@@ -493,6 +493,7 @@ if __name__ == "__main__":
         plotComplex()
     elif EXPR == "complexBars":
         plotComplexBars()
+    elif EXPR == "single":
         plotSingle()
     elif EXPR == "real":
         plotReal()
