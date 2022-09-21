@@ -1,7 +1,6 @@
 package matrix
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/utils"
@@ -113,12 +112,35 @@ func BenchmarkBinaryMul128(b *testing.B) {
 		utils.ParamsDefault128().N,
 		rows)
 
+	var r int
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		//fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
+		// fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
 		d := BinaryMul128(rm, m)
 		// to avoid compiler optimization
-		fmt.Println(d.Rows())
+		r = d.Rows()
 	}
 
+	rows = r
+
 }
+
+//func BenchmarkMul128(b *testing.B) {
+//rows, columns := 2048, 2048
+//rnd := utils.RandomPRG()
+
+//m := NewRandom128(rnd, rows, columns)
+//rm := NewRandom128(
+//utils.NewPRG(utils.ParamsDefault128().SeedA),
+//utils.ParamsDefault128().N,
+//rows)
+
+//b.ResetTimer()
+//for i := 0; i < b.N; i++ {
+////fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
+//d := Mul128(rm, m)
+//// to avoid compiler optimization
+//fmt.Println(d.Rows())
+//}
+
+//}

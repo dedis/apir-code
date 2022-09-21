@@ -1,12 +1,13 @@
 package matrix
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/si-co/vpir-code/lib/utils"
 	"github.com/stretchr/testify/require"
 )
+
+var rows int
 
 func TestEncoding(t *testing.T) {
 	m1 := &Matrix{
@@ -54,12 +55,15 @@ func BenchmarkBinaryMul32(b *testing.B) {
 		utils.ParamsDefault().N,
 		rows)
 
-  b.ResetTimer()
+	var r int
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-    fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
+		//fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
 		d := BinaryMul(rm, m)
 		// to avoid compiler optimization
-		fmt.Println(d.Rows())
+		r = d.Rows()
 	}
+
+	rows = r
 
 }
