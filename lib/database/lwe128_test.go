@@ -10,7 +10,6 @@ import (
 )
 
 func TestLWE(t *testing.T) {
-	//rows, columns := CalculateNumRowsAndColumns(8389000, true) // 1 MiB
 	rows, columns := 2048, 2048
 	fmt.Println(rows, columns)
 	b := make([]byte, rows*columns/8+1)
@@ -53,7 +52,7 @@ func TestLWE(t *testing.T) {
 	fmt.Println("start digest computation BinaryMul")
 
 	ti := time.Now()
-	d := matrix.BinaryMul128Parallel(rm, db.Matrix)
+	d := matrix.BinaryMul128(rm, db.Matrix)
 	fmt.Println("done with digest computation in time:", time.Since(ti).Seconds())
 
 	db.Auth = &Auth{
