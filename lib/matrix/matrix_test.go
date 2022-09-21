@@ -67,3 +67,25 @@ func BenchmarkBinaryMul32(b *testing.B) {
 	rows = r
 
 }
+
+func BenchmarkMul(b *testing.B) {
+	rows, columns := 2048, 2048
+	rnd := utils.RandomPRG()
+
+	m := NewRandom(rnd, rows, columns)
+	rm := NewRandom(
+		utils.NewPRG(utils.ParamsDefault128().SeedA),
+		utils.ParamsDefault128().N,
+		rows)
+
+	var r int
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		//fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
+		d := Mul(rm, m)
+		// to avoid compiler optimization
+		r = d.Rows()
+	}
+
+	rows = r
+}

@@ -125,22 +125,24 @@ func BenchmarkBinaryMul128(b *testing.B) {
 
 }
 
-//func BenchmarkMul128(b *testing.B) {
-//rows, columns := 2048, 2048
-//rnd := utils.RandomPRG()
+func BenchmarkMul128(b *testing.B) {
+	rows, columns := 2048, 2048
+	rnd := utils.RandomPRG()
 
-//m := NewRandom128(rnd, rows, columns)
-//rm := NewRandom128(
-//utils.NewPRG(utils.ParamsDefault128().SeedA),
-//utils.ParamsDefault128().N,
-//rows)
+	m := NewRandom128(rnd, rows, columns)
+	rm := NewRandom128(
+		utils.NewPRG(utils.ParamsDefault128().SeedA),
+		utils.ParamsDefault128().N,
+		rows)
 
-//b.ResetTimer()
-//for i := 0; i < b.N; i++ {
-////fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
-//d := Mul128(rm, m)
-//// to avoid compiler optimization
-//fmt.Println(d.Rows())
-//}
+	var r int
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		//fmt.Printf("[%v x %v] times [%v x %v]\n", rm.rows, rm.cols, m.rows, m.cols)
+		d := Mul128(rm, m)
+		// to avoid compiler optimization
+		r = d.Rows()
+	}
 
-//}
+	rows = r
+}
