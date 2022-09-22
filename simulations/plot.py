@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from utils import *
 
 resultFolder = "final_results/"
-resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -192,8 +191,8 @@ def plotComplexBars():
 
 def plotSingle():
     size_to_unit = {8192: "1 KiB", 8389000: "1 MiB", 8590000000: "1 GiB"}
-    schemes = ["computationalDH.json", "computationalLWE.json"]
-    labels = ["Auth. DH", "Auth. LWE"]
+    schemes = ["computationalDH.json", "computationalLWE128.json"]
+    labels = ["Auth. DH", "Auth. LWE128"]
     cpuTable = defaultdict(list)
     bwTable = defaultdict(list)
     for i, scheme in enumerate(schemes):
