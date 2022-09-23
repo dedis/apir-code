@@ -291,7 +291,7 @@ func pirElliptic(db *database.Elliptic, nRepeat int) []*Chunk {
 		results[j] = initChunk(numRetrievedBlocks)
 
 		// store digest size
-		results[j].Digest = float64(len(db.SubDigests))
+		results[j].Digest = float64(len(db.SubDigests)) + float64(len(db.Digest))
 
 		// pick a random block index to start the retrieval
 		index := rand.Intn(db.NumRows * db.NumColumns)
