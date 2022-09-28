@@ -100,9 +100,9 @@ func main() {
 	// amplification parameters (found via script in /scripts/integrity_amplification.py)
 	// KiB, MiB, GiB
 	tECC := map[int]int{
-		8192:       3,
-		8389000:    4,
-		8590000000: 7,
+		1 << 13: 3,
+		1 << 23: 4,
+		1 << 33: 7,
 	}
 
 	// range over all the DB lengths specified in the general simulation config
@@ -152,7 +152,11 @@ func main() {
 			results = pirElliptic(dbElliptic, s.Repetitions)
 		case "cmp-vpir-lwe": // LWE uses Amplify
 			log.Printf("db info: %#v", dbLWE.Info)
-			results = pirLWE(dbLWE, s.Repetitions, tECC[dbLen])
+			rep, ok := tECC[dbLen]
+			if !ok {
+				panic("tECC not defined for this db length")
+			}
+			results = pirLWE(dbLWE, s.Repetitions, rep)
 		case "cmp-vpir-lwe-128":
 			log.Printf("db info: %#v", dbLWE128.Info)
 			results = pirLWE128(dbLWE128, s.Repetitions)
@@ -249,8 +253,7 @@ func pirLWE(db *database.LWE, nRepeat, tECC int) []*Chunk {
 		results[j] = initChunk(numRetrievedBlocks)
 
 		// store digest size
-		// TODO: want normal digest, not bytes
-		results[j].Digest = db.Auth.DigestLWE.BytesSize()
+		results[j].Digest = db.Auth.DigestLWE.BytesSize() * float64(tECC)
 
 		// pick a random block index to start the retrieval
 		ii := rand.Intn(db.NumRows)
