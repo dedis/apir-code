@@ -253,8 +253,7 @@ func pirLWE(db *database.LWE, nRepeat, tECC int) []*Chunk {
 		results[j] = initChunk(numRetrievedBlocks)
 
 		// store digest size
-		results[j].Digest = db.Auth.DigestLWE.BytesSize() * float64(tECC)
-
+		results[j].Digest = db.Auth.DigestLWE.BytesSize()
 		// pick a random block index to start the retrieval
 		ii := rand.Intn(db.NumRows)
 		jj := rand.Intn(db.NumColumns)
