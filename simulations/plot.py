@@ -189,40 +189,81 @@ def plotComplexBars():
     #plt.show()
     plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
 
+def parseSpiral():
+    base_name = resultFolder + 'spiral_'
+    file_type = '.json'
+    sizes = ["kib", "mib", "gib"]
+    sizes_to_key = {"kib": 1 << 13, "mib": 1 << 23, "gib": 1 << 33}
+
+    cpuTable = {1 << 13: 0, 1 << 23: 0, 1 << 33: 0}
+    bwTable = {1 << 13: 0, 1 << 23: 0, 1 << 33: 0}
+    digestTable = {1 << 13: 0, 1 << 23: 0, 1 << 33: 0}
+
+    for s in sizes:
+        f = open(base_name + s + file_type)
+        out = json.load(f)
+        digestTable[sizes_to_key[s]] = out["param_sz"]/1024.0 # store in KiB
+        bwTable[sizes_to_key[s]] = (out["query_sz"] + out["resp_sz"])/1024.0 # store in KiB
+        cpuTable[sizes_to_key[s]] = out["total_us"]/1000000 * 1000 # stored in us in the original file, store in ms
+
+    return cpuTable, bwTable, digestTable
+
+
 def plotSingle():
-    size_to_unit = {8192: "1 KiB", 8389000: "1 MiB", 8590000000: "1 GiB"}
-    schemes = ["computationalDH.json", "computationalLWE128.json"]
-    labels = ["Auth. DH", "Auth. LWE128"]
-    cpuTable = defaultdict(list)
-    bwTable = defaultdict(list)
+    size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
+    base_latex = "\\multirow{3}{*}"
+    size_to_latex = {
+            1 << 13: base_latex + "{1 KiB}",
+            1 << 23: base_latex + "{1 MiB}",
+            1 << 33: base_latex + "{1 GiB}",
+        }
+    size_to_units_latex = {
+            1 << 13: ["{KiB}", "{KiB}", "{ms}"],
+            1 << 23: ["{MiB}", "{KiB}", "{ms}"],
+            1 << 33: ["{MiB}", "{KiB}", "{s}"],
+        }
+    size_to_multipliers = {
+            1 << 13: [1.0, 1.0, 1.0],
+            1 << 23: [1/1024.0, 1.0, 1.0],
+            1 << 33: [1/1024.0, 1.0, 1/1000.0],
+        }
+    metrics_icons = ["\\alignicon{\\faSend}", "\\alignicon{\\faWifi}", "\\alignicon{\\faClockO}"]
+    schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json", "spiral"]
+    cpuTable = {}
+    bwTable = {}
+    digestTable = {}
     for i, scheme in enumerate(schemes):
+        if scheme == "spiral":
+            continue
         stats = allStats(resultFolder + scheme)
+        cpuTable[scheme] = {}
+        bwTable[scheme] = {}
+        digestTable[scheme] = {}
         for j, dbSize in enumerate(sorted(stats.keys())):
             bw = bwMean(stats, dbSize) 
             cpu = cpuMean(stats, dbSize)
-            cpuTable[dbSize].append(cpu*1000) # print in seconds
-            bwTable[dbSize].append(bw*9.765625e-4)
-    
-    for size, values in cpuTable.items():
-        # DH is not compute for 1GiB
-        if size == 8590000000:
-            print(size_to_unit[size], end = " ")
-            print("& x & N/A & x$\\times$ &", end = " ")
-            print(rounder2(values[0]), " & x$\\times$", end = " ")
-            # bw
-            print("& x & N/A & x$\\times$ &", end = " ")
-            print(rounder2(bwTable[size][0]), " & x$\\times$ \\\\")
-        else:
-            print(size_to_unit[size], end = " ")
-            print("& x & ", rounder2(values[0]), " & x$\\times$ &", end = " ")
-            print(rounder2(values[1]), " & x$\\times$", end = " ")
-            # bw
-            print("& x & ", rounder2(bwTable[size][0]), " & x$\\times$ &", end = " ")
-            print(rounder2(bwTable[size][1]), " & x$\\times$ \\\\")
+            cpuTable[scheme][dbSize] = cpu*1000*1000 # store in ms (already divided by 1000 in function)
+            bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
+            digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
 
-    # print_latex_table_joint(cpuTable, len(schemes), get_size_in_bits)
-    # print("")
-    # print_latex_table_joint(bwTable, len(schemes), get_size_in_bits)
+    cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
+
+    metrics = (digestTable, bwTable, cpuTable)
+    for dbSize in size_to_unit.keys():
+        print(size_to_latex[dbSize], end = " & ")
+        for i, m in enumerate(metrics):
+            if i == 0:
+                print(metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+            else:
+                print(" & " + metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+            for scheme in schemes:
+                if dbSize == 1<<33 and "DH" in scheme:
+                    print("N/A", end = " & ")
+                else:
+                    print(round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2), end = " & ")
+            print("\\\\")
+        print("\\midrule")
+        print("")
 
 
 def plotRealComplex():
@@ -405,24 +446,18 @@ def plotPreprocessing():
         results[k] = np.mean(v)
 
     plt.plot(
-    range(len(results)), 
-    [x/1000 for x in sorted(results.values())],
-    color='black', 
-    marker=markers[0],
-    linestyle=linestyles[0],
-    linewidth=0.5,
+        range(len(results)), 
+        [x/1000 for x in sorted(results.values())],
+        color='black', 
+        marker=markers[0],
+        linestyle=linestyles[0],
+        linewidth=0.5,
     )
-
-    # fig, axs = plt.subplots() 
 
     # cosmetics
     plt.xticks(range(len(results)), [int(x/GiB) for x in sorted(results.keys())])
     plt.ylabel('CPU time [s]')
-    # axs.set_xticks(sorted(results.keys())), 
     plt.xlabel('Database size [GiB]')
-    # axs.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           # ncol=2, mode="expand", borderaxespad=0.)
-
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/preprocessing.eps', format='eps', dpi=300, transparent=True)
 
