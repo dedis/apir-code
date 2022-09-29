@@ -228,7 +228,7 @@ def plotSingle():
             1 << 33: [1/1024.0, 1.0, 1/1000.0],
         }
     metrics_icons = ["\\alignicon{\\faSend}", "\\alignicon{\\faWifi}", "\\alignicon{\\faClockO}"]
-    schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json", "spiral"]
+    schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json"]
     cpuTable = {}
     bwTable = {}
     digestTable = {}
@@ -261,6 +261,9 @@ def plotSingle():
                     print("N/A", end = " & ")
                 else:
                     print(round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2), end = " & ")
+            # print ratio
+            ratio = m[schemes[-2]][dbSize]/m[schemes[-1]][dbSize]
+            print(round(ratio, 2), end = "$\\times$ ")
             print("\\\\")
         print("\\midrule")
         print("")
