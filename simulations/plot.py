@@ -209,7 +209,7 @@ def parseSpiral():
     return cpuTable, bwTable, digestTable
 
 
-def plotSingle():
+def plotSingleRatios():
     size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
     base_latex = "\\multirow{3}{*}"
     size_to_latex = {
@@ -218,17 +218,18 @@ def plotSingle():
             1 << 33: base_latex + "{1 GiB}",
         }
     size_to_units_latex = {
-            1 << 13: ["{KiB}", "{KiB}", "{ms}"],
-            1 << 23: ["{MiB}", "{KiB}", "{ms}"],
-            1 << 33: ["{MiB}", "{KiB}", "{s}"],
+            1 << 13: ["[KiB]", "[KiB]", "[ms]"],
+            1 << 23: ["[MiB]", "[KiB]", "[ms]"],
+            1 << 33: ["[MiB]", "[KiB]", "[s]"],
         }
     size_to_multipliers = {
             1 << 13: [1.0, 1.0, 1.0],
             1 << 23: [1/1024.0, 1.0, 1.0],
             1 << 33: [1/1024.0, 1.0, 1/1000.0],
         }
-    metrics_icons = ["\\alignicon{\\faSend}", "\\alignicon{\\faWifi}", "\\alignicon{\\faClockO}"]
-    schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json"]
+    metrics_icons = ["Off ", "On ", "Time "]
+    schemes = ["simplePIR.json", "computationalDH.json", "computationalLWE128.json", "computationalLWE.json"]
+    names = ['DDH', 'LWE', 'LWE$^+$', 'SimplePIR']
     cpuTable = {}
     bwTable = {}
     digestTable = {}
@@ -247,7 +248,86 @@ def plotSingle():
             digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
 
     cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
+    
+    # print latex table
+    metrics = (digestTable, bwTable, cpuTable)
+    for dbSize in size_to_unit.keys():
+        print(size_to_latex[dbSize], end = " & ")
+        for i, m in enumerate(metrics):
+            if i == 0:
+                print(metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+            else:
+                print(" & " + metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+            for scheme in schemes:
+                if dbSize == 1<<33 and "DH" in scheme:
+                    print("N/A", end = " & ")
+                    print("N/A", end = " & ") # for ratio 
+                elif "simple" in scheme:
+                    print(round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2), end = " & ")
+                else:
+                    ratio = round(m[scheme][dbSize]/m[schemes[0]][dbSize], 1)
+                    value = round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2)
+                    if value >= 1000:
+                       value = sci_notation(value, 1) 
+                    if ratio >=1000:
+                        ratio = sci_notation(ratio, 1)
+                    print(value, end = " & ")
+                    if scheme == schemes[-1]:
+                        print(ratio, end = "$\\times$ ")
+                    else:
+                        print(ratio, end = "$\\times$ & ")
+            print("\\\\")
+        print("\\midrule")
+        print("")
 
+def sci_notation(number, sig_fig=2):
+    ret_string = "{0:.{1:d}e}".format(number, sig_fig)
+    a, b = ret_string.split("e")
+    # remove leading "+" and strip leading zeros
+    b = int(b)
+    return "$" + a + " \\cdot 10^{" + str(b) + "}$ "
+ 
+def plotSingle():
+    size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
+    base_latex = "\\multirow{3}{*}"
+    size_to_latex = {
+            1 << 13: base_latex + "{1 KiB}",
+            1 << 23: base_latex + "{1 MiB}",
+            1 << 33: base_latex + "{1 GiB}",
+        }
+    size_to_units_latex = {
+            1 << 13: ["[KiB]", "[KiB]", "[ms]"],
+            1 << 23: ["[MiB]", "[KiB]", "[ms]"],
+            1 << 33: ["[MiB]", "[KiB]", "[s]"],
+        }
+    size_to_multipliers = {
+            1 << 13: [1.0, 1.0, 1.0],
+            1 << 23: [1/1024.0, 1.0, 1.0],
+            1 << 33: [1/1024.0, 1.0, 1/1000.0],
+        }
+    metrics_icons = ["Off ", "On ", "Time "]
+    schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json"]
+    names = ['DDH', 'LWE', 'LWE$^+$', 'SimplePIR']
+    cpuTable = {}
+    bwTable = {}
+    digestTable = {}
+    for i, scheme in enumerate(schemes):
+        if scheme == "spiral":
+            continue
+        stats = allStats(resultFolder + scheme)
+        cpuTable[scheme] = {}
+        bwTable[scheme] = {}
+        digestTable[scheme] = {}
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            bw = bwMean(stats, dbSize) 
+            cpu = cpuMean(stats, dbSize)
+            cpuTable[scheme][dbSize] = cpu*1000*1000 # store in ms (already divided by 1000 in function)
+            bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
+            digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
+
+    cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
+    
+    # print latex table
     metrics = (digestTable, bwTable, cpuTable)
     for dbSize in size_to_unit.keys():
         print(size_to_latex[dbSize], end = " & ")
@@ -268,6 +348,130 @@ def plotSingle():
         print("\\midrule")
         print("")
 
+def plotSingle():
+    size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
+    base_latex = "\\multirow{3}{*}"
+    size_to_latex = {
+            1 << 13: base_latex + "{1 KiB}",
+            1 << 23: base_latex + "{1 MiB}",
+            1 << 33: base_latex + "{1 GiB}",
+        }
+    size_to_units_latex = {
+            1 << 13: ["[KiB]", "[KiB]", "[ms]"],
+            1 << 23: ["[MiB]", "[KiB]", "[ms]"],
+            1 << 33: ["[MiB]", "[KiB]", "[s]"],
+        }
+    size_to_multipliers = {
+            1 << 13: [1.0, 1.0, 1.0],
+            1 << 23: [1/1024.0, 1.0, 1.0],
+            1 << 33: [1/1024.0, 1.0, 1/1000.0],
+        }
+    metrics_icons = ["Off ", "On ", "Time "]
+    schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json"]
+    names = ['DDH', 'LWE', 'LWE$^+$', 'SimplePIR']
+    cpuTable = {}
+    bwTable = {}
+    digestTable = {}
+    for i, scheme in enumerate(schemes):
+        if scheme == "spiral":
+            continue
+        stats = allStats(resultFolder + scheme)
+        cpuTable[scheme] = {}
+        bwTable[scheme] = {}
+        digestTable[scheme] = {}
+        for j, dbSize in enumerate(sorted(stats.keys())):
+            bw = bwMean(stats, dbSize) 
+            cpu = cpuMean(stats, dbSize)
+            cpuTable[scheme][dbSize] = cpu*1000*1000 # store in ms (already divided by 1000 in function)
+            bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
+            digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
+
+    cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
+    
+    # print latex table
+    metrics = (digestTable, bwTable, cpuTable)
+    for dbSize in size_to_unit.keys():
+        print(size_to_latex[dbSize], end = " & ")
+        for i, m in enumerate(metrics):
+            if i == 0:
+                print(metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+            else:
+                print(" & " + metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+            for scheme in schemes:
+                if dbSize == 1<<33 and "DH" in scheme:
+                    print("N/A", end = " & ")
+                else:
+                    print(round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2), end = " & ")
+            # print ratio
+            ratio = m[schemes[-2]][dbSize]/m[schemes[-1]][dbSize]
+            print(round(ratio, 2), end = "$\\times$ ")
+            print("\\\\")
+        print("\\midrule")
+        print("")
+
+    cpuData = [list(cpuTable[schemes[i]].values()) for i in range(len((schemes)))]
+    cpuData[0].append(0) # bigger db for DH is NA
+
+    offData = [list(digestTable[schemes[i]].values()) for i in range(len(schemes))]
+    offData[0].append(0) # bigger db for DH is NA
+
+    onData = [list(bwTable[schemes[i]].values()) for i in range(len(schemes))]
+    onData[0].append(0) # bigger db for 
+
+    # plot numerical result
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    width = 0.2
+    x = np.arange(len(list(size_to_unit.values())))
+     
+    colors=['darkgray','gray','dimgray','black']
+    for i in range(len(schemes)):
+        ax1.bar(x + i*width, cpuData[i], width, color=colors[i], label=names[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
+        ax2.bar(x + i*width, offData[i], width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
+        ax3.bar(x + i*width, onData[i], width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
+    
+    fig.legend(names, bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=len(names), mode="expand", borderaxespad=0.)
+
+    axs = [ax1, ax2, ax3]
+    for ax in axs:
+        ax.set_xticks(x + width + width/2)
+        ax.set_xticklabels(list(size_to_unit.values()))
+        ax.set_xlabel('Database size')
+        ax.set_yscale('log')
+    ax1.set_ylabel('User time [ms]')
+    ax2.set_ylabel('Offline bandwidth [KiB]')
+    ax3.set_ylabel('Online bandwidth [KiB]')
+    plt.tight_layout(h_pad=1.5)
+    plt.savefig('figures/single_bar_multi.eps', format='eps', dpi=300, transparent=True, bbox_inches="tight")
+
+    # plot ratio
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    x = np.arange(len(list(size_to_unit.values())))
+     
+    colors=["", 'gray', 'dimgray']
+    for i in range(len(schemes)-1):
+        if i != 0:
+            ax1.bar(x + i*width, np.array(cpuData[i])/np.array(cpuData[-1]), width, color=colors[i], label=names[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
+            ax2.bar(x + i*width, np.array(offData[i])/np.array(offData[-1]), width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
+            ax3.bar(x + i*width, np.array(onData[i])/np.array(onData[-1]), width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
+   
+    #namesThree = names.pop()
+    #fig.legend(names[1:], bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           #ncol=len(names), mode="expand", borderaxespad=0.)
+
+    fig.legend()
+
+    axs = [ax1, ax2, ax3]
+    for ax in axs:
+        ax.set_xticks(x + width + width/2)
+        ax.set_xticklabels(list(size_to_unit.values()))
+        ax.set_xlabel('Database size')
+        #ax.set_yscale('log')
+    ax1.set_ylabel('User time ratio')
+    ax2.set_ylabel('Offline bandwidth ratio')
+    ax3.set_ylabel('Online bandwidth ratio')
+    plt.tight_layout(h_pad=1.5)
+    plt.savefig('figures/single_bar_multi_ratio.eps', format='eps', dpi=300, transparent=True, bbox_inches="tight")
 
 def plotRealComplex():
     schemes = [
@@ -523,7 +727,7 @@ args = parser.parse_args()
 EXPR = args.expr
 
 if __name__ == "__main__":
-    prepare_for_latex()
+    #prepare_for_latex()
     if EXPR == "point":
         plotPoint()
     elif EXPR == "complex":
@@ -532,6 +736,7 @@ if __name__ == "__main__":
         plotComplexBars()
     elif EXPR == "single":
         plotSingle()
+        plotSingleRatios()
     elif EXPR == "real":
         plotReal()
     elif EXPR == "realcomplex":
