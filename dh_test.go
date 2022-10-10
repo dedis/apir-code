@@ -17,14 +17,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDHMatrixOneMb(t *testing.T) {
+func TestDH(t *testing.T) {
 	dbLen := 1024 * 1024 // dbLen is specified in bits
 	dbPRG := utils.RandomPRG()
 	ecg := group.P256
 	db := database.CreateRandomEllipticWithDigest(dbPRG, dbLen, ecg, true)
 	fmt.Println("DB created")
 	prg := utils.RandomPRG()
-	retrieveBlocksDH(t, prg, db, "SingleMatrixOneMB")
+	retrieveBlocksDH(t, prg, db, "Diffie-Hellman")
 }
 
 func retrieveBlocksDH(t *testing.T, rnd io.Reader, db *database.Elliptic, testName string) {

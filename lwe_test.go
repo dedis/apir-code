@@ -39,5 +39,4 @@ func retrieveBlocksLWE(t *testing.T, db *database.LWE, params *utils.ParamsLWE, 
 		require.Equal(t, uint32(db.Matrix.Get(utils.VectorToMatrixIndices(i, db.Info.NumColumns))), res)
 	}
 	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
-
 }

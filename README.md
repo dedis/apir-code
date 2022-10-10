@@ -8,21 +8,6 @@ for the proof of concept application, Keyd,
 a privacy-preserving PGP public keys directory based on multi-server 
 authenticated PIR.
 
-
-
-* [ Multi-server authenticated PIR ](#multi)
-* [ Single-server authenticated PIR ](#single)
-* [ Keyd ](#keyd)
-
-<a name="multi"></a>
-# Multi-server authenticated PIR
-We give two multi-server authenticated-PIR schemes:
-one for point queries and one for predicate queries.
-
-<a name="single"></a>
-# Single-server authenticated PIR
-
-<a name="keyd"></a>
 # Keyd
 Keyd is a privacy-preserving PGP public keys directory based on multi-server
 authenticated PIR.

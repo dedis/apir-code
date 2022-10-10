@@ -15,7 +15,6 @@ import (
 
 func TestLWE128(t *testing.T) {
 	dbLen := 1024 * 1024 // dbLen is specified in bits
-	//dbLen := 4 * 4
 	db := database.CreateRandomBinaryLWEWithLength128(utils.RandomPRG(), dbLen)
 	p := utils.ParamsWithDatabaseSize128(db.Info.NumRows, db.Info.NumColumns)
 	retrieveBlocksLWE128(t, db, p, "TestLWE128")

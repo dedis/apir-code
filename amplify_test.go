@@ -13,22 +13,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAmplifyOneMbEncoding(t *testing.T) {
+func TestAmplify(t *testing.T) {
 	threshold := 8
 	dbLen := 1024 * 1024 // dbLen is specified in bits
 	db := database.CreateRandomBinaryLWEWithLength(utils.RandomPRG(), dbLen)
 	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
 
-	retrieveBlocksAmplify(t, db, p, threshold, "TestAmplifyOneMb")
-}
-
-func TestAmplifyOneMb(t *testing.T) {
-	threshold := 8
-	dbLen := 1024 * 1024 // dbLen is specified in bits
-	db := database.CreateRandomBinaryLWEWithLength(utils.RandomPRG(), dbLen)
-	p := utils.ParamsWithDatabaseSize(db.Info.NumRows, db.Info.NumColumns)
-
-	retrieveBlocksAmplify(t, db, p, threshold, "TestAmplifyOneMb")
+	retrieveBlocksAmplify(t, db, p, threshold, "TestAmplify")
 }
 
 func retrieveBlocksAmplify(t *testing.T, db *database.LWE, params *utils.ParamsLWE, threshold int, testName string) {

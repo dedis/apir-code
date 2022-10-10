@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPIRPointOneMb(t *testing.T) {
+func TestPIRPoint(t *testing.T) {
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
 	elemBitSize := 8
@@ -34,7 +34,7 @@ func TestPIRPointOneMb(t *testing.T) {
 
 	fmt.Println(len(db.Entries))
 
-	retrievePIRPoint(t, xof, db, numBlocks, "PIRPointOneMb")
+	retrievePIRPoint(t, xof, db, numBlocks, "PIRPoint")
 }
 
 func retrievePIRPoint(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks int, testName string) {
