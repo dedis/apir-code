@@ -3,14 +3,27 @@
 vulnerabilities.
 
 This repository contains the code for multi-server and
-single-server authenticated PIR schemes and the code
-for the proof of concept application, Keyd.
+single-server authenticated-PIR schemes and the code
+for the proof of concept application, Keyd, 
+a privacy-preserving PGP public keys directory based on multi-server 
+authenticated PIR.
+
+1. [ Multi-server authenticated PIR ](#multi)
+2. [ Single-server authenticated PIR ](#single)
+3. [ Keyd ](#keyd)
+
+<a name="multi"></a>
+# Multi-server authenticated PIR
+
+<a name="single"></a>
+# Single-server authenticated PIR
+
+<a name="keyd"></a>
+# Keyd
 Keyd is a privacy-preserving PGP public keys directory based on multi-server
 authenticated PIR.
 Keyd enable a client to privately retrieve a PGP key given an email address and
 to private compute several statistics over the set of PGP keys.
-
-# Keyd
 
 ## WARNING
 The original Go client and this [website](https://keyd.org/) are **not** production-ready software
