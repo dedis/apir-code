@@ -55,7 +55,7 @@ func (c *DH) QueryBytes(index int) ([]byte, error) {
 		query = append(query, database.CommitScalarToIndex(r, uint64(j), c.dbInfo.Group))
 	}
 
-	// Add the additional blinding t to the the retrieval index.
+	// Add the additional blinding t to the retrieval index.
 	// See Construction 9 of the paper.
 	st.ht = database.CommitScalarToIndex(t, uint64(st.iy), g)
 	query[st.iy].Add(query[st.iy], st.ht)

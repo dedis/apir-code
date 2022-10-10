@@ -3,6 +3,7 @@ import argparse
 
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
+import matplotlib.font_manager as font_manager
 import matplotlib.pyplot as plt
 
 from utils import *
@@ -287,68 +288,70 @@ def sci_notation(number, sig_fig=2):
     b = int(b)
     return "$" + a + " \\cdot 10^{" + str(b) + "}$ "
  
-def plotSingle():
-    size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
-    base_latex = "\\multirow{3}{*}"
-    size_to_latex = {
-            1 << 13: base_latex + "{1 KiB}",
-            1 << 23: base_latex + "{1 MiB}",
-            1 << 33: base_latex + "{1 GiB}",
-        }
-    size_to_units_latex = {
-            1 << 13: ["[KiB]", "[KiB]", "[ms]"],
-            1 << 23: ["[MiB]", "[KiB]", "[ms]"],
-            1 << 33: ["[MiB]", "[KiB]", "[s]"],
-        }
-    size_to_multipliers = {
-            1 << 13: [1.0, 1.0, 1.0],
-            1 << 23: [1/1024.0, 1.0, 1.0],
-            1 << 33: [1/1024.0, 1.0, 1/1000.0],
-        }
-    metrics_icons = ["Off ", "On ", "Time "]
-    schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json"]
-    names = ['DDH', 'LWE', 'LWE$^+$', 'SimplePIR']
-    cpuTable = {}
-    bwTable = {}
-    digestTable = {}
-    for i, scheme in enumerate(schemes):
-        if scheme == "spiral":
-            continue
-        stats = allStats(resultFolder + scheme)
-        cpuTable[scheme] = {}
-        bwTable[scheme] = {}
-        digestTable[scheme] = {}
-        for j, dbSize in enumerate(sorted(stats.keys())):
-            bw = bwMean(stats, dbSize) 
-            cpu = cpuMean(stats, dbSize)
-            cpuTable[scheme][dbSize] = cpu*1000*1000 # store in ms (already divided by 1000 in function)
-            bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
-            digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
+# def plotSingle():
+#     size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
+#     base_latex = "\\multirow{3}{*}"
+#     size_to_latex = {
+#             1 << 13: base_latex + "{1 KiB}",
+#             1 << 23: base_latex + "{1 MiB}",
+#             1 << 33: base_latex + "{1 GiB}",
+#         }
+#     size_to_units_latex = {
+#             1 << 13: ["[KiB]", "[KiB]", "[ms]"],
+#             1 << 23: ["[MiB]", "[KiB]", "[ms]"],
+#             1 << 33: ["[MiB]", "[KiB]", "[s]"],
+#         }
+#     size_to_multipliers = {
+#             1 << 13: [1.0, 1.0, 1.0],
+#             1 << 23: [1/1024.0, 1.0, 1.0],
+#             1 << 33: [1/1024.0, 1.0, 1/1000.0],
+#         }
+#     metrics_icons = ["Off ", "On ", "Time "]
+#     schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json"]
+#     names = ['DDH', 'LWE', 'LWE$^+$', 'SimplePIR']
+#     cpuTable = {}
+#     bwTable = {}
+#     digestTable = {}
+#     for i, scheme in enumerate(schemes):
+#         if scheme == "spiral":
+#             continue
+#         stats = allStats(resultFolder + scheme)
+#         cpuTable[scheme] = {}
+#         bwTable[scheme] = {}
+#         digestTable[scheme] = {}
+#         for j, dbSize in enumerate(sorted(stats.keys())):
+#             bw = bwMean(stats, dbSize)
+#             cpu = cpuMean(stats, dbSize)
+#             cpuTable[scheme][dbSize] = cpu*1000*1000 # store in ms (already divided by 1000 in function)
+#             bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
+#             digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
+#
+#     cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
+#
+#     # print latex table
+#     metrics = (digestTable, bwTable, cpuTable)
+#     for dbSize in size_to_unit.keys():
+#         print(size_to_latex[dbSize], end = " & ")
+#         for i, m in enumerate(metrics):
+#             if i == 0:
+#                 print(metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+#             else:
+#                 print(" & " + metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
+#             for scheme in schemes:
+#                 if dbSize == 1<<33 and "DH" in scheme:
+#                     print("N/A", end = " & ")
+#                 else:
+#                     print(round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2), end = " & ")
+#             # print ratio
+#             ratio = m[schemes[-2]][dbSize]/m[schemes[-1]][dbSize]
+#             print(round(ratio, 2), end = "$\\times$ ")
+#             print("\\\\")
+#         print("\\midrule")
+#         print("")
 
-    cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
-    
-    # print latex table
-    metrics = (digestTable, bwTable, cpuTable)
-    for dbSize in size_to_unit.keys():
-        print(size_to_latex[dbSize], end = " & ")
-        for i, m in enumerate(metrics):
-            if i == 0:
-                print(metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
-            else:
-                print(" & " + metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
-            for scheme in schemes:
-                if dbSize == 1<<33 and "DH" in scheme:
-                    print("N/A", end = " & ")
-                else:
-                    print(round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2), end = " & ")
-            # print ratio
-            ratio = m[schemes[-2]][dbSize]/m[schemes[-1]][dbSize]
-            print(round(ratio, 2), end = "$\\times$ ")
-            print("\\\\")
-        print("\\midrule")
-        print("")
 
 def plotSingle():
+    font_prop = font_manager.FontProperties(family='serif', size=10)
     size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
     base_latex = "\\multirow{3}{*}"
     size_to_latex = {
@@ -429,18 +432,27 @@ def plotSingle():
         ax2.bar(x + i*width, offData[i], width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
         ax3.bar(x + i*width, onData[i], width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
     
-    fig.legend(names, bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           ncol=len(names), mode="expand", borderaxespad=0.)
+    fig.legend(names, bbox_to_anchor=(0.14, 1, 0.8, .102), loc='lower left',
+           ncol=len(names), mode="expand", borderaxespad=0., prop=font_prop, fontsize=11)
 
     axs = [ax1, ax2, ax3]
     for ax in axs:
-        ax.set_xticks(x + width + width/2)
-        ax.set_xticklabels(list(size_to_unit.values()))
-        ax.set_xlabel('Database size')
+        ax.set_xticks(x + width + width/2, fontproperties=font_prop)
+        ax.set_xticklabels(list(size_to_unit.values()), fontproperties=font_prop)
+        ax.set_xlabel('Database size', fontproperties=font_prop)
+        # Axis label slightly bigger
+        ax.xaxis.label.set_size(11)
         ax.set_yscale('log')
-    ax1.set_ylabel('User time [ms]')
-    ax2.set_ylabel('Offline bandwidth [KiB]')
-    ax3.set_ylabel('Online bandwidth [KiB]')
+    ax1.set_ylabel('User time [ms]', fontproperties=font_prop)
+    ax1.yaxis.label.set_size(11)
+    ax2.set_ylabel('Offline bandwidth [KiB]', fontproperties=font_prop)
+    ax2.yaxis.label.set_size(11)
+    ax3.set_ylabel('Online bandwidth [KiB]', fontproperties=font_prop)
+    ax3.yaxis.label.set_size(11)
+
+    # for item in ([ax.xaxis.label, ax.yaxis.label] +
+    #              ax.get_xticklabels() + ax.get_yticklabels()):
+    #     item.set_fontsize(20)
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/single_bar_multi.eps', format='eps', dpi=300, transparent=True, bbox_inches="tight")
 
