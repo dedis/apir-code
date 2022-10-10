@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMatrixOneMbMerkle(t *testing.T) {
+func TestMerkle(t *testing.T) {
 	numServers := 2
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
@@ -29,17 +29,13 @@ func TestMatrixOneMbMerkle(t *testing.T) {
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
 
-	// functions defined in vpir_test.go
-	xofDB := utils.RandomPRG()
-	xof := utils.RandomPRG()
-
-	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMerkle(utils.RandomPRG(), dbLen, nRows, blockLen)
 	fmt.Println("DB created")
 
-	retrieveBlocksITMerkle(t, xof, db, numServers, numBlocks, "MatrixOneMbMerkle")
+	retrieveBlocksMerkle(t, utils.RandomPRG(), db, numServers, numBlocks, "Merkle")
 }
 
-func TestMatrixOneMbMerkleFourServers(t *testing.T) {
+func TestMerkleFourServers(t *testing.T) {
 	numServers := 4
 	dbLen := oneMB
 	blockLen := testBlockLength * field.Bytes
@@ -49,17 +45,13 @@ func TestMatrixOneMbMerkleFourServers(t *testing.T) {
 	nCols := int(math.Sqrt(float64(numBlocks)))
 	nRows := nCols
 
-	// functions defined in vpir_test.go
-	xofDB := utils.RandomPRG()
-	xof := utils.RandomPRG()
-
-	db := database.CreateRandomMerkle(xofDB, dbLen, nRows, blockLen)
+	db := database.CreateRandomMerkle(utils.RandomPRG(), dbLen, nRows, blockLen)
 	fmt.Println("DB created")
 
-	retrieveBlocksITMerkle(t, xof, db, numServers, numBlocks, "MatrixOneMbMerkle")
+	retrieveBlocksMerkle(t, utils.RandomPRG(), db, numServers, numBlocks, "MerkleFourServers")
 }
 
-func retrieveBlocksITMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numServers, numBlocks int, testName string) {
+func retrieveBlocksMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numServers, numBlocks int, testName string) {
 	c := client.NewPIR(rnd, &db.Info)
 	servers := make([]*server.PIR, numServers)
 	for i := range servers {
