@@ -15,7 +15,7 @@ linestyles = ['-', '--', ':', '-.']
 patterns = ['', '//', '.']
 
 # constants
-GiB = 8589934592
+GiB = 1 << 33
 
 def load_config(file):
     with open(file, 'rb') as f:
@@ -56,7 +56,7 @@ def getServerStats(server_id, scheme, key):
     server_log = "server_" + str(server_id) + "_" + scheme + "_" + str(key) + ".log"
     return parseServerLog(resultFolder + server_log)
 
-def plotComplexLine():
+def plotComplex():
     schemes = ["fss_classic", "fss_auth"]
     config = load_config("fss_classic.toml")
     scheme_labels = ["Unauthenticated", "Authenticated"]
@@ -142,79 +142,6 @@ def plotComplexLine():
     plt.savefig('figures/complex_lines.eps', format='eps', dpi=300, transparent=True)
 
     
-    # print("predicate queries max ratio user-time:", max(ratio_time))
-    # print("predicate queries max ratio bandwidth:", max(ratio_bw))
-
-def plotComplex():
-    schemes = ["fss_classic", "fss_auth"]
-    config = load_config("fss_classic.toml")
-    scheme_labels = ["Unauthenticated", "Authenticated"]
-
-    width = 0.35  # the width of the bars
-    fig, ax = plt.subplots()
-
-    input_sizes = config['InputSizes']
-    time = []
-    bandwidth = []
-    for i, scheme in enumerate(schemes):
-        time.append([])
-        bandwidth.append([])
-        for input_size in input_sizes:
-            bw, tm = getClientStats(scheme, input_size)
-
-            for k in range(0, 2):
-                bw = [a + b for a,b in zip(bw, getServerStats(k, scheme, input_size))]
-
-            time[i].append(tm)
-            bandwidth[i].append(bw)
-    
-    time_np = np.array(time)
-    bandwidth_np = np.array(bandwidth)
-
-    ratio_time = [statistic(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))]
-    ratio_bw = [statistic(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
-
-    print("predicate queries max ratio user-time:", max(ratio_time))
-    print("predicate queries max ratio bandwidth:", max(ratio_bw))
-
-    err_time = [np.std(time_np[1][i]/time_np[0][i]) for i in range(len(time[0]))]
-    err_bw = [np.std(bandwidth_np[1][i]/bandwidth_np[0][i]) for i in range(len(time[0]))]
-
-    x = np.arange(len(ratio_time))
-    
-    rects1 = ax.bar(
-            x - width/2, 
-            ratio_time, 
-            width, 
-            #yerr=err_time,
-            label='User time', 
-            color='0.3', 
-            edgecolor='black', 
-            )
-    rects2 = ax.bar(
-            x + width/2, 
-            ratio_bw, 
-            width, 
-            #yerr=err_time,
-            label='Bandwidth',
-            color='0.7', 
-            edgecolor = 'black',
-            )
-    ax.axhline(y = 1, color ='black', linestyle = '--')
-
-    # cosmetics
-    ax.set_ylabel('Relative overhead between \n authenticated and unauthenticated PIR')
-    ax.set_xticks(x, [x for x in sorted(input_sizes)])
-    ax.set_xlabel('Function-secret-sharing input size [bytes]')
-    ax.set_ylim(bottom=0.9)
-    ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           ncol=2, mode="expand", borderaxespad=0.)
-
-    plt.tight_layout()
-    #plt.show()
-    #plt.savefig('figures/complex_bars_std.eps', format='eps', dpi=300, transparent=True)
-    plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
-
 def plotPoint():
     schemes = ["pir_classic", "pir_merkle"]
     config = load_config("simul.toml")
@@ -333,7 +260,6 @@ def plotPointMulti():
 
 ## plots
 prepare_for_latex()
-#plotPoint()
-#plotPointMulti()
-#plotComplex()
-plotComplexLine()
+plotPoint()
+plotPointMulti()
+plotComplex()

@@ -17,12 +17,8 @@ markers = ['.', '*', 'd', 's']
 linestyles = ['-', '--', ':', '-.']
 patterns = ['', '//', '.']
 
-GB = pow(1024, 3)
-bitsToGB = 0.000000000125
 MB = pow(1024, 2)
-KB = 1024
-GiB = 8589935000
-MiB = 1048576
+GiB = 1 << 33
 
 def cpuMean(stats, key):
     # always plotted in seconds
@@ -31,164 +27,6 @@ def cpuMean(stats, key):
 def bwMean(stats, key):
     return stats[key]['client']['bw']['mean'] \
             + stats[key]['server']['bw']['mean']
-
-def plotPoint():
-    schemes = ["pirClassic.json", "pirMerkle.json"]
-    schemeLabels = ["Unauthenticated", "Authenticated"]
-
-    fig, axs = plt.subplots(2, sharex=True)
-
-    cpuArray = []
-    bwArray = []
-    x = []
-    for i, scheme in enumerate(schemes):
-        stats = allStats(resultFolder + scheme) 
-        cpuArray.append([])
-        bwArray.append([])
-        for j, dbSize in enumerate(sorted(stats.keys())):
-            # store means
-            cpuArray[i].append(cpuMean(stats, dbSize))
-            bwArray[i].append(bwMean(stats, dbSize)/MB)
-
-
-        axs[0].plot(
-                [x/GiB for x in sorted(stats.keys())], 
-                cpuArray[i], 
-                color='black', 
-                marker=markers[int(i / (len(schemes) / 2))],
-                linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))],
-                linewidth=0.5,
-        )
-        axs[1].plot(
-                [x/GiB for x in sorted(stats.keys())], 
-                bwArray[i], 
-                color='black', 
-                marker=markers[int(i / (len(schemes) / 2))],
-                linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))],
-                linewidth=0.5,
-        )
-
-    ratioCPU = [cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]
-    ratioBW = [bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]
-
-    print("ratios CPU:", max(ratioCPU))
-    print("ratios BW:", max(ratioBW))
-
-    # cosmetics
-    axs[0].set_ylabel('CPU time [s]')
-    axs[0].set_xticks([int(x/GiB) for x in sorted(stats.keys())]), 
-    axs[1].set_ylabel('Bandwidth [MiB]')
-    axs[1].set_xlabel('DB size [GiB]')
-    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           ncol=2, mode="expand", borderaxespad=0.)
-
-    plt.tight_layout(h_pad=1.5)
-    plt.savefig('figures/point.eps', format='eps', dpi=300, transparent=True)
-
-def plotComplex(): 
-    schemes = ["fss.json", "authfss.json"]
-    schemeLabels = ["Unauthenticated", "Authenticated"]
-
-    fig, axs = plt.subplots(2, sharex=True)
-
-    cpuArray = []
-    bwArray = []
-    x = []
-    for i, scheme in enumerate(schemes):
-        stats = allStats(resultFolder + scheme) 
-        cpuArray.append([])
-        bwArray.append([])
-        for j, dbSize in enumerate(sorted(stats.keys())):
-            # store means
-            cpuArray[i].append(cpuMean(stats, dbSize))
-            bwArray[i].append(bwMean(stats, dbSize)/1024)
-
-        axs[0].plot(
-                [x for x in sorted(stats.keys())], 
-                cpuArray[i], 
-                color='black', 
-                linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))]
-        )
-
-        axs[1].plot(
-                [x for x in sorted(stats.keys())], 
-                bwArray[i], 
-                color='black', 
-                linestyle=linestyles[int(i / (len(schemes) / 2))],
-                label=schemeLabels[int(i / (len(schemes) / 2))]
-        )
-
-    print("mean ratio CPU:", np.median([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
-    print("mean ratio BW:", np.median([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
-
-    # cosmetics
-    axs[0].set_ylabel('CPU time [s]')
-    axs[0].set_xticks([x for x in sorted(stats.keys())])
-    axs[1].set_ylabel('Bandwidth [KiB]')
-    axs[1].set_xlabel('Function-secret-sharing input size [bytes]')
-    axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           ncol=2, mode="expand", borderaxespad=0.)
-
-    plt.tight_layout()
-    #plt.show()
-    plt.savefig('figures/complex.eps', format='eps', dpi=300, transparent=True)
-
-def plotComplexBars(): 
-    schemes = ["fss.json", "authfss.json"]
-    schemeLabels = ["Unauthenticated", "Authenticated"]
-
-    width = 0.35  # the width of the bars
-    fig, ax = plt.subplots()
-
-    cpuArray = []
-    bwArray = []
-    for i, scheme in enumerate(schemes):
-        stats = allStats(resultFolder + scheme) 
-        cpuArray.append([])
-        bwArray.append([])
-        for j, dbSize in enumerate(sorted(stats.keys())):
-            # store means 
-            cpuArray[i].append(cpuMean(stats, dbSize))
-            bwArray[i].append(bwMean(stats, dbSize)/1024)
-
-    print("mean ratio CPU:", np.median([cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]))
-    print("mean ratio BW:", np.median([bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]))
-    
-    ratioCPU = [cpuArray[1][i]/cpuArray[0][i] for i in range(len(cpuArray[0]))]
-    ratioBW = [bwArray[1][i]/bwArray[0][i] for i in range(len(cpuArray[0]))]
-
-    x = np.arange(len(ratioCPU))
-    
-    rects1 = ax.bar(
-            x - width/2, 
-            ratioCPU, width, 
-            label='CPU', 
-            color='0.3', 
-            edgecolor='black', 
-            )
-    rects2 = ax.bar(
-            x + width/2, 
-            ratioBW, width, 
-            label='Bandwidth',
-            color='0.7', 
-            edgecolor = 'black',
-            )
-    ax.axhline(y = 1, color ='black', linestyle = '--')
-
-    # cosmetics
-    ax.set_ylabel('Relative overhead between \n authenticated and unauthenticated PIR')
-    ax.set_xticks(x, [x for x in sorted(stats.keys())])
-    ax.set_xlabel('Function-secret-sharing input size [bytes]')
-    ax.set_ylim(bottom=0.9)
-    ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           ncol=2, mode="expand", borderaxespad=0.)
-
-    plt.tight_layout()
-    #plt.show()
-    plt.savefig('figures/complex_bars.eps', format='eps', dpi=300, transparent=True)
 
 def parseSpiral():
     base_name = resultFolder + 'spiral_'
@@ -680,29 +518,6 @@ def plotPreprocessing():
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/preprocessing.eps', format='eps', dpi=300, transparent=True)
 
-def print_latex_table_separate(results, numApproaches, get_printable_size):
-    for size, values in results.items():
-        print(get_printable_size(size), end=" ")
-        for i, value in enumerate(values):
-            print("& %s " % rounder2(value), end="")
-            # we need to compute the overhead over the baseline that is always at position i%numApproaches==0
-            if i % numApproaches != 0:
-                print("& %s$\\times$ " % rounder2(value / values[int(i / numApproaches) * numApproaches]), end="")
-        print("\\\\")
-
-
-def print_latex_table_joint(results, numApproaches):
-    for size, values in results.items():
-        print(str(int(int(size) / (8 * MB))) + "\\,MB", end=" ")
-        for i, value in enumerate(values):
-            print("& %s & %s " % (rounder2(value[0]), rounder2(value[1])), end="")
-            # compute overhead
-            if i % numApproaches == numApproaches - 1:
-                print("& %s & %s " % (rounder2(value[0] / values[i - 1][0]), rounder2(value[1] / values[i - 1][1])),
-                      end="")
-        print("\\\\")
-
-
 def get_size_in_mib(bits):
     return str(int(int(bits) / (8 * MB))) + "\\,MiB"
 
@@ -740,13 +555,7 @@ EXPR = args.expr
 
 if __name__ == "__main__":
     #prepare_for_latex()
-    if EXPR == "point":
-        plotPoint()
-    elif EXPR == "complex":
-        plotComplex()
-    elif EXPR == "complexBars":
-        plotComplexBars()
-    elif EXPR == "single":
+    if EXPR == "single":
         plotSingle()
         plotSingleRatios()
     elif EXPR == "real":
