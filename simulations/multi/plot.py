@@ -22,7 +22,7 @@ def load_config(file):
         return tomli.load(f)
 
 def statistic(a):
-    return np.mean(a)
+    return np.median(a)
 
 def parseClientLog(file):
     tm, bw = [], []
@@ -136,7 +136,7 @@ def plotComplex():
     axs[0].set_ylabel('User-time ratio')
     axs[0].set_xticks(input_sizes), 
     axs[1].set_ylabel('Bandwidth ratio')
-    axs[1].set_xlabel('Function-secret-sharing input size [B]')
+    axs[1].set_xlabel("Length of the parameter's hidden predicate $s$ [B]")
 
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/complex_lines.eps', format='eps', dpi=300, transparent=True)
@@ -260,6 +260,6 @@ def plotPointMulti():
 
 ## plots
 prepare_for_latex()
-plotPoint()
-plotPointMulti()
+# plotPoint()
+# plotPointMulti()
 plotComplex()
