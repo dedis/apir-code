@@ -55,8 +55,6 @@
         <details>
             <summary>Presentation</summary>
 
-            <h1>Introduction</h1>
-
             <p>
             Keyd is a PGP public-key directory that offers
             (1) classic key look-ups and
@@ -78,10 +76,9 @@
 
             <p>
             We provide two ways to use Keyd by querying the two servers holding an exact
-            replica of the database.
+            replica of the database: a website frontend and the Go client that we 
+            itroduce above.
             </p>
-
-            <p>Website frontend</h1>
 
             <p>
             This website is a frontened for the Keyd client introduced above.
@@ -191,15 +188,15 @@
                     </form>
                 </div>
 
-                <div class="row">
+                <!--<div class="row">
                     <input class="openable" type="radio" id="count-timestamp" name="query-type" value="timestamp">
                     <label for="count-timestamp">By timestamp</label>
 
                     <form class="sub-form" action="javascript:void(0);" onSubmit="countByTimestamp(this)">
-                        <!--<div class="row-form">
+                        <div class="row-form">
                             <label for="count-timestamp-month">Month (1-12)</label>
                             <input type="number" id="count-timestamp-month" value="1" min="1" max="12" name="month">
-                        </div>-->
+                        </div>
 
                         <div class="row-form">
                             <label for="count-timestamp-year">Year</label>
@@ -213,7 +210,7 @@
                         <div class="result" id="count-timestamp-result">
                         </div>
                     </form>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
