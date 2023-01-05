@@ -16,6 +16,26 @@ authenticated PIR.
 
 # Overview
 
+# Setup
+To run the code in this repository
+install [Go](https://go.dev/) (tested with Go 1.17.5)
+and a C compiler (tested with version 12.2.0).
+
+To reproduce the evaluation results, install 
+[Python 3](https://www.python.org/downloads/), 
+[Fabirc](https://www.fabfile.org/),
+[NumPy](https://numpy.org/) and 
+[Matplotlib](https://matplotlib.org/).
+
+We obtain our evaluation results 
+on machines equipped with two
+Intel Xeon E5-2680 v3 (Haswell) CPUs, each with 12 cores, 24 threads,
+and operating at 2.5 GHz. Each machine has 256 GB of RAM, and
+runs Ubuntu 20.04 and Go 1.17.5.
+However, the code runs on any machine equipped with the 
+softwares listed above.
+
+
 # Keyd
 Keyd is a privacy-preserving PGP public keys directory based on multi-server
 authenticated PIR.
