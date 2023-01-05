@@ -6,12 +6,9 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"log"
 	"math/rand"
-	"os"
 	"path/filepath"
 	"runtime"
-	"runtime/pprof"
 	"testing"
 	"time"
 
@@ -32,7 +29,8 @@ import (
 var db *database.DB
 
 func initRealDB() {
-	// math randomness used only for testing purposes
+	// math randomness used only to select random entries
+	// in the database
 	rand.Seed(time.Now().UnixNano())
 
 	// init global db
@@ -47,7 +45,8 @@ func initRealDB() {
 }
 
 func TestRealRetrieveKey(t *testing.T) {
-	// math randomness used only for testing purposes
+	// math randomness used only to select random entries
+	// in the database
 	rand.Seed(time.Now().UnixNano())
 
 	// get file paths for key dump
@@ -217,15 +216,6 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 
 	totalTimer := monitor.NewMonitor()
 
-	f, err := os.Create("complexPIR.prof")
-	if err != nil {
-		log.Fatal("could not create CPU profile: ", err)
-	}
-	if err := pprof.StartCPUProfile(f); err != nil {
-		log.Fatal("could not start CPU profile: ", err)
-	}
-	defer pprof.StopCPUProfile()
-
 	// compute the input query
 	in, err := q.Encode()
 	require.NoError(t, err)
@@ -242,7 +232,7 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
 	totalTime := totalTimer.Record()
-	fmt.Printf("TotalCPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
+	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTime)
 
 	// verify result
 	count := localResult(db, q.Info, match)
@@ -255,15 +245,6 @@ func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	s1 := server.NewPredicateAPIR(db, 1)
 
 	totalTimer := monitor.NewMonitor()
-
-	f, err := os.Create("complexVPIR.prof")
-	if err != nil {
-		log.Fatal("could not create CPU profile: ", err)
-	}
-	if err := pprof.StartCPUProfile(f); err != nil {
-		log.Fatal("could not start CPU profile: ", err)
-	}
-	defer pprof.StopCPUProfile()
 
 	// compute the input of the query
 	in, err := q.Encode()

@@ -30,7 +30,6 @@ func TestMerkle(t *testing.T) {
 	nRows := nCols
 
 	db := database.CreateRandomMerkle(utils.RandomPRG(), dbLen, nRows, blockLen)
-	fmt.Println("DB created")
 
 	retrieveBlocksMerkle(t, utils.RandomPRG(), db, numServers, numBlocks, "Merkle")
 }

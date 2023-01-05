@@ -22,7 +22,6 @@ func TestDH(t *testing.T) {
 	dbPRG := utils.RandomPRG()
 	ecg := group.P256
 	db := database.CreateRandomEllipticWithDigest(dbPRG, dbLen, ecg, true)
-	fmt.Println("DB created")
 	prg := utils.RandomPRG()
 	retrieveBlocksDH(t, prg, db, "Diffie-Hellman")
 }
@@ -45,5 +44,5 @@ func retrieveBlocksDH(t *testing.T, rnd io.Reader, db *database.Elliptic, testNa
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i], res)
 	}
-	fmt.Printf("\nTotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
 }
