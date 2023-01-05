@@ -262,7 +262,7 @@ func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
 	totalTime := totalTimer.Record()
-	fmt.Printf("Total CPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
+	fmt.Printf("Total CPU time %s: %.1fms\n", testName, totalTime)
 
 	// verify result
 	count := localResult(db, q.Info, match)
@@ -413,6 +413,5 @@ func getDBFilePaths() []string {
 	// fmt.Println("Testing with", filePaths)
 	// return filePaths
 	filePath := filepath.Join(sksDir, "sks-000.pgp")
-	fmt.Printf("Testing with %s\n", filePath)
 	return []string{filePath}
 }

@@ -40,6 +40,6 @@ func retrieveBlocksAmplify(t *testing.T, db *database.LWE, params *utils.ParamsL
 		require.NoError(t, err)
 		require.Equal(t, uint32(db.Matrix.Get(utils.VectorToMatrixIndices(i, db.Info.NumColumns))), res)
 	}
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+	fmt.Printf("Total CPU time %s: %.1fms\n", testName, totalTimer.Record())
 
 }

@@ -30,10 +30,9 @@ func retrieveBlocksDH(t *testing.T, rnd io.Reader, db *database.Elliptic, testNa
 	c := client.NewDH(rnd, &db.Info)
 	s := server.NewDH(db)
 
-	var i int
 	totalTimer := monitor.NewMonitor()
 	for j := 0; j < 10; j++ {
-		i = rand.Intn(db.NumRows * db.NumColumns)
+		i := rand.Intn(db.NumRows * db.NumColumns)
 		query, err := c.QueryBytes(i)
 		require.NoError(t, err)
 
@@ -44,5 +43,5 @@ func retrieveBlocksDH(t *testing.T, rnd io.Reader, db *database.Elliptic, testNa
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i], res)
 	}
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+	fmt.Printf("Total CPU time %s: %.1fms\n", testName, totalTimer.Record())
 }
