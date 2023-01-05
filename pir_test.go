@@ -32,8 +32,6 @@ func TestPIRPoint(t *testing.T) {
 
 	db := database.CreateRandomBytes(xofDB, dbLen, nRows, blockLen)
 
-	fmt.Println(len(db.Entries))
-
 	retrievePIRPoint(t, xof, db, numBlocks, "PIRPoint")
 }
 
@@ -60,5 +58,5 @@ func retrievePIRPoint(t *testing.T, rnd io.Reader, db *database.Bytes, numBlocks
 		require.NoError(t, err)
 		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize], res)
 	}
-	fmt.Printf("TotalCPU time %s: %.2fms\n", testName, totalTimer.Record())
+	fmt.Printf("Total CPU time %s: %.2fms\n", testName, totalTimer.Record())
 }

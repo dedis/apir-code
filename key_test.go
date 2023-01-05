@@ -165,7 +165,7 @@ func retrieveRealKey(t *testing.T, c client.Client, servers []server.Server, rea
 	for i := 0; i < numKeys; i++ {
 		// get random key
 		j := rand.Intn(len(realKeys))
-		fmt.Println(pgp.PrimaryEmail(realKeys[i]))
+		//fmt.Println(pgp.PrimaryEmail(realKeys[i]))
 		result := retrieveBlockGivenID(t, c, servers, pgp.PrimaryEmail(realKeys[j]), numBlocks)
 		result = database.UnPadBlock(result)
 
@@ -175,7 +175,7 @@ func retrieveRealKey(t *testing.T, c client.Client, servers []server.Server, rea
 		require.Equal(t, pgp.PrimaryEmail(realKeys[j]), pgp.PrimaryEmail(retrievedKey))
 		require.Equal(t, realKeys[j].PrimaryKey.Fingerprint, retrievedKey.PrimaryKey.Fingerprint)
 	}
-	fmt.Printf("TotalCPU time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
+	fmt.Printf("Total time to retrieve %d real keys: %v\n", numKeys, time.Since(start))
 }
 
 func retrieveBlockGivenID(t *testing.T, c client.Client, ss []server.Server, id string, dbLenBlocks int) []byte {
@@ -232,7 +232,7 @@ func retrieveComplexPIR(t *testing.T, db *database.DB, q *query.ClientFSS, match
 	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
 	totalTime := totalTimer.Record()
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTime)
+	fmt.Printf("Total CPU time %s: %.1fms\n", testName, totalTime)
 
 	// verify result
 	count := localResult(db, q.Info, match)
@@ -262,7 +262,7 @@ func retrieveComplex(t *testing.T, db *database.DB, q *query.ClientFSS, match in
 	res, err := c.ReconstructBytes(answers)
 	require.NoError(t, err)
 	totalTime := totalTimer.Record()
-	fmt.Printf("TotalCPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
+	fmt.Printf("Total CPU time %s: %.1fms, %.1fs\n", testName, totalTime, totalTime/float64(1000))
 
 	// verify result
 	count := localResult(db, q.Info, match)

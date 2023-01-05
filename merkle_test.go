@@ -45,7 +45,6 @@ func TestMerkleFourServers(t *testing.T) {
 	nRows := nCols
 
 	db := database.CreateRandomMerkle(utils.RandomPRG(), dbLen, nRows, blockLen)
-	fmt.Println("DB created")
 
 	retrieveBlocksMerkle(t, utils.RandomPRG(), db, numServers, numBlocks, "MerkleFourServers")
 }
@@ -76,5 +75,5 @@ func retrieveBlocksMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numSe
 		require.Equal(t, db.Entries[i*db.BlockSize:(i+1)*db.BlockSize-db.ProofLen-1], res)
 	}
 
-	fmt.Printf("TotalCPU time %s: %.1fms\n", testName, totalTimer.Record())
+	fmt.Printf("Total CPU time %s: %.1fms\n", testName, totalTimer.Record())
 }
