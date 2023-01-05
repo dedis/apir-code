@@ -23,7 +23,7 @@ and a C compiler (tested with version 12.2.0).
 
 To reproduce the evaluation results, install 
 [Python 3](https://www.python.org/downloads/), 
-[Fabirc](https://www.fabfile.org/),
+[Fabric](https://www.fabfile.org/),
 [NumPy](https://numpy.org/) and 
 [Matplotlib](https://matplotlib.org/).
 
