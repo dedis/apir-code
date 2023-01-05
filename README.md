@@ -1,12 +1,20 @@
 # Authenticated PIR
-**WARNING**: This software is **not** production-ready and is full of security
-vulnerabilities.
+**WARNING**: This software is **not** production-ready 
+and it might contain security vulnerabilities.
+
+This code accompanies the paper "Verifiable private information retrieval"
+by Simone Colombo, Kirill Nikitin, 
+Bryan Ford, David J. Wu and Henry Corrigan-Gibbs, to appear at USENIX Security
+2023.
 
 This repository contains the code for multi-server and
 single-server authenticated-PIR schemes and the code
-for the proof of concept application, Keyd, 
+for the proof of concept application Keyd, 
 a privacy-preserving PGP public keys directory based on multi-server 
 authenticated PIR.
+
+
+# Overview
 
 # Keyd
 Keyd is a privacy-preserving PGP public keys directory based on multi-server
@@ -57,3 +65,4 @@ The answers from the servers are sent to the server simulating the client, which
 executes the reconstruction procedure and forward the result to be presented on
 this website.
 
+# Citation
