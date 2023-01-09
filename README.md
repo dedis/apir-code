@@ -42,6 +42,19 @@ it is possible to remove the appropriate flags from
 Any flag modification is likely to negatively impact performance.
 
 # Usage
+## Correctness tests
+To run all basic correctness tests, execute
+```
+go test
+```
+This command prints performance measurements to stdout.
+The entire test suite takes about 6 minutes to run and it should terminate with a `PASS`,
+indicating that all tests have passed.
+
+## Multi-server point queries
+## Multi-server complex queries
+## Single-server point queries
+## Keyd: privacy-preserving key server
 
 # Keyd
 Keyd is a privacy-preserving PGP public keys directory based on multi-server
