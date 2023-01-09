@@ -49,9 +49,9 @@ This command prints performance measurements to stdout.
 The entire test suite takes about 6 minutes to run and it should terminate with a `PASS`,
 indicating that all tests have passed.
 
-## Multi-server point queries
-The code for the experiments on our multi-server authenticated-PIR scheme for
-point queries is in `simulations/multi`.
+## Multi-server point and complex queries
+The code for the experiments on our multi-server authenticated-PIR schemes for
+point and complex queries is in [`simulations/multi`](simulations/multi).
 
 To run the simulation, first modify
 `simulations/multi/config.toml` 
@@ -66,8 +66,8 @@ do not modify this file; to speed up the simulation, or to run on machines with
 insufficient RAM, one can reduce the sizes of the databases and/or the number of
 repetitions.
 
-## Multi-server complex queries
 ## Single-server point queries
+The code for the experiments on our single-server authenticated-PIR
 ## Keyd: privacy-preserving key server
 
 # Keyd
