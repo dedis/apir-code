@@ -19,7 +19,7 @@ authenticated PIR.
 # Setup
 To run the code in this repository
 install [Go](https://go.dev/) (tested with Go 1.17.5)
-and a C compiler (tested with version 12.2.0).
+and a C compiler (tested with GCC 12.2.0).
 
 To reproduce the evaluation results, install 
 [Python 3](https://www.python.org/downloads/), 
@@ -35,6 +35,13 @@ runs Ubuntu 20.04 and Go 1.17.5.
 However, the code runs on any machine equipped with the 
 softwares listed above.
 
+If the machine do not support one or more of the
+`-march=native`, `-msse4.1`, `-maes`, `-mavx2` or `-mavx` C compiler flags,
+it is possible to remove the appropriate flags from
+`lib/matrix/matrix128.go` and `lib/matrix/matrix.go`. 
+Any flag modification is likely to negatively impact performance.
+
+# Usage
 
 # Keyd
 Keyd is a privacy-preserving PGP public keys directory based on multi-server
