@@ -41,7 +41,8 @@ it is possible to remove the appropriate flags from
 `lib/matrix/matrix128.go` and `lib/matrix/matrix.go`. 
 Any flag modification is likely to negatively impact performance.
 
-# Usage
+# Usage and experiments
+
 ## Correctness tests
 To run all basic correctness tests, execute
 `go test`
@@ -50,16 +51,17 @@ The entire test suite takes about 6 minutes to run and it should terminate with 
 indicating that all tests have passed.
 
 ## Multi-server point and complex queries
-The code for the experiments on our multi-server authenticated-PIR schemes for
-point and complex queries is in [`simulations/multi`](simulations/multi).
+The code for the experiments on our multi-server authenticated-PIR schemes
+is in [`simulations/multi`](simulations/multi).
 
 To run the simulation, first modify
-`simulations/multi/config.toml` 
+[`simulations/multi/config.toml`](simulations/multi/config.toml)
 to indicate the IP address of the client machines and the IP addresses and
 ports of the five servers machines. One can safely use the default 
 port numbers that we indicate in the `simulations/multi/config.toml` file.
 
-The `simulations/multi/simul.toml` file contains the databases sizes, 
+The [`simulations/multi/simul.toml`](simulations/multi/simul.toml) 
+file contains the databases sizes, 
 the number of repetitions for a single experiment and the amount of data to 
 retrieve from the database. To reproduce the results of the paper, 
 do not modify this file; to speed up the simulation, or to run on machines with 
@@ -68,6 +70,19 @@ repetitions.
 
 ## Single-server point queries
 The code for the experiments on our single-server authenticated-PIR
+resides in [`simulations`](simulations).
+
+The experiments for single-serve schemes run on a single machine 
+give the sequential nature of the protocol. 
+
+As in the multi-server case, 
+the [`simulations/multi/simul.toml`](simulations/multi/simul.toml) 
+file contains the databases sizes, 
+the number of repetitions for a single experiment and the amount of data to 
+retrieve from the database. These can be modified to speed up the experiments
+and/or use a machine with less RAM.
+
+
 ## Keyd: privacy-preserving key server
 
 # Keyd
