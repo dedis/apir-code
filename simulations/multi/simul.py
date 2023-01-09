@@ -86,6 +86,9 @@ def client_setup(c):
     c.forward_agent = True
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
         c.run('git pull', warn = True)
+        c.cd('client')
+        c.run('go build')
+        c.cd('..')
         c.run('bash ' + 'setup.sh')
     # disable now useless agent forwarding
     c.forward_agent = False
@@ -249,12 +252,12 @@ client = Connection(client_host, user=user, connect_kwargs={'password': password
 client_setup(client)
 
 # run experiments, in this case only with two servers
-#experiment_pir_classic(pool, client)
-#experiment_pir_merkle(pool, client)
+experiment_pir_classic(pool, client)
+experiment_pir_merkle(pool, client)
 
 # run multi experiments, with all the servers
-# experiment_pir_multi_classic(pool, client)
-# experiment_pir_multi_merkle(pool, client)
+experiment_pir_multi_classic(pool, client)
+experiment_pir_multi_merkle(pool, client)
 
 # run experiments for fss with only two servers
 experiment_fss_classic(pool, client)

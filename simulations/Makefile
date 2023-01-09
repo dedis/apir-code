@@ -1,4 +1,4 @@
-.PHONY: run_simul benchmarks performance
+.PHONY: run_simul single preprocessing
 
 run_simul: 
 	go run . -config=$(config)
