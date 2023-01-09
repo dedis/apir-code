@@ -44,14 +44,28 @@ Any flag modification is likely to negatively impact performance.
 # Usage
 ## Correctness tests
 To run all basic correctness tests, execute
-```
-go test
-```
+`go test`
 This command prints performance measurements to stdout.
 The entire test suite takes about 6 minutes to run and it should terminate with a `PASS`,
 indicating that all tests have passed.
 
 ## Multi-server point queries
+The code for the experiments on our multi-server authenticated-PIR scheme for
+point queries is in `simulations/multi`.
+
+To run the simulation, first modify
+`simulations/multi/config.toml` 
+to indicate the IP address of the client machines and the IP addresses and
+ports of the five servers machines. One can safely use the default 
+port numbers that we indicate in the `simulations/multi/config.toml` file.
+
+The `simulations/multi/simul.toml` file contains the databases sizes, 
+the number of repetitions for a single experiment and the amount of data to 
+retrieve from the database. To reproduce the results of the paper, 
+do not modify this file; to speed up the simulation, or to run on machines with 
+insufficient RAM, one can reduce the sizes of the databases and/or the number of
+repetitions.
+
 ## Multi-server complex queries
 ## Single-server point queries
 ## Keyd: privacy-preserving key server
