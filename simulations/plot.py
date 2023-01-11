@@ -28,26 +28,6 @@ def bwMean(stats, key):
     return stats[key]['client']['bw']['mean'] \
             + stats[key]['server']['bw']['mean']
 
-def parseSpiral():
-    base_name = resultFolder + 'spiral_'
-    file_type = '.json'
-    sizes = ["kib", "mib", "gib"]
-    sizes_to_key = {"kib": 1 << 13, "mib": 1 << 23, "gib": 1 << 33}
-
-    cpuTable = {1 << 13: 0, 1 << 23: 0, 1 << 33: 0}
-    bwTable = {1 << 13: 0, 1 << 23: 0, 1 << 33: 0}
-    digestTable = {1 << 13: 0, 1 << 23: 0, 1 << 33: 0}
-
-    for s in sizes:
-        f = open(base_name + s + file_type)
-        out = json.load(f)
-        digestTable[sizes_to_key[s]] = out["param_sz"]/1024.0 # store in KiB
-        bwTable[sizes_to_key[s]] = (out["query_sz"] + out["resp_sz"])/1024.0 # store in KiB
-        cpuTable[sizes_to_key[s]] = out["total_us"]/1000000 * 1000 # stored in us in the original file, store in ms
-
-    return cpuTable, bwTable, digestTable
-
-
 def plotSingleRatios():
     size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
     base_latex = "\\multirow{3}{*}"
@@ -86,8 +66,6 @@ def plotSingleRatios():
             bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
             digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
 
-    cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
-    
     # print latex table
     metrics = (digestTable, bwTable, cpuTable)
     for dbSize in size_to_unit.keys():
@@ -164,8 +142,6 @@ def sci_notation(number, sig_fig=2):
 #             bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
 #             digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
 #
-#     cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
-#
 #     # print latex table
 #     metrics = (digestTable, bwTable, cpuTable)
 #     for dbSize in size_to_unit.keys():
@@ -227,8 +203,6 @@ def plotSingle():
             bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
             digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
 
-    cpuTable["spiral"], bwTable["spiral"], digestTable["spiral"] = parseSpiral()
-    
     # print latex table
     metrics = (digestTable, bwTable, cpuTable)
     for dbSize in size_to_unit.keys():
