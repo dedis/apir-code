@@ -269,35 +269,6 @@ def plotSingle():
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/single_bar_multi.eps', format='eps', dpi=300, transparent=True, bbox_inches="tight")
 
-    # plot ratio
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    x = np.arange(len(list(size_to_unit.values())))
-     
-    colors=["", 'gray', 'dimgray']
-    for i in range(len(schemes)-1):
-        if i != 0:
-            ax1.bar(x + i*width, np.array(cpuData[i])/np.array(cpuData[-1]), width, color=colors[i], label=names[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
-            ax2.bar(x + i*width, np.array(offData[i])/np.array(offData[-1]), width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
-            ax3.bar(x + i*width, np.array(onData[i])/np.array(onData[-1]), width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
-   
-    #namesThree = names.pop()
-    #fig.legend(names[1:], bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-           #ncol=len(names), mode="expand", borderaxespad=0.)
-
-    fig.legend()
-
-    axs = [ax1, ax2, ax3]
-    for ax in axs:
-        ax.set_xticks(x + width + width/2)
-        ax.set_xticklabels(list(size_to_unit.values()))
-        ax.set_xlabel('Database size')
-        #ax.set_yscale('log')
-    ax1.set_ylabel('User time ratio')
-    ax2.set_ylabel('Offline bandwidth ratio')
-    ax3.set_ylabel('Online bandwidth ratio')
-    plt.tight_layout(h_pad=1.5)
-    plt.savefig('figures/single_bar_multi_ratio.eps', format='eps', dpi=300, transparent=True, bbox_inches="tight")
-
 def plotRealComplex():
     schemes = [
         "complexPIR_email", 
