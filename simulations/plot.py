@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -527,6 +528,11 @@ EXPR = args.expr
 
 if __name__ == "__main__":
     #prepare_for_latex()
+    if not os.path.exists("figures"):
+        os.makedirs("figures")
+    if not os.path.exists("results"):
+        os.makedirs("results")
+
     if EXPR == "single":
         plotSingle()
         plotSingleRatios()
