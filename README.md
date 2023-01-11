@@ -15,10 +15,12 @@ authenticated PIR.
 
 
 # Overview
-The code in this repository is organizes as follows.
+The code in this repository is organizes as follows:
 
 * [lib/client](lib/client): clients for all the authenticated and
 unauthenticated PIR schemes.
+* [lib/database](lib/database): databases for all the authenticated and
+    unauthenticated PIR schemes, except the database for the Keyd PGP key.
 * [lib/ecc](lib/ecc): error correcting code (ECC) for the
     single-server authenticated-PIR scheme based on integrity authentication;
     currently, we implement a simple repetition code.
@@ -28,16 +30,17 @@ unauthenticated PIR schemes.
 * [lib/matrix](lib/matrix): matrix operations for the single-server
     authenticated-PIR scheme that relies on the LWE assumption.
 * [lib/merkle](lib/merkle): Merkle tree implementation.
-* [lib/monitor](lib/monitor)
-* [lib/pgp](lib/pgp)
-* [lib/proto](lib/proto)
-* [lib/query](lib/query)
-* [lib/server](lib/server)
-* [lib/utils](lib/utils)
-* [cmd/](cmd)
-* [data/](data)
-* [scripts/](scripts)
-
+* [lib/monitor](lib/monitor): CPU monitoring and benchmarking tools.
+* [lib/pgp](lib/pgp): utilities to create the PGP key-server database for Keyd. 
+* [lib/proto](lib/proto): gRPC protocol files for deployment.
+* [lib/query](lib/query): queries for the multi-server authenticated scheme for
+    complex queries, i.e., available privately-computed statistics.
+* [lib/server](lib/server): servers for all the authenticated and
+    unauthenticated PIR schemes.
+* [lib/utils](lib/utils): various utilities.
+* [cmd/](cmd): clients for Keyd, both local Go clients and the web front end.
+* [data/](data): data, i.e., PGP keys, for Keyd.
+* [scripts/](scripts): various useful scripts.
 
 # Setup
 To run the code in this repository
