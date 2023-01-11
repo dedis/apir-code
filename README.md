@@ -15,6 +15,26 @@ authenticated PIR.
 
 
 # Overview
+The code in this repository is organizes as follows.
+
+| **[lib/](lib)** | |
+| [lib/client](lib/client) | Clients for all the authenticated and
+unauthenticated PIR schemes |
+| [lib/ecc](lib/ecc) | |
+| [lib/field](lib/field) | |
+| [lib/fss](lib/fss) | |
+| [lib/matrix](lib/matrix) | |
+| [lib/merkle](lib/merkle) | |
+| [lib/monitor](lib/monitor) | |
+| [lib/pgp](lib/pgp) | |
+| [lib/proto](lib/proto) | |
+| [lib/query](lib/query) | |
+| [lib/server](lib/server) | |
+| [lib/utils](lib/utils) | |
+| **[cmd/](cmd)** | |
+| **[data/](data)** | |
+| **[scripts/](scripts)** | |
+
 
 # Setup
 To run the code in this repository
