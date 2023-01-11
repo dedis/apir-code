@@ -19,11 +19,15 @@ The code in this repository is organizes as follows.
 
 * [lib/client](lib/client): clients for all the authenticated and
 unauthenticated PIR schemes.
-* [lib/ecc](lib/ecc) 
-* [lib/field](lib/field) 
-* [lib/fss](lib/fss) 
-* [lib/matrix](lib/matrix) 
-* [lib/merkle](lib/merkle)
+* [lib/ecc](lib/ecc): error correcting code (ECC) for the
+    single-server authenticated-PIR scheme based on integrity authentication;
+    currently, we implement a simple repetition code.
+* [lib/field](lib/field): field for the multi-server scheme for complex
+    queries.
+* [lib/fss](lib/fss): function-secret-sharing scheme.
+* [lib/matrix](lib/matrix): matrix operations for the single-server
+    authenticated-PIR scheme that relies on the LWE assumption.
+* [lib/merkle](lib/merkle): Merkle tree implementation.
 * [lib/monitor](lib/monitor)
 * [lib/pgp](lib/pgp)
 * [lib/proto](lib/proto)
