@@ -495,10 +495,8 @@ def plotPreprocessing():
 def get_size_in_mib(bits):
     return str(int(int(bits) / (8 * MB))) + "\\,MiB"
 
-
 def get_size_in_bits(bits):
     return str(int(bits / 1e6)) + "\\,M"
-
 
 def rounder(x):
     if x > 3:
@@ -541,4 +539,4 @@ if __name__ == "__main__":
     elif EXPR == "preprocessing":
         plotPreprocessing()
     else:
-        print("Unknown experiment: choose between benchmarks and performance")
+        print("Unknown experiment: choose between the available options")
