@@ -106,11 +106,17 @@ of inclusion in the rooted Merkle tree and attaches this proof
 to each database record.
 We measure the CPU time that a single server takes to process the database 
 with an experiment that can be executed as follows. From the root 
-of the repository, run the following commands
+of the repository, run the following commands:
 ```
 cd simulations
 make preprocessing
 ```
+
+To reproduce the plot run the following command in the same directory:
+```
+python plot.py -e preprocessing
+```
+The resulting plot is saved in `figures/preprocessing.eps`.
 
 ## Single-server point queries
 The code for the experiments on our single-server authenticated-PIR
