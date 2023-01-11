@@ -68,6 +68,24 @@ do not modify this file; to speed up the simulation, or to run on machines with
 insufficient RAM, one can reduce the sizes of the databases and/or the number of
 repetitions.
 
+TODO HERE FINISH
+
+The multi-server authenticated-PIR scheme 
+for point queries needs database preprocessing:
+the servers compute a Merkle
+tree over the database entries along
+with their indexes.
+Then for each entry, each server constructs a Merkle proof $\pi_i$
+of inclusion in the rooted Merkle tree and attaches this proof
+to each database record.
+We measure the CPU time that a single server takes to process the database 
+with an experiment that can be executed as follows. From the root 
+of the repository, run the following commands
+```
+cd simulations
+make preprocessing
+```
+
 ## Single-server point queries
 The code for the experiments on our single-server authenticated-PIR
 resides in [`simulations`](simulations).
@@ -89,6 +107,7 @@ cd simulations
 make single
 ```
 
+The single-server schemes 
 
 ## Keyd: privacy-preserving key server
 
