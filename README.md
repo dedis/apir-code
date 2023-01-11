@@ -139,7 +139,13 @@ cd simulations
 make single
 ```
 
-The single-server schemes 
+To reproduce the plots run the following commands in the same directory:
+```
+python plot.py -e single
+```
+This command saves the plot in `figures/single_bar_multi.eps` and prints a LaTeX
+table in the terminal; the table is not used in the paper but it is useful to
+extrapolate the overheads among schemes.
 
 ## Keyd: privacy-preserving key server
 
