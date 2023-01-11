@@ -82,6 +82,13 @@ the number of repetitions for a single experiment and the amount of data to
 retrieve from the database. These can be modified to speed up the experiments
 and/or use a machine with less RAM.
 
+To run the single-server experiments, first clone this repository on the server. 
+Form the root of repository, run the command
+```
+cd simulations
+make single
+```
+
 
 ## Keyd: privacy-preserving key server
 
