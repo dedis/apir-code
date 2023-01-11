@@ -101,7 +101,7 @@ for point queries needs database preprocessing:
 the servers compute a Merkle
 tree over the database entries along
 with their indexes.
-Then for each entry, each server constructs a Merkle proof $\pi_i$
+Then for each entry, each server constructs a Merkle proof
 of inclusion in the rooted Merkle tree and attaches this proof
 to each database record.
 We measure the CPU time that a single server takes to process the database 
