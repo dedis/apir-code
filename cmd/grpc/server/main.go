@@ -14,6 +14,7 @@ import (
 	"runtime/pprof"
 	"syscall"
 
+	"github.com/si-co/vpir-code/cmd/grpc/sdnotify"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/pgp"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -164,7 +165,6 @@ func main() {
 		experiment: *experiment,
 		cores:      *cores,
 	})
-	log.Printf("is listening at %s", addr)
 
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
@@ -172,11 +172,27 @@ func main() {
 	errCh := make(chan error, 1)
 
 	go func() {
-		log.Println("starting grpc server")
+		log.Println("gRPC server started at", lis.Addr())
 		if err := rpcServer.Serve(lis); err != nil {
 			errCh <- err
 		}
 	}()
+
+	_, err = sdnotify.SdNotify(false, sdnotify.SdNotifyReady)
+	if err != nil {
+		log.Fatalf("failed to sdnotify: %v", err)
+	}
+
+	select {
+	case err := <-errCh:
+		log.Fatalf("failed to serve: %v", err)
+	case <-sigCh:
+		rpcServer.GracefulStop()
+		lis.Close()
+		log.Println("clean shutdown of server done")
+	}
+
+	sdnotify.SdNotify(false, sdnotify.SdNotifyStopping)
 }
 
 // vpirServer is used to implement VPIR Server protocol.
