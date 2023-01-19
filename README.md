@@ -44,10 +44,11 @@ unauthenticated PIR schemes.
 
 # Setup
 To run the code in this repository
-install [Go](https://go.dev/) (tested with Go 1.17.5)
-and a C compiler (tested with GCC 12.2.0).
+install [Go](https://go.dev/) (tested with Go 1.17.5 and 1.19.5)
+and a C compiler (tested with GCC 9.4.0).
 
 To reproduce the evaluation results, install 
+[GNU Make](https://www.gnu.org/software/make/),
 [Python 3](https://www.python.org/downloads/), 
 [Fabric](https://www.fabfile.org/),
 [NumPy](https://numpy.org/) and 
