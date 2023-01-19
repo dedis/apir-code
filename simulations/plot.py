@@ -463,6 +463,7 @@ def plotPreprocessing():
     plt.xlabel('Database size [GiB]')
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/preprocessing.eps', format='eps', dpi=300, transparent=True)
+    print("figure preprocessing.eps succesfully saved in figures/")
 
 def get_size_in_mib(bits):
     return str(int(int(bits) / (8 * MB))) + "\\,MiB"
