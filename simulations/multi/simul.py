@@ -1,3 +1,4 @@
+import argparse
 import time
 import requests
 import multiprocessing
@@ -12,7 +13,7 @@ user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
 
 # simulations directory on servers
-simul_dir = '/' + user + '/go/src/github.com/si-co/vpir-code/simulations/multi/'
+simul_dir = '/' + user + '/go/src/github.com/si-co/apir-code/simulations/multi/'
 
 # commands 
 default_pir_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
@@ -86,9 +87,6 @@ def client_setup(c):
     c.forward_agent = True
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
         c.run('git pull', warn = True)
-        c.cd('client')
-        c.run('go build')
-        c.cd('..')
         c.run('bash ' + 'setup.sh')
     # disable now useless agent forwarding
     c.forward_agent = False
@@ -251,14 +249,42 @@ client_host = client_address()
 client = Connection(client_host, user=user, connect_kwargs={'password': password,})
 client_setup(client)
 
-# run experiments, in this case only with two servers
-experiment_pir_classic(pool, client)
-experiment_pir_merkle(pool, client)
+# -----------Argument Parser-------------
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-e",
+    "--expr",
+    type=str,
+    help="experiments: point, point_multi, predicate",
+    required=True)
 
-# run multi experiments, with all the servers
-experiment_pir_multi_classic(pool, client)
-experiment_pir_multi_merkle(pool, client)
+args = parser.parse_args()
+EXPR = args.expr
 
-# run experiments for fss with only two servers
-experiment_fss_classic(pool, client)
-experiment_fss_auth(pool, client)
+if __name__ == "__main__":
+    if not os.path.exists("figures"):
+        os.makedirs("figures")
+    if not os.path.exists("results"):
+        os.makedirs("results")
+
+    if EXPR == "point":
+        # run experiments, 
+        # in this case only with two servers
+        experiment_pir_classic(pool, client)
+        experiment_pir_merkle(pool, client)
+    elif EXPR == "point_multi":
+        # run multi experiments, 
+        # with all the servers
+        experiment_pir_multi_classic(pool, client)
+        experiment_pir_multi_merkle(pool, client)
+    elif EXPR == "predicate":
+        # run experiments for 
+        # fss with only two servers
+        experiment_fss_classic(pool, client)
+        experiment_fss_auth(pool, client)
+    else:
+        print("Unknown experiment: choose between the available options")
+
+
+
+

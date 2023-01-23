@@ -1,14 +1,14 @@
 # Configuration for gRPC-based application
 
-client = "10.90.40.3"
+client = "10.90.38.5"
 
 [servers]
   [servers.0]
-  ip = "10.90.39.17"
+  ip = "10.90.38.14"
   port = 50050
 
   [servers.1]
-  ip = "10.90.39.23"
+  ip = "10.90.39.3"
   port = 50051
 
   #[servers.2]
