@@ -113,13 +113,18 @@ func main() {
 		nRows := s.NumRows
 		numBlocks := dl
 
+		if s.Primitive == "cmp-vpir-dh" && dbLen == 1<<33 {
+			log.Printf("skipping %d db for DH", dbLen)
+			continue
+		}
+
 		// matrix db
 		if nRows != 1 {
 			utils.IncreaseToNextSquare(&numBlocks)
 			nRows = int(math.Sqrt(float64(numBlocks)))
 		}
 
-		// setup db, this is the same for DPF or IT
+		// setup db
 		dbPRG := utils.RandomPRG()
 		dbElliptic := new(database.Elliptic)
 		dbLWE := new(database.LWE)
