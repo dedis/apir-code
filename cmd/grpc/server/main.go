@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -170,6 +171,33 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	errCh := make(chan error, 1)
+
+	// start HTTP server for tests
+	if *experiment {
+		host, _, err := net.SplitHostPort(addr)
+		if err != nil {
+			log.Fatal("impossible to parse addr for HTTP server")
+		}
+		h := func(w http.ResponseWriter, _ *http.Request) {
+			sigCh <- os.Interrupt
+		}
+		httpAddr := fmt.Sprintf("%s:%s", host, "8080")
+		srv := &http.Server{Addr: httpAddr}
+		http.HandleFunc("/", h)
+		go func() {
+			srv.ListenAndServe()
+		}()
+
+		select {
+		case err := <-errCh:
+			log.Fatalf("failed to serve: %v", err)
+		case <-sigCh:
+			rpcServer.GracefulStop()
+			lis.Close()
+			srv.Shutdown(context.Background())
+			log.Println("clean shutdown of server done")
+		}
+	}
 
 	go func() {
 		log.Println("gRPC server started at", lis.Addr())
