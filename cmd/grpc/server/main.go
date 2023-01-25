@@ -179,22 +179,6 @@ func main() {
 		}
 	}()
 
-	_, err = sdnotify.SdNotify(false, sdnotify.SdNotifyReady)
-	if err != nil {
-		log.Fatalf("failed to sdnotify: %v", err)
-	}
-
-	select {
-	case err := <-errCh:
-		log.Fatalf("failed to serve: %v", err)
-	case <-sigCh:
-		rpcServer.GracefulStop()
-		lis.Close()
-		log.Println("clean shutdown of server done")
-	}
-
-	sdnotify.SdNotify(false, sdnotify.SdNotifyStopping)
-
 	// start HTTP server for tests
 	if *experiment {
 		host, _, err := net.SplitHostPort(addr)
@@ -210,18 +194,23 @@ func main() {
 		go func() {
 			srv.ListenAndServe()
 		}()
-
-		select {
-		case err := <-errCh:
-			log.Fatalf("failed to serve: %v", err)
-		case <-sigCh:
-			rpcServer.GracefulStop()
-			lis.Close()
-			srv.Shutdown(context.Background())
-			log.Println("clean shutdown of server done")
-		}
 	}
 
+	_, err = sdnotify.SdNotify(false, sdnotify.SdNotifyReady)
+	if err != nil {
+		log.Fatalf("failed to sdnotify: %v", err)
+	}
+
+	select {
+	case err := <-errCh:
+		log.Fatalf("failed to serve: %v", err)
+	case <-sigCh:
+		rpcServer.GracefulStop()
+		lis.Close()
+		log.Println("clean shutdown of server done")
+	}
+
+	sdnotify.SdNotify(false, sdnotify.SdNotifyStopping)
 }
 
 // vpirServer is used to implement VPIR Server protocol.
