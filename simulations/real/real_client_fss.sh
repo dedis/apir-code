@@ -28,6 +28,9 @@ cd - > /dev/null
 # move to root
 cd ../..
 
+# let servers start
+sleep 1260 # 21 minutes
+
 for scheme in "complexPIR" "complexVPIR"; do
   echo "##### running with $scheme scheme #####"
 
