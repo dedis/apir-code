@@ -32,5 +32,5 @@ for scheme in "pointPIR" "pointVPIR"; do
     # terminates servers and wait for their reboot
     curl $ip_first:8080 > /dev/null
     curl $ip_second:8080 > /dev/null
-    sleep 300
+    sleep 180
 done
