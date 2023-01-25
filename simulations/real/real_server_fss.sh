@@ -1,8 +1,7 @@
 #!/bin/bash
 
 id=$1
-experiment=$3
-#
+
 # create results dir if doesn't already exist
 mkdir -p ../results
 
