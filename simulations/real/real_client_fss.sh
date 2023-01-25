@@ -11,7 +11,7 @@ echo "REMEMBER TO UPDATE SERVERS IP ADDRESSES"
 
 ip_first="10.90.38.14"
 ip_second="10.90.39.3"
-#
+
 # create results dir if doesn't already exist
 mkdir -p ../results
 
@@ -26,7 +26,7 @@ go build
 cd - > /dev/null
 
 # move to root
-cd ../...
+cd ../..
 
 for scheme in "complexPIR" "complexVPIR"; do
   echo "##### running with $scheme scheme #####"
