@@ -1,3 +1,5 @@
+import os
+import argparse
 import numpy as np
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -6,8 +8,8 @@ import tomli
 
 from utils import *
 
-resultFolder = "final_results/"
-#resultFolder = "results/"
+#resultFolder = "final_results/"
+resultFolder = "results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -140,6 +142,7 @@ def plotComplex():
 
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/complex_lines.eps', format='eps', dpi=300, transparent=True)
+    print("figure saved in figures/complex_lines.esp")
 
     
 def plotPoint():
@@ -203,6 +206,7 @@ def plotPoint():
 
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/point.eps', format='eps', dpi=300, transparent=True)
+    print("figure saved in figures/point.esp")
 
 
 def plotPointMulti():
@@ -258,8 +262,30 @@ def plotPointMulti():
     plt.tight_layout(h_pad=1.5)
     plt.savefig('figures/multi.eps', format='eps', dpi=300, transparent=True)
 
-## plots
-prepare_for_latex()
-# plotPoint()
-# plotPointMulti()
-plotComplex()
+# -----------Argument Parser-------------
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-e",
+    "--expr",
+    type=str,
+    help="experiment to plot: point, point_multi, predicate",
+    required=True)
+
+args = parser.parse_args()
+EXPR = args.expr
+
+if __name__ == "__main__":
+    prepare_for_latex()
+    if not os.path.exists("figures"):
+        os.makedirs("figures")
+    if not os.path.exists("results"):
+        os.makedirs("results")
+
+    if EXPR == "point":
+        plotPoint()
+    elif EXPR == "point_multi":
+        plotPointMulti()
+    elif EXPR == "predicate":
+        plotComplex()
+    else:
+        print("Unknown experiment: choose between the available options")
