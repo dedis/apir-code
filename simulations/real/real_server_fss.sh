@@ -23,7 +23,7 @@ for scheme in "complexPIR" "complexVPIR"; do
   for target in "email" "algo" "and" "avg"; do
     echo "##### running server $id with $scheme scheme and $target target #####"
     # run server given the correct scheme 
-    cmd/grpc/server/server -id=$id -files=31 -experiment -scheme=$scheme | tee -a /simulations/results/stats_server-${id}_${scheme}_${target}.log
+    cmd/grpc/server/server -id=$id -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-${id}_${scheme}_${target}.log
     wait $!
   done
 done
