@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-resultFolder = "final_results/"
+#resultFolder = "final_results/"
+resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -333,7 +334,7 @@ def plotRealComplex():
             print(t, "&", bwUnauth, "&", bw, "\\\\")
         
 def plotReal():
-    schemes = ["merkle-dpf", "pir-dpf"]
+    schemes = ["pointVPIR", "pointPIR"]
     labels = ["Authenticated", "Unauthenticated"]
     dbSizes = [12.485642 ,11.650396 ,11.907099,11.122669,11.702634 ,10.918602]
 
@@ -364,18 +365,11 @@ def plotReal():
 
         
         # take medians
-        #answersMean = meanFromDict(answers)
-        #queriesMean = meanFromDict(queries)
         ping = 0.375815 # ms
         latencyMean = meanFromDict(latencies)
-        #bestLatency = latencyMean[24] + ping
-        worstLatency = latencyMean[1] + ping
+        latency = latencyMean[-1] + ping
         
-        if i % 2 == 0:
-            print(labels[int(i/2)], "&",  round(worstLatency, 2), "&", end=" ")
-        else:
-            print(round(worstLatency, 2), "\\\\") 
-
+        print(labels[i], ":", round(latency, 2))
 
 def plotMulti():
     schemes = ["pirClassicMulti.json", "pirMerkleMulti.json"]
