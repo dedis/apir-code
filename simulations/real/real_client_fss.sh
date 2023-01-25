@@ -4,7 +4,7 @@
 kill_servers () {
   curl $ip_first:8080 > /dev/null
   curl $ip_second:8080 > /dev/null
-  sleep 120
+  sleep 1260
 }
 
 echo "REMEMBER TO UPDATE SERVERS IP ADDRESSES"
