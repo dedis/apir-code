@@ -19,7 +19,7 @@ cd - > /dev/null
 cd ../../
 
 # run servers
-for scheme in "pointPIR" "pointVPIR"; do
+for scheme in "complexPIR" "complexVPIR"; do
   for target in "email" "algo" "and" "avg"; do
     echo "##### running server $id with $scheme scheme and $target target #####"
     # run server given the correct scheme 
