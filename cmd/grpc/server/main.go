@@ -172,6 +172,29 @@ func main() {
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	errCh := make(chan error, 1)
 
+	go func() {
+		log.Println("gRPC server started at", lis.Addr())
+		if err := rpcServer.Serve(lis); err != nil {
+			errCh <- err
+		}
+	}()
+
+	_, err = sdnotify.SdNotify(false, sdnotify.SdNotifyReady)
+	if err != nil {
+		log.Fatalf("failed to sdnotify: %v", err)
+	}
+
+	select {
+	case err := <-errCh:
+		log.Fatalf("failed to serve: %v", err)
+	case <-sigCh:
+		rpcServer.GracefulStop()
+		lis.Close()
+		log.Println("clean shutdown of server done")
+	}
+
+	sdnotify.SdNotify(false, sdnotify.SdNotifyStopping)
+
 	// start HTTP server for tests
 	if *experiment {
 		host, _, err := net.SplitHostPort(addr)
@@ -199,28 +222,6 @@ func main() {
 		}
 	}
 
-	go func() {
-		log.Println("gRPC server started at", lis.Addr())
-		if err := rpcServer.Serve(lis); err != nil {
-			errCh <- err
-		}
-	}()
-
-	_, err = sdnotify.SdNotify(false, sdnotify.SdNotifyReady)
-	if err != nil {
-		log.Fatalf("failed to sdnotify: %v", err)
-	}
-
-	select {
-	case err := <-errCh:
-		log.Fatalf("failed to serve: %v", err)
-	case <-sigCh:
-		rpcServer.GracefulStop()
-		lis.Close()
-		log.Println("clean shutdown of server done")
-	}
-
-	sdnotify.SdNotify(false, sdnotify.SdNotifyStopping)
 }
 
 // vpirServer is used to implement VPIR Server protocol.
