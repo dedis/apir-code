@@ -10,7 +10,7 @@ go build
 cd - > /dev/null
 
 # move to root
-cd ../
+cd ../../
 
 # run servers
 for scheme in "pointPIR" "pointVPIR"; do
