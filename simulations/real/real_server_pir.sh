@@ -3,7 +3,7 @@
 rm results/stats*
 
 # build server
-cd ../cmd/grpc/server
+cd ../../cmd/grpc/server
 go build
 
 # go back to simultion directory
