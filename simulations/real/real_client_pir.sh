@@ -20,7 +20,7 @@ cd - > /dev/null
 cd ../..
 
 # run servers
-for scheme in "pointPIR", "pointVPIR"; do
+for scheme in "pointPIR" "pointVPIR"; do
   echo "##### running with $scheme scheme #####"
     # repeat experiment 30 times
     for i in {1..30}; do
