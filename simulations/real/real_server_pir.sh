@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# create results dir if doesn't already exist
+mkdir ../results
+
 # remove stats log and create new files
 rm ../results/stats*
 
