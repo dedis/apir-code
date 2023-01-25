@@ -35,7 +35,7 @@ for scheme in "complexPIR" "complexVPIR"; do
   echo "    ##### running with $target target #####"
   for i in {1..30}; do
     echo "    ##### iteration $i"
-    cmd/grpc/client/client -id=".edu" -target=$target -from-end=4 -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_${target}.log
+    cmd/grpc/client/client -id=".edu" -target=$target -from-end=4 -experiment -scheme=$scheme | tee -a ../simulations/results/stats_client_${scheme}_${target}.log
     sleep 5
   done
   kill_servers
@@ -44,7 +44,7 @@ for scheme in "complexPIR" "complexVPIR"; do
   echo "    ##### running with $target target #####"
   for i in {1..30}; do
     echo "    ##### iteration $i"
-    cmd/grpc/client/client -id="ElGamal" -target=$target -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_${target}.log
+    cmd/grpc/client/client -id="ElGamal" -target=$target -experiment -scheme=$scheme | tee -a ../simulations/results/stats_client_${scheme}_${target}.log
     sleep 5
   done
   kill_servers
@@ -54,7 +54,7 @@ for scheme in "complexPIR" "complexVPIR"; do
   echo "    ##### running with $target target #####"
   for i in {1..30}; do
     echo "    ##### iteration $i"
-    cmd/grpc/client/client -id=".edu" -and -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_and.log
+    cmd/grpc/client/client -id=".edu" -and -experiment -scheme=$scheme | tee -a ../simulations/results/stats_client_${scheme}_and.log
     sleep 5
   done
   kill_servers
@@ -64,7 +64,7 @@ for scheme in "complexPIR" "complexVPIR"; do
   echo "    ##### running with $target target #####"
   for i in {1..30}; do
     echo "    ##### iteration $i"
-    cmd/grpc/client/client -id=".edu" -from-end=4 -and -avg -experiment -scheme=$scheme | tee -a simulations/results/stats_client_${scheme}_avg.log
+    cmd/grpc/client/client -id=".edu" -from-end=4 -and -avg -experiment -scheme=$scheme | tee -a ../simulations/results/stats_client_${scheme}_avg.log
     sleep 5
   done
   kill_servers
