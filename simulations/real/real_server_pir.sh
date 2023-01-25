@@ -1,6 +1,6 @@
 #!/bin/bash
 # remove stats log and create new files
-rm results/stats*
+rm ../results/stats*
 
 # build server
 cd ../../cmd/grpc/server

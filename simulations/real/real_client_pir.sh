@@ -4,17 +4,17 @@ ip_first="10.90.38.14"
 ip_second="10.90.39.3"
 
 # remove stats log and create new files
-rm results/stats*
+rm ../results/stats*
 
 # build client
-cd ../cmd/grpc/client
+cd ../../cmd/grpc/client
 go build 
 
 # go back to simultion directory
 cd - > /dev/null
 
 # move to root
-cd ../
+cd ../..
 
 # run servers
 for scheme in "pointPIR", "pointVPIR"; do
