@@ -20,6 +20,6 @@ cd ../../
 for scheme in "pointPIR" "pointVPIR"; do
   echo "##### running with $scheme scheme #####"
     # run servers
-    cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-0_$scheme.log
+    cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-$1_$scheme.log
     wait $!
 done
