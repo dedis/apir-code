@@ -1,10 +1,11 @@
 #!/bin/bash
+echo "REMEMBER TO UPDATE SERVERS IP ADDRESSES"
 
 ip_first="10.90.38.14"
 ip_second="10.90.39.3"
 
 # create results dir if doesn't already exist
-mkdir ../results
+mkdir -p ../results
 
 # remove stats log and create new files
 rm ../results/stats*

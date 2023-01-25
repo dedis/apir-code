@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # create results dir if doesn't already exist
-mkdir ../results
+mkdir -p ../results
 
 # remove stats log and create new files
 rm ../results/stats*
@@ -19,7 +19,7 @@ cd ../../
 # run servers
 for scheme in "pointPIR" "pointVPIR"; do
   echo "##### running with $scheme scheme #####"
-    # run servers
-    cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-$1_$scheme.log
-    wait $!
+  # run servers
+  cmd/grpc/server/server -id=$1 -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-$1_$scheme.log
+  wait $!
 done

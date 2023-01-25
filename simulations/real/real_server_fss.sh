@@ -1,26 +1,30 @@
 #!/bin/bash
 
 id=$1
-scheme=$2
 experiment=$3
-
-export GOGC=8000
+#
+# create results dir if doesn't already exist
+mkdir -p ../results
 
 # remove stats log and create new files
-rm results/stats*
+rm ../results/stats*
 
 # build server
-cd ../cmd/grpc/server
+cd ../../cmd/grpc/server
 go build
 
 # go back to simultion directory
 cd - > /dev/null
 
 # move to root
-cd ../
+cd ../../
 
 # run servers
-echo "##### running server $id with $scheme scheme #####"
-# run server given the correct scheme 
-cmd/grpc/server/server -id=$id -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-${id}_${scheme}_${experiment}.log
-wait $!
+for scheme in "pointPIR" "pointVPIR"; do
+  for target in "email" "algo" "and" "avg"; do
+    echo "##### running server $id with $scheme scheme and $target target #####"
+    # run server given the correct scheme 
+    cmd/grpc/server/server -id=$id -files=31 -experiment -scheme=$scheme | tee -a simulations/results/stats_server-${id}_${scheme}_${target}.log
+    wait $!
+  done
+done
