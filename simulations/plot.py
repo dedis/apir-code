@@ -282,12 +282,12 @@ def plotRealComplex():
         "complexVPIR_avg", 
     ]
 
-    core = -1 # only a single core
-    c = core
+    c = -1 # only a single core
 
     fig, ax = plt.subplots()
 
     bwUnauth = 0
+    tUnauth = 0
     for i, scheme in enumerate(schemes):
         logServers = [
                 "stats_server-0_" + scheme + ".log", 
@@ -299,8 +299,8 @@ def plotRealComplex():
 
         # combine answers bandwidth
         answers = dict()
-        answers[core] = [sum(x) for x in zip(statsServers[0][core]["answer"], statsServers[1][core]["answer"])]
-        serversBW = answers[core]
+        answers[c] = [sum(x) for x in zip(statsServers[0][c]["answer"], statsServers[1][c]["answer"])]
+        serversBW = answers[c]
 
         # get client stats
         statsClient = parseLog(resultFolder + "stats_client_" + scheme + ".log")
@@ -330,8 +330,9 @@ def plotRealComplex():
                 print("unknow scheme")
 
             bwUnauth = bw
+            tUnauth = t
         else:
-            print(t, "&", bwUnauth, "&", bw, "\\\\")
+            print(t, "&", round(float(t)/float(tUnauth), 2), "&", bwUnauth, "&", bw, "&", round(float(bw)/float(bwUnauth), 2), "\\\\")
         
 def plotReal():
     schemes = ["pointVPIR", "pointPIR"]
@@ -440,7 +441,7 @@ def plotPreprocessing():
 
     # take mean
     for k, v in results.items():
-        results[k] = np.mean(v)
+        results[k] = np.median(v)
 
     plt.plot(
         range(len(results)), 
