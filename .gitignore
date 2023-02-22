@@ -58,3 +58,6 @@ data/mmap.d/
 !simulations/final_results/*
 !simulations/final_results_new/*
 !simulations/multi/final_results/*
+
+# git-lfs
+data/sks/sks-000.pgp
