@@ -42,6 +42,10 @@ unauthenticated PIR schemes.
 * [data/](data): data, i.e., PGP keys, for Keyd.
 * [scripts/](scripts): various useful scripts.
 
+The dump of the SKS PGP key directory can be downloaded
+[here](https://drive.switch.ch/index.php/s/PoJANZvf1cOGnfS). 
+The `sks*` file must be placed in the `data/sks` folder.
+
 # Setup
 To run the code in this repository
 install [Go](https://go.dev/) (tested with Go 1.17.5 and 1.19.5)
