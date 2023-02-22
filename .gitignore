@@ -60,4 +60,4 @@ data/mmap.d/
 !simulations/multi/final_results/*
 
 # git-lfs
-data/sks/sks-000.pgp
+!data/sks/sks-000.pgp
