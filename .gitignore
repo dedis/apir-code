@@ -61,3 +61,4 @@ data/mmap.d/
 
 # git-lfs
 !data/sks/sks-000.pgp
+!data/sks/sks-001.pgp
