@@ -403,8 +403,7 @@ func getDB() (*database.DB, error) {
 
 func getDBFilePaths() []string {
 	sksDir := filepath.Join("data", pgp.SksParsedFolder)
-	// always use sks-000 for tests, the only
-	// file included in git-lfs
+	// always use sks-000 for tests
 	filePath := filepath.Join(sksDir, "sks-000.pgp")
 	return []string{filePath}
 }
