@@ -82,6 +82,9 @@ def server_setup(c, sid):
         c.run('bash ' + 'setup.sh')
     # disable now useless agent forwarding
     c.forward_agent = False
+    
+    # upload config
+    c.put('config.toml', remote=simul_dir)
 
 def client_setup(c):
     # enable agent forwarding for git pull
@@ -91,6 +94,9 @@ def client_setup(c):
         c.run('bash ' + 'setup.sh')
     # disable now useless agent forwarding
     c.forward_agent = False
+
+    # upload config
+    c.put('config.toml', remote=simul_dir)
 
 def server_pir_command(logFile, scheme, dbLen, elemBitSize, nRows, blockLen):
     return default_pir_server_command.format(logFile, scheme, dbLen, elemBitSize, nRows, blockLen)
