@@ -13,7 +13,7 @@ user = os.getenv('APIR_USER')
 password = os.getenv('APIR_PASSWORD')
 
 # simulations directory on servers
-simul_dir = '/' + user + '/go/src/github.com/si-co/apir-code/simulations/multi/'
+simul_dir = '/' + user + '/go/src/github.com/dedis/apir-code/simulations/multi/'
 
 # commands 
 default_pir_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
