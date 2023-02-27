@@ -77,7 +77,7 @@ def server_setup(c, sid):
     # enable agent forwarding for git pull
     c.forward_agent = True
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
-        c.run('git pull', warn = True)
+        #c.run('git pull', warn = True)
         c.run('echo '+ str(sid) + ' > server/sid')
         c.run('bash ' + 'setup.sh')
     # disable now useless agent forwarding
@@ -87,7 +87,7 @@ def client_setup(c):
     # enable agent forwarding for git pull
     c.forward_agent = True
     with c.cd(simul_dir), c.prefix('PATH=$PATH:/usr/local/go/bin'):
-        c.run('git pull', warn = True)
+        #c.run('git pull', warn = True)
         c.run('bash ' + 'setup.sh')
     # disable now useless agent forwarding
     c.forward_agent = False
