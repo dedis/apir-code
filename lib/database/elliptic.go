@@ -29,7 +29,7 @@ func CreateRandomEllipticWithDigest(rnd io.Reader, dbLen int, g group.Group, reb
 		data[i] = data[i] & 1
 	}
 	NGoRoutines := runtime.NumCPU()
-	if numRows < 100 { // dirty hack for small databases
+	if numRows < 1000 { // dirty hack for small databases
 		NGoRoutines = 8
 	}
 	h := crypto.BLAKE2b_256
