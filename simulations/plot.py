@@ -360,6 +360,7 @@ def plotMulti():
            ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout(h_pad=1.5)
+    plt.show()
     plt.savefig('figures/multi.eps', format='eps', dpi=300, transparent=True)
 
 
@@ -439,7 +440,7 @@ if __name__ == "__main__":
     # prepare_for_latex()
     matplotlib.rcParams['text.usetex'] = True
     matplotlib.rcParams['font.family'] = 'serif'
-    matplotlib.rcParams['font.serif'] = 'Computer Modern Roman'
+    matplotlib.rcParams['font.serif'] = 'Times'
     if not os.path.exists("figures"):
         os.makedirs("figures")
     if not os.path.exists("results"):
