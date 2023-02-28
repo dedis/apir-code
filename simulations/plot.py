@@ -106,66 +106,6 @@ def sci_notation(number, sig_fig=2):
     b = int(b)
     return "$" + a + " \\cdot 10^{" + str(b) + "}$ "
  
-# def plotSingle():
-#     size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
-#     base_latex = "\\multirow{3}{*}"
-#     size_to_latex = {
-#             1 << 13: base_latex + "{1 KiB}",
-#             1 << 23: base_latex + "{1 MiB}",
-#             1 << 33: base_latex + "{1 GiB}",
-#         }
-#     size_to_units_latex = {
-#             1 << 13: ["[KiB]", "[KiB]", "[ms]"],
-#             1 << 23: ["[MiB]", "[KiB]", "[ms]"],
-#             1 << 33: ["[MiB]", "[KiB]", "[s]"],
-#         }
-#     size_to_multipliers = {
-#             1 << 13: [1.0, 1.0, 1.0],
-#             1 << 23: [1/1024.0, 1.0, 1.0],
-#             1 << 33: [1/1024.0, 1.0, 1/1000.0],
-#         }
-#     metrics_icons = ["Off ", "On ", "Time "]
-#     schemes = ["computationalDH.json", "computationalLWE128.json", "computationalLWE.json", "simplePIR.json"]
-#     names = ['DDH', 'LWE', 'LWE$^+$', 'SimplePIR']
-#     cpuTable = {}
-#     bwTable = {}
-#     digestTable = {}
-#     for i, scheme in enumerate(schemes):
-#         if scheme == "spiral":
-#             continue
-#         stats = allStats(resultFolder + scheme)
-#         cpuTable[scheme] = {}
-#         bwTable[scheme] = {}
-#         digestTable[scheme] = {}
-#         for j, dbSize in enumerate(sorted(stats.keys())):
-#             bw = bwMean(stats, dbSize)
-#             cpu = cpuMean(stats, dbSize)
-#             cpuTable[scheme][dbSize] = cpu*1000*1000 # store in ms (already divided by 1000 in function)
-#             bwTable[scheme][dbSize] = (bw/1024.0) # KiB, since everything is already in bytes
-#             digestTable[scheme][dbSize] = stats[dbSize]['digest']/1024.0 # KiB, since everything is already in bytes
-#
-#     # print latex table
-#     metrics = (digestTable, bwTable, cpuTable)
-#     for dbSize in size_to_unit.keys():
-#         print(size_to_latex[dbSize], end = " & ")
-#         for i, m in enumerate(metrics):
-#             if i == 0:
-#                 print(metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
-#             else:
-#                 print(" & " + metrics_icons[i] + size_to_units_latex[dbSize][i], end = " & ")
-#             for scheme in schemes:
-#                 if dbSize == 1<<33 and "DH" in scheme:
-#                     print("N/A", end = " & ")
-#                 else:
-#                     print(round(m[scheme][dbSize]*size_to_multipliers[dbSize][i], 2), end = " & ")
-#             # print ratio
-#             ratio = m[schemes[-2]][dbSize]/m[schemes[-1]][dbSize]
-#             print(round(ratio, 2), end = "$\\times$ ")
-#             print("\\\\")
-#         print("\\midrule")
-#         print("")
-
-
 def plotSingle():
     font_prop = font_manager.FontProperties(family='serif', size=10)
     size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
@@ -268,7 +208,7 @@ def plotSingle():
     #              ax.get_xticklabels() + ax.get_yticklabels()):
     #     item.set_fontsize(20)
     plt.tight_layout(h_pad=1.5)
-    plt.savefig('figures/single_bar_multi.eps', format='eps', dpi=300, transparent=True, bbox_inches="tight")
+    plt.savefig('figures/single_bar.eps', format='eps', dpi=300, transparent=True, bbox_inches="tight")
 
 def plotRealComplex():
     schemes = [
