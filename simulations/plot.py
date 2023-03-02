@@ -2,15 +2,14 @@
 import argparse
 import os
 
-import matplotlib.lines as mlines
-import matplotlib.patches as mpatches
+import matplotlib
 import matplotlib.font_manager as font_manager
 import matplotlib.pyplot as plt
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "results/"
+resultFolder = "final_results/"
+# resultFolder = "results/"
 
 print("plotting from", resultFolder)
 
@@ -107,8 +106,8 @@ def sci_notation(number, sig_fig=2):
     return "$" + a + " \\cdot 10^{" + str(b) + "}$ "
  
 def plotSingle():
-    font_prop = font_manager.FontProperties(family='serif', size=10)
-    size_to_unit = {1<<13: "1 KiB", 1<<23: "1 MiB", 1<<33: "1 GiB"}
+    font_prop = font_manager.FontProperties(family='serif', size=11)
+    size_to_unit = {1<<13: "1KiB", 1<<23: "1MiB", 1<<33: "1GiB"}
     base_latex = "\\multirow{3}{*}"
     size_to_latex = {
             1 << 13: base_latex + "{1 KiB}",
@@ -187,22 +186,25 @@ def plotSingle():
         ax3.bar(x + i*width, onData[i], width, color=colors[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
     
     fig.legend(names, bbox_to_anchor=(0.14, 1, 0.8, .102), loc='lower left',
-           ncol=len(names), mode="expand", borderaxespad=0., prop=font_prop, fontsize=11)
+           ncol=len(names), mode="expand", borderaxespad=0., fontsize=13)
 
     axs = [ax1, ax2, ax3]
     for ax in axs:
-        ax.set_xticks(x + width + width/2, fontproperties=font_prop)
+        ax.set_xticks(x + width + width/2, fontsize=11)
         ax.set_xticklabels(list(size_to_unit.values()), fontproperties=font_prop)
         ax.set_xlabel('Database size', fontproperties=font_prop)
         # Axis label slightly bigger
-        ax.xaxis.label.set_size(11)
+        ax.xaxis.label.set_size(14)
         ax.set_yscale('log')
-    ax1.set_ylabel('User time [ms]', fontproperties=font_prop)
-    ax1.yaxis.label.set_size(11)
+    ax1.set_ylabel('User time [ms]')
+    ax1.yaxis.label.set_size(14)
+    ax1.yaxis.set_tick_params(labelsize=13)
     ax2.set_ylabel('Offline bandwidth [KiB]', fontproperties=font_prop)
-    ax2.yaxis.label.set_size(11)
+    ax2.yaxis.label.set_size(14)
+    ax2.yaxis.set_tick_params(labelsize=13)
     ax3.set_ylabel('Online bandwidth [KiB]', fontproperties=font_prop)
-    ax3.yaxis.label.set_size(11)
+    ax3.yaxis.label.set_size(14)
+    ax3.yaxis.set_tick_params(labelsize=13)
 
     # for item in ([ax.xaxis.label, ax.yaxis.label] +
     #              ax.get_xticklabels() + ax.get_yticklabels()):
@@ -358,6 +360,7 @@ def plotMulti():
            ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout(h_pad=1.5)
+    plt.show()
     plt.savefig('figures/multi.eps', format='eps', dpi=300, transparent=True)
 
 
@@ -434,7 +437,10 @@ args = parser.parse_args()
 EXPR = args.expr
 
 if __name__ == "__main__":
-    #prepare_for_latex()
+    # prepare_for_latex()
+    matplotlib.rcParams['text.usetex'] = True
+    matplotlib.rcParams['font.family'] = 'serif'
+    matplotlib.rcParams['font.serif'] = 'Times'
     if not os.path.exists("figures"):
         os.makedirs("figures")
     if not os.path.exists("results"):
