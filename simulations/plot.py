@@ -360,7 +360,6 @@ def plotMulti():
            ncol=2, mode="expand", borderaxespad=0.)
 
     plt.tight_layout(h_pad=1.5)
-    plt.show()
     plt.savefig('figures/multi.eps', format='eps', dpi=300, transparent=True)
 
 
