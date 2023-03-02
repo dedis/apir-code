@@ -442,7 +442,7 @@ if __name__ == "__main__":
 
     if EXPR == "single":
         plotSingle()
-        plotSingleRatios()
+        #plotSingleRatios()
     elif EXPR == "real":
         plotReal()
     elif EXPR == "realcomplex":
