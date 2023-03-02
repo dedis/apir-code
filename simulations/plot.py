@@ -190,7 +190,8 @@ def plotSingle():
 
     axs = [ax1, ax2, ax3]
     for ax in axs:
-        ax.set_xticks(x + width + width/2, fontsize=11)
+        #ax.set_xticks(x + width + width/2, fontsize=11)
+        ax.set_xticks(x + width + width/2)
         ax.set_xticklabels(list(size_to_unit.values()), fontproperties=font_prop)
         ax.set_xlabel('Database size', fontproperties=font_prop)
         # Axis label slightly bigger
