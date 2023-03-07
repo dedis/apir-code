@@ -2,10 +2,13 @@
 **WARNING**: This software is **not** production-ready 
 and it might contain security vulnerabilities.
 
-This code accompanies the paper "Verifiable private information retrieval"
-by Simone Colombo, Kirill Nikitin, 
-Bryan Ford, David J. Wu and Henry Corrigan-Gibbs, to appear at USENIX Security
-2023.
+This code accompanies the paper 
+["Verifiable private information retrieval"](https://eprint.iacr.org/2023/297)
+by Simone Colombo, 
+Kirill Nikitin, 
+Henry Corrigan-Gibbs,
+David J. Wu
+and Bryan Ford, to appear at USENIX Security 2023.
 
 This repository contains the code for multi-server and
 single-server authenticated-PIR schemes and the code
@@ -72,7 +75,7 @@ it is possible to remove the appropriate flags from
 `lib/matrix/matrix128.go` and `lib/matrix/matrix.go`. 
 Any flag modification is likely to negatively impact performance.
 
-# Usage and experiments
+<!--# Usage and experiments-->
 
 ## Correctness tests
 To run all basic correctness tests, execute
@@ -81,77 +84,85 @@ This command prints performance measurements to stdout.
 The entire test suite takes about 6 minutes to run and it should terminate with a `PASS`,
 indicating that all tests have passed.
 
-## Multi-server point and complex queries
-The code for the experiments on our multi-server authenticated-PIR schemes
-is in [`simulations/multi`](simulations/multi).
+<!--## Multi-server point and complex queries-->
+<!--The code for the experiments on our multi-server authenticated-PIR schemes-->
+<!--is in [`simulations/multi`](simulations/multi).-->
 
-To run the simulation, first modify
-[`simulations/multi/config.toml`](simulations/multi/config.toml)
-to indicate the IP address of the client machines and the IP addresses and
-ports of the five servers machines. One can safely use the default 
-port numbers that we indicate in the `simulations/multi/config.toml` file.
+<!--To run the simulation, first modify-->
+<!--[`simulations/multi/config.toml`](simulations/multi/config.toml)-->
+<!--to indicate the IP address of the client machines and the IP addresses and-->
+<!--ports of the five servers machines. One can safely use the default -->
+<!--port numbers that we indicate in the `simulations/multi/config.toml` file.-->
 
-The [`simulations/multi/simul.toml`](simulations/multi/simul.toml) 
-file contains the databases sizes, 
-the number of repetitions for a single experiment and the amount of data to 
-retrieve from the database. To reproduce the results of the paper, 
-do not modify this file; to speed up the simulation, or to run on machines with 
-insufficient RAM, one can reduce the sizes of the databases and/or the number of
-repetitions.
+<!--The [`simulations/multi/simul.toml`](simulations/multi/simul.toml) -->
+<!--file contains the databases sizes, -->
+<!--the number of repetitions for a single experiment and the amount of data to -->
+<!--retrieve from the database. To reproduce the results of the paper, -->
+<!--do not modify this file; to speed up the simulation, or to run on machines with -->
+<!--insufficient RAM, one can reduce the sizes of the databases and/or the number of-->
+<!--repetitions.-->
 
-TODO HERE FINISH
+<!--TODO HERE FINISH-->
 
-The multi-server authenticated-PIR scheme 
-for point queries needs database preprocessing:
-the servers compute a Merkle
-tree over the database entries along
-with their indexes.
-Then for each entry, each server constructs a Merkle proof
-of inclusion in the rooted Merkle tree and attaches this proof
-to each database record.
-We measure the CPU time that a single server takes to process the database 
-with an experiment that can be executed as follows. From the root 
-of the repository, run the following commands:
-```
-cd simulations
-make preprocessing
-```
+<!--The multi-server authenticated-PIR scheme -->
+<!--for point queries needs database preprocessing:-->
+<!--the servers compute a Merkle-->
+<!--tree over the database entries along-->
+<!--with their indexes.-->
+<!--Then for each entry, each server constructs a Merkle proof-->
+<!--of inclusion in the rooted Merkle tree and attaches this proof-->
+<!--to each database record.-->
+<!--We measure the CPU time that a single server takes to process the database -->
+<!--with an experiment that can be executed as follows. From the root -->
+<!--of the repository, run the following commands:-->
+<!--```-->
+<!--cd simulations-->
+<!--make preprocessing-->
+<!--```-->
 
-To reproduce the plot run the following command in the same directory:
-```
-python plot.py -e preprocessing
-```
-The resulting plot is saved in `figures/preprocessing.eps`.
+<!--To reproduce the plot run the following command in the same directory:-->
+<!--```-->
+<!--python plot.py -e preprocessing-->
+<!--```-->
+<!--The resulting plot is saved in `figures/preprocessing.eps`.-->
 
-## Single-server point queries
-The code for the experiments on our single-server authenticated-PIR
-resides in [`simulations`](simulations).
+<!--## Single-server point queries-->
+<!--The code for the experiments on our single-server authenticated-PIR-->
+<!--resides in [`simulations`](simulations).-->
 
-The experiments for single-serve schemes run on a single machine 
-give the sequential nature of the protocol. 
+<!--The experiments for single-serve schemes run on a single machine -->
+<!--give the sequential nature of the protocol. -->
 
-As in the multi-server case, 
-the [`simulations/multi/simul.toml`](simulations/multi/simul.toml) 
-file contains the databases sizes, 
-the number of repetitions for a single experiment and the amount of data to 
-retrieve from the database. These can be modified to speed up the experiments
-and/or use a machine with less RAM.
+<!--As in the multi-server case, -->
+<!--the [`simulations/multi/simul.toml`](simulations/multi/simul.toml) -->
+<!--file contains the databases sizes, -->
+<!--the number of repetitions for a single experiment and the amount of data to -->
+<!--retrieve from the database. These can be modified to speed up the experiments-->
+<!--and/or use a machine with less RAM.-->
 
-To run the single-server experiments, first clone this repository on the server. 
-Form the root of repository, run the command
-```
-cd simulations
-make single
-```
+<!--To run the single-server experiments, first clone this repository on the server. -->
+<!--Form the root of repository, run the command-->
+<!--```-->
+<!--cd simulations-->
+<!--make single-->
+<!--```-->
 
-To reproduce the plots run the following commands in the same directory:
-```
-python plot.py -e single
-```
-This command saves the plot in `figures/single_bar_multi.eps` and prints a LaTeX
-table in the terminal; the table is not used in the paper but it is useful to
-extrapolate the overheads among schemes.
+<!--To reproduce the plots run the following commands in the same directory:-->
+<!--```-->
+<!--python plot.py -e single-->
+<!--```-->
+<!--This command saves the plot in `figures/single_bar_multi.eps` and prints a LaTeX-->
+<!--table in the terminal; the table is not used in the paper but it is useful to-->
+<!--extrapolate the overheads among schemes.-->
 
-## Keyd: privacy-preserving key server
+<!--## Keyd: privacy-preserving key server-->
 
 # Citation
+```
+@inproceedings{colombo23authenticated,
+  author    = {Simone Colombo and Kirill Nikitin and Henry Corrigan-Gibbs and David J. Wu and Bryan Ford},
+  title     = {Authenticated private information retrieval},
+  booktitle = {USENIX Security},
+  year      = {2023}
+}
+```
