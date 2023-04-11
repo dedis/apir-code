@@ -5,6 +5,7 @@ import multiprocessing
 from multiprocessing import Process
 import os
 import tomli
+import ipaddress
 from fabric import ThreadingGroup as Group
 from fabric import Connection
 
@@ -17,14 +18,17 @@ path = os.getenv('APIR_PATH')
 simul_dir = path + '/simulations/multi/'
 
 # commands 
-default_pir_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
-default_fss_server_command = "screen -dm ./server -logFile={} -scheme={} && sleep 15"
+default_pir_server_command = "screen -dm ./server -sid={} -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
+default_fss_server_command = "screen -dm ./server -sid={} -logFile={} -scheme={} && sleep 15"
 default_pir_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
 default_pir_client_multi_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={} -numServers={}"
 default_fss_client_command = "./client -logFile={} -scheme={} -repetitions={} -inputSize={}"
 
 # local directories
 results_dir = "results"
+
+def is_localhost(c):
+    return c.host == "localhost" or ipaddress.ip_address(c.host).is_loopback
 
 def test_command():
     return 'uname -a'
@@ -52,7 +56,10 @@ def servers_addresses():
 
 def kill_servers(servers):
     for s in servers:
-        requests.get("http://" + s + ":8080")
+        try: 
+            requests.get("http://" + s + ":8080")
+        except: 
+            continue # if refused, means server is killed already
 
 def client_address():
     config = load_servers_config()
@@ -84,7 +91,8 @@ def server_setup(c, sid):
     c.forward_agent = False
     
     # upload config
-    c.put('config.toml', remote=simul_dir)
+    if not is_localhost(c):
+        c.put('config.toml', remote=simul_dir)
 
 def client_setup(c):
     # enable agent forwarding for git pull
@@ -96,10 +104,11 @@ def client_setup(c):
     c.forward_agent = False
 
     # upload config
-    c.put('config.toml', remote=simul_dir)
+    if not is_localhost(c):
+        c.put('config.toml', remote=simul_dir)
 
-def server_pir_command(logFile, scheme, dbLen, elemBitSize, nRows, blockLen):
-    return default_pir_server_command.format(logFile, scheme, dbLen, elemBitSize, nRows, blockLen)
+def server_pir_command(sid, logFile, scheme, dbLen, elemBitSize, nRows, blockLen):
+    return default_pir_server_command.format(sid, logFile, scheme, dbLen, elemBitSize, nRows, blockLen)
 
 def client_pir_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve):
     return default_pir_client_command.format(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve)
@@ -107,8 +116,8 @@ def client_pir_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve
 def client_pir_multi_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve, numServers):
     return default_pir_client_multi_command.format(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve, numServers)
 
-def server_fss_command(logFile, scheme):
-    return default_fss_server_command.format(logFile, scheme)
+def server_fss_command(sid, logFile, scheme):
+    return default_fss_server_command.format(sid, logFile, scheme)
 
 def client_fss_command(logFile, scheme, repetitions, inputSize):
     return default_fss_client_command.format(logFile, scheme, repetitions, inputSize)
@@ -131,8 +140,8 @@ def experiment_pir(pir_type, server_pool, client):
     for dl in databaseLengths:
         logFile = "pir_" + pir_type + "_" + str(dl) + ".log"
         print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
-        print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
-        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        print("\t server command:", server_pir_command(-1, logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(-1, logFile, "pir-" + pir_type, dl, ebs, nr, bl))
         if "classic" in pir_type:
             time.sleep(30)
         else:
@@ -168,34 +177,42 @@ def experiment_pir_multi(pir_type, server_pool, client):
 
     # run experiment on all database lengths
     for s in numServers:
-        logFile = "pir_" + pir_type + "_multi_" + str(s) + ".log"
+        logFile_base = "pir_" + pir_type + "_multi_" + str(s) + ".log"
         print("\t Starting", str(s), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
-        print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
-        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        #print("\t server command:", server_pir_command(s, logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        for i, c in enumerate(server_pool):
+            if i >= s:
+                continue
+            logFile = "sever_" + str(i) + "_" + logFile_base
+            print("\t starting server", i, "with command:", server_pir_command(i, logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+            c.run('cd ' + simul_dir + 'server && ' + server_pir_command(i, logFile, "pir-" + pir_type, dl, ebs, nr, bl))
         time.sleep(100)
         print("\t Run client")
-        print("\t client command:", client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
-        client.run('cd ' + simul_dir + 'client && ' + client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
+        print("\t client command:", client_pir_multi_command(logFile_base, "pir-" + pir_type, rep, ebs, btr, s))
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_multi_command(logFile_base, "pir-" + pir_type, rep, ebs, btr, s))
 
         kill_servers(servers_addresses())
 
     # get all log files
     for s in numServers:
-        logFile = "pir_" + pir_type + "_multi_" + str(s) + ".log"
+        logFile_base = "pir_" + pir_type + "_multi_" + str(s) + ".log"
         for i, c in enumerate(server_pool):
+            if i >= s:
+                continue
+            logFile = "sever_" + str(i) + "_" + logFile_base
             print("\t server", str(i), "log file location:", simul_dir + 'server/' + logFile)
-            c.get(simul_dir + 'server/' + logFile, results_dir + "/server_" + str(i) + "_" + logFile)
+            c.get(simul_dir + 'server/' + logFile, results_dir + "/server_" + str(i) + "_" + logFile_base)
 
-        print("\t client", "log file location:", simul_dir + 'client/' + logFile)
-        client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
+        print("\t client", "log file location:", simul_dir + 'client/' + logFile_base)
+        client.get(simul_dir + 'client/' + logFile_base, results_dir + "/client_" + logFile_base)
 
         # delete useless logs from servers that weren't used in the specific iteration
-        directory = os.fsencode(results_dir)
-        for file in os.listdir(directory):
-            filename = os.fsdecode(file)
-            if "multi" in filename and 'stats' not in open(results_dir + "/" + filename).read():
-                print("removing uselss log file", filename)
-                os.remove(results_dir + "/" + filename)
+        # directory = os.fsencode(results_dir)
+        # for file in os.listdir(directory):
+            # filename = os.fsdecode(file)
+            # if "multi" in filename and 'stats' not in open(results_dir + "/" + filename).read():
+                # print("removing uselss log file", filename)
+                # os.remove(results_dir + "/" + filename)
 
 def experiment_pir_classic(server_pool, client):
     experiment_pir("classic", server_pool, client)
@@ -291,7 +308,3 @@ if __name__ == "__main__":
         experiment_fss_auth(pool, client)
     else:
         print("Unknown experiment: choose between the available options")
-
-
-
-
