@@ -32,7 +32,7 @@ const (
 )
 
 func main() {
-	sid := readServerID()
+	sidPtr := flag.Int("sid", -1, "id of the server")
 	logFile := flag.String("logFile", "", "write log to file instead of stdout/stderr")
 	scheme := flag.String("scheme", "", "scheme to use: pir-classic, pir-merkle")
 	elemBitSize := flag.Int("elemBitSize", -1, "bit size of element, in which block lengtht is specified")
@@ -41,6 +41,13 @@ func main() {
 	blockLen := flag.Int("blockLen", -1, "block size for DB")
 
 	flag.Parse()
+
+	// check if sid is defined in command line
+	sid := *sidPtr
+	// if not specified from command line, read from file
+	if sid == -1 {
+		sid = readServerID()
+	}
 
 	// write either to stdout or to logfile
 	log.SetOutput(os.Stdout)
