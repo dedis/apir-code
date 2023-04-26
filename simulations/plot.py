@@ -312,7 +312,8 @@ def plotReal():
         ping = 0.375815 # ms
         latencyMean = meanFromDict(latencies)
         latency = latencyMean[-1] + ping
-        
+       
+        print("wall-clock time needed to retrieve a PGP public-key:")
         print(labels[i], ":", round(latency, 2), "sec")
 
 def plotMulti():
