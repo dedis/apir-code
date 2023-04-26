@@ -160,8 +160,8 @@ indicating that all tests have passed.
 The branch [sid](https://github.com/dedis/apir-code/tree/sid) enables to run the
 tests using less physical machines than the servers used by the different
 experiments. We decided not to merge this branch into the main branch because
-multi-server (authenticated) PIR schemes assume non-colluding, i.e., different,
-servers.
+multi-server (authenticated) PIR schemes need non-colluding, i.e., different,
+servers for security.
 
 
 # Citation
