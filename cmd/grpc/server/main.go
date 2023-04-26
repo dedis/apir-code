@@ -209,7 +209,7 @@ func main() {
 	case err := <-errCh:
 		log.Fatalf("failed to serve: %v", err)
 	case <-sigCh:
-		close(server.queryChan) //TODO put it in a 'serverShutdown()' function
+		server.stopWorker()
 		rpcServer.GracefulStop()
 		lis.Close()
 		log.Println("clean shutdown of server done")
@@ -289,6 +289,10 @@ func (s *vpirServer) startWorker() {
 
 		wrap.answer <- a
 	}
+}
+
+func (s *vpirServer) stopWorker() {
+	close(s.queryChan)
 }
 
 func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
