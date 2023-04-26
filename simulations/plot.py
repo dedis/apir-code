@@ -313,7 +313,7 @@ def plotReal():
         latencyMean = meanFromDict(latencies)
         latency = latencyMean[-1] + ping
         
-        print(labels[i], ":", round(latency, 2))
+        print(labels[i], ":", round(latency, 2), "sec")
 
 def plotMulti():
     schemes = ["pirClassicMulti.json", "pirMerkleMulti.json"]
