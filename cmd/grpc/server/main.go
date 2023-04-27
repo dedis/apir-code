@@ -161,11 +161,15 @@ func main() {
 	}
 
 	// start server
-	proto.RegisterVPIRServer(rpcServer, &vpirServer{
+	server := &vpirServer{
 		Server:     s,
 		experiment: *experiment,
 		cores:      *cores,
-	})
+		queryChan:  make(chan queryWrapper, 10),
+	}
+	proto.RegisterVPIRServer(rpcServer, server)
+
+	server.startWorker()
 
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
@@ -205,6 +209,7 @@ func main() {
 	case err := <-errCh:
 		log.Fatalf("failed to serve: %v", err)
 	case <-sigCh:
+		server.stopWorker()
 		rpcServer.GracefulStop()
 		lis.Close()
 		log.Println("clean shutdown of server done")
@@ -213,10 +218,18 @@ func main() {
 	sdnotify.SdNotify(false, sdnotify.SdNotifyStopping)
 }
 
+type queryWrapper struct {
+	query  *proto.QueryRequest
+	answer chan []byte
+	error  chan error
+}
+
 // vpirServer is used to implement VPIR Server protocol.
 type vpirServer struct {
 	proto.UnimplementedVPIRServer
 	Server server.Server // both IT and DPF-based server
+
+	queryChan chan queryWrapper
 
 	// only for experiments
 	experiment bool
@@ -244,17 +257,42 @@ func (s *vpirServer) Query(ctx context.Context, qr *proto.QueryRequest) (
 	*proto.QueryResponse, error) {
 	log.Print("got query request")
 
-	a, err := s.Server.AnswerBytes(qr.GetQuery())
-	if err != nil {
-		return nil, err
-	}
-	answerLen := len(a)
-	log.Printf("answer size in bytes: %d", answerLen)
-	if s.experiment {
-		log.Printf("stats,%d,%d", s.cores, answerLen)
-	}
+	answerCh := make(chan []byte, 1)
+	errorCh := make(chan error, 1)
+	s.queryChan <- queryWrapper{qr, answerCh, errorCh}
 
-	return &proto.QueryResponse{Answer: a}, nil
+	select {
+	case answer := <-answerCh:
+		return &proto.QueryResponse{Answer: answer}, nil
+	case err := <-errorCh:
+		log.Printf("ERROR while processing query: %v", err)
+		return nil, err
+	case <-ctx.Done():
+		log.Printf("Context deadline exceeded - canceled?")
+		return nil, context.DeadlineExceeded
+	}
+}
+
+func (s *vpirServer) startWorker() {
+	for wrap := range s.queryChan {
+
+		a, err := s.Server.AnswerBytes(wrap.query.GetQuery())
+		if err != nil {
+			wrap.error <- err
+			continue
+		}
+		answerLen := len(a)
+		log.Printf("answer size in bytes: %d", answerLen)
+		if s.experiment {
+			log.Printf("stats,%d,%d", s.cores, answerLen)
+		}
+
+		wrap.answer <- a
+	}
+}
+
+func (s *vpirServer) stopWorker() {
+	close(s.queryChan)
 }
 
 func loadPgpDB(filesNumber int, rebalanced bool) (*database.DB, error) {
