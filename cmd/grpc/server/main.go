@@ -169,7 +169,7 @@ func main() {
 	}
 	proto.RegisterVPIRServer(rpcServer, server)
 
-	server.startWorker()
+	go server.startWorker()
 
 	// listen signals from os
 	sigCh := make(chan os.Signal, 1)
