@@ -241,7 +241,7 @@
                 return data.text();
             })
             .then(res => {
-                result.innerHTML = `<div>${res}</div>`;;
+                result.innerHTML = `<div style="white-space: pre-line;">${res}</div>`;;
             })
             .catch(error => {
                 result.innerText = "error: " + error;
