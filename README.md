@@ -46,7 +46,7 @@ unauthenticated PIR schemes.
 * [scripts/](scripts): various useful scripts.
 
 The dump of the SKS PGP key directory can be downloaded
-[here](https://drive.switch.ch/index.php/s/PoJANZvf1cOGnfS). 
+[here](https://drive.switch.ch/index.php/s/IFEmRlDNgachlOc). 
 The `sks*` file must be placed in the `data/sks` folder.
 
 # Setup
