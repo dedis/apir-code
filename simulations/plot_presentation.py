@@ -92,6 +92,8 @@ def plotSingle():
         ax2.bar(x + i*width, offData[i], width, label=names[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
         ax3.bar(x + i*width, onData[i], width, label=names[i]) # , color='#000080', label='Case-1', yerr=data_std[:,0])
 
+    ax2.bar(x + 3*width, [1, 1024, 1048576], width, label='DB')
+
     axs = [ax1, ax2, ax3]
     for ax in axs:
         #ax.set_xticks(x + width + width/2, fontsize=11)
