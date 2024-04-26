@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/BurntSushi/toml v0.3.1
 	github.com/cloudflare/circl v1.3.3
+	github.com/dkales/dpf-go v0.0.0-20210304170054-6eae87348848
 	github.com/golang/protobuf v1.5.2
 	github.com/lukechampine/fastxor v0.0.0-20210322201628-b664bed5a5cc
 	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691
@@ -19,8 +20,6 @@ require (
 )
 
 require (
-	github.com/armfazh/h2c-go-ref v0.0.0-20210215173008-07e12a6f8e0d // indirect
-	github.com/armfazh/tozan-ecc v0.1.3 // indirect
 	github.com/bwesterb/go-ristretto v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
