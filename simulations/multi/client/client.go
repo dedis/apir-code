@@ -344,7 +344,7 @@ func equalDBInfo(info []*database.Info) bool {
 }
 
 func connectToServer(creds credentials.TransportCredentials, address string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	conn, err := grpc.DialContext(ctx, address,
