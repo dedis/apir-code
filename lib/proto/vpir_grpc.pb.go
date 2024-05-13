@@ -129,5 +129,5 @@ var _VPIR_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "lib/proto/vpir.proto",
+	Metadata: "vpir.proto",
 }
