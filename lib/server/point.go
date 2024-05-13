@@ -1,8 +1,10 @@
 package server
 
 import (
+	"math/bits"
 	"runtime"
 
+	"github.com/dkales/dpf-go/dpf"
 	"github.com/lukechampine/fastxor"
 	"github.com/si-co/vpir-code/lib/database"
 )
@@ -14,8 +16,9 @@ import (
 // information to the database entries, but this is trasparent from the server
 // perspective and only changes the database creation.
 type PIR struct {
-	db    *database.Bytes
-	cores int
+	numServers int
+	db         *database.Bytes
+	cores      int
 }
 
 // NewPIR return a server for the information theoretic single-bit
@@ -23,9 +26,20 @@ type PIR struct {
 // the database.
 func NewPIR(db *database.Bytes, cores ...int) *PIR {
 	if len(cores) == 0 {
-		return &PIR{db: db, cores: runtime.NumCPU()}
+		return &PIR{
+			db:    db,
+			cores: runtime.NumCPU()}
 	}
-	return &PIR{db: db, cores: cores[0]}
+	return &PIR{
+		db:    db,
+		cores: cores[0],
+	}
+}
+
+func NewPIRTwo(db *database.Bytes, cores ...int) *PIR {
+	p := NewPIR(db, cores...)
+	p.numServers = 2
+	return p
 }
 
 // DBInfo returns database info
@@ -43,6 +57,11 @@ func (s *PIR) Answer(q []byte) []byte {
 	nRows := s.db.NumRows
 	nCols := s.db.NumColumns
 
+	// use DPF for 2-servers
+	if s.numServers == 2 {
+		q = dpf.EvalFull(q, uint64(bits.Len(uint(nCols))))
+	}
+
 	var prevPos, nextPos int
 	out := make([]byte, nRows*s.db.BlockSize)
 
@@ -54,7 +73,6 @@ func (s *PIR) Answer(q []byte) []byte {
 			s.db.Entries[prevPos:nextPos],
 			s.db.BlockLengths[i*nCols:(i+1)*nCols],
 			q,
-			s.db.BlockSize,
 			out[i*s.db.BlockSize:(i+1)*s.db.BlockSize])
 		prevPos = nextPos
 	}
@@ -62,7 +80,7 @@ func (s *PIR) Answer(q []byte) []byte {
 }
 
 // XORs entries and q block by block of size bl
-func xorValues(entries []byte, blockLens []int, q []byte, bl int, out []byte) {
+func xorValues(entries []byte, blockLens []int, q []byte, out []byte) {
 	pos := 0
 	for j := range blockLens {
 		if (q[j/8]>>(j%8))&1 == byte(1) {

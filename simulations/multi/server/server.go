@@ -124,7 +124,7 @@ func main() {
 	var s server.Server
 	switch *scheme {
 	case "pir-classic", "pir-merkle":
-		s = server.NewPIR(dbBytes)
+		s = server.NewPIRTwo(dbBytes)
 	case "fss-classic":
 		s = server.NewPredicatePIR(dbFSS, byte(sid))
 	case "fss-auth":

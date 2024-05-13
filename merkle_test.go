@@ -53,7 +53,11 @@ func retrieveBlocksMerkle(t *testing.T, rnd io.Reader, db *database.Bytes, numSe
 	c := client.NewPIR(rnd, &db.Info)
 	servers := make([]*server.PIR, numServers)
 	for i := range servers {
-		servers[i] = server.NewPIR(db)
+		if numServers == 2 {
+			servers[i] = server.NewPIRTwo(db)
+		} else {
+			servers[i] = server.NewPIR(db)
+		}
 	}
 
 	totalTimer := monitor.NewMonitor()

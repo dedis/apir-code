@@ -24,7 +24,7 @@ default_pir_client_multi_command = "./client -logFile={} -scheme={} -repetitions
 default_fss_client_command = "./client -logFile={} -scheme={} -repetitions={} -inputSize={}"
 
 # local directories
-results_dir = "results"
+results_dir = "new_results"
 
 def test_command():
     return 'uname -a'
@@ -279,19 +279,3 @@ if __name__ == "__main__":
         # in this case only with two servers
         experiment_pir_classic(pool, client)
         experiment_pir_merkle(pool, client)
-    elif EXPR == "point_multi":
-        # run multi experiments, 
-        # with all the servers
-        experiment_pir_multi_classic(pool, client)
-        experiment_pir_multi_merkle(pool, client)
-    elif EXPR == "predicate":
-        # run experiments for 
-        # fss with only two servers
-        experiment_fss_classic(pool, client)
-        experiment_fss_auth(pool, client)
-    else:
-        print("Unknown experiment: choose between the available options")
-
-
-
-
