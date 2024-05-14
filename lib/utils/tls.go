@@ -84,9 +84,6 @@ func init() {
 		ServerCertificates[i], err = tls.X509KeyPair(
 			[]byte(ServerPublicKeys[i]),
 			[]byte(serverSecretKeys[i]))
-		log.Printf("Loading server certificate #%v", i)
-		log.Println("Certificate:", ServerPublicKeys[i])
-		log.Println("Private Key:", serverSecretKeys[i])
 		if err != nil {
 			log.Fatalf("could not load certficate #%v %v", i, err)
 		}
