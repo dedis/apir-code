@@ -59,11 +59,7 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 		return [][]byte{k0, k1}
 	}
 
-	vectors, err := c.secretShare(numServers)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return vectors
+	panic("incorrect number of servers")
 }
 
 // ReconstructBytes returns []byte
