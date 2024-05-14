@@ -32,7 +32,7 @@ UlPyu+VdM7y9+qpaWYoLaCouO2VKGGVoVzKLKZ8dQWVZZYRefkz/85P0eGzosMSe
 U25HF+7GP0TZEfhAlgD9VgIe92xOkEj6rDE2+pHIs4gsAnTTnBY5f7/+Ma10AwF/
 CDTtWEy00TU8Aw+xVsrQDl8hD2fWDxJUZ29jvkAfHUPdO/dMXrQgSl8xqJIuBkxq
 nvs=
-	-----END CERTIFICATE-----`,
+-----END CERTIFICATE-----`,
 
 	`-----BEGIN CERTIFICATE-----
 MIIDXjCCAcagAwIBAgIQDR4dg8xww1hyrEHcmiIzbDANBgkqhkiG9w0BAQsFADBl
@@ -54,7 +54,7 @@ Ujbd3Pr6XsUcdTYVfcyOKvuMgB28xqP2VxBKwIRWSLb3vN7tWKakqR0jhhBt0pCk
 +F+2UOj1aD4qL1EyJRlOyEch9JISMFOPFFeYzPJ1qR3wLFcgyPHhdMxcfapwTbLB
 4/DKZVuDvla4Ec/5fERaEK3f5fICk9AYkx2drRMs31NW602pKXcF3ucdMZzTM+cY
 dSM=
-	-----END CERTIFICATE-----`,
+-----END CERTIFICATE-----`,
 }
 
 var serverSecretKeys = [...]string{
