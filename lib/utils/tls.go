@@ -77,7 +77,7 @@ Qz3jCEyvBaE2zm8WwtQ2UHo8nhleFCD+60qcDCqKHGf8vCsuvpKOIwWk
 var ServerCertificates []tls.Certificate
 
 func init() {
-	numServers := 5
+	numServers := 2
 
 	ServerCertificates = make([]tls.Certificate, numServers)
 
