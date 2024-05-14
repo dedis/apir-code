@@ -32,7 +32,7 @@ UlPyu+VdM7y9+qpaWYoLaCouO2VKGGVoVzKLKZ8dQWVZZYRefkz/85P0eGzosMSe
 U25HF+7GP0TZEfhAlgD9VgIe92xOkEj6rDE2+pHIs4gsAnTTnBY5f7/+Ma10AwF/
 CDTtWEy00TU8Aw+xVsrQDl8hD2fWDxJUZ29jvkAfHUPdO/dMXrQgSl8xqJIuBkxq
 nvs=
-	-----END CERTIFICATE-----`,
+-----END CERTIFICATE-----`,
 
 	`-----BEGIN CERTIFICATE-----
 MIIDXjCCAcagAwIBAgIQDR4dg8xww1hyrEHcmiIzbDANBgkqhkiG9w0BAQsFADBl
@@ -54,7 +54,7 @@ Ujbd3Pr6XsUcdTYVfcyOKvuMgB28xqP2VxBKwIRWSLb3vN7tWKakqR0jhhBt0pCk
 +F+2UOj1aD4qL1EyJRlOyEch9JISMFOPFFeYzPJ1qR3wLFcgyPHhdMxcfapwTbLB
 4/DKZVuDvla4Ec/5fERaEK3f5fICk9AYkx2drRMs31NW602pKXcF3ucdMZzTM+cY
 dSM=
-	-----END CERTIFICATE-----`,
+-----END CERTIFICATE-----`,
 }
 
 var serverSecretKeys = [...]string{
@@ -62,13 +62,13 @@ var serverSecretKeys = [...]string{
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgyHKwZ0LY+KDEQyUL
 YHk/PGY2QhmgzlwE1G0NoNpkO1WhRANCAARMdXsYkd95AZs1jqoySUZ4/oOR8cF2
 wo8qLb57yo5K/7GGF5t4XH00M+G8TR+HDReGQe0fQDLVgDnWasfJOnyy
-	-----END PRIVATE KEY-----`,
+-----END PRIVATE KEY-----`,
 
 	`-----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgFPH5bH9ShjnSJfzf
 3PCbuSeCwXRZ4VxLuYVHITKweBihRANCAAR/tfC//iEevdK5wwEYsVul0Hhtu0M8
 Qz3jCEyvBaE2zm8WwtQ2UHo8nhleFCD+60qcDCqKHGf8vCsuvpKOIwWk
-	-----END PRIVATE KEY-----`,
+-----END PRIVATE KEY-----`,
 }
 
 // ServerCertificates holds the certificates for the servers
@@ -84,6 +84,9 @@ func init() {
 		ServerCertificates[i], err = tls.X509KeyPair(
 			[]byte(ServerPublicKeys[i]),
 			[]byte(serverSecretKeys[i]))
+		log.Printf("Loading server certificate #%v", i)
+		log.Println("Certificate:", ServerPublicKeys[i])
+		log.Println("Private Key:", serverSecretKeys[i])
 		if err != nil {
 			log.Fatalf("could not load certficate #%v %v", i, err)
 		}
