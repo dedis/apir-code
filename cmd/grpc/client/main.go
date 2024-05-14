@@ -22,7 +22,6 @@ import (
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
 )
 
@@ -438,8 +437,7 @@ func connectToServer(creds credentials.TransportCredentials, address string) (*g
 	defer cancel()
 
 	conn, err := grpc.DialContext(ctx, address,
-		//grpc.WithTransportCredentials(creds), grpc.WithBlock())
-		grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+		grpc.WithTransportCredentials(creds), grpc.WithBlock())
 	if err != nil {
 		return nil, xerrors.Errorf("did not connect to %s: %v", address, err)
 	}
