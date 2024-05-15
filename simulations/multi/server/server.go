@@ -104,10 +104,10 @@ func main() {
 	var dbFSS *database.DB
 	switch *scheme {
 	case "pir-classic":
-		*nRows = 10 * (*elemBitSize) * (*blockLen)
+		*nRows = *nRows / 2
 		dbBytes = database.CreateRandomBytes(dbPRG, *dbLen, *nRows, *blockLen)
 	case "pir-merkle":
-		*nRows = 10 * (*elemBitSize) * (*blockLen)
+		*nRows = *nRows / 2
 		dbBytes = database.CreateRandomMerkle(dbPRG, *dbLen, *nRows, *blockLen)
 	case "fss-classic", "fss-auth":
 		numIdenfitiers := 100000
