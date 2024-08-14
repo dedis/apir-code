@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@ package merkle
 import (
 	"encoding/binary"
 	"errors"
-	"hash/adler32"
+	"hash/fnv"
 	"math"
 )
 
@@ -28,13 +28,21 @@ type MerkleTree struct {
 	// data is the data from which the Merkle tree is created
 	// data are stored as a map from the actual data encoded to string to
 	// the index of the data in the tree
-	data map[uint32]uint32
+	data map[uint64]uint32
 	// nodes are the leaf and branch nodes of the Merkle tree
 	nodes [][]byte
 }
 
+func hashFNV1a64(data []byte) uint64 {
+	h := fnv.New64a()
+	if _, err := h.Write(data); err != nil {
+		panic(err)
+	}
+	return h.Sum64()
+}
+
 func (t *MerkleTree) indexOf(input []byte) (uint32, error) {
-	if i, ok := t.data[adler32.Checksum(input)]; ok {
+	if i, ok := t.data[hashFNV1a64(input)]; ok {
 		return i, nil
 	}
 	return 0, errors.New("data not found")
@@ -85,14 +93,19 @@ func NewUsing(data [][]byte, hash HashType) (*MerkleTree, error) {
 	branchesLen := int(math.Exp2(math.Ceil(math.Log2(float64(len(data))))))
 
 	// map with the original data to easily loop up the index
-	md := make(map[uint32]uint32, len(data))
+	md := make(map[uint64]uint32, len(data))
+	hashForNodes := fnv.New64a()
 	// We pad our data length up to the power of 2
 	nodes := make([][]byte, branchesLen+len(data)+(branchesLen-len(data)))
 	// Leaves
 	for i := range data {
 		ib := indexToBytes(i)
 		nodes[i+branchesLen] = hash.Hash(data[i], ib)
-		md[adler32.Checksum(data[i])] = uint32(i)
+		if _, err := hashForNodes.Write(data[i]); err != nil {
+			return nil, err
+		}
+		md[hashForNodes.Sum64()] = uint32(i)
+		hashForNodes.Reset()
 	}
 	for i := len(data) + branchesLen; i < len(nodes); i++ {
 		nodes[i] = make([]byte, hash.HashLength())
