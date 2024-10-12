@@ -104,7 +104,8 @@ func main() {
 	var dbFSS *database.DB
 	switch *scheme {
 	case "pir-classic":
-		dbBytes = database.CreateRandomBytes(dbPRG, *dbLen, *nRows, *blockLen)
+		// TODO: no matrix here
+		dbBytes = database.CreateRandomBytes(dbPRG, *dbLen, 1, *blockLen)
 	case "pir-merkle":
 		dbBytes = database.CreateRandomMerkle(dbPRG, *dbLen, *nRows, *blockLen)
 	case "fss-classic", "fss-auth":
