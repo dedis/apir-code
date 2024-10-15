@@ -107,7 +107,7 @@ func main() {
 		// TODO: no matrix here
 		dbBytes = database.CreateRandomBytes(dbPRG, *dbLen, 1, *blockLen)
 	case "pir-merkle":
-		dbBytes = database.CreateRandomMerkle(dbPRG, *dbLen, *nRows, *blockLen)
+		dbBytes = database.CreateRandomMerkle(dbPRG, *dbLen, 1, *blockLen)
 	case "fss-classic", "fss-auth":
 		numIdenfitiers := 100000
 		dbFSS, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
