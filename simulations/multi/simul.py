@@ -27,7 +27,7 @@ default_pir_client_multi_command = "./client -logFile={} -scheme={} -repetitions
 default_fss_client_command = "./client -logFile={} -scheme={} -repetitions={} -inputSize={}"
 
 # local directories
-results_dir = "results_vectors"
+results_dir = "new_results"
 
 def test_command():
     return 'uname -a'
@@ -194,6 +194,51 @@ def experiment_pir_vector(pir_type, server_pool, client):
         print("\t client", "log file location:", simul_dir + 'client/' + logFile)
         client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
 
+def experiment_pir_multi_vector(pir_type, server_pool, client):
+    print('Experiment PIR multi', pir_type)
+    gc = load_general_config()
+    ic = load_individual_config('pir_' + pir_type + '_multi_vector.toml')
+
+    # define experiment parameters
+    dl = 8589935000 # 1 GiB for this experiment
+    rep = gc['Repetitions']
+    ebs = ic['ElementBitSize']
+    nr = ic['NumRows']
+    bl = ic['BlockLength']
+    btr = gc['BitsToRetrieve']
+    numServers = ic['NumServers']
+
+    # run experiment on all database lengths
+    for s in numServers:
+        logFile = "pir_" + pir_type + "_multi_vector_" + str(s) + ".log"
+        print("\t Starting", str(s), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
+        print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl, s))
+        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl, s))
+        time.sleep(100)
+        print("\t Run client")
+        print("\t client command:", client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
+
+        kill_servers(servers_addresses())
+
+    # get all log files
+    for s in numServers:
+        logFile = "pir_" + pir_type + "_multi_vector_" + str(s) + ".log"
+        for i, c in enumerate(server_pool):
+            print("\t server", str(i), "log file location:", simul_dir + 'server/' + logFile)
+            c.get(simul_dir + 'server/' + logFile, results_dir + "/server_" + str(i) + "_" + logFile)
+
+        print("\t client", "log file location:", simul_dir + 'client/' + logFile)
+        client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
+
+        # delete useless logs from servers that weren't used in the specific iteration
+        directory = os.fsencode(results_dir)
+        for file in os.listdir(directory):
+            filename = os.fsdecode(file)
+            if "multi" in filename and 'stats' not in open(results_dir + "/" + filename).read():
+                print("removing uselss log file", filename)
+                os.remove(results_dir + "/" + filename)
+
 def experiment_pir_multi(pir_type, server_pool, client):
     print('Experiment PIR multi', pir_type)
     gc = load_general_config()
@@ -257,6 +302,12 @@ def experiment_pir_multi_classic(server_pool, client):
 def experiment_pir_multi_merkle(server_pool, client):
     experiment_pir_multi("merkle", server_pool, client)
 
+def experiment_pir_multi_classic_vector(server_pool, client):
+    experiment_pir_multi_vector("classic", server_pool, client)
+
+def experiment_pir_multi_merkle_vector(server_pool, client):
+    experiment_pir_multi_vector("merkle", server_pool, client)
+
 def experiment_fss(fss_type, server_pool, client):
     print('Experiment FSS', fss_type)
     gc = load_general_config()
@@ -316,6 +367,7 @@ parser.add_argument(
 args = parser.parse_args()
 EXPR = args.expr
 
+# TODO: fix this back
 if __name__ == "__main__":
     if not os.path.exists("figures"):
         os.makedirs("figures")
@@ -327,6 +379,15 @@ if __name__ == "__main__":
         # in this case only with two servers
         experiment_pir_classic(pool, client)
         experiment_pir_merkle(pool, client)
+
+        experiment_pir_classic_vector(pool, client)
+        experiment_pir_merkle_vector(pool, client)
+
+        experiment_pir_multi_classic(pool, client)
+        experiment_pir_multi_merkle(pool, client)
+
+        experiment_pir_multi_classic_vector(pool, client)
+        experiment_pir_multi_merkle_vector(pool, client)
     if EXPR == "vector":
         # run experiments, 
         # in this case only with two servers
