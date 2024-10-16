@@ -383,11 +383,11 @@ if __name__ == "__main__":
         experiment_pir_classic_vector(pool, client)
         experiment_pir_merkle_vector(pool, client)
 
-        experiment_pir_multi_classic(pool, client)
-        experiment_pir_multi_merkle(pool, client)
+        # experiment_pir_multi_classic(pool, client)
+        # experiment_pir_multi_merkle(pool, client)
 
-        experiment_pir_multi_classic_vector(pool, client)
-        experiment_pir_multi_merkle_vector(pool, client)
+        # experiment_pir_multi_classic_vector(pool, client)
+        # experiment_pir_multi_merkle_vector(pool, client)
     if EXPR == "vector":
         # run experiments, 
         # in this case only with two servers
