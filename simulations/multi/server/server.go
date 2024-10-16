@@ -127,6 +127,7 @@ func main() {
 	case "pir-classic", "pir-merkle":
 		if *numServers == 2 {
 			s = server.NewPIRTwo(dbBytes)
+			log.Println("using DPF with numServers:", numServers)
 		} else {
 			s = server.NewPIR(dbBytes)
 		}
