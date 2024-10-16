@@ -186,7 +186,7 @@ def experiment_pir_vector(pir_type, server_pool, client):
 
     # get all log files
     for dl in databaseLengths:
-        logFile = "pir_" + pir_type + "_" + str(dl) + ".log"
+        logFile = "pir_" + pir_type + "_vector_" + str(dl) + ".log"
         for i, c in enumerate(server_pool):
             print("\t server", str(i), "log file location:", simul_dir + 'server/' + logFile)
             c.get(simul_dir + 'server/' + logFile, results_dir + "/server_" + str(i) + "_" + logFile)
