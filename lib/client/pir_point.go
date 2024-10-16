@@ -4,7 +4,9 @@ import (
 	"encoding/binary"
 	"io"
 	"log"
+	"math/bits"
 
+	"github.com/dkales/dpf-go/dpf"
 	"github.com/lukechampine/fastxor"
 	"github.com/si-co/vpir-code/lib/database"
 	"github.com/si-co/vpir-code/lib/utils"
@@ -51,6 +53,12 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 		ix: ix,
 		iy: iy,
 	}
+
+	if numServers == 2 {
+		k0, k1 := dpf.Gen(uint64(c.state.iy), uint64(bits.Len(uint(c.dbInfo.NumColumns))))
+		return [][]byte{k0, k1}
+	}
+
 	vectors, err := c.secretShare(numServers)
 	if err != nil {
 		log.Fatal(err)

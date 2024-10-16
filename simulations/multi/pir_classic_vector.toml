@@ -1,0 +1,5 @@
+Name = "pirClassic"
+Primitive = "pir-classic"
+NumRows = 1 # vector
+BlockLength = 1024
+ElementBitSize = 8

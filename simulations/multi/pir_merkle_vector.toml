@@ -1,0 +1,6 @@
+Name = "pirMerkle"
+Primitive = "pir-merkle"
+NumRows = 1 # vector
+BlockLength = 1024
+ElementBitSize = 8
+NumServers = [2, 4, 6, 8, 10]

@@ -39,6 +39,7 @@ func main() {
 	dbLen := flag.Int("dbLen", -1, "DB length in bits")
 	nRows := flag.Int("nRows", -1, "number of rows in the DB representation")
 	blockLen := flag.Int("blockLen", -1, "block size for DB")
+	numServers := flag.Int("servers", 2, "num servers to use")
 
 	flag.Parse()
 
@@ -104,10 +105,9 @@ func main() {
 	var dbFSS *database.DB
 	switch *scheme {
 	case "pir-classic":
-		// TODO: no matrix here
-		dbBytes = database.CreateRandomBytes(dbPRG, *dbLen, 1, *blockLen)
+		dbBytes = database.CreateRandomBytes(dbPRG, *nRows, 1, *blockLen)
 	case "pir-merkle":
-		dbBytes = database.CreateRandomMerkle(dbPRG, *dbLen, 1, *blockLen)
+		dbBytes = database.CreateRandomMerkle(dbPRG, *nRows, 1, *blockLen)
 	case "fss-classic", "fss-auth":
 		numIdenfitiers := 100000
 		dbFSS, err = database.CreateRandomKeysDB(dbPRG, numIdenfitiers)
@@ -125,7 +125,11 @@ func main() {
 	var s server.Server
 	switch *scheme {
 	case "pir-classic", "pir-merkle":
-		s = server.NewPIR(dbBytes)
+		if *numServers == 2 {
+			s = server.NewPIRTwo(dbBytes)
+		} else {
+			s = server.NewPIR(dbBytes)
+		}
 	case "fss-classic":
 		s = server.NewPredicatePIR(dbFSS, byte(sid))
 	case "fss-auth":

@@ -17,7 +17,7 @@ path = os.getenv('APIR_PATH')
 simul_dir = path + '/simulations/multi/'
 
 # commands 
-default_pir_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} && sleep 15"
+default_pir_server_command = "screen -dm ./server -logFile={} -scheme={} -dbLen={} -elemBitSize={} -nRows={} -blockLen={} -servers={} && sleep 15"
 default_fss_server_command = "screen -dm ./server -logFile={} -scheme={} && sleep 15"
 default_pir_client_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={}"
 default_pir_client_multi_command = "./client -logFile={} -scheme={} -repetitions={} -elemBitSize={} -bitsToRetrieve={} -numServers={}"
@@ -98,8 +98,8 @@ def client_setup(c):
     # upload config
     c.put('config.toml', remote=simul_dir)
 
-def server_pir_command(logFile, scheme, dbLen, elemBitSize, nRows, blockLen):
-    return default_pir_server_command.format(logFile, scheme, dbLen, elemBitSize, nRows, blockLen)
+def server_pir_command(logFile, scheme, dbLen, elemBitSize, nRows, blockLen, servers=2):
+    return default_pir_server_command.format(logFile, scheme, dbLen, elemBitSize, nRows, blockLen, servers)
 
 def client_pir_command(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve):
     return default_pir_client_command.format(logFile, scheme, repetitions, elemBitSize, bitsToRetrieve)
@@ -152,6 +152,45 @@ def experiment_pir(pir_type, server_pool, client):
         print("\t client", "log file location:", simul_dir + 'client/' + logFile)
         client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
 
+def experiment_pir_vector(pir_type, server_pool, client):
+    print('Experiment PIR vector', pir_type)
+    gc = load_general_config()
+    ic = load_individual_config('pir_' + pir_type + '_vector.toml')
+
+    print("\t Run", len(server_pool), "servers")
+    # define experiment parameters
+    databaseLengths = gc['DBBitLengths']
+    rep = gc['Repetitions']
+    ebs = ic['ElementBitSize']
+    nr = ic['NumRows']
+    bl = ic['BlockLength']
+    btr = gc['BitsToRetrieve']
+
+    # run experiment on all database lengths
+    for dl in databaseLengths:
+        logFile = "pir_" + pir_type + "_vector_" + str(dl) + ".log"
+        print("\t Starting", len(server_pool), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
+        print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        if "classic" in pir_type:
+            time.sleep(30)
+        else:
+            time.sleep(900)
+        print("\t Run client")
+        client.run('cd ' + simul_dir + 'client && ' + client_pir_command(logFile, "pir-" + pir_type, rep, ebs, btr))
+
+        kill_servers(servers_addresses())
+
+    # get all log files
+    for dl in databaseLengths:
+        logFile = "pir_" + pir_type + "_" + str(dl) + ".log"
+        for i, c in enumerate(server_pool):
+            print("\t server", str(i), "log file location:", simul_dir + 'server/' + logFile)
+            c.get(simul_dir + 'server/' + logFile, results_dir + "/server_" + str(i) + "_" + logFile)
+
+        print("\t client", "log file location:", simul_dir + 'client/' + logFile)
+        client.get(simul_dir + 'client/' + logFile, results_dir + "/client_" + logFile)
+
 def experiment_pir_multi(pir_type, server_pool, client):
     print('Experiment PIR multi', pir_type)
     gc = load_general_config()
@@ -170,8 +209,8 @@ def experiment_pir_multi(pir_type, server_pool, client):
     for s in numServers:
         logFile = "pir_" + pir_type + "_multi_" + str(s) + ".log"
         print("\t Starting", str(s), "servers with database length", dl, "element bit size", ebs, "number of rows", nr, "block length", bl)
-        print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
-        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl))
+        print("\t server command:", server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl, s))
+        server_pool.run('cd ' + simul_dir + 'server && ' + server_pir_command(logFile, "pir-" + pir_type, dl, ebs, nr, bl, s))
         time.sleep(100)
         print("\t Run client")
         print("\t client command:", client_pir_multi_command(logFile, "pir-" + pir_type, rep, ebs, btr, s))
@@ -202,6 +241,12 @@ def experiment_pir_classic(server_pool, client):
 
 def experiment_pir_merkle(server_pool, client):
     experiment_pir("merkle", server_pool, client)
+
+def experiment_pir_classic_vector(server_pool, client):
+    experiment_pir_vector("classic", server_pool, client)
+
+def experiment_pir_merkle_vector(server_pool, client):
+    experiment_pir_vector("merkle", server_pool, client)
 
 def experiment_pir_multi_classic(server_pool, client):
     experiment_pir_multi("classic", server_pool, client)
@@ -279,6 +324,11 @@ if __name__ == "__main__":
         # in this case only with two servers
         experiment_pir_classic(pool, client)
         experiment_pir_merkle(pool, client)
+    if EXPR == "vector":
+        # run experiments, 
+        # in this case only with two servers
+        experiment_pir_classic_vector(pool, client)
+        experiment_pir_merkle_vector(pool, client)
     elif EXPR == "point_multi":
         # run multi experiments, 
         # with all the servers

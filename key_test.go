@@ -64,7 +64,7 @@ func TestRealRetrieveKey(t *testing.T) {
 	// client and servers
 	prg := utils.RandomPRG()
 	c := client.NewPIR(prg, &db.Info)
-	servers := []server.Server{server.NewPIR(db), server.NewPIR(db)}
+	servers := []server.Server{server.NewPIRTwo(db), server.NewPIRTwo(db)}
 
 	retrieveRealKey(t, c, servers, realKeys, numBlocks)
 }
@@ -88,7 +88,7 @@ func TestRealRetrieveKeyPIR(t *testing.T) {
 	// client and servers
 	prg := utils.RandomPRG()
 	c := client.NewPIR(prg, &db.Info)
-	servers := []server.Server{server.NewPIR(db), server.NewPIR(db)}
+	servers := []server.Server{server.NewPIRTwo(db), server.NewPIRTwo(db)}
 
 	retrieveRealKey(t, c, servers, realKeys, numBlocks)
 }
