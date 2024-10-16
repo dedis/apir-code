@@ -56,7 +56,6 @@ func (c *PIR) Query(index int, numServers int) [][]byte {
 
 	if numServers == 2 {
 		k0, k1 := dpf.Gen(uint64(c.state.iy), uint64(bits.Len(uint(c.dbInfo.NumColumns))))
-		log.Printf("using DPF with %d numSevers\n", numServers)
 		return [][]byte{k0, k1}
 	}
 
