@@ -1,5 +1,5 @@
 Name = "pirClassic"
 Primitive = "pir-classic"
-NumRows = 0 # every NumRows != 1 indicate matrix
+NumRows = 1 # vector
 BlockLength = 1024
 ElementBitSize = 8
