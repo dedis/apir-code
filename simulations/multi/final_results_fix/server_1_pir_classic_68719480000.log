@@ -1,0 +1,66 @@
+[Server 1] 2024/10/17 13:49:49 flags: 1 pir_classic_68719480000.log pir-classic 68719480000 8 1 1024
+[Server 1] 2024/10/17 13:50:07 using DPF with numServers: 0xc000238530
+[Server 1] 2024/10/17 13:50:07 is listening at 10.90.39.6:50051
+[Server 1] 2024/10/17 13:50:07 starting grpc server
+[Server 1] 2024/10/17 13:50:34 got databaseInfo request
+[Server 1] 2024/10/17 13:50:34 got query request
+[Server 1] 2024/10/17 13:50:35 stats,1024
+[Server 1] 2024/10/17 13:50:35 got query request
+[Server 1] 2024/10/17 13:50:35 stats,1024
+[Server 1] 2024/10/17 13:50:35 got query request
+[Server 1] 2024/10/17 13:50:36 stats,1024
+[Server 1] 2024/10/17 13:50:36 got query request
+[Server 1] 2024/10/17 13:50:37 stats,1024
+[Server 1] 2024/10/17 13:50:37 got query request
+[Server 1] 2024/10/17 13:50:38 stats,1024
+[Server 1] 2024/10/17 13:50:38 got query request
+[Server 1] 2024/10/17 13:50:38 stats,1024
+[Server 1] 2024/10/17 13:50:38 got query request
+[Server 1] 2024/10/17 13:50:39 stats,1024
+[Server 1] 2024/10/17 13:50:39 got query request
+[Server 1] 2024/10/17 13:50:40 stats,1024
+[Server 1] 2024/10/17 13:50:40 got query request
+[Server 1] 2024/10/17 13:50:40 stats,1024
+[Server 1] 2024/10/17 13:50:40 got query request
+[Server 1] 2024/10/17 13:50:41 stats,1024
+[Server 1] 2024/10/17 13:50:41 got query request
+[Server 1] 2024/10/17 13:50:42 stats,1024
+[Server 1] 2024/10/17 13:50:42 got query request
+[Server 1] 2024/10/17 13:50:42 stats,1024
+[Server 1] 2024/10/17 13:50:42 got query request
+[Server 1] 2024/10/17 13:50:43 stats,1024
+[Server 1] 2024/10/17 13:50:43 got query request
+[Server 1] 2024/10/17 13:50:44 stats,1024
+[Server 1] 2024/10/17 13:50:44 got query request
+[Server 1] 2024/10/17 13:50:44 stats,1024
+[Server 1] 2024/10/17 13:50:45 got query request
+[Server 1] 2024/10/17 13:50:45 stats,1024
+[Server 1] 2024/10/17 13:50:45 got query request
+[Server 1] 2024/10/17 13:50:46 stats,1024
+[Server 1] 2024/10/17 13:50:47 got query request
+[Server 1] 2024/10/17 13:50:47 stats,1024
+[Server 1] 2024/10/17 13:50:47 got query request
+[Server 1] 2024/10/17 13:50:48 stats,1024
+[Server 1] 2024/10/17 13:50:48 got query request
+[Server 1] 2024/10/17 13:50:49 stats,1024
+[Server 1] 2024/10/17 13:50:49 got query request
+[Server 1] 2024/10/17 13:50:50 stats,1024
+[Server 1] 2024/10/17 13:50:50 got query request
+[Server 1] 2024/10/17 13:50:50 stats,1024
+[Server 1] 2024/10/17 13:50:50 got query request
+[Server 1] 2024/10/17 13:50:51 stats,1024
+[Server 1] 2024/10/17 13:50:51 got query request
+[Server 1] 2024/10/17 13:50:52 stats,1024
+[Server 1] 2024/10/17 13:50:52 got query request
+[Server 1] 2024/10/17 13:50:52 stats,1024
+[Server 1] 2024/10/17 13:50:53 got query request
+[Server 1] 2024/10/17 13:50:53 stats,1024
+[Server 1] 2024/10/17 13:50:53 got query request
+[Server 1] 2024/10/17 13:50:54 stats,1024
+[Server 1] 2024/10/17 13:50:54 got query request
+[Server 1] 2024/10/17 13:50:55 stats,1024
+[Server 1] 2024/10/17 13:50:55 got query request
+[Server 1] 2024/10/17 13:50:55 stats,1024
+[Server 1] 2024/10/17 13:50:56 got query request
+[Server 1] 2024/10/17 13:50:56 stats,1024
+[Server 1] 2024/10/17 13:50:56 clean shutdown of server done

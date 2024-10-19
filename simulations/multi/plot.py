@@ -8,8 +8,8 @@ import tomli
 
 from utils import *
 
-#resultFolder = "final_results/"
-resultFolder = "new_results/"
+#resultFolder = "new_results/"
+resultFolder = "final_results_fix/"
 
 # styles
 markers = ['.', '*', 'd', 's']

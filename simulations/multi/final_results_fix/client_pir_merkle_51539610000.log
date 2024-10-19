@@ -1,0 +1,246 @@
+[Client] 2024/10/19 00:23:38 connected to server 10.90.38.8:50050
+[Client] 2024/10/19 00:23:38 connected to server 10.90.39.6:50051
+[Client] 2024/10/19 00:23:38 sent databaseInfo request to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:38 sent databaseInfo request to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:38 databaseInfo: &database.Info{NumRows:1, NumColumns:6291456, BlockSize:1769, BlockLengths:[]int(nil), PIRType:"merkle", Auth:(*database.Auth)(nil), Merkle:(*database.Merkle)(0xc000126120)}
+[Client] 2024/10/19 00:23:38 numTotalBlocks, numRetrieveBlocks: 6291456 1
+[Client] 2024/10/19 00:23:38 start repetition 1 out of 40
+[Client] 2024/10/19 00:23:38 done with queries computation
+[Client] 2024/10/19 00:23:39 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:40 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:40 done with block reconstruction
+[Client] 2024/10/19 00:23:40 stats,0,642,1.455454
+[Client] 2024/10/19 00:23:40 start repetition 2 out of 40
+[Client] 2024/10/19 00:23:40 done with queries computation
+[Client] 2024/10/19 00:23:41 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:45 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:45 done with block reconstruction
+[Client] 2024/10/19 00:23:45 stats,1,642,5.153849
+[Client] 2024/10/19 00:23:45 start repetition 3 out of 40
+[Client] 2024/10/19 00:23:45 done with queries computation
+[Client] 2024/10/19 00:23:46 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:46 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:46 done with block reconstruction
+[Client] 2024/10/19 00:23:46 stats,2,642,1.236419
+[Client] 2024/10/19 00:23:46 start repetition 4 out of 40
+[Client] 2024/10/19 00:23:46 done with queries computation
+[Client] 2024/10/19 00:23:47 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:47 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:47 done with block reconstruction
+[Client] 2024/10/19 00:23:47 stats,3,642,1.548192
+[Client] 2024/10/19 00:23:47 start repetition 5 out of 40
+[Client] 2024/10/19 00:23:47 done with queries computation
+[Client] 2024/10/19 00:23:49 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:49 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:49 done with block reconstruction
+[Client] 2024/10/19 00:23:49 stats,4,642,1.523605
+[Client] 2024/10/19 00:23:49 start repetition 6 out of 40
+[Client] 2024/10/19 00:23:49 done with queries computation
+[Client] 2024/10/19 00:23:50 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:51 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:51 done with block reconstruction
+[Client] 2024/10/19 00:23:51 stats,5,642,1.547797
+[Client] 2024/10/19 00:23:51 start repetition 7 out of 40
+[Client] 2024/10/19 00:23:51 done with queries computation
+[Client] 2024/10/19 00:23:52 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:52 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:52 done with block reconstruction
+[Client] 2024/10/19 00:23:52 stats,6,642,1.593091
+[Client] 2024/10/19 00:23:52 start repetition 8 out of 40
+[Client] 2024/10/19 00:23:52 done with queries computation
+[Client] 2024/10/19 00:23:53 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:54 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:54 done with block reconstruction
+[Client] 2024/10/19 00:23:54 stats,7,642,1.546867
+[Client] 2024/10/19 00:23:54 start repetition 9 out of 40
+[Client] 2024/10/19 00:23:54 done with queries computation
+[Client] 2024/10/19 00:23:55 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:55 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:55 done with block reconstruction
+[Client] 2024/10/19 00:23:55 stats,8,642,1.536258
+[Client] 2024/10/19 00:23:55 start repetition 10 out of 40
+[Client] 2024/10/19 00:23:55 done with queries computation
+[Client] 2024/10/19 00:23:57 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:57 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:57 done with block reconstruction
+[Client] 2024/10/19 00:23:57 stats,9,642,1.562096
+[Client] 2024/10/19 00:23:57 start repetition 11 out of 40
+[Client] 2024/10/19 00:23:57 done with queries computation
+[Client] 2024/10/19 00:23:58 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:23:58 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:23:58 done with block reconstruction
+[Client] 2024/10/19 00:23:58 stats,10,642,1.586888
+[Client] 2024/10/19 00:23:58 start repetition 12 out of 40
+[Client] 2024/10/19 00:23:58 done with queries computation
+[Client] 2024/10/19 00:24:00 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:00 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:00 done with block reconstruction
+[Client] 2024/10/19 00:24:00 stats,11,642,1.533564
+[Client] 2024/10/19 00:24:00 start repetition 13 out of 40
+[Client] 2024/10/19 00:24:00 done with queries computation
+[Client] 2024/10/19 00:24:01 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:01 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:01 done with block reconstruction
+[Client] 2024/10/19 00:24:01 stats,12,642,1.548981
+[Client] 2024/10/19 00:24:01 start repetition 14 out of 40
+[Client] 2024/10/19 00:24:01 done with queries computation
+[Client] 2024/10/19 00:24:03 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:03 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:03 done with block reconstruction
+[Client] 2024/10/19 00:24:03 stats,13,642,1.554961
+[Client] 2024/10/19 00:24:03 start repetition 15 out of 40
+[Client] 2024/10/19 00:24:03 done with queries computation
+[Client] 2024/10/19 00:24:04 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:05 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:05 done with block reconstruction
+[Client] 2024/10/19 00:24:05 stats,14,642,1.531177
+[Client] 2024/10/19 00:24:05 start repetition 16 out of 40
+[Client] 2024/10/19 00:24:05 done with queries computation
+[Client] 2024/10/19 00:24:06 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:06 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:06 done with block reconstruction
+[Client] 2024/10/19 00:24:06 stats,15,642,1.570612
+[Client] 2024/10/19 00:24:06 start repetition 17 out of 40
+[Client] 2024/10/19 00:24:06 done with queries computation
+[Client] 2024/10/19 00:24:07 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:08 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:08 done with block reconstruction
+[Client] 2024/10/19 00:24:08 stats,16,642,1.534985
+[Client] 2024/10/19 00:24:08 start repetition 18 out of 40
+[Client] 2024/10/19 00:24:08 done with queries computation
+[Client] 2024/10/19 00:24:09 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:09 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:09 done with block reconstruction
+[Client] 2024/10/19 00:24:09 stats,17,642,1.564251
+[Client] 2024/10/19 00:24:09 start repetition 19 out of 40
+[Client] 2024/10/19 00:24:09 done with queries computation
+[Client] 2024/10/19 00:24:10 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:11 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:11 done with block reconstruction
+[Client] 2024/10/19 00:24:11 stats,18,642,1.547259
+[Client] 2024/10/19 00:24:11 start repetition 20 out of 40
+[Client] 2024/10/19 00:24:11 done with queries computation
+[Client] 2024/10/19 00:24:12 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:12 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:12 done with block reconstruction
+[Client] 2024/10/19 00:24:12 stats,19,642,1.559500
+[Client] 2024/10/19 00:24:12 start repetition 21 out of 40
+[Client] 2024/10/19 00:24:12 done with queries computation
+[Client] 2024/10/19 00:24:14 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:14 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:14 done with block reconstruction
+[Client] 2024/10/19 00:24:14 stats,20,642,1.526785
+[Client] 2024/10/19 00:24:14 start repetition 22 out of 40
+[Client] 2024/10/19 00:24:14 done with queries computation
+[Client] 2024/10/19 00:24:15 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:15 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:15 done with block reconstruction
+[Client] 2024/10/19 00:24:15 stats,21,642,1.531307
+[Client] 2024/10/19 00:24:15 start repetition 23 out of 40
+[Client] 2024/10/19 00:24:15 done with queries computation
+[Client] 2024/10/19 00:24:17 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:17 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:17 done with block reconstruction
+[Client] 2024/10/19 00:24:17 stats,22,642,1.537355
+[Client] 2024/10/19 00:24:17 start repetition 24 out of 40
+[Client] 2024/10/19 00:24:17 done with queries computation
+[Client] 2024/10/19 00:24:18 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:19 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:19 done with block reconstruction
+[Client] 2024/10/19 00:24:19 stats,23,642,1.577168
+[Client] 2024/10/19 00:24:19 start repetition 25 out of 40
+[Client] 2024/10/19 00:24:19 done with queries computation
+[Client] 2024/10/19 00:24:20 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:20 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:20 done with block reconstruction
+[Client] 2024/10/19 00:24:20 stats,24,642,1.524919
+[Client] 2024/10/19 00:24:20 start repetition 26 out of 40
+[Client] 2024/10/19 00:24:20 done with queries computation
+[Client] 2024/10/19 00:24:21 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:22 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:22 done with block reconstruction
+[Client] 2024/10/19 00:24:22 stats,25,642,1.529019
+[Client] 2024/10/19 00:24:22 start repetition 27 out of 40
+[Client] 2024/10/19 00:24:22 done with queries computation
+[Client] 2024/10/19 00:24:23 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:23 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:23 done with block reconstruction
+[Client] 2024/10/19 00:24:23 stats,26,642,1.519604
+[Client] 2024/10/19 00:24:23 start repetition 28 out of 40
+[Client] 2024/10/19 00:24:23 done with queries computation
+[Client] 2024/10/19 00:24:24 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:25 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:25 done with block reconstruction
+[Client] 2024/10/19 00:24:25 stats,27,642,1.508320
+[Client] 2024/10/19 00:24:25 start repetition 29 out of 40
+[Client] 2024/10/19 00:24:25 done with queries computation
+[Client] 2024/10/19 00:24:26 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:26 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:26 done with block reconstruction
+[Client] 2024/10/19 00:24:26 stats,28,642,1.520641
+[Client] 2024/10/19 00:24:26 start repetition 30 out of 40
+[Client] 2024/10/19 00:24:26 done with queries computation
+[Client] 2024/10/19 00:24:27 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:28 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:28 done with block reconstruction
+[Client] 2024/10/19 00:24:28 stats,29,642,1.526487
+[Client] 2024/10/19 00:24:28 start repetition 31 out of 40
+[Client] 2024/10/19 00:24:28 done with queries computation
+[Client] 2024/10/19 00:24:29 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:29 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:29 done with block reconstruction
+[Client] 2024/10/19 00:24:29 stats,30,642,1.546269
+[Client] 2024/10/19 00:24:29 start repetition 32 out of 40
+[Client] 2024/10/19 00:24:29 done with queries computation
+[Client] 2024/10/19 00:24:30 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:31 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:31 done with block reconstruction
+[Client] 2024/10/19 00:24:31 stats,31,642,1.547813
+[Client] 2024/10/19 00:24:31 start repetition 33 out of 40
+[Client] 2024/10/19 00:24:31 done with queries computation
+[Client] 2024/10/19 00:24:32 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:32 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:32 done with block reconstruction
+[Client] 2024/10/19 00:24:32 stats,32,642,1.517852
+[Client] 2024/10/19 00:24:32 start repetition 34 out of 40
+[Client] 2024/10/19 00:24:32 done with queries computation
+[Client] 2024/10/19 00:24:33 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:34 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:34 done with block reconstruction
+[Client] 2024/10/19 00:24:34 stats,33,642,1.550079
+[Client] 2024/10/19 00:24:34 start repetition 35 out of 40
+[Client] 2024/10/19 00:24:34 done with queries computation
+[Client] 2024/10/19 00:24:35 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:35 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:35 done with block reconstruction
+[Client] 2024/10/19 00:24:35 stats,34,642,1.535206
+[Client] 2024/10/19 00:24:35 start repetition 36 out of 40
+[Client] 2024/10/19 00:24:35 done with queries computation
+[Client] 2024/10/19 00:24:37 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:37 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:37 done with block reconstruction
+[Client] 2024/10/19 00:24:37 stats,35,642,1.552979
+[Client] 2024/10/19 00:24:37 start repetition 37 out of 40
+[Client] 2024/10/19 00:24:37 done with queries computation
+[Client] 2024/10/19 00:24:38 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:38 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:38 done with block reconstruction
+[Client] 2024/10/19 00:24:38 stats,36,642,1.506448
+[Client] 2024/10/19 00:24:38 start repetition 38 out of 40
+[Client] 2024/10/19 00:24:38 done with queries computation
+[Client] 2024/10/19 00:24:40 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:40 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:40 done with block reconstruction
+[Client] 2024/10/19 00:24:40 stats,37,642,1.529058
+[Client] 2024/10/19 00:24:40 start repetition 39 out of 40
+[Client] 2024/10/19 00:24:40 done with queries computation
+[Client] 2024/10/19 00:24:41 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:41 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:41 done with block reconstruction
+[Client] 2024/10/19 00:24:41 stats,38,642,1.260010
+[Client] 2024/10/19 00:24:41 start repetition 40 out of 40
+[Client] 2024/10/19 00:24:41 done with queries computation
+[Client] 2024/10/19 00:24:42 sent query to 10.90.38.8:50050
+[Client] 2024/10/19 00:24:43 sent query to 10.90.39.6:50051
+[Client] 2024/10/19 00:24:43 done with block reconstruction
+[Client] 2024/10/19 00:24:43 stats,39,642,1.541999

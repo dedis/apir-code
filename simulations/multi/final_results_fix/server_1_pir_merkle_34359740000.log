@@ -1,0 +1,86 @@
+[Server 1] 2024/10/18 23:52:35 flags: 1 pir_merkle_34359740000.log pir-merkle 34359740000 8 1 1024
+[Server 1] 2024/10/18 23:53:30 using DPF with numServers: 0xc000238530
+[Server 1] 2024/10/18 23:53:30 is listening at 10.90.39.6:50051
+[Server 1] 2024/10/18 23:53:30 starting grpc server
+[Server 1] 2024/10/19 00:07:50 got databaseInfo request
+[Server 1] 2024/10/19 00:07:50 got query request
+[Server 1] 2024/10/19 00:07:52 stats,1737
+[Server 1] 2024/10/19 00:07:52 got query request
+[Server 1] 2024/10/19 00:07:53 stats,1737
+[Server 1] 2024/10/19 00:07:53 got query request
+[Server 1] 2024/10/19 00:07:53 stats,1737
+[Server 1] 2024/10/19 00:07:54 got query request
+[Server 1] 2024/10/19 00:07:54 stats,1737
+[Server 1] 2024/10/19 00:07:54 got query request
+[Server 1] 2024/10/19 00:07:55 stats,1737
+[Server 1] 2024/10/19 00:07:55 got query request
+[Server 1] 2024/10/19 00:07:56 stats,1737
+[Server 1] 2024/10/19 00:07:56 got query request
+[Server 1] 2024/10/19 00:07:57 stats,1737
+[Server 1] 2024/10/19 00:07:57 got query request
+[Server 1] 2024/10/19 00:07:58 stats,1737
+[Server 1] 2024/10/19 00:07:58 got query request
+[Server 1] 2024/10/19 00:07:59 stats,1737
+[Server 1] 2024/10/19 00:07:59 got query request
+[Server 1] 2024/10/19 00:07:59 stats,1737
+[Server 1] 2024/10/19 00:08:00 got query request
+[Server 1] 2024/10/19 00:08:00 stats,1737
+[Server 1] 2024/10/19 00:08:00 got query request
+[Server 1] 2024/10/19 00:08:01 stats,1737
+[Server 1] 2024/10/19 00:08:01 got query request
+[Server 1] 2024/10/19 00:08:02 stats,1737
+[Server 1] 2024/10/19 00:08:02 got query request
+[Server 1] 2024/10/19 00:08:03 stats,1737
+[Server 1] 2024/10/19 00:08:03 got query request
+[Server 1] 2024/10/19 00:08:03 stats,1737
+[Server 1] 2024/10/19 00:08:04 got query request
+[Server 1] 2024/10/19 00:08:04 stats,1737
+[Server 1] 2024/10/19 00:08:04 got query request
+[Server 1] 2024/10/19 00:08:05 stats,1737
+[Server 1] 2024/10/19 00:08:05 got query request
+[Server 1] 2024/10/19 00:08:06 stats,1737
+[Server 1] 2024/10/19 00:08:06 got query request
+[Server 1] 2024/10/19 00:08:07 stats,1737
+[Server 1] 2024/10/19 00:08:07 got query request
+[Server 1] 2024/10/19 00:08:07 stats,1737
+[Server 1] 2024/10/19 00:08:07 got query request
+[Server 1] 2024/10/19 00:08:08 stats,1737
+[Server 1] 2024/10/19 00:08:08 got query request
+[Server 1] 2024/10/19 00:08:09 stats,1737
+[Server 1] 2024/10/19 00:08:09 got query request
+[Server 1] 2024/10/19 00:08:09 stats,1737
+[Server 1] 2024/10/19 00:08:10 got query request
+[Server 1] 2024/10/19 00:08:10 stats,1737
+[Server 1] 2024/10/19 00:08:10 got query request
+[Server 1] 2024/10/19 00:08:11 stats,1737
+[Server 1] 2024/10/19 00:08:11 got query request
+[Server 1] 2024/10/19 00:08:12 stats,1737
+[Server 1] 2024/10/19 00:08:12 got query request
+[Server 1] 2024/10/19 00:08:12 stats,1737
+[Server 1] 2024/10/19 00:08:12 got query request
+[Server 1] 2024/10/19 00:08:13 stats,1737
+[Server 1] 2024/10/19 00:08:13 got query request
+[Server 1] 2024/10/19 00:08:14 stats,1737
+[Server 1] 2024/10/19 00:08:14 got query request
+[Server 1] 2024/10/19 00:08:15 stats,1737
+[Server 1] 2024/10/19 00:08:15 got query request
+[Server 1] 2024/10/19 00:08:16 stats,1737
+[Server 1] 2024/10/19 00:08:16 got query request
+[Server 1] 2024/10/19 00:08:16 stats,1737
+[Server 1] 2024/10/19 00:08:16 got query request
+[Server 1] 2024/10/19 00:08:17 stats,1737
+[Server 1] 2024/10/19 00:08:17 got query request
+[Server 1] 2024/10/19 00:08:18 stats,1737
+[Server 1] 2024/10/19 00:08:18 got query request
+[Server 1] 2024/10/19 00:08:19 stats,1737
+[Server 1] 2024/10/19 00:08:19 got query request
+[Server 1] 2024/10/19 00:08:20 stats,1737
+[Server 1] 2024/10/19 00:08:20 got query request
+[Server 1] 2024/10/19 00:08:21 stats,1737
+[Server 1] 2024/10/19 00:08:21 got query request
+[Server 1] 2024/10/19 00:08:21 stats,1737
+[Server 1] 2024/10/19 00:08:21 got query request
+[Server 1] 2024/10/19 00:08:22 stats,1737
+[Server 1] 2024/10/19 00:08:22 got query request
+[Server 1] 2024/10/19 00:08:23 stats,1737
+[Server 1] 2024/10/19 00:08:23 clean shutdown of server done
