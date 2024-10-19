@@ -9,12 +9,9 @@ from fabric import ThreadingGroup as Group
 from fabric import Connection
 
 # servers data
-# user = os.getenv('APIR_USER')
-# password = os.getenv('APIR_PASSWORD')
-# path = os.getenv('APIR_PATH')
-user = "root"
-password = "dedislab"
-path = "/root/go/src/github.com/si-co/vpir-code"
+user = os.getenv('APIR_USER')
+password = os.getenv('APIR_PASSWORD')
+path = os.getenv('APIR_PATH')
 
 # simulations directory on servers
 simul_dir = path + '/simulations/multi/'
@@ -27,7 +24,7 @@ default_pir_client_multi_command = "./client -logFile={} -scheme={} -repetitions
 default_fss_client_command = "./client -logFile={} -scheme={} -repetitions={} -inputSize={}"
 
 # local directories
-results_dir = "new_results"
+results_dir = "results"
 
 def test_command():
     return 'uname -a'
