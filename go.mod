@@ -14,7 +14,7 @@ require (
 	golang.org/x/crypto v0.21.0
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/grpc v1.56.3
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.33.0
 	lukechampine.com/blake3 v1.1.7
 	lukechampine.com/uint128 v1.2.0
 )
