@@ -8,8 +8,8 @@ import tomli
 
 from utils import *
 
-resultFolder = "final_results/"
-#resultFolder = "results/"
+#resultFolder = "final_results/"
+resultFolder = "new_results/"
 
 # styles
 markers = ['.', '*', 'd', 's']
@@ -238,7 +238,7 @@ def plotPoint():
         )
         axs[1].plot(
                 [int(x/GiB) for x in db_lengths],
-                [x*1e-6 for x in bandwidth[i]],
+                [x*1e-3 for x in bandwidth[i]],
                 color='black', 
                 marker=markers[int(i / (len(schemes) / 2))],
                 linestyle=linestyles[int(i / (len(schemes) / 2))],
@@ -253,11 +253,13 @@ def plotPoint():
 
     print("point queries max ratio user-time:", max(ratio_time))
     print("point queries max ratio bandwidth:", max(ratio_bw))
+    print("point queries ratio user-time:", ratio_time)
+    print("point queries ratio bandwidth:", ratio_bw)
 
     # cosmetics
     axs[0].set_ylabel('User time [s]')
     axs[0].set_xticks([int(x/GiB) for x in db_lengths]), 
-    axs[1].set_ylabel('Bandwidth [MiB]')
+    axs[1].set_ylabel('Bandwidth [KiB]')
     axs[1].set_xlabel('Database size [GiB]')
     axs[0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
