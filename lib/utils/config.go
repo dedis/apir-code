@@ -12,6 +12,8 @@ type Config struct {
 	Servers map[string]Server
 
 	Addresses []string
+
+	CertFile string
 }
 
 type Server struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"google.golang.org/grpc/credentials"
 	"log"
 	"sync"
 	"time"
@@ -37,7 +38,7 @@ func (m *Manager) Connect() (Actor, error) {
 	servers := make([]server, len(m.config.Addresses))
 
 	// load servers certificates
-	creds, err := utils.LoadServersCertificates()
+	creds, err := credentials.NewClientTLSFromFile(m.config.CertFile, "")
 	if err != nil {
 		return Actor{}, xerrors.Errorf("failed to load servers certificates: %v", err)
 	}

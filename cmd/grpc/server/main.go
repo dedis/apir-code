@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
@@ -121,18 +120,15 @@ func main() {
 	runtime.GC()
 
 	// run server with TLS
-	cfg := &tls.Config{
-		Certificates: []tls.Certificate{utils.ServerCertificates[*sid]},
-		ClientAuth:   tls.NoClientCert,
-	}
-	lis, err := net.Listen("tcp", addr)
+	creds, err := credentials.NewClientTLSFromFile(config.CertFile, "")
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to load servers certificates: %v", err)
 	}
+
 	rpcServer := grpc.NewServer(
 		grpc.MaxRecvMsgSize(1024*1024*1024),
 		grpc.MaxSendMsgSize(1024*1024*1024),
-		grpc.Creds(credentials.NewTLS(cfg)),
+		grpc.Creds(creds),
 	)
 
 	// select correct server
@@ -175,6 +171,11 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	errCh := make(chan error, 1)
+
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 
 	go func() {
 		log.Println("gRPC server started at", lis.Addr())

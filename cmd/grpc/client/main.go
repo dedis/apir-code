@@ -119,7 +119,7 @@ func main() {
 
 func (lc *localClient) connectToServers() error {
 	// load servers certificates
-	creds, err := utils.LoadServersCertificates()
+	creds, err := credentials.NewClientTLSFromFile(lc.config.CertFile, "")
 	if err != nil {
 		return xerrors.Errorf("could not load servers certificates: %v", err)
 	}
