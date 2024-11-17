@@ -54,6 +54,7 @@ var staticPointConfig = &utils.Config{
 	Addresses: []string{
 		"128.179.33.63:50050", "128.179.33.75:50051",
 	},
+	CertFile: "/opt/apir/cert.pem",
 }
 
 var staticComplexConfig = &utils.Config{
@@ -70,6 +71,7 @@ var staticComplexConfig = &utils.Config{
 	Addresses: []string{
 		"128.179.33.63:50040", "128.179.33.75:50041",
 	},
+	CertFile: "/opt/apir/cert.pem",
 }
 
 var grpcOpts = []grpc.CallOption{
