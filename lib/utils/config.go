@@ -14,6 +14,7 @@ type Config struct {
 	Addresses []string
 
 	CertFile string
+	KeyFile  string
 }
 
 type Server struct {
