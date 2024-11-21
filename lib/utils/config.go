@@ -13,8 +13,11 @@ type Config struct {
 
 	Addresses []string
 
-	CertFile string
-	KeyFile  string
+	ServerCertFile string
+	ServerKeyFile  string
+
+	ClientCertFile string
+	ClientKeyFile  string
 }
 
 type Server struct {

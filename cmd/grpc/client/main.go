@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/binary"
 	"errors"
 	"flag"
@@ -117,9 +119,36 @@ func main() {
 	os.Exit(0)
 }
 
+func loadClientTLSCredentials(config *utils.Config) (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed server's certificate
+	pemServerCA, err := os.ReadFile(config.ServerCertFile)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
+
+	// Load client's certificate and private key
+	clientCert, err := tls.LoadX509KeyPair(config.ClientCertFile, config.ClientKeyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the credentials and return it
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      certPool,
+	}
+
+	return credentials.NewTLS(tlsConfig), nil
+}
+
 func (lc *localClient) connectToServers() error {
-	// load servers certificates
-	creds, err := credentials.NewClientTLSFromFile(lc.config.CertFile, "")
+	// load certificates
+	creds, err := loadClientTLSCredentials(lc.config)
 	if err != nil {
 		return xerrors.Errorf("could not load servers certificates: %v", err)
 	}

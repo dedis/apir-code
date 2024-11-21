@@ -120,7 +120,7 @@ func main() {
 	runtime.GC()
 
 	// run server with TLS
-	creds, err := credentials.NewServerTLSFromFile(config.CertFile, config.KeyFile)
+	creds, err := credentials.NewServerTLSFromFile(config.ServerCertFile, config.ServerKeyFile)
 	if err != nil {
 		log.Fatalf("failed to load servers certificates: %v", err)
 	}
