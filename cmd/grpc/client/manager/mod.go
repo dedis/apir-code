@@ -2,10 +2,13 @@ package manager
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/binary"
 	"fmt"
 	"google.golang.org/grpc/credentials"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -38,7 +41,7 @@ func (m *Manager) Connect() (Actor, error) {
 	servers := make([]server, len(m.config.Addresses))
 
 	// load servers certificates
-	creds, err := credentials.NewClientTLSFromFile(m.config.Creds.CertificateFile, "")
+	creds, err := loadClientTLSCredentials(m.config)
 	if err != nil {
 		return Actor{}, xerrors.Errorf("failed to load servers certificates: %v", err)
 	}
@@ -60,6 +63,52 @@ func (m *Manager) Connect() (Actor, error) {
 		servers: servers,
 		opts:    m.opts,
 	}, nil
+}
+
+func loadClientTLSCredentials(config utils.Config) (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed server's certificate
+	if config.Creds.CertificateFile == "" {
+		log.Println("No servers certificates file provided, using default")
+		config.Creds.CertificateFile = "/opt/apir/server-cert.pem"
+	}
+	log.Printf("Loading servers certificates from %s", config.Creds.CertificateFile)
+
+	pemServerCA, err := os.ReadFile(config.Creds.CertificateFile)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to read server's certificate: %v", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, xerrors.Errorf("failed to add server CA's certificate")
+	}
+
+	// Load client's certificate and private key
+	// Load certificate of the CA who signed server's certificate
+	if config.ClientCertFile == "" {
+		log.Println("No certificate file provided, using default")
+		config.ClientCertFile = "/opt/apir/client-cert.pem"
+	}
+	if config.ClientKeyFile == "" {
+		log.Println("No key file provided, using default")
+		config.ClientKeyFile = "/opt/apir/server-key.pem"
+	}
+
+	log.Printf("Loading client certificates from %s", config.ClientCertFile)
+	log.Printf("Loading client key from %s", config.ClientKeyFile)
+
+	clientCert, err := tls.LoadX509KeyPair(config.ClientCertFile, config.ClientKeyFile)
+	if err != nil {
+		log.Fatalf("failed to load X509 key pair: %v", err)
+	}
+
+	// Create the credentials and return it
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      certPool,
+	}
+
+	return credentials.NewTLS(tlsConfig), nil
 }
 
 // Actor allows to perform operations on the servers.
