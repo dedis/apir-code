@@ -90,6 +90,22 @@ func main() {
 	}
 	addr := config.Addresses[*sid]
 
+	// run server with TLS
+	if config.Creds.CertificateFile == "" {
+		log.Println("No certificate file provided, using default")
+		config.Creds.CertificateFile = "/opt/apir/server-cert.pem"
+	}
+	if config.Creds.KeyFile == "" {
+		log.Println("No key file provided, using default")
+		config.Creds.KeyFile = "/opt/apir/server-key.pem"
+	}
+	log.Printf("Loading server certificates from %s", config.Creds.CertificateFile)
+	log.Printf("Loading server key from %s", config.Creds.KeyFile)
+	creds, err := credentials.NewServerTLSFromFile(config.Creds.CertificateFile, config.Creds.KeyFile)
+	if err != nil {
+		log.Fatalf("failed to load servers certificates: %v", err)
+	}
+
 	// load the db
 	var db *database.DB
 	var dbBytes *database.Bytes
@@ -118,14 +134,6 @@ func main() {
 
 	// GC after db creation
 	runtime.GC()
-
-	// run server with TLS
-	log.Printf("Loading server certificates from %s", config.Creds.CertificateFile)
-	log.Printf("Loading server key from %s", config.Creds.KeyFile)
-	creds, err := credentials.NewServerTLSFromFile(config.Creds.CertificateFile, config.Creds.KeyFile)
-	if err != nil {
-		log.Fatalf("failed to load servers certificates: %v", err)
-	}
 
 	rpcServer := grpc.NewServer(
 		grpc.MaxRecvMsgSize(1024*1024*1024),
