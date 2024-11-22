@@ -10,11 +10,9 @@ import (
 
 type Config struct {
 	Servers map[string]Server
+	Creds   Creds
 
 	Addresses []string
-
-	ServerCertFile string
-	ServerKeyFile  string
 
 	ClientCertFile string
 	ClientKeyFile  string
@@ -24,6 +22,11 @@ type Server struct {
 	Index int
 	IP    string
 	Port  int
+}
+
+type Creds struct {
+	CertificateFile string
+	KeyFile         string
 }
 
 func LoadConfig(configFile string) (*Config, error) {

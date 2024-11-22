@@ -54,8 +54,9 @@ var staticPointConfig = &utils.Config{
 	Addresses: []string{
 		"128.179.33.63:50050", "128.179.33.75:50051",
 	},
-	ServerCertFile: "/opt/apir/server-cert.pem",
-	ServerKeyFile:  "/opt/apir/server-key.pem",
+	Creds: utils.Creds{
+		CertificateFile: "/opt/apir/server-cert.pem"},
+
 	ClientCertFile: "/opt/apir/client-cert.pem",
 	ClientKeyFile:  "/opt/apir/client-key.pem",
 }
@@ -74,8 +75,9 @@ var staticComplexConfig = &utils.Config{
 	Addresses: []string{
 		"128.179.33.63:50040", "128.179.33.75:50041",
 	},
-	ServerCertFile: "/opt/apir/server-cert.pem",
-	ServerKeyFile:  "/opt/apir/server-key.pem",
+	Creds: utils.Creds{
+		CertificateFile: "/opt/apir/server-cert.pem"},
+
 	ClientCertFile: "/opt/apir/client-cert.pem",
 	ClientKeyFile:  "/opt/apir/client-key.pem",
 }

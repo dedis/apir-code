@@ -38,7 +38,7 @@ func (m *Manager) Connect() (Actor, error) {
 	servers := make([]server, len(m.config.Addresses))
 
 	// load servers certificates
-	creds, err := credentials.NewClientTLSFromFile(m.config.ServerCertFile, "")
+	creds, err := credentials.NewClientTLSFromFile(m.config.Creds.CertificateFile, "")
 	if err != nil {
 		return Actor{}, xerrors.Errorf("failed to load servers certificates: %v", err)
 	}
