@@ -121,7 +121,12 @@ func main() {
 
 func loadClientTLSCredentials(config *utils.Config) (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed server's certificate
+	if config.Creds.CertificateFile == "" {
+		log.Println("No servers certificates file provided, using default")
+		config.Creds.CertificateFile = "/opt/apir/server-cert.pem"
+	}
 	log.Printf("Loading servers certificates from %s", config.Creds.CertificateFile)
+
 	pemServerCA, err := os.ReadFile(config.Creds.CertificateFile)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to read server's certificate: %v", err)
@@ -133,11 +138,22 @@ func loadClientTLSCredentials(config *utils.Config) (credentials.TransportCreden
 	}
 
 	// Load client's certificate and private key
+	// Load certificate of the CA who signed server's certificate
+	if config.ClientCertFile == "" {
+		log.Println("No certificate file provided, using default")
+		config.ClientCertFile = "/opt/apir/client-cert.pem"
+	}
+	if config.ClientKeyFile == "" {
+		log.Println("No key file provided, using default")
+		config.ClientKeyFile = "/opt/apir/server-key.pem"
+	}
+
 	log.Printf("Loading client certificates from %s", config.ClientCertFile)
 	log.Printf("Loading client key from %s", config.ClientKeyFile)
+
 	clientCert, err := tls.LoadX509KeyPair(config.ClientCertFile, config.ClientKeyFile)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to load X509 key pair: %v", err)
+		log.Fatalf("failed to load X509 key pair: %v", err)
 	}
 
 	// Create the credentials and return it
