@@ -43,16 +43,16 @@ const keyNotFoundErr string = "no key with the given email id is found"
 var staticPointConfig = &utils.Config{
 	Servers: map[string]utils.Server{
 		"0": {
-			IP:   "128.179.33.63",
+			IP:   "10.156.33.110",
 			Port: 50050,
 		},
 		"1": {
-			IP:   "128.179.33.75",
+			IP:   "10.156.33.112",
 			Port: 50051,
 		},
 	},
 	Addresses: []string{
-		"128.179.33.63:50050", "128.179.33.75:50051",
+		"10.156.33.110:50050", "10.156.33.112:50051",
 	},
 	Creds: utils.Creds{
 		CertificateFile: "/opt/apir/server-cert.pem"},
@@ -64,16 +64,16 @@ var staticPointConfig = &utils.Config{
 var staticComplexConfig = &utils.Config{
 	Servers: map[string]utils.Server{
 		"0": {
-			IP:   "128.179.33.63",
+			IP:   "10.156.33.110",
 			Port: 50040,
 		},
 		"1": {
-			IP:   "128.179.33.75",
+			IP:   "10.156.33.112",
 			Port: 50041,
 		},
 	},
 	Addresses: []string{
-		"128.179.33.63:50040", "128.179.33.75:50041",
+		"10.156.33.110:50040", "10.156.33.112:50041",
 	},
 	Creds: utils.Creds{
 		CertificateFile: "/opt/apir/server-cert.pem"},

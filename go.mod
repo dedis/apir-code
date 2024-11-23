@@ -10,7 +10,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/lukechampine/fastxor v0.0.0-20210322201628-b664bed5a5cc
 	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.29.0
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 	google.golang.org/grpc v1.68.0
