@@ -146,9 +146,9 @@ func main() {
 	switch *scheme {
 	case "pointPIR", "pointVPIR":
 		if *cores != -1 && *experiment {
-			s = server.NewPIR(dbBytes, *cores)
+			s = server.NewPIRTwo(dbBytes, *cores)
 		} else {
-			s = server.NewPIR(dbBytes)
+			s = server.NewPIRTwo(dbBytes)
 		}
 	case "complexPIR":
 		if *cores != -1 && *experiment {
