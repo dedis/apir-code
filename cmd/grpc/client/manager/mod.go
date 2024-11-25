@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"google.golang.org/grpc/credentials"
 	"log"
 	"sync"
 	"time"
@@ -37,17 +38,13 @@ func (m *Manager) Connect() (Actor, error) {
 	servers := make([]server, len(m.config.Addresses))
 
 	// load servers certificates
-	creds, err := utils.LoadServersCertificates()
+	creds, err := credentials.NewClientTLSFromFile(m.config.Creds.CertificateFile, "")
 	if err != nil {
 		return Actor{}, xerrors.Errorf("failed to load servers certificates: %v", err)
 	}
 
 	for i, addr := range m.config.Addresses {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
-
-		conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(creds),
-			grpc.WithBlock())
+		conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
 		if err != nil {
 			return Actor{}, xerrors.Errorf("failed to connect to %s: %v", addr, err)
 		}

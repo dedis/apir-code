@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/BurntSushi/toml"
@@ -10,8 +11,12 @@ import (
 
 type Config struct {
 	Servers map[string]Server
+	Creds   Creds
 
 	Addresses []string
+
+	ClientCertFile string
+	ClientKeyFile  string
 }
 
 type Server struct {
@@ -20,7 +25,17 @@ type Server struct {
 	Port  int
 }
 
+type Creds struct {
+	CertificateFile string
+	KeyFile         string
+}
+
 func LoadConfig(configFile string) (*Config, error) {
+	log.Printf("Loading config file from %s", configFile)
+	if configFile == "" {
+		log.Fatalf("config file is not set")
+	}
+
 	// load config file
 	c := new(Config)
 	_, err := toml.DecodeFile(configFile, c)

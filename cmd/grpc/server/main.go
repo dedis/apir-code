@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
@@ -91,6 +90,22 @@ func main() {
 	}
 	addr := config.Addresses[*sid]
 
+	// run server with TLS
+	if config.Creds.CertificateFile == "" {
+		log.Println("No certificate file provided, using default")
+		config.Creds.CertificateFile = "/opt/apir/server-cert.pem"
+	}
+	if config.Creds.KeyFile == "" {
+		log.Println("No key file provided, using default")
+		config.Creds.KeyFile = "/opt/apir/server-key.pem"
+	}
+	log.Printf("Loading server certificates from %s", config.Creds.CertificateFile)
+	log.Printf("Loading server key from %s", config.Creds.KeyFile)
+	creds, err := credentials.NewServerTLSFromFile(config.Creds.CertificateFile, config.Creds.KeyFile)
+	if err != nil {
+		log.Fatalf("failed to load servers certificates: %v", err)
+	}
+
 	// load the db
 	var db *database.DB
 	var dbBytes *database.Bytes
@@ -120,19 +135,10 @@ func main() {
 	// GC after db creation
 	runtime.GC()
 
-	// run server with TLS
-	cfg := &tls.Config{
-		Certificates: []tls.Certificate{utils.ServerCertificates[*sid]},
-		ClientAuth:   tls.NoClientCert,
-	}
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
 	rpcServer := grpc.NewServer(
 		grpc.MaxRecvMsgSize(1024*1024*1024),
 		grpc.MaxSendMsgSize(1024*1024*1024),
-		grpc.Creds(credentials.NewTLS(cfg)),
+		grpc.Creds(creds),
 	)
 
 	// select correct server
@@ -140,9 +146,9 @@ func main() {
 	switch *scheme {
 	case "pointPIR", "pointVPIR":
 		if *cores != -1 && *experiment {
-			s = server.NewPIR(dbBytes, *cores)
+			s = server.NewPIRTwo(dbBytes, *cores)
 		} else {
-			s = server.NewPIR(dbBytes)
+			s = server.NewPIRTwo(dbBytes)
 		}
 	case "complexPIR":
 		if *cores != -1 && *experiment {
@@ -175,6 +181,11 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	errCh := make(chan error, 1)
+
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 
 	go func() {
 		log.Println("gRPC server started at", lis.Addr())

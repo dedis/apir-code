@@ -43,33 +43,43 @@ const keyNotFoundErr string = "no key with the given email id is found"
 var staticPointConfig = &utils.Config{
 	Servers: map[string]utils.Server{
 		"0": {
-			IP:   "128.179.33.63",
+			IP:   "srv1.keyd.org",
 			Port: 50050,
 		},
 		"1": {
-			IP:   "128.179.33.75",
+			IP:   "srv2.keyd.org",
 			Port: 50051,
 		},
 	},
 	Addresses: []string{
-		"128.179.33.63:50050", "128.179.33.75:50051",
+		"srv1.keyd.org:50050", "srv2.keyd.org:50051",
 	},
+	Creds: utils.Creds{
+		CertificateFile: "/opt/apir/server-cert.pem"},
+
+	ClientCertFile: "/opt/apir/client-cert.pem",
+	ClientKeyFile:  "/opt/apir/client-key.pem",
 }
 
 var staticComplexConfig = &utils.Config{
 	Servers: map[string]utils.Server{
 		"0": {
-			IP:   "128.179.33.63",
+			IP:   "srv1.keyd.org",
 			Port: 50040,
 		},
 		"1": {
-			IP:   "128.179.33.75",
+			IP:   "srv2.keyd.org",
 			Port: 50041,
 		},
 	},
 	Addresses: []string{
-		"128.179.33.63:50040", "128.179.33.75:50041",
+		"srv1.keyd.org:50040", "srv2.keyd.org:50041",
 	},
+	Creds: utils.Creds{
+		CertificateFile: "/opt/apir/server-cert.pem"},
+
+	ClientCertFile: "/opt/apir/client-cert.pem",
+	ClientKeyFile:  "/opt/apir/client-key.pem",
 }
 
 var grpcOpts = []grpc.CallOption{
