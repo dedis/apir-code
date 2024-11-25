@@ -44,7 +44,7 @@ func (m *Manager) Connect() (Actor, error) {
 	}
 
 	for i, addr := range m.config.Addresses {
-		conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(creds))
+		conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(creds), grpc.WithBlock())
 		if err != nil {
 			return Actor{}, xerrors.Errorf("failed to connect to %s: %v", addr, err)
 		}
