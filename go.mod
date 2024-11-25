@@ -7,7 +7,6 @@ require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/cloudflare/circl v1.5.0
 	github.com/dkales/dpf-go v0.0.0-20210304170054-6eae87348848
-	github.com/golang/protobuf v1.5.4
 	github.com/lukechampine/fastxor v0.0.0-20210322201628-b664bed5a5cc
 	github.com/nikirill/go-crypto v0.0.0-20210204153324-694bf46cc691
 	github.com/stretchr/testify v1.10.0
